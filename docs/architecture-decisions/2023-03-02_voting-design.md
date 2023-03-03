@@ -2,7 +2,7 @@
 
 - **Status**: Draft
 - **Owner:** Rob Moore
-- **Deciders**: Rob Moore (MakerX), Richard Watts-Seale (MakerX), Alessandro Ferrari (Algorand Foundation), Stephane Barroso (Algorand Foundation), Benjamin Guidarelli (Algorand Foundation)
+- **Deciders**: Rob Moore (MakerX), Richard Watts-Seale (MakerX), Alessandro Cappellato (Algorand Foundation), Stephane Barroso (Algorand Foundation), Benjamin Guidarelli (Algorand Foundation)
 - **Date created**: 2023-03-02
 - **Date decided:** TBD
 - **Date updated**: 2023-03-02
