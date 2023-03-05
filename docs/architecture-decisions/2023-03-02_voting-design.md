@@ -19,11 +19,12 @@ This decision record articulates the different design considerations of this on-
 
 * **Account** - A single blockchain account (colloquially referred to as a wallet), which is secured by a private key and identified by a public key
 * **Vote caster** - An actor who can place a vote, this would be represented by a single account within an on-chain voting context
-* **Vote creator** - An actor which wants to create an opportunity for vote casters to vote
-* **Voting round** - A discrete opportunity for vote casters to participate in a vote for a given context
+* **Voting round creator** - An actor which wants to create an opportunity for vote casters to vote
+* **Question** - A prompt that raises a statement for a vote caster to consider and submit an answer to as part of casting a vote
+* **Voting round** - A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions
 * **Vote gating** - Restricting who can participate as a vote caster within a voting round
 * **Vote weighting** - Allocating a relative quantity or "weighting" of votes that an individual vote caster can exercise as part of participating in a voting round
-* **Vote delegation** - A vote creator can pass on their voting power to a different actor to cast a vote on their behalf (note: this is not an explicit requirement of the voting tool as it stands)
+* **Vote delegation** - A vote caster can pass on their voting power to a different actor to cast a vote on their behalf (note: this is not an explicit requirement of the voting tool as it stands)
 * **Snapshot** - A list of accounts based on some set of criteria
 * **Snapshot index** - The order-dependant, zero-based index of a given account within a snapshot
 * **Vote gating and weighting metadata** - A metadata document that contains all of the data needed to specify the gating and weighting for a voting round for a given snapshot 
@@ -35,10 +36,10 @@ This decision record articulates the different design considerations of this on-
 
 ## Requirements
 
-- Vote creators can create voting rounds
+- Voting round creators can create voting rounds
 - Vote casters can participate in a voting round
-- Vote creators can specify a snapshot of accounts that then gate access to participate in the voting round
-- Vote creators can optionally specify a vote "weighting" for snapshotted accounts
+- Voting round creators can specify a snapshot of accounts that then gate access to participate in the voting round
+- Voting round creators can optionally specify a vote "weighting" for snapshotted accounts
 
 ## Principles
 
@@ -100,7 +101,7 @@ To prevent an account claiming tokens multiple times the confidential server can
 **Cons**
 
 - While delegated voting power is possible, it's not possible to delegate for a single voting round, only all voting rounds for a given snapshot (unless some sort of smart contract is created to facilitate controlled delegation)
-- Requires either vote creator or vote caster to lock up ALGOs for minimum balance requirement of box storage, which introduces clean up complexity at vote closure
+- Requires either voting round creator or vote caster to lock up ALGOs for minimum balance requirement of box storage, which introduces clean up complexity at vote closure
 - Requires a confidential server to be present at first vote registration for each snapshot (reduces decentralisation)
 - Requires vote casters to opt-in to the voting token at first vote registration for each snapshot, adding to the complexity of the user experience
 - Account has additional ALGO minimum balance requirement for the snapshot token, requiring transactions to clean up after the last vote that uses a snapshot (and it won't be clear to a vote caster when that is), adding to the complexity of the user experience
@@ -135,7 +136,7 @@ The voting smart contract can enforce vote gating by ensuring the box storage el
 
 To prevent an account voting multiple times the smart contract can store the vote answers in box storage and ensure they have not been set yet when accepting a vote.
 
-To ensure minimum balance requirement is catered for box storage the vote creator can send enough ALGOs to cover all possible box storage use for the maximum number of voters to the smart contract account after smart contract creation. This would then require the deletion of the boxes at vote closure (which could take many transactions depending on the number of votes) and a transfer of the ALGOs back to the vote creator.
+To ensure minimum balance requirement is catered for box storage the voting round creator can send enough ALGOs to cover all possible box storage use for the maximum number of voters to the smart contract account after smart contract creation. This would then require the deletion of the boxes at vote closure (which could take many transactions depending on the number of votes) and a transfer of the ALGOs back to the voting round creator.
 
 **Pros**
 
@@ -144,7 +145,7 @@ To ensure minimum balance requirement is catered for box storage the vote creato
 
 **Cons**
 
-- Requires vote creator to lock up significant number of ALGOs for minimum balance requirement of box storage and has significant clean up complexity at vote closure (lots of transactions needed to delete box storage)
+- Requires voting round creator to lock up significant number of ALGOs for minimum balance requirement of box storage and has significant clean up complexity at vote closure (lots of transactions needed to delete box storage)
 - Delegated voting is not easily possible (you could implement delegation using box storage, but it's complex to implement)
 - Requires either:
    - Significant number of transactions after the smart contract is created (slow, expensive, but no confidential server required)
@@ -159,7 +160,7 @@ When a vote caster casts their vote, their vote answers will be provided along w
 
 To prevent an account voting multiple times the smart contract can store a bit corresponding to the snapshot index within a known box storage key and ensure this has not already been set yet when accepting a vote. For example, if the snapshot index is 3 (i.e. position 4) there are 8 accounts in the snapshot (i.e. there 8 bits are needed and thus a 1 byte box is allocated) and the existing value is before voting `00001000` then after voting the box value will be `00011000` and a subsequent attempt by that account to vote will fail. Using bit-wise logic means that the amount of box storage needed to record vote participation is limited, which reduces the ALGO minimum balance requirement and complexity of clean up at vote closure.
 
-To ensure minimum balance requirement is catered for box storage the vote creator can send enough ALGOs to cover storing the participation bits for the number of potential voters in the snapshot.
+To ensure minimum balance requirement is catered for box storage the voting round creator can send enough ALGOs to cover storing the participation bits for the number of potential voters in the snapshot.
 
 **Pros**
 
@@ -188,13 +189,181 @@ Option VG5 - Merkle tree.
 
 ## Capability: Metadata storage
 
-Voting round metadata and vote gating and weighting metadata storage
-Vote listings
-authenticity
+There are two key metadata documents that will be referenced by the voting tool:
 
-todo: S3 vs IPFS
+* **Vote gating and weighting metadata** - A metadata document that contains all of the data needed to specify the gating and weighting for a voting round for a given snapshot 
+* **Voting round metadata** - A metadata document that contains all of the data that specifies the configuration of a voting round
+
+While some of the metadata will be stored on-chain within the voting round smart contract, some of it will be too expensive or simply not useful to store on-chain, but will need to be retrieved as part of any dApp that displays a read and/or write interface for voting.
+
+There are two key approaches that could be used for this:
+
+* **InterPlanetary File System (IPFS)** - Storing the JSON blobs as an immutable content-addressable hash within IPFS
+* **Cloud blob storage** - Storing the JSON blobs within a cloud blob storage such as Amazon S3 and exposed directly or via an API
+
+### Option MS1 - IPFS
+
+**Pros**
+
+- Immutability is guaranteed by the content-addressable storage
+- Permanence can be ensured by any party that is happy to continue to pay to pin the content
+- Decentralised - doesn't require DNS/AWS/API to be maintained to continue be retrievable
+- Immutability of content means it's relatively easy to implement in-browser caching too so subsequent visits a user makes to the voting page can load faster
+
+**Cons**
+
+- Requires a confidential server to perform the upload (or and end user to provide an IPFS service upload key, which is not a good user experience, particularly for less technical voting round creators, and requires in browser secret handling)
+- Relies on the AWS bill, DNS and potentially API deployment to be maintained for the metadata to be retrieved into the future (doesn't comply with the decentralisation principle)
+- IPFS performance is often slow and unreliable (although the download performance can be offset by an IPFS gateway with a write-through cache to high performance blob storage like Amazon S3)
 
 
-## Capability: Tallying
+### Option MS2 - Cloud blob storage
 
-todo: global vs box and single v multiple questions
+**Pros**
+
+- It's possible to use shared access signatures / pre-signed URLs to delegate the ability to upload content to the storage from the frontend application (reducing the amount of execution needed on a confidential server)
+- Fast performance for upload and download
+
+**Cons**
+
+- Immutability isn't guaranteed, so the metadata isn't tamperproof
+- Relies on the AWS bill, DNS and potentially API deployment to be maintained for the metadata to be retrieved into the future (doesn't comply with the decentralisation principle)
+
+### Preferred option
+
+Option MS1 - IPFS.
+
+It's the solution that conforms best to the principles of **Integrity and transparency** and **Decentralised** and it's similarly **flexible** as Option MS2 (outside of mutable snapshotting, which itself won't work with the Merkle root implementation of vote gating anyway). The performance and reliability issues with IPFS can easily be solved with a write-through cache gateway so the user experience is slick (and can be combined with browser caching too).
+
+### Selected option
+
+Option MS1 - IPFS.
+
+
+## Capability: Tallying and result determination
+
+Any voting process will naturally need individual votes to be tallied and an algorithm applied to determine the result. There are a number of tallying options that could be implemented, which are described below. 
+
+The options for tallying are:
+
+* **Off-chain tallying** - there is no on-chain tallying and instead the result is determined off-chain by analysing all of the voting transactions
+* **Global storage** - a tally is stored and incremented in global storage
+* **Box storage** - a tally is stored and incremented in box storage
+
+To determine a result there are numerous voting algorithms including first past the post and preferential voting. Assuming a preference for an on-chain voting algorithm, the complexity of storing preferences and then calculating a preference-based result is too complex (at least as a starting point), so the voting tool will use first past the post voting. One of the disadvantages of first pass the post voting is it's possible to "win" the vote with a reasonably low number of the overall vote proportion (particularly as the number of voting options increases). Given there is no on-chain action currently being proposed, the risk of such a circumstance is low and it can be left as a manual exercise to determine if the result of the vote was unsatisfactory and a new vote should be cast with different options.
+
+### Option T1 - Off-chain tallying
+
+**Pros**
+
+- Smart contract code is significantly simpler
+- Full flexibility to interpret results using more complex algorithms
+
+**Cons**
+
+- No verifiably authentic tamperproof record of the result of the voting round
+
+### Option T2 - Global storage
+
+**Pros**
+
+- dApp logic is simpler (no need to load boxes)
+- Possible to have a verifiably authentic tamperproof record of the result
+
+**Cons**
+
+- The number of questions and/or options that can be tracked is limited by the limits of global storage
+
+### Option T3 - Box storage
+
+**Pros**
+
+- Much larger number of questions and/or options can be accomodated
+- Possible to have a verifiably authentic tamperproof record of the result
+
+**Cons**
+
+- dApp logic is more complex (need to load boxes)
+
+### Preferred option
+
+Option T2 - Global storage.
+
+Having the ability to have a verifiably authentic tamperproof record of the result is a really powerful feature that aligns well to the stated principles. The global storage option allows for a lot of simplicity in how that is handled.
+
+### Selected option
+
+Option T3 - Box storage.
+
+Given the goal is to have something that is flexible for future requirements using box storage yields a lot more flexibility in the number of questions / options that can be catered for.
+
+## Capability: Recording the result
+
+In order to allow the result of the voting round to be stored and inspected it needs to be recorded.
+
+The options for this are:
+
+* **Manual Non-Fungible Token (NFT)** - The result is emitted as an NFT by the account that created the voting smart contract in the first place
+* **In-contract storage** - The result is kept in tallied in-contract storage (assuming the tallying option stores data on-chain; see [Capability: Tallying and result determination](#capability-tallying-and-result-determination))
+* **Automated NFT** - The result is emitted as an NFT with on-chain metadata from within the voting smart contract at vote closure
+
+### Option R1 - Manual NFT
+
+**Pros**
+
+- Ability to use any NFT standard including ones with immutable off-chain storage (e.g. IPFS)
+- Simpler smart contract logic
+- All NFTs are created from the same account so are easier to retrieve and visualise as a collection using standard ecosystem tools
+
+**Cons**
+
+- The NFT isn't guaranteed to be tamperproof, while someone can verify that the on-chain data matches the NFT metadata, you can't tell it from just seeing the NFT
+
+### Option R2 - In-contract storage
+
+**Pros**
+
+- Simpler smart contract logic
+- dApp logic is more complex (result must be visualised by loading data from the contract) and it's harder for people to quickly validate / see the result without the dApp
+
+**Cons**
+
+- Means the smart contract must be kept in-tact and not deleted, locking up any ALGOs to cover minimum balance requirement for that data forever
+
+### Option R3 - Automated NFT
+
+**Pros**
+
+- Simple dApp logic
+- Smart contract can be deleted to free up ALGOs
+- Creates an easy to consume tamperproof, verifiably authentic record of the result
+
+**Cons**
+
+- Most complex smart contract logic
+- NFT metadata standard limited to ones with on-chain storage such as ARC-69
+- NFT is from different creator accounts so it's hard to load them all into a single collection
+
+### Preferred option
+
+Option R3 - Automated NFT.
+
+The most elegant solution that conforms to the Integrity and transparency and Decentralised principles.
+
+### Selected option
+
+Option R3 - Automated NFT.
+
+## Capability: Finding results
+
+In order to find all of the results they need to be queried from the blockchain. The type of query that can be given depends on the selection for the [Recording the result](#capability-recording-the-result) and [Tallying and result determination](#capability-tallying-and-result-determination) capabilities.
+
+## Capability: Multiple questions
+
+Enforcing required questions.
+
+## Capability: Seeing individual responses
+
+## Capability: Voting round to smart contract relationship
+
+
