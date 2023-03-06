@@ -258,7 +258,7 @@ The options for tallying are:
 * **Global storage** - a tally is stored and incremented in global storage
 * **Box storage** - a tally is stored and incremented in box storage
 
-To determine a result there are numerous voting algorithms including first past the post and preferential voting. Assuming a preference for an on-chain voting algorithm, the complexity of storing preferences and then calculating a preference-based result is too complex (at least as a starting point), so the voting tool will use first past the post voting. One of the disadvantages of first pass the post voting is it's possible to "win" the vote with a reasonably low number of the overall vote proportion (particularly as the number of voting options increases). Given there is no on-chain action currently being proposed, the risk of such a circumstance is low and it can be left as a manual exercise to determine if the result of the vote was unsatisfactory and a new vote should be cast with different options.
+To determine a result there are numerous voting algorithms including first past the post and preferential voting. Assuming a preference for an on-chain voting algorithm, the complexity of storing preferences and then calculating a preference-based result is too complex (at least as a starting point), so the voting tool will collect the data that would be required for first past the post voting. One of the disadvantages of first pass the post voting is it's possible to "win" the vote with a reasonably low number of the overall vote proportion (particularly as the number of voting options increases). Given there is no on-chain action currently being proposed, the risk of such a circumstance is low and it can be left as a manual exercise to determine if the result of the vote was unsatisfactory and a new vote should be cast with different options. Furthermore, as there is no current need to determine a "winner" from the vote, it's enough to simply record the tallies and leave interpretation up to the vote creator / broader community.
 
 ### Option T1 - Off-chain tallying
 
@@ -528,7 +528,14 @@ There are two key scenarios where the ability to see the individual votes is req
 * When someone wants to analyse the raw voting data
 * When an individual wants to see the votes they have previously cast e.g. on the voting dApp
 
-The use case of analysing raw voting data has to be done by creating a full archival node and pulling data out of it or following the Server API pattern below, since the default APIs provided by indexer don't allow for querying of all transactions against an application ID.
+The use case of analysing raw voting data has to be done by either:
+
+* Creating a full archival node and pulling data out of it
+* Emitting each vote as a log and using the [application logs](https://developer.algorand.org/docs/rest-apis/indexer/#get-v2applicationsapplication-idlogs) indexer API
+* Saving each vote in a box and querying all of the boxes (although this significantly increases the required minimum balance requirement of the smart contract account)
+* Following the Server API pattern below, since the default APIs provided by indexer don't allow for querying of all transactions against an application ID
+
+There is no currently need to provide easy access to raw voting data so requiring a full archival node is fine as a fallback solution with no effort required.
 
 There are a number of options for the use case of seeing someone's individual vote:
 
