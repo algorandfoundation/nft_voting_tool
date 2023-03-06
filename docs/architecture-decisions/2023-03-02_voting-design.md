@@ -52,6 +52,14 @@ This decision record articulates the different design considerations of this on-
 
 There are a series of capabilities that need to be implemented by the voting tool that each have design considerations and options.
 
+* [Vote gating](#capability-vote-gating)
+* [Metadata storage](#capability-metadata-storage)
+* [Tallying and result determination](#capability-tallying-and-result-determination)
+* [Recording the result](#capability-recording-the-result)
+* [Finding results](#capability-finding-results)
+* [Multiple questions](#capability-multiple-questions)
+* [Seeing individual votes](#capability-seeing-individual-votes)
+
 ## Capability: Vote gating
 
 Vote gating is complex to implement on a blockchain because storage space is limited / expensive and a snapshot could consist of tens or even hundreds of thousands of account addresses.
