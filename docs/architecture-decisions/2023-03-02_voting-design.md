@@ -540,6 +540,7 @@ There is no currently need to provide easy access to raw voting data so requirin
 There are a number of options for the use case of seeing someone's individual vote:
 
 * **Indexer** - Use the [account transactions indexer endpoint](https://developer.algorand.org/docs/rest-apis/indexer/#get-v2accountsaccount-idtransactions) to query for all `appl` transactions between the voting round start time and end time for the account (note: if the start and end time become mutable then the query would need to change), note: this is cacheable if it's past the end time, or from the moment a transaction is found (assuming that voting is immutable)
+* **Box storage** - Store vote data in a box for each vote caster and query it from algod, note: this also allows for mutable or cancelled voting to be implemented
 * **Local storage cache** - Require vote casters to opt-in to the smart contract and have the smart contract store their answer in local storage, this allows for a single algod call (account information query) to retrieve the local state values for all smart contracts so significantly reduces the number of calls needed
 * **Server API** - Have a server running that caches transactions to the application by listening to all blocks that occur between the start time and end time of the voting round (e.g. using [Conduit](https://developer.algorand.org/articles/developer-preview-of-conduit-a-new-way-to-access-algorand-chain-data/)) and then providing a queryable API of that data
 
@@ -566,7 +567,18 @@ There are a number of options for the use case of seeing someone's individual vo
 - Requires small, extra minimum balance requirement ALGO lock-up for vote caster
 - The vote caster can clear their local state for the smart contract (opt-out, clearstate) and then the dApp UI won't show the correct information and will also allow them to submit another vote (albeit that call will fail)
 
-### Option IR3 - Server API
+### Option IR3 - Box storage
+
+**Pros**
+
+- Reasonable performance (so better dApp UX) - single algod call per smart contract to get results from all of the smart contracts
+- Allows you to implement mutable or cancelled voting in the future (note a current requirement)
+
+**Cons**
+
+- Requires large extra minimum balance requirement ALGO lock-up to be funded by vote creator
+
+### Option IR4 - Server API
 
 **Pros**
 
@@ -579,7 +591,7 @@ There are a number of options for the use case of seeing someone's individual vo
 
 ### Preferred option
 
-Option IR3 - Server API.
+Option IR4 - Server API.
 
 Provides great performance and great flexibility.
 
