@@ -273,6 +273,7 @@ To determine a result there are numerous voting algorithms including first past 
 **Cons**
 
 - The number of questions and/or options that can be tracked is limited by the limits of global storage
+- A single call to algod retrieves the list of created apps and their current global storage so it's easy to retrieve the data
 
 ### Option T3 - Box storage
 
@@ -284,18 +285,19 @@ To determine a result there are numerous voting algorithms including first past 
 **Cons**
 
 - dApp logic is more complex (need to load boxes)
+- Retrieving data from algod is harder (N+1 requests for N boxes, rather than 1 call to get all global storage values)
 
 ### Preferred option
 
 Option T2 - Global storage.
 
-Having the ability to have a verifiably authentic tamperproof record of the result is a really powerful feature that aligns well to the stated principles. The global storage option allows for a lot of simplicity in how that is handled.
+Having the ability to have a verifiably authentic tamperproof record of the result is a really powerful feature that aligns well to the stated principles. The global storage option allows for a lot of simplicity in how that is handled and retrieved.
 
 ### Selected option
 
 Option T3 - Box storage.
 
-Given the goal is to have something that is flexible for future requirements using box storage yields a lot more flexibility in the number of questions / options that can be catered for.
+Given the goal is to have something that is flexible for future requirements using box storage yields a lot more flexibility in the number of questions / options that can be catered for. There is a downside in how easy the data is to retrieve though so it's possible this decision may be revisited.
 
 ## Capability: Recording the result
 
@@ -358,11 +360,91 @@ Option R3 - Automated NFT.
 
 In order to find all of the results they need to be queried from the blockchain. The type of query that can be given depends on the selection for the [Recording the result](#capability-recording-the-result) and [Tallying and result determination](#capability-tallying-and-result-determination) capabilities.
 
+Given a selection of:
+
+* Option T3 - Box storage.
+* Option R3 - Automated NFT.
+
+If there is no cache then the following requests would be required:
+
+* One call to algod to return all apps created by the creator wallet (including global state)
+* Per each app:
+    * One call to algod **per box** to get current box storage values (to see current voting state)
+    * One call to indexer to get any transactions from the current user's account to that app (to see if/what the current user voted) (cacheable once voted, assuming voting is immutable)
+    * One call to algod to get any assets created by the app account (to see if there is a result NFT)
+      * One call to indexer to get creation transaction note for result NFT if there is one
+    * One call to IPFS to get the voting round metadata (cacheable)
+    * One call to IPFS to get the vote gating and weighting metadata (cacheable)
+
+That's a lot of requests per app, including IPFS calls which can be very slow and unreliable depending on the gateway (although can be cached forever if the value doesn't change). This can result in a poor user experience with a lot of waiting.
+
+The following options exist:
+
+* **dApp querying** - Make the dApp query for all data directly (caching applied in-browser)
+* **Cache API** - Have an API that caches the data and returns it all in a condensed format for the dApp to display
+* **Collection cache records** - Automatically create cache records on-chain for the dApp to query directly and reduce the number of calls required, e.g. similar concept to [ARC-30](https://github.com/algorandfoundation/ARCs/pull/122), but including: apps (index and address), metadata IPFS hashes and result NFT asset indexes (and metadata to further improve the cache given this metadata is immutable)
+   * This can be orchestrated by the voting round creator experience within the dApp and use their wallet to do it to reduce the complexity of maintenance since voting round creator actions would always generate a situation where the cache record would need to change
+
+Regardless of which option is selected, it makes sense to use a write-through IPFS cache gateway so all IPFS calls are faster and more reliable.
+
+### Option FR1 - dApp querying
+
+**Pros**
+
+- Most decentralised - no need to run any services to cache data and talking directly to indexer so no need to trust a different set of data
+
+**Cons**
+
+- Less optimal user experience (high time to wait, more HTTP calls so higher likelihood of API having errors and timeouts)
+- Most complex dApp code
+
+### Option FR2 - Cache API
+
+**Pros**
+
+- Best user experience - a single (or small number of), cached API can be called to retrieve the key data that a dApp needs to see
+- dApp code is simple
+
+**Cons**
+
+- dApp isn't as portable, since it requires a specific server-side API to be running (there's potentially a middle ground though where the server can mimic some of the underlying services like IPFS, but with better response time and reliability due to caching)
+- Cache API needs to be created (additional backend complexity beyond a write-through cache IPFS gateway)
+
+### Option FR3 - Collection cache records
+
+**Pros**
+
+- Number of overall calls from the dApp is reduced, improving user experience
+- (Assuming use of ARC-19) has nice cache semantics for the collection cache, since there is a simple algod lookup for the current reserve address of the collection cache asset and then a cacheable IPFS call
+- Doesn't require a backend cache service to be built since it can be orchestrated by the voting round creator dApp, so retains a lot of portability
+- Incidentally creates another abstraction that may provide useful future flexibility for a voting round creator to have separate "collections" of voting rounds for the same account (since data is tied to the collection cache record rather than the creator account)
+
+**Cons**
+
+- Introduces another synchronous upfront call to get to the data whenever it changes (i.e. algod call + (cacheable) IPFS call, assuming use of ARC-19)
+- The dApp blindly trusts the data in this cache record is correct, but all data within it can be verified as accurate by looking at the raw on-chain records
+- dApp logic for voting round creator is more complex (since the collection cache record needs to be maintained)
+- If multiple people operated the voting round creator account and wanted to "publish" a voting round simultaneously it's possible they will overwrite the other round (but this is incredibly unlikely as anyone operating such an account would likely be communicating with each other, and also can be worked around in the future if needed by the voting round creator dApp detecting if a voting round hasn't been "published" and offer to do it)
+
+### Preferred option
+
+Option FR3 - Collection cache records.
+
+A good balance between terrible user experience and centralisation / lack of portability.
+
+### Selected option
+
+Option FR3 - Collection cache records.
+
+
 ## Capability: Multiple questions
 
 Enforcing required questions.
 
 ## Capability: Seeing individual responses
+
+indexer
+local storage cache, but MBR and extra transaction and can wipe it away
 
 ## Capability: Voting round to smart contract relationship
 
