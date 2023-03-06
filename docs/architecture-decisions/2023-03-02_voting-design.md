@@ -5,7 +5,7 @@
 - **Deciders**: Rob Moore (MakerX), Richard Watts-Seale (MakerX), Alessandro Cappellato (Algorand Foundation), Stephane Barroso (Algorand Foundation), Benjamin Guidarelli (Algorand Foundation)
 - **Date created**: 2023-03-02
 - **Date decided:** TBD
-- **Date updated**: 2023-03-02
+- **Date updated**: 2023-03-06
 
 ## Context
 
@@ -213,8 +213,8 @@ There are two key approaches that could be used for this:
 **Cons**
 
 - Requires a confidential server to perform the upload (or and end user to provide an IPFS service upload key, which is not a good user experience, particularly for less technical voting round creators, and requires in browser secret handling)
-- Relies on the AWS bill, DNS and potentially API deployment to be maintained for the metadata to be retrieved into the future (doesn't comply with the decentralisation principle)
 - IPFS performance is often slow and unreliable (although the download performance can be offset by an IPFS gateway with a write-through cache to high performance blob storage like Amazon S3)
+- Doesn't allow for modifications to the metadata (unless the IPFS hash stored in the smart contract is modified)
 
 
 ### Option MS2 - Cloud blob storage
@@ -279,7 +279,7 @@ To determine a result there are numerous voting algorithms including first past 
 
 **Pros**
 
-- Much larger number of questions and/or options can be accomodated
+- Much larger number of questions and/or options can be accommodated
 - Possible to have a verifiably authentic tamperproof record of the result
 
 **Cons**
@@ -513,11 +513,63 @@ Option MQ1 - Frontend linking.
 
 
 
-## Capability: Seeing individual responses
+## Capability: Seeing individual votes
 
-indexer
-local storage cache, but MBR and extra transaction and can wipe it away
+There are two key scenarios where the ability to see the individual votes is required:
 
-## Capability: Voting round to smart contract relationship
+* When someone wants to analyse the raw voting data
+* When an individual wants to see the votes they have previously cast e.g. on the voting dApp
+
+The use case of analysing raw voting data has to be done by creating a full archival node and pulling data out of it or following the Server API pattern below, since the default APIs provided by indexer don't allow for querying of all transactions against an application ID.
+
+There are a number of options for the use case of seeing someone's individual vote:
+
+* **Indexer** - Use the [account transactions indexer endpoint](https://developer.algorand.org/docs/rest-apis/indexer/#get-v2accountsaccount-idtransactions) to query for all `appl` transactions between the voting round start time and end time for the account (note: if the start and end time become mutable then the query would need to change), note: this is cacheable if it's past the end time, or from the moment a transaction is found (assuming that voting is immutable)
+* **Local storage cache** - Require vote casters to opt-in to the smart contract and have the smart contract store their answer in local storage, this allows for a single algod call (account information query) to retrieve the local state values for all smart contracts so significantly reduces the number of calls needed
+* **Server API** - Have a server running that caches transactions to the application by listening to all blocks that occur between the start time and end time of the voting round (e.g. using [Conduit](https://developer.algorand.org/articles/developer-preview-of-conduit-a-new-way-to-access-algorand-chain-data/)) and then providing a queryable API of that data
 
 
+### Option IR1 - Indexer
+
+**Pros**
+
+- Simple
+
+**Cons**
+
+- Requires a lot of indexer calls (at least one for each smart contract with potentially multiple per smart contract if the account interacts with a lot of apps during the voting time period)
+
+### Option IR2 - Local storage cache
+
+**Pros**
+
+- Much higher performance (so better dApp UX) - single algod call to get results from all of the smart contracts
+
+**Cons**
+
+- Requires an extra transaction when voting (opt-in)
+- Requires small, extra minimum balance requirement ALGO lock-up for vote caster
+- The vote caster can clear their local state for the smart contract (opt-out, clearstate) and then the dApp UI won't show the correct information and will also allow them to submit another vote (albeit that call will fail)
+
+### Option IR3 - Server API
+
+**Pros**
+
+- High performance (good dApp experience)
+- Allows for aggregate data analysis without standing up a custom full archival node
+
+**Cons**
+
+- Requires an extra server to be implemented and run as part of the solution
+
+### Preferred option
+
+Option IR3 - Server API.
+
+Provides great performance and great flexibility.
+
+### Selected option
+
+Option IR1 - Indexer.
+
+Implementation effort is significantly lower, there is no current need to facilitate aggregate data analysis and the user experience will be acceptable given the caching that is possible.
