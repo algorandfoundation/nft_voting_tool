@@ -439,7 +439,79 @@ Option FR3 - Collection cache records.
 
 ## Capability: Multiple questions
 
+Having the flexibility to allow multiple questions to be asked as part of a voting round is an important requirement. The NFT Council voting will have multiple questions (one per category being nominated) and the xGov initiative will have multiple proposals to vote on (each considered a separate question).
+
+There are a number of ways to achieve this:
+
+* **Frontend linking** - A smart contract is created for each question and a voting round ID is set on them that the dApp can use to link them together visually
+* **Transaction linking** - A smart contract is created for each question, but they must be voted on together in a single atomic transaction
+* **Single contract, one vote** - A smart contract is created for the whole voting round and is built to handle multiple questions in a single vote
+* **Single contract, multiple votes** - A smart contract is created for the whole voting round and is built to handle one question per vote (i.e. it's called multiple times to vote on different questions)
+
 Enforcing required questions.
+
+### Option MQ1 - Frontend linking
+
+**Pros**
+
+- By far the simplest to implement, for both the dApp and the smart contract
+- No limit to the number of questions in a voting round
+
+**Cons**
+
+- No ability to enforce required questions or split a vote weight across questions
+- Multiple transactions to sign for vote caster
+
+### Option MQ2 - Transaction linking
+
+**Pros**
+
+- Question and answer handling is kept simple for dApp and smart contract
+- Ability to enforce required questions (e.g. using a voting round contract that checks the integrity of each of the votes in the transaction group)
+
+**Cons**
+
+- Limit to the number of questions that can be asked based on the atomic group max size
+- Extra contract or logic required to validate transaction group, which needs to somehow validate the app calls (presumably using a combination of a voting round ID combined with checking each app creator account matches); adding vote weight splitting to this logic too is likely to be extremely complex
+- Multiple transactions to sign for vote caster
+
+### Option MQ3 - Single contract, one vote
+
+**Pros**
+
+- User experience is the best - a single transaction call
+- More easily possible to implement vote weight splitting and required/optional question validation
+
+**Cons**
+
+- Rather than building simple, composable, flexible components, this builds a more complex smart contract, which means it's more likely to have errors and will potentially be less flexible for future requirements the community has
+- Question/answer handling logic will be complex in both the dApp and smart contract
+- Number of questions will be limited by app argument semantics and storage limits
+
+### Option MQ4 - Single contract, multiple votes
+
+**Pros**
+
+- Question and answer handling is kept simple for dApp and smart contract
+- No limit to the number of questions in a voting round
+
+**Cons**
+
+- No ability to enforce required questions or split a vote weight across questions
+- Multiple transactions to sign for vote caster
+- Preventing double voting requires storing a bit flag per question (i.e. more boxes get used and the dApp needs to load the right box per question)
+
+### Preferred option
+
+Option MQ1 - Frontend linking.
+
+Starting with this option leads to the simplest solution that meets current need (no need for current requirements to implement vote weight splitting or required questions), but provides the easiest base of functionality to be extended in the future to meet other requirements.
+
+### Selected option
+
+Option MQ1 - Frontend linking.
+
+
 
 ## Capability: Seeing individual responses
 
