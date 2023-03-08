@@ -1,0 +1,43 @@
+{
+  "name": "infrastructure",
+  "version": "0.1.0",
+  "bin": {
+    "infrastructure": "bin/infrastructure.js"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc && copyfiles package.json package-lock.json cdk.json build && cd build && npm ci --only=production && json -I -f cdk.json -e \"this.app='node bin/infrastructure.js'\"",
+    "clean": "rimraf build",
+    "cdk": "cdk",
+    "bootstrap:local": "dotenv -e .env -e ../.env -- npm run bootstrap",
+    "bootstrap": "cross-env-shell npm run cdk -- bootstrap aws://$CDK_DEFAULT_ACCOUNT/$AWS_DEFAULT_REGION && cross-env-shell npm run cdk -- bootstrap aws://$CDK_DEFAULT_ACCOUNT/us-east-1",
+    "diff:local": "dotenv -e .env  -e ../.env -- npm run diff",
+    "diff": "npm run cdk -- diff",
+    "deploy:local": "dotenv -e .env -e ../.env -- npm run deploy && npm run set-secrets:local",
+    "deploy": "npm run cdk -- deploy \"*\" --ci --require-approval never --outputs-file ./cdk-outputs.json",
+    "destroy:local": "dotenv -e .env -e ../.env -- npm run cdk -- destroy --all",
+    "graph:local": "dotenv -e .env -e ../.env -- npm run graph && move-cli diagram.png ../docs/stack.png",
+    "graph": "npm run cdk -- synth --context environment=env && npx cdk-dia",
+    "set-secrets:local": "dotenv -e .env -e ../.env -- set-aws-secrets",
+    "set-secrets": "set-aws-secrets",
+    "build-website": "cd .. && npm run build"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.110",
+    "@types/node": "^18.14.0",
+    "cdk-dia": "^0.9.0",
+    "copyfiles": "^2.4.1",
+    "dotenv-cli": "^7.0.0",
+    "json": "^11.0.0",
+    "move-cli": "^2.0.0",
+    "rimraf": "^4.1.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "aws-cdk": "^2.64.0",
+    "aws-cdk-lib": "^2.64.0",
+    "aws-sdk": "^2.1318.0",
+    "constructs": "^10.1.255",
+    "cross-env": "^7.0.3"
+  }
+}
