@@ -1,0 +1,17 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: cdk bootstrap - /infrastructure",
+      "type": "npm",
+      "script": "bootstrap:local",
+      "path": "${workspaceFolder}/infrastructure",
+      "options": {
+        "cwd": "${workspaceFolder}/infrastructure"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}
+

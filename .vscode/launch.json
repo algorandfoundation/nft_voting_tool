@@ -1,0 +1,38 @@
+{
+  "configurations": [
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Run (Edge)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src/dapp"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Run (Chrome)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src/dapp"
+    },
+    {
+      "type": "firefox",
+      "request": "launch",
+      "name": "Run (Firefox)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src/dapp"
+    },
+    {
+      "name": "Deploy AWS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/infrastructure",
+      "console": "integratedTerminal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "deploy:local"
+      ],
+      "preLaunchTask": "npm: cdk bootstrap - /infrastructure"
+    }
+  ]
+}

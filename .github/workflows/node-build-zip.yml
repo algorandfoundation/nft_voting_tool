@@ -1,0 +1,85 @@
+name: "Node Build Zip"
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        default: 16.x
+      working-directory:
+        required: false
+        type: string
+        default: "."
+      build-path:
+        required: false
+        type: string
+        default: build
+      artifact-name:
+        required: false
+        type: string
+        default: node-app
+      static-site:
+        required: false
+        type: boolean
+        default: false
+      static-site-env-prefix:
+        required: false
+        type: string
+        default: VITE
+    secrets:
+      npm-auth-token:
+        description: NPM auth token (optional, GITHUB_TOKEN is used by default)
+        required: false
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # setup node + private repo access
+      - name: Use Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "npm"
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      # prepare static sites for config transformation upon later deployment
+      - if: ${{ inputs.static-site }}
+        run: sed -n 's/\(${{ inputs.static-site-env-prefix }}_[A-Z0-9_]\+\)=\(.*\)/\1=#{\1}#/p' .env.sample > .env && cat .env
+
+      # run npm ci preventing script access to npm auth token
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+      # allow scripts to run without npm auth token
+      - run: npm rebuild && npm run prepare --if-present
+
+      - name: Prepare
+        run: npm run prepare --if-present
+
+      - name: Build
+        run: npm run build
+        # CDK infrastructure build calls npm ci on /infrastructure/build, which may fail without NODE_AUTH_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+
+      - name: Zip build folder
+        run: pushd ${{ inputs.build-path }}; zip -q -r ../${{ inputs.artifact-name }}.zip *
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip
+          if-no-files-found: error
