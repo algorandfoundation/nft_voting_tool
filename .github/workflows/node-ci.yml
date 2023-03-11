@@ -1,0 +1,87 @@
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: false
+        type: string
+        default: 16.x
+      working-directory:
+        required: false
+        type: string
+        default: '.'
+      lint-script:
+        required: false
+        type: string
+        default: npm run lint --if-present
+      compile-script:
+        required: false
+        type: string
+        default: npm run check-types --if-present
+      test-script:
+        required: false
+        type: string
+        default: npm run test --if-present
+      audit-script:
+        required: false
+        type: string
+        default: npm audit
+      build-script:
+        required: false
+        type: string
+        default: npm run build
+      run-build:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      npm-auth-token:
+        description: NPM auth token (optional, GITHUB_TOKEN is used by default)
+        required: false
+
+jobs:
+  node-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # setup node + private repo access
+      - name: Use Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      # run npm ci preventing script access to npm auth token
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+      # allow scripts to run without npm auth token
+      - run: npm rebuild && npm run prepare --if-present
+
+      # run all the CI scripts
+      - name: Lint
+        run: ${{ inputs.lint-script }}
+      - name: Compile
+        run: ${{ inputs.compile-script }}
+      - name: Test
+        run: ${{ inputs.test-script }}
+      - name: Audit
+        run: ${{ inputs.audit-script }}
+      - name: Build
+        if: ${{ inputs.run-build }}
+        run: ${{ inputs.build-script }}
+        # CDK infrastructure build calls npm ci on /infrastructure/build, which may fail without NODE_AUTH_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+
+

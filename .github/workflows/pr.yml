@@ -1,0 +1,29 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build-dapp:
+    name: Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/dapp
+      run-build: true
+  build-infrastructure:
+    name: Infrastructure
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./infrastructure
+      run-build: true
+

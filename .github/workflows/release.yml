@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.vscode/**'
+      - '.idea/**'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  ci-dapp:
+    name: CI Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/dapp
+      compile-script: npm run typecheck
+  ci-infrastructure:
+    name: CI Infrastructure
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./infrastructure
+
+  build-dapp:
+    name: Build Dapp
+    uses: ./.github/workflows/node-build-zip.yml
+    with:
+      working-directory: ./src/dapp
+      build-path: dist
+      artifact-name: dapp
+      static-site: true
+      static-site-env-prefix: VITE
+    needs:
+      - ci-dapp
+  build-infrastructure:
+    name: Build Infrastructure
+    uses: ./.github/workflows/node-build-zip.yml
+    with:
+      working-directory: ./infrastructure
+      artifact-name: infrastructure
+    needs:
+      - ci-infrastructure
+
+  deploy-to-dev:
+    runs-on: ubuntu-latest
+    name: Deploy to Dev
+    environment: Dev
+    concurrency: '${{ github.workflow }}-dev'
+    needs:
+      - build-dapp
+      - build-infrastructure
+    steps:
+      - name: Deploy
+        uses: ./.github/actions/node-deploy-cdk
+        env:
+          DEPLOYMENT_ENVIRONMENT: dev
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
+          AWS_DEFAULT_REGION: us-west-2
+          BASE_DOMAIN: voting.algorand.foundation
+        with:
+          app-artifact-unzips: dapp:website/dist
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+          aws-region: us-west-2
+          static-site-transforms: |
+            VITE_CLIENT_ID:${{ secrets.CLIENT_ID }}
+            VITE_TENANT_ID:${{ secrets.TENANT_ID }}
+            VITE_SCOPES:${{ secrets.SCOPES }}
+            VITE_REPLY_URI:${{ secrets.REPLY_URI }}
+
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+    name: Deploy to Prod
+    environment: Prod
+    concurrency: '${{ github.workflow }}-prod'
+    needs:
+      - deploy-to-dev
+    steps:
+      - name: Deploy
+        uses: ./.github/actions/node-deploy-cdk
+        env:
+          DEPLOYMENT_ENVIRONMENT: prod
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
+          AWS_DEFAULT_REGION: ap-southeast-2
+          BASE_DOMAIN: voting.algorand.foundation
+        with:
+          app-artifact-unzips: website:website/dist
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+          aws-region: ap-southeast-2
+          static-site-transforms: |
+            VITE_CLIENT_ID:${{ secrets.CLIENT_ID }}
+            VITE_TENANT_ID:${{ secrets.TENANT_ID }}
+            VITE_SCOPES:${{ secrets.SCOPES }}
+            VITE_REPLY_URI:${{ secrets.REPLY_URI }}

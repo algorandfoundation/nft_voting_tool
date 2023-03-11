@@ -38,6 +38,10 @@
     "aws-cdk-lib": "^2.64.0",
     "aws-sdk": "^2.1318.0",
     "constructs": "^10.1.255",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "@henrist/cdk-cross-region-params": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=16.0"
   }
 }

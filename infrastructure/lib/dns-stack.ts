@@ -6,7 +6,6 @@ import { Construct } from 'constructs'
 import { CustomDomainConfigProps, CustomDomainConfigViaDnsStackProps, CustomDomainConfigViaDnsWithSSLStackProps } from './custom-domain'
 
 export interface BaseDnsProps extends StackProps {
-  /** The domain name to generate DNS hosted zone for e.g. myapp.makerx.tech */
   domainName: string
   /** Any regions to generate SSM Parameters for to allow cross-region referencing of Route53 hosted zone and/or SSL certs.
    *
