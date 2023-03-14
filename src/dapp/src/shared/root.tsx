@@ -1,13 +1,13 @@
-import { DEFAULT_NETWORK, DEFAULT_NODE_BASEURL, DEFAULT_NODE_TOKEN, WalletProvider } from "@txnlab/use-wallet";
+import { WalletProvider } from "@txnlab/use-wallet";
 import { Outlet } from "react-router-dom";
 import { useAlgoWallet } from "../utils/useAlgoWalletProvider";
 
 export default function Root() {
   const walletProviders = useAlgoWallet({
-    nodeToken: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN ?? DEFAULT_NODE_TOKEN,
-    nodeServer: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER ?? DEFAULT_NODE_BASEURL,
-    nodePort: import.meta.env.VITE_ALGOD_NOTE_CONFIG_PORT ?? DEFAULT_NODE_TOKEN,
-    network: import.meta.env.VITE_ALGOD_NETWORK ?? DEFAULT_NETWORK,
+    nodeToken: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN,
+    nodeServer: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
+    nodePort: import.meta.env.VITE_ALGOD_NOTE_CONFIG_PORT,
+    network: import.meta.env.VITE_ALGOD_NETWORK,
     autoConnect: true,
   });
 
