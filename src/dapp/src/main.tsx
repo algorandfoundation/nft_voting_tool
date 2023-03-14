@@ -1,12 +1,13 @@
 import { ThemeProvider } from "@material-tailwind/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./error-page";
-import VotePage from "./features/vote";
-import VoteConfigPage from "./features/vote-config";
+import HomePage from "./features/vote";
+import VoteCreationPage from "./features/vote-creation";
+import CastVote from "./features/vote/cast";
 import "./main.css";
-import Root from "./shared/root";
+import Root from "./root";
 
 const router = createBrowserRouter([
   {
@@ -16,11 +17,15 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <VotePage />,
+        element: <HomePage />,
       },
       {
-        path: "config",
-        element: <VoteConfigPage />,
+        path: "create",
+        element: <VoteCreationPage />,
+      },
+      {
+        path: "cast/:voteCid",
+        element: <CastVote />,
       },
     ],
   },

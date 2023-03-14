@@ -1,3 +1,109 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "Beni";
+  src: url("/fonts/Beni-Black.otf") format("opentype");
+  font-display: "swapping";
+  font-weight: 900;
+}
+
+@font-face {
+  font-family: "Beni";
+  src: url("/fonts/Beni-Bold.otf") format("opentype");
+  font-display: "swapping";
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Beni";
+  src: url("/fonts/Beni-Regular.ttf") format("truetype");
+  font-display: "swapping";
+}
+
+@font-face {
+  font-family: "Beni";
+  src: url("/fonts/Beni-Light.ttf") format("truetype");
+  font-display: "swapping";
+  font-weight: 300;
+}
+
+/* This is to prevent Tailwind Dialog from messing with scroll bar when hiding/showing different dialogs */
+/* https://github.com/tailwindlabs/headlessui/issues/1199#issuecomment-1079639459 */
+html {
+  overflow: auto !important;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+}
+
+body {
+  @apply font-open-sans;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  @apply font-beni;
+  @apply uppercase;
+}
+
+h1 {
+  @apply text-8xl my-2;
+}
+
+h2 {
+  @apply text-7xl my-2;
+}
+
+h3 {
+  @apply text-5xl my-2;
+}
+
+h4 {
+  @apply text-4xl my-2;
+}
+
+h5 {
+  @apply text-3xl my-2;
+}
+
+p {
+  @apply my-2;
+}
+
+@layer base {
+  .text-vertial {
+    writing-mode: vertical-lr;
+  }
+
+  .text-horizontal {
+    writing-mode: horizontal-tb;
+  }
+}
+
+.algorand-lime-gradient {
+  background: linear-gradient(180deg, #dcfe54 0%, #01dc94 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.algorand-coral-gradient {
+  background: linear-gradient(135deg, #f7aef8 0%, #ff684e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.algorand-grey-gradient {
+  background: linear-gradient(135deg, #d9d9d9 0%, #a6b0c3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
