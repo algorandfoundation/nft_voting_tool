@@ -49,7 +49,7 @@ jobs:
 
   deploy-to-dev:
     runs-on: ubuntu-latest
-    name: Deploy to Dev
+    name: Deploy to TestNet
     environment: Dev
     concurrency: "${{ github.workflow }}-dev"
     needs:
@@ -59,9 +59,10 @@ jobs:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
-          DEPLOYMENT_ENVIRONMENT: dev
+          DEPLOYMENT_ENVIRONMENT: testnet
           CDK_DEFAULT_ACCOUNT: ${{ secrets.DEV_CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
+          BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
         with:
           app-artifact-unzips: dapp:dapp/dist
