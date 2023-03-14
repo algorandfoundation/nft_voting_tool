@@ -99,10 +99,10 @@ function VoteCreationPage() {
           <div className="md:w-1/3"></div>
           <div className="md:w-2/3">
             <button
-              className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+              className="shadow bg-algorand-arctic-lime hover:bg-algorand-orange-coral focus:shadow-outline focus:outline-none hover:text-white font-bold py-2 px-4 rounded-full"
               type="button"
             >
-              Sign Up
+              Next Step
             </button>
           </div>
         </div>

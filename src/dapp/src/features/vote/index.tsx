@@ -12,7 +12,7 @@ function HomePage() {
       <div className={clsx("bg-white", "py-8", "px-4", "min-h-full", "min-w-full", "flex", "justify-between")} style={style}>
         <h3 className="font-bold my-auto flex-3 pl-8">Algorand council&nbsp;-&nbsp;Open until 21st March</h3>
         <Link
-          className="bg-algorand-arctic-lime uppercase font-beni text-4xl p-7 mr-8 ml-4 whitespace-nowrap text-black my-auto"
+          className="shadow button bg-algorand-arctic-lime hover:bg-algorand-orange-coral focus:shadow-outline focus:outline-none hover:text-white font-bold py-2 px-4 rounded-full"
           to="/cast/algo-council"
         >
           Cast my vote

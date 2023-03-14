@@ -49,7 +49,7 @@ function CastVote() {
               <div className="p-4 mb-2 w-1/4 bg-green-200 hover:bg-green-700 hover:text-white cursor-pointer">Steve</div>
               <div className="mt-2">
                 <button
-                  className="shadow bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold py-2 px-4 rounded"
+                  className="shadow bg-algorand-arctic-lime hover:bg-algorand-orange-coral focus:shadow-outline focus:outline-none hover:text-white font-bold py-2 px-4 rounded-full"
                   type="button"
                 >
                   Cast my vote
