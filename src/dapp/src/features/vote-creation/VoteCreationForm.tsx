@@ -1,6 +1,6 @@
-import { Button } from "@material-tailwind/react";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { SubmitButton } from "../../shared/forms/components/submit-button/SubmitButton";
 import { ValidatedForm } from "../../shared/forms/validated-form/ValidatedForm";
 
 const formSchema = zfd.formData({
@@ -15,7 +15,6 @@ const formSchema = zfd.formData({
 
 export interface VoteCreationFormProps {
   onSubmit?: (data: z.infer<typeof formSchema>) => void | Promise<void>;
-  submitButton?: JSX.Element;
 }
 
 export default function VoteCreationForm({ onSubmit }: VoteCreationFormProps) {
@@ -46,7 +45,7 @@ export default function VoteCreationForm({ onSubmit }: VoteCreationFormProps) {
             field: "end",
           })}
 
-          <Button>Next: Questions</Button>
+          <SubmitButton>Next: Questions</SubmitButton>
         </>
       )}
     </ValidatedForm>

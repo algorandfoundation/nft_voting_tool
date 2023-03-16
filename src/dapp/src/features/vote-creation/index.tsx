@@ -1,74 +1,17 @@
 import { Typography } from "@material-tailwind/react";
-import VoteCreationForm from "./VoteCreationForm";
+import VoteCreationForm, { VoteCreationFormProps } from "./VoteCreationForm";
 
 function VoteCreationPage() {
+  const handleSubmit: VoteCreationFormProps["onSubmit"] = (data) => {
+    console.log("form submit", data);
+  };
+
   return (
     <>
       <Typography variant="h3">New Voting Round</Typography>
 
       <div className="w-full max-w-sm">
-        <VoteCreationForm />
-        <div className="md:flex md:items-center mb-6">
-          <div className="w-full px-3">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="vote-title">
-              Vote title
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="vote-title"
-              type="text"
-            />
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
-          <div className="w-full px-3">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="vote-description">
-              Vote description
-            </label>
-            <textarea
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="vote-description"
-            />
-            <p className="text-gray-600 text-xs italic">Max 200 characters</p>
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
-          <div className="w-full px-3">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="vote-information-link">
-              Vote information link
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="vote-information-link"
-              type="text"
-            />
-            <p className="text-gray-600 text-xs italic">URL where voters can get more information about the vote</p>
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
-          <div className="w-full px-3">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="start">
-              Start
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="start"
-              type="text"
-            />
-          </div>
-        </div>
-        <div className="md:flex md:items-center mb-6">
-          <div className="w-full px-3">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="end">
-              End
-            </label>
-            <input
-              className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-              id="end"
-              type="text"
-            />
-          </div>
-        </div>
+        <VoteCreationForm onSubmit={(data) => handleSubmit(data)} />
         <div className="md:flex md:items-center mb-6">
           <div className="w-full px-3">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="snapshot">
