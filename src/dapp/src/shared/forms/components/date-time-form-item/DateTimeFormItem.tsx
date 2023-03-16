@@ -1,11 +1,12 @@
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import Datepicker from "react-tailwindcss-datepicker";
 import { DateValueType } from "react-tailwindcss-datepicker/dist/types";
 import type { FormItemProps } from "../form-item/FormItem";
 import { FormItem } from "../form-item/FormItem";
 import { TimePicker, TimeValue } from "./TimePicker";
+import { useSubsequentRendersEffect } from "./useSubsequentRendersEffect";
 
 const noTime = { hours: undefined, minutes: undefined, ampm: undefined };
 export type DateTimeFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children"> &
@@ -33,7 +34,7 @@ export function DateFormItem<TSchema extends Record<string, any> = Record<string
           const [date, setDate] = useState<DateValueType>(null);
           const [time, setTime] = useState<TimeValue>(noTime);
 
-          useEffect(() => {
+          useSubsequentRendersEffect(() => {
             if (date?.startDate) {
               if (!time.hours || !time.minutes || !time.ampm) {
                 setTime({ hours: time.hours ?? "12", minutes: time.minutes ?? "00", ampm: time.ampm ?? "AM" });
