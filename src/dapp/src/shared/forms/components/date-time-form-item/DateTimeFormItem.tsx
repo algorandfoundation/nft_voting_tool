@@ -20,19 +20,31 @@ export function DateFormItem<TSchema extends Record<string, any> = Record<string
   hint,
   ...inputProps
 }: DateTimeFormItemProps<TSchema>) {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
+  const { control } = useFormContext();
 
   return (
     <FormItem field={field} label={label} hint={hint} disabled={disabled} className={className}>
       <Controller
         name={field}
         control={control}
-        render={({ field: { onChange, onBlur, value, name, ref } }) => {
-          const [date, setDate] = useState<DateValueType>(null);
-          const [time, setTime] = useState<TimeValue>(noTime);
+        render={({ field: { onChange, onBlur, value } }) => {
+          const [date, setDate] = useState<DateValueType>(
+            value
+              ? {
+                  startDate: dayjs(value).format("YYYY-MM-DD"),
+                  endDate: dayjs(value).format("YYYY-MM-DD"),
+                }
+              : null
+          );
+          const [time, setTime] = useState<TimeValue>(
+            value
+              ? {
+                  hours: dayjs(value).format("h") as TimeValue["hours"],
+                  minutes: dayjs(value).format("mm") as TimeValue["minutes"],
+                  ampm: dayjs(value).format("A") as TimeValue["ampm"],
+                }
+              : noTime
+          );
 
           useSubsequentRendersEffect(() => {
             if (date?.startDate) {
