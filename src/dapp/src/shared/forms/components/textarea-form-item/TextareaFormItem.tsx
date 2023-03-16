@@ -11,7 +11,7 @@ export function TextareaFormItem<TSchema extends Record<string, any> = Record<st
   disabled,
   label,
   className,
-  ...inputProps
+  ...textAreaProps
 }: TextareaFormItemProps<TSchema>) {
   const {
     control,
@@ -25,7 +25,7 @@ export function TextareaFormItem<TSchema extends Record<string, any> = Record<st
         control={control}
         render={({ field: { onChange, onBlur, value, name, ref } }) => (
           <Textarea
-            {...inputProps}
+            {...textAreaProps}
             variant="static"
             error={!!error}
             onChange={onChange}

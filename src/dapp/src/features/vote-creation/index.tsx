@@ -1,10 +1,13 @@
+import { Typography } from "@material-tailwind/react";
+import VoteCreationForm from "./VoteCreationForm";
+
 function VoteCreationPage() {
   return (
     <>
-      <div className="px-3">
-        <h3>New Voting Round</h3>
-      </div>
-      <form className="w-full max-w-sm">
+      <Typography variant="h3">New Voting Round</Typography>
+
+      <div className="w-full max-w-sm">
+        <VoteCreationForm />
         <div className="md:flex md:items-center mb-6">
           <div className="w-full px-3">
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="vote-title">
@@ -106,7 +109,7 @@ function VoteCreationPage() {
             </button>
           </div>
         </div>
-      </form>
+      </div>
     </>
   );
 }

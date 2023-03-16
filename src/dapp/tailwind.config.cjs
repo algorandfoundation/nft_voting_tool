@@ -18,7 +18,7 @@ const defaultSansFontFamily = [
 // @ts-check
 /** @type {import('tailwindcss/tailwind-config').TailwindConfig} */
 module.exports = withMT({
-  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}", "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js"],
   theme: {
     extend: {
       colors: {
