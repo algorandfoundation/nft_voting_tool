@@ -57,7 +57,7 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
   };
 
   return (
-    <ThemeProvider value={theme}>
+    <ThemeProvider value={theme as Parameters<typeof ThemeProvider>[0]["value"]}>
       <div className="flex">
         <div className="w-10">
           <TimeComponentSelect
