@@ -44,8 +44,18 @@ export default function VoteCreationForm({ onSubmit }: VoteCreationFormProps) {
             label: "End",
             field: "end",
           })}
+          {helper.fileField({
+            label: "Snapshot file",
+            field: "snapshotFile",
+          })}
+          {helper.textField({
+            label: "Minimum number of votes (quorum)",
+            field: "minimumVotes",
+          })}
 
-          <SubmitButton>Next: Questions</SubmitButton>
+          <div className="text-right">
+            <SubmitButton className="mt-8">Next: Questions</SubmitButton>
+          </div>
         </>
       )}
     </ValidatedForm>
