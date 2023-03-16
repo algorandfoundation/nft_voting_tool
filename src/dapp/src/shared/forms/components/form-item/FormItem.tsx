@@ -35,9 +35,11 @@ export function FormItem<TSchema extends Record<string, any> = Record<string, an
         {!required && " (optional)"}
       </Typography>
       {children && cloneElement(children, { className: clsx(children.props.className) })}
-      <Typography variant="small" className="text-gray-600">
-        {hint}
-      </Typography>
+      {hint && (
+        <Typography variant="small" className="text-gray-600">
+          {hint}
+        </Typography>
+      )}
       {error && <ValidationErrorMessage message={error?.message} />}
     </div>
   );
