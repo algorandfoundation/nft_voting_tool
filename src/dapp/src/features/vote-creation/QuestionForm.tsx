@@ -21,7 +21,7 @@ export interface QuestionFormProps {
 
 export default function QuestionForm({ onSubmit, voteTitle, back, defaultValues }: QuestionFormProps) {
   return (
-    <>
+    <div className=" w-full max-w-md">
       <Typography variant="h3">{voteTitle}</Typography>
       <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={defaultValues}>
         {(helper) => (
@@ -40,7 +40,7 @@ export default function QuestionForm({ onSubmit, voteTitle, back, defaultValues 
               minimumItemCount: 2,
             })}
 
-            <div className="mt-8 flex gap-8 justify-end">
+            <div className="mt-8 flex gap-6 justify-end">
               <Button variant="outlined" color="blue-gray" onClick={back}>
                 Back
               </Button>
@@ -49,6 +49,6 @@ export default function QuestionForm({ onSubmit, voteTitle, back, defaultValues 
           </>
         )}
       </ValidatedForm>
-    </>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import QuestionForm, { QuestionFormProps } from "./QuestionForm";
+import Review from "./review";
 import RoundInfoForm, { RoundInfoFormProps } from "./RoundInfoForm";
 import { Steps } from "./Steps";
 import { VoteCreationSteps } from "./VoteCreationSteps";
@@ -31,14 +32,14 @@ function VoteCreationPage() {
 
   const handleQuestionSubmit: QuestionFormProps["onSubmit"] = (data) => {
     setQuestions(data);
-    setCurrentStep(VoteCreationSteps.Questions);
+    setCurrentStep(VoteCreationSteps.Review);
     document.documentElement.scrollTop = 0;
   };
 
   return (
     <>
       <Steps currentStep={currentStep} />
-      <div className="mt-8 w-full max-w-md">
+      <div className="mt-8">
         {currentStep === VoteCreationSteps.RoundInfo && (
           <RoundInfoForm onSubmit={(data) => handleRoundInfoSubmit(data)} defaultValues={roundInfo} />
         )}
@@ -48,6 +49,15 @@ function VoteCreationPage() {
             voteTitle={roundInfo.voteTitle}
             back={() => setCurrentStep(VoteCreationSteps.RoundInfo)}
             defaultValues={questions}
+          />
+        )}
+        {currentStep === VoteCreationSteps.Review && (
+          <Review
+            onCreate={() => {}}
+            question={questions}
+            roundInfo={roundInfo}
+            back={() => setCurrentStep(VoteCreationSteps.Questions)}
+            setCurrentStep={setCurrentStep}
           />
         )}
       </div>

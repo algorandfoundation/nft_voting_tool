@@ -11,7 +11,7 @@ const formSchema = zfd.formData({
   start: zfd.text(),
   end: zfd.text(),
   snapshotFile: zfd.text(z.string().optional()),
-  minimumVotes: zfd.numeric(z.number().optional()),
+  minimumVotes: zfd.numeric(z.number({ invalid_type_error: "Should be a number" }).optional()),
 });
 
 type Fields = z.infer<typeof formSchema>;
@@ -23,7 +23,7 @@ export interface RoundInfoFormProps {
 
 export default function RoundInfoForm({ onSubmit, defaultValues }: RoundInfoFormProps) {
   return (
-    <>
+    <div className=" w-full max-w-md">
       <Typography variant="h3">New Voting Round</Typography>
       <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={defaultValues}>
         {(helper) => (
@@ -65,6 +65,6 @@ export default function RoundInfoForm({ onSubmit, defaultValues }: RoundInfoForm
           </>
         )}
       </ValidatedForm>
-    </>
+    </div>
   );
 }
