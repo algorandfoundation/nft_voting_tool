@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@material-tailwind/react";
+import { CssBaseline } from "@mui/material";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -49,10 +49,9 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider>
-      <RecoilRoot>
-        <RouterProvider router={router} />
-      </RecoilRoot>
-    </ThemeProvider>
+    <CssBaseline />
+    <RecoilRoot>
+      <RouterProvider router={router} />
+    </RecoilRoot>
   </React.StrictMode>
 );

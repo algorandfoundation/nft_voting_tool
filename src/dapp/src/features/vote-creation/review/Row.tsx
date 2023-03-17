@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Typography } from "@mui/material";
 
 type RowProp = {
   label: string;

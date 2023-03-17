@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Typography } from "@mui/material";
 import type { FieldError, FieldErrorsImpl, Merge } from "react-hook-form";
 
 export interface ValidationErrorMessageProps {

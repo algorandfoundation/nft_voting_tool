@@ -1,6 +1,5 @@
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, IconButton, Typography } from "@material-tailwind/react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Button, IconButton, Typography } from "@mui/material";
 import { useCallback, useRef } from "react";
 
 export interface TextfileFieldProps {
@@ -18,10 +17,14 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
       const [file] = files;
       const reader = new FileReader();
       reader.readAsText(file, "UTF-8");
+
       reader.onload = function (evt) {
-        onChange(evt.target?.result as string);
+        const result = evt.target?.result as string;
+        console.log("result", result);
+        onChange(result);
       };
-      reader.onerror = function () {
+      reader.onerror = function (e) {
+        console.log("error", e);
         onChange(new Error("Error reading file"));
       };
     },
@@ -32,24 +35,28 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
 
   return (
     <div>
-      <div className="flex gap-4">
-        <Button color="gray" onClick={() => ref.current?.click()}>
-          Choose file
-        </Button>
+      <div className="flex gap-4 items-center">
+        {!value && (
+          <Button variant="contained" onClick={() => ref.current?.click()}>
+            Choose file
+          </Button>
+        )}
         <Typography>{value ? `${value.split("\n").length} lines` : ""} </Typography>
         {value && (
-          <IconButton color="gray" onClick={() => onChange("")}>
-            <FontAwesomeIcon icon={faTrash} />
+          <IconButton aria-label="delete" onClick={() => onChange(null)}>
+            <DeleteIcon />
           </IconButton>
         )}
       </div>
-      <input
-        ref={ref}
-        className="sr-only"
-        type="file"
-        onChange={(e) => onFilesAdded(Array.from(e.target.files ?? []))}
-        disabled={disabled}
-      />
+      {!value && (
+        <input
+          ref={ref}
+          className="sr-only"
+          type="file"
+          onChange={(e) => onFilesAdded(Array.from(e.target.files ?? []))}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 }

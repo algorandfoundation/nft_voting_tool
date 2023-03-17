@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const withMT = require("@material-tailwind/react/utils/withMT");
-
 const defaultSansFontFamily = [
   "-apple-system",
   "BlinkMacSystemFont",
@@ -17,8 +14,8 @@ const defaultSansFontFamily = [
 
 // @ts-check
 /** @type {import('tailwindcss/tailwind-config').TailwindConfig} */
-module.exports = withMT({
-  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}", "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js"],
+module.exports = {
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -90,5 +87,5 @@ module.exports = withMT({
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
-});
+  plugins: [],
+};

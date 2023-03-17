@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Typography } from "@mui/material";
 import clsx from "clsx";
 import type { ReactElement } from "react";
 import { cloneElement } from "react";
@@ -30,15 +30,17 @@ export function FormItem<TSchema extends Record<string, any> = Record<string, an
   const errorMessage = errors[field]?.message;
   return (
     <div>
-      <Typography variant="lead">
+      <Typography variant="h6">
         {label}
         {!required && " (optional)"}
       </Typography>
       {children && cloneElement(children, { className: clsx(children.props.className) })}
       {hint && (
-        <Typography variant="small" className="text-gray-600">
-          {hint}
-        </Typography>
+        <div>
+          <Typography variant="caption" className="text-gray-600">
+            {hint}
+          </Typography>
+        </div>
       )}
       {errorMessage && <ValidationErrorMessage message={errorMessage} />}
     </div>

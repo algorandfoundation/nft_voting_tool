@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import clsx from "clsx";
 import type { MutableRefObject } from "react";
 import React, { createContext, useContext } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -41,7 +40,7 @@ export function ValidatedForm<TSchema extends Record<string, unknown>>({
   return (
     <ValidatorContextProvider value={validator}>
       <FormProvider {...formContext}>
-        <form className={clsx(className)} onSubmit={onSubmit && formContext.handleSubmit(onSubmit)}>
+        <form className="flex-row space-y-4" onSubmit={onSubmit && formContext.handleSubmit(onSubmit)}>
           {typeof children === "function" ? children(new FormFieldHelper<TSchema>()) : children}
         </form>
       </FormProvider>

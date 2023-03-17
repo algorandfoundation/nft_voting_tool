@@ -1,10 +1,9 @@
-import { Textarea, TextareaProps } from "@material-tailwind/react";
+import { TextField } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import type { FormItemProps } from "../form-item/FormItem";
 import { FormItem } from "../form-item/FormItem";
 
-export type TextareaFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children"> &
-  Partial<TextareaProps>;
+export type TextareaFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children">;
 
 export function TextareaFormItem<TSchema extends Record<string, any> = Record<string, any>>({
   field,
@@ -24,9 +23,11 @@ export function TextareaFormItem<TSchema extends Record<string, any> = Record<st
         name={field}
         control={control}
         render={({ field: { onChange, onBlur, value, name, ref } }) => (
-          <Textarea
+          <TextField
+            fullWidth
+            rows={4}
+            multiline
             {...textAreaProps}
-            variant="static"
             error={!!error}
             onChange={onChange}
             onBlur={onBlur}

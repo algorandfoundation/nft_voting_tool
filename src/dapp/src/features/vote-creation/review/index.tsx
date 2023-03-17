@@ -1,4 +1,4 @@
-import { Button, Textarea, Typography } from "@material-tailwind/react";
+import { Button, TextField, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
@@ -25,7 +25,7 @@ export default function Review() {
     <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
       <Typography>Review everything on this page carefully, as it cannot be changed once you create the voting round.</Typography>
-      <Typography variant="h4" className="mt-10">
+      <Typography variant="h4" className="!mt-6 !mb-2">
         Vote set up
       </Typography>
       <div className="container grid grid-cols-8 gap-4">
@@ -40,8 +40,8 @@ export default function Review() {
           value={roundInfo.snapshotFile ? `${roundInfo.snapshotFile.split("\n").length.toLocaleString()} wallets` : "-"}
         />
         {roundInfo.snapshotFile && (
-          <div className="col-span-6 col-start-3">
-            <Textarea className="max-w-md" disabled={true} value={roundInfo.snapshotFile} />
+          <div className="col-span-6 col-start-3 max-w-xs">
+            <TextField rows={6} fullWidth multiline className="max-w-md" disabled value={roundInfo.snapshotFile} />
           </div>
         )}
         <Row label="Min votes" value={roundInfo.minimumVotes?.toString() ?? "-"} />
@@ -55,7 +55,7 @@ export default function Review() {
           />
         </div>
       </div>
-      <Typography variant="h4" className="mt-10">
+      <Typography variant="h4" className="!mt-6 !mb-2">
         Question or category
       </Typography>
       <div className="container grid grid-cols-8 gap-4 ">
@@ -78,10 +78,12 @@ export default function Review() {
         </div>
       </div>
       <div className="mt-8 flex gap-6 justify-end max-w-md">
-        <Button variant="outlined" color="blue-gray" onClick={() => navigate(-1)}>
+        <Button variant="outlined" onClick={() => navigate(-1)}>
           Back
         </Button>
-        <Button onClick={() => setConfirmationDialogOpen(true)}>Create voting round</Button>
+        <Button variant="contained" onClick={() => setConfirmationDialogOpen(true)}>
+          Create voting round
+        </Button>
       </div>
       <ConfirmationDialog
         handleOpen={handleConfirmationDialogOpen}

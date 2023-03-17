@@ -1,10 +1,10 @@
-import { Input, InputProps } from "@material-tailwind/react";
+import { TextField, TextFieldProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import type { FormItemProps } from "../form-item/FormItem";
 import { FormItem } from "../form-item/FormItem";
 
 export type TextFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children"> &
-  Partial<InputProps>;
+  Partial<TextFieldProps>;
 
 export function TextFormItem<TSchema extends Record<string, any> = Record<string, any>>({
   field,
@@ -25,7 +25,7 @@ export function TextFormItem<TSchema extends Record<string, any> = Record<string
         name={field}
         control={control}
         render={({ field: { onChange, onBlur, value, name, ref } }) => (
-          <Input {...inputProps} error={!!error} variant="static" onChange={onChange} onBlur={onBlur} value={value} name={name} ref={ref} />
+          <TextField fullWidth {...inputProps} error={!!error} onChange={onChange} onBlur={onBlur} value={value} name={name} ref={ref} />
         )}
       />
     </FormItem>

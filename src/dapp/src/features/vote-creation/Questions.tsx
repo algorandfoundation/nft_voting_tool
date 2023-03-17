@@ -1,4 +1,4 @@
-import { Button, Typography } from "@material-tailwind/react";
+import { Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
@@ -52,7 +52,7 @@ export default function Questions() {
               })}
 
               <div className="mt-8 flex gap-6 justify-end">
-                <Button variant="outlined" color="blue-gray" onClick={() => navigate(-1)}>
+                <Button variant="outlined" onClick={() => navigate(-1)}>
                   Back
                 </Button>
                 <SubmitButton>Next: Review</SubmitButton>

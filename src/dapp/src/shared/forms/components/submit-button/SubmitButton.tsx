@@ -1,4 +1,4 @@
-import { Button } from "@material-tailwind/react";
+import { Button } from "@mui/material";
 import clsx from "clsx";
 import React from "react";
 
@@ -9,7 +9,7 @@ export type SubmitButtonProps = {
 
 export function SubmitButton({ className, children, ...rest }: SubmitButtonProps) {
   return (
-    <Button type="submit" className={clsx(className)} {...rest}>
+    <Button variant="contained" type="submit" className={clsx(className)} {...rest}>
       {children}
     </Button>
   );

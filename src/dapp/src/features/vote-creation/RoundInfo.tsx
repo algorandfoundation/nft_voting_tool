@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
@@ -33,7 +33,7 @@ export default function RoundInfo() {
   return (
     <>
       <Steps currentStep={VoteCreationSteps.RoundInfo} />
-      <div className="mt-8 w-full max-w-md">
+      <div className="mt-8 w-full max-w-lg">
         <Typography variant="h3">New Voting Round</Typography>
         <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={roundInfo}>
           {(helper) => (
@@ -52,14 +52,16 @@ export default function RoundInfo() {
 
                 hint: "URL where voters can get more information about the vote",
               })}
-              {helper.dateTimeField({
-                label: "Start",
-                field: "start",
-              })}
-              {helper.dateTimeField({
-                label: "End",
-                field: "end",
-              })}
+              <div className="flex justify-between">
+                {helper.dateTimeField({
+                  label: "Start",
+                  field: "start",
+                })}
+                {helper.dateTimeField({
+                  label: "End",
+                  field: "end",
+                })}
+              </div>
               {helper.documentField({
                 label: "Snapshot file",
                 field: "snapshotFile",
