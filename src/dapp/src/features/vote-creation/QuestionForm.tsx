@@ -12,19 +12,14 @@ export const formSchema = zfd.formData({
 
 export type Fields = z.infer<typeof formSchema>;
 
-const defaultValues: Partial<Fields> = {
-  questionTitle: "",
-  questionDescription: "",
-  answers: [" ", " "],
-};
-
 export interface QuestionFormProps {
   voteTitle: string;
   onSubmit?: (data: z.infer<typeof formSchema>) => void | Promise<void>;
   back: () => void;
+  defaultValues: Fields;
 }
 
-export default function QuestionForm({ onSubmit, voteTitle, back }: QuestionFormProps) {
+export default function QuestionForm({ onSubmit, voteTitle, back, defaultValues }: QuestionFormProps) {
   return (
     <>
       <Typography variant="h3">{voteTitle}</Typography>

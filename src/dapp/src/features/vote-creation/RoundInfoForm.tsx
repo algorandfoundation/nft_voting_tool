@@ -14,10 +14,10 @@ const formSchema = zfd.formData({
   minimumVotes: zfd.numeric(z.number().optional()),
 });
 
-export type Fields = z.infer<typeof formSchema>;
+type Fields = z.infer<typeof formSchema>;
 
 export interface RoundInfoFormProps {
-  defaultValues: Partial<Fields>;
+  defaultValues: Fields;
   onSubmit?: (data: Fields) => void | Promise<void>;
 }
 

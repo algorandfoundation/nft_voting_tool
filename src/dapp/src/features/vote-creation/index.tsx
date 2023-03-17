@@ -1,12 +1,12 @@
 import { useState } from "react";
 import QuestionForm, { QuestionFormProps } from "./QuestionForm";
-import RoundInfoForm, { Fields as RoundInfoFIelds, RoundInfoFormProps } from "./RoundInfoForm";
+import RoundInfoForm, { RoundInfoFormProps } from "./RoundInfoForm";
 import { Steps } from "./Steps";
 import { VoteCreationSteps } from "./VoteCreationSteps";
 
 function VoteCreationPage() {
   const [currentStep, setCurrentStep] = useState(VoteCreationSteps.RoundInfo);
-  const [roundInfo, setRoundInfo] = useState<RoundInfoFIelds>({
+  const [roundInfo, setRoundInfo] = useState<RoundInfoFormProps["defaultValues"]>({
     end: "",
     // @ts-expect-error this cannot be undefined
     minimumVotes: "",
@@ -17,6 +17,12 @@ function VoteCreationPage() {
     voteTitle: "",
   });
 
+  const [questions, setQuestions] = useState<QuestionFormProps["defaultValues"]>({
+    questionTitle: "",
+    questionDescription: "",
+    answers: [" ", " "],
+  });
+
   const handleRoundInfoSubmit: RoundInfoFormProps["onSubmit"] = (data) => {
     setRoundInfo(data);
     setCurrentStep(VoteCreationSteps.Questions);
@@ -24,6 +30,7 @@ function VoteCreationPage() {
   };
 
   const handleQuestionSubmit: QuestionFormProps["onSubmit"] = (data) => {
+    setQuestions(data);
     setCurrentStep(VoteCreationSteps.Questions);
     document.documentElement.scrollTop = 0;
   };
@@ -40,6 +47,7 @@ function VoteCreationPage() {
             onSubmit={(data) => handleQuestionSubmit(data)}
             voteTitle={roundInfo.voteTitle}
             back={() => setCurrentStep(VoteCreationSteps.RoundInfo)}
+            defaultValues={questions}
           />
         )}
       </div>
