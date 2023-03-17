@@ -6,7 +6,5 @@ export interface ValidationErrorMessageProps {
 }
 
 export const ValidationErrorMessage = ({ message }: ValidationErrorMessageProps) => (
-  <Typography variant="small" color="red">
-    {message?.toString()}
-  </Typography>
+  <Typography color="error">{message?.toString()}</Typography>
 );

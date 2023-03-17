@@ -19,12 +19,9 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
       reader.readAsText(file, "UTF-8");
 
       reader.onload = function (evt) {
-        const result = evt.target?.result as string;
-        console.log("result", result);
-        onChange(result);
+        onChange(evt.target?.result as string);
       };
       reader.onerror = function (e) {
-        console.log("error", e);
         onChange(new Error("Error reading file"));
       };
     },
@@ -43,7 +40,7 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
         )}
         <Typography>{value ? `${value.split("\n").length} lines` : ""} </Typography>
         {value && (
-          <IconButton aria-label="delete" onClick={() => onChange(null)}>
+          <IconButton aria-label="delete" onClick={() => onChange("")}>
             <DeleteIcon />
           </IconButton>
         )}
