@@ -25,13 +25,13 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const handleConfirmationDialogOpen = () => setConfirmationDialogOpen(!confirmationDialogOpen);
   return (
-    <>
+    <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
       <Typography>Review everything on this page carefully, as it cannot be changed once you create the voting round.</Typography>
       <Typography variant="h4" className="mt-10">
         Vote set up
       </Typography>
-      <div className="container grid grid-cols-8 gap-4 ">
+      <div className="container grid grid-cols-8 gap-4">
         <Row label="Vote title" value={roundInfo.voteTitle} />
         <Row label="Vote description" value={roundInfo.voteDescription ?? "-"} />
         <Row label="Vote information" value={roundInfo.voteInformationUrl} />
@@ -63,7 +63,7 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
       </Typography>
       <div className="container grid grid-cols-8 gap-4 ">
         <Row label="Question or category" value={question.questionTitle} />
-        <Row label="description" value={question.questionDescription ?? "-"} />
+        <Row label="Description" value={question.questionDescription ?? "-"} />
         <Row label="Options" value={question.answers[0]} />
         {question.answers.slice(1).map((answer, index) => (
           <div key={index} className="col-span-6 col-start-3">
@@ -87,6 +87,6 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
         <Button onClick={() => setConfirmationDialogOpen(true)}>Create voting round</Button>
       </div>
       <ConfirmationDialog handleOpen={handleConfirmationDialogOpen} open={confirmationDialogOpen} onConfirm={onCreate} />
-    </>
+    </div>
   );
 }
