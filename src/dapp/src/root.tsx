@@ -2,6 +2,7 @@ import { WalletProvider } from "@txnlab/use-wallet";
 import { Outlet } from "react-router-dom";
 import SiteFooter from "./components/siteFooter";
 import SiteHeader from "./components/siteHeader";
+import ScrollToTop from "./shared/router/ScrollToTop";
 import { useAlgoWallet } from "./utils/useAlgoWalletProvider";
 
 export default function Root() {
@@ -21,6 +22,7 @@ export default function Root() {
           <Outlet />
         </div>
         <SiteFooter />
+        <ScrollToTop />
       </WalletProvider>
     </>
   );

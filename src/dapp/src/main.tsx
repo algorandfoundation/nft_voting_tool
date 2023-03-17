@@ -2,9 +2,12 @@ import { ThemeProvider } from "@material-tailwind/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { RecoilRoot } from "recoil";
 import ErrorPage from "./error-page";
 import HomePage from "./features/vote";
-import VoteCreationPage from "./features/vote-creation";
+import Questions from "./features/vote-creation/Questions";
+import Review from "./features/vote-creation/review";
+import RoundInfo from "./features/vote-creation/RoundInfo";
 import CastVote from "./features/vote/cast";
 import "./main.css";
 import Root from "./root";
@@ -21,7 +24,20 @@ const router = createBrowserRouter([
       },
       {
         path: "create",
-        element: <VoteCreationPage />,
+        children: [
+          {
+            path: "",
+            element: <RoundInfo />,
+          },
+          {
+            path: "questions",
+            element: <Questions />,
+          },
+          {
+            path: "review",
+            element: <Review />,
+          },
+        ],
       },
       {
         path: "cast/:voteCid",
@@ -34,7 +50,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+      <RecoilRoot>
+        <RouterProvider router={router} />
+      </RecoilRoot>
     </ThemeProvider>
   </React.StrictMode>
 );

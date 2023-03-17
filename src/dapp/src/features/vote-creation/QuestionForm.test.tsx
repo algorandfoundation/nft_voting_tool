@@ -1,4 +1,4 @@
-import { Fields, formSchema } from "./QuestionForm";
+import { Fields, formSchema } from "./Questions";
 
 describe("QuestionForm", () => {
   it("should validate when all fields are filled", () => {

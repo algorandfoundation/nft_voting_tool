@@ -3,8 +3,9 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import { useState } from "react";
-import { QuestionFormProps } from "../QuestionForm";
-import { RoundInfoFormProps } from "../RoundInfoForm";
+import { useNavigate } from "react-router-dom";
+import { useQuestions, useRoundInfo } from "../state";
+import { useStepRedirect } from "../useStepRedirect";
 import { VoteCreationSteps } from "../VoteCreationSteps";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Link } from "./Link";
@@ -12,18 +13,14 @@ import { Row } from "./Row";
 dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
 
-export interface ReviewProps {
-  onCreate: () => void;
-  question: QuestionFormProps["defaultValues"];
-  roundInfo: RoundInfoFormProps["defaultValues"];
-  back: () => void;
-  setCurrentStep: (step: VoteCreationSteps) => void;
-}
-
-export default function Review({ onCreate, roundInfo, question, back, setCurrentStep }: ReviewProps) {
+export default function Review() {
   const utcOffset = dayjs().utcOffset() / 60;
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const handleConfirmationDialogOpen = () => setConfirmationDialogOpen(!confirmationDialogOpen);
+  const roundInfo = useRoundInfo();
+  const questions = useQuestions();
+  const navigate = useNavigate();
+  useStepRedirect(VoteCreationSteps.Review);
   return (
     <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
@@ -53,7 +50,7 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
             label="Edit vote set up"
             onClick={(e) => {
               e.preventDefault();
-              setCurrentStep(VoteCreationSteps.RoundInfo);
+              navigate(-2);
             }}
           />
         </div>
@@ -62,10 +59,10 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
         Question or category
       </Typography>
       <div className="container grid grid-cols-8 gap-4 ">
-        <Row label="Question or category" value={question.questionTitle} />
-        <Row label="Description" value={question.questionDescription ?? "-"} />
-        <Row label="Options" value={question.answers[0]} />
-        {question.answers.slice(1).map((answer, index) => (
+        <Row label="Question or category" value={questions.questionTitle} />
+        <Row label="Description" value={questions.questionDescription ?? "-"} />
+        <Row label="Options" value={questions.answers[0]} />
+        {questions.answers.slice(1).map((answer, index) => (
           <div key={index} className="col-span-6 col-start-3">
             <Typography className="m-0">{answer}</Typography>
           </div>
@@ -75,18 +72,25 @@ export default function Review({ onCreate, roundInfo, question, back, setCurrent
             label="Edit question"
             onClick={(e) => {
               e.preventDefault();
-              setCurrentStep(VoteCreationSteps.Questions);
+              navigate(-1);
             }}
           />
         </div>
       </div>
       <div className="mt-8 flex gap-6 justify-end max-w-md">
-        <Button variant="outlined" color="blue-gray" onClick={back}>
+        <Button variant="outlined" color="blue-gray" onClick={() => navigate(-1)}>
           Back
         </Button>
         <Button onClick={() => setConfirmationDialogOpen(true)}>Create voting round</Button>
       </div>
-      <ConfirmationDialog handleOpen={handleConfirmationDialogOpen} open={confirmationDialogOpen} onConfirm={onCreate} />
+      <ConfirmationDialog
+        handleOpen={handleConfirmationDialogOpen}
+        open={confirmationDialogOpen}
+        onConfirm={() => {
+          // TODO: create the round
+          handleConfirmationDialogOpen();
+        }}
+      />
     </div>
   );
 }
