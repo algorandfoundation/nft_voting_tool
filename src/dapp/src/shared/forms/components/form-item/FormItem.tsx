@@ -24,10 +24,10 @@ export function FormItem<TSchema extends Record<string, any> = Record<string, an
   field,
 }: FormItemProps<TSchema>) {
   const {
-    formState: { errors, touchedFields },
+    formState: { errors },
   } = useFormContext();
   const { required } = useFieldMetaData(field);
-  const error = errors[field];
+  const errorMessage = errors[field]?.message;
   return (
     <div>
       <Typography variant="lead">
@@ -40,7 +40,7 @@ export function FormItem<TSchema extends Record<string, any> = Record<string, an
           {hint}
         </Typography>
       )}
-      {error && <ValidationErrorMessage message={error?.message} />}
+      {errorMessage && <ValidationErrorMessage message={errorMessage} />}
     </div>
   );
 }

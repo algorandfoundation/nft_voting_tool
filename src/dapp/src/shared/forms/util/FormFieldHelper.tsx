@@ -1,5 +1,6 @@
 import { DateFormItem, DateTimeFormItemProps } from "../components/date-time-form-item/DateTimeFormItem";
 import { FileFormItem, FileFormItemProps } from "../components/file-form-item/FileFormItem";
+import { TextArrayFormItem, TextArrayFormItemProps } from "../components/text-array-form-item/TextArrayFormItem";
 import type { TextFormItemProps } from "../components/text-form-item/TextFormItem";
 import { TextFormItem } from "../components/text-form-item/TextFormItem";
 import type { TextareaFormItemProps } from "../components/textarea-form-item/TextareaFormItem";
@@ -21,6 +22,10 @@ export class FormFieldHelper<TSchema extends Record<string, any>> {
 
   textField(props: TextFormItemProps<TSchema>) {
     return <TextFormItem {...this.prefixFieldProp(props)} />;
+  }
+
+  textFields(props: TextArrayFormItemProps<TSchema>) {
+    return <TextArrayFormItem {...this.prefixFieldProp(props)} />;
   }
 
   textareaField(props: TextareaFormItemProps<TSchema>) {

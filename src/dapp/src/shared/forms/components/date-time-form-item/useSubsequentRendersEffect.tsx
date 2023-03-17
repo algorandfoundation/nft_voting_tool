@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-// @ts-expect-error `process` is available
 const env = process.env.NODE_ENV;
 /**
  * `useEffect` that does not fire on the first render

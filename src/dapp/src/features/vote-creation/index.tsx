@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import QuestionForm, { QuestionFormProps } from "./QuestionForm";
 import RoundInfoForm, { Fields as RoundInfoFIelds, RoundInfoFormProps } from "./RoundInfoForm";
 import { Steps } from "./Steps";
@@ -27,10 +27,6 @@ function VoteCreationPage() {
     setCurrentStep(VoteCreationSteps.Questions);
     document.documentElement.scrollTop = 0;
   };
-
-  useEffect(() => {
-    console.log("step", currentStep);
-  }, [currentStep]);
 
   return (
     <>

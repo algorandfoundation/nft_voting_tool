@@ -4,14 +4,18 @@ import { zfd } from "zod-form-data";
 import { SubmitButton } from "../../shared/forms/components/submit-button/SubmitButton";
 import { ValidatedForm } from "../../shared/forms/validated-form/ValidatedForm";
 
-const formSchema = zfd.formData({
+export const formSchema = zfd.formData({
   questionTitle: zfd.text(),
   questionDescription: zfd.text(z.string().optional()),
+  answers: zfd.repeatable(z.array(zfd.text(z.string().trim().min(1, "Required"))).min(2, "Must have at least 2 answers")),
 });
 
-const defaultValues: Partial<z.infer<typeof formSchema>> = {
+export type Fields = z.infer<typeof formSchema>;
+
+const defaultValues: Partial<Fields> = {
   questionTitle: "",
   questionDescription: "",
+  answers: [" ", " "],
 };
 
 export interface QuestionFormProps {
@@ -35,6 +39,12 @@ export default function QuestionForm({ onSubmit, voteTitle, back }: QuestionForm
               label: "Question description",
               field: "questionDescription",
             })}
+            {helper.textFields({
+              label: "Response options",
+              field: "answers",
+              minimumItemCount: 2,
+            })}
+
             <div className="mt-8 flex gap-8 justify-end">
               <Button variant="outlined" color="blue-gray" onClick={back}>
                 Back
