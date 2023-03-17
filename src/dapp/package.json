@@ -2,7 +2,6 @@
   "name": "nft-voting-tool",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "dev": "vite",
     "clean": "rimraf dist",
@@ -13,22 +12,35 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.16",
-    "@material-tailwind/react": "^1.2.4",
+    "@hookform/resolvers": "^2.9.11",
+    "@mui/icons-material": "^5.11.11",
+    "@mui/material": "^5.11.13",
+    "@mui/x-date-pickers": "^6.0.2",
     "@tailwindcss/forms": "^0.5.3",
     "@txnlab/use-wallet": "^1.2.5",
     "buffer": "^6.0.3",
     "clsx": "^1.2.1",
+    "dayjs": "^1.11.7",
     "events": "^3.3.0",
+    "lodash.range": "^3.2.0",
     "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.5",
     "react-router-dom": "^6.9.0",
-    "util": "^0.12.5"
+    "recoil": "^0.7.7",
+    "util": "^0.12.5",
+    "zod": "^3.21.4",
+    "zod-form-data": "^2.0.0"
   },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@types/jest": "^29.4.4",
+    "@types/lodash.range": "^3.2.7",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
     "@typescript-eslint/eslint-plugin": "~5.33.0",
@@ -39,9 +51,11 @@
     "eslint": "^8.22.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "jest": "^29.5.0",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.2.7",
-    "typescript": "^4.9.3",
+    "ts-jest": "^29.0.5",
+    "typescript": "^4.9.5",
     "vite": "^4.1.0"
   },
   "overrides": {
