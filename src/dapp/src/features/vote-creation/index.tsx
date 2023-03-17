@@ -10,7 +10,7 @@ function VoteCreationPage() {
     end: "",
     // @ts-expect-error this cannot be undefined
     minimumVotes: "",
-    snapshotFile: undefined,
+    snapshotFile: "",
     start: "",
     voteDescription: "",
     voteInformationUrl: "",

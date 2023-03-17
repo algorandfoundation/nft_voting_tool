@@ -1,10 +1,10 @@
 import { DateFormItem, DateTimeFormItemProps } from "../components/date-time-form-item/DateTimeFormItem";
-import { FileFormItem, FileFormItemProps } from "../components/file-form-item/FileFormItem";
 import { TextArrayFormItem, TextArrayFormItemProps } from "../components/text-array-form-item/TextArrayFormItem";
 import type { TextFormItemProps } from "../components/text-form-item/TextFormItem";
 import { TextFormItem } from "../components/text-form-item/TextFormItem";
 import type { TextareaFormItemProps } from "../components/textarea-form-item/TextareaFormItem";
 import { TextareaFormItem } from "../components/textarea-form-item/TextareaFormItem";
+import { TextfileFormItem, TextfileFormItemProps } from "../components/textfile-form-item/TextfileFormItem";
 
 export class FormFieldHelper<TSchema extends Record<string, any>> {
   private readonly fieldPrefix: string;
@@ -36,7 +36,7 @@ export class FormFieldHelper<TSchema extends Record<string, any>> {
     return <DateFormItem {...this.prefixFieldProp(props)} />;
   }
 
-  fileField(props: FileFormItemProps<TSchema>) {
-    return <FileFormItem {...this.prefixFieldProp(props)} />;
+  documentField(props: TextfileFormItemProps<TSchema>) {
+    return <TextfileFormItem {...props} />;
   }
 }

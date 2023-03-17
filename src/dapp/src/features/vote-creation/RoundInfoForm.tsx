@@ -10,7 +10,7 @@ const formSchema = zfd.formData({
   voteInformationUrl: zfd.text(),
   start: zfd.text(),
   end: zfd.text(),
-  snapshotFile: zfd.file(z.instanceof(File).optional()),
+  snapshotFile: zfd.text(z.string().optional()),
   minimumVotes: zfd.numeric(z.number().optional()),
 });
 
@@ -50,7 +50,7 @@ export default function RoundInfoForm({ onSubmit, defaultValues }: RoundInfoForm
               label: "End",
               field: "end",
             })}
-            {helper.fileField({
+            {helper.documentField({
               label: "Snapshot file",
               field: "snapshotFile",
             })}
