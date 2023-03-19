@@ -37,6 +37,9 @@
     "zod": "^3.21.4",
     "zod-form-data": "^2.0.0"
   },
+  "peerDependencies": {
+    "@perawallet/connect": "^1.2.0"
+  },
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@types/jest": "^29.4.4",
@@ -60,9 +63,6 @@
   },
   "overrides": {
     "@blockshake/defly-connect": {
-      "algosdk": "^2.1.0"
-    },
-    "@perawallet/connect": {
       "algosdk": "^2.1.0"
     }
   }
