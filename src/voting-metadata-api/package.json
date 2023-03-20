@@ -1,0 +1,42 @@
+{
+  "name": "@makerx/caddi-poller",
+  "version": "1.0.0",
+  "description": "Caddi Poller",
+  "main": "index.js",
+  "author": "MakerX",
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node-dev --transpile-only --watch .env -r dotenv/config ./index.ts",
+    "build": "npm run clean && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production && rimraf package.json package-lock.json index.js",
+    "clean": "rimraf build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ipld/dag-pb": "^4.0.2",
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1338.0",
+    "aws-xray-sdk": "^3.4.1",
+    "date-fns": "^2.29.3",
+    "multiformats": "^11.0.2",
+    "node-fetch": "^3.3.1",
+    "sharp": "^0.31.3",
+    "superagent": "^8.0.9",
+    "uuid": "^9.0.0",
+    "web3.storage": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.114",
+    "@types/aws-sdk": "^2.7.0",
+    "@types/node": "^18.15.3",
+    "@types/node-fetch": "^2.6.2",
+    "@types/sharp": "^0.31.1",
+    "@types/uuid": "^9.0.1",
+    "@types/superagent": "^4.1.16",
+    "copyfiles": "^2.4.1",
+    "dotenv": "^16.0.3",
+    "prettier": "^2.8.4",
+    "rimraf": "^4.4.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.2"
+  }
+}
