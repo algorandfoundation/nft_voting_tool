@@ -32,7 +32,7 @@ export default function Questions() {
   return (
     <>
       <Steps currentStep={VoteCreationSteps.Questions} />
-      <div className="mt-8w-full max-w-md">
+      <div className="mt-8 w-full max-w-md">
         <Typography variant="h3">{voteTitle}</Typography>
         <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={questions}>
           {(helper) => (
