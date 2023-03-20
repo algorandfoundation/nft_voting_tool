@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "path": "./",
+      "name": "ROOT"
+    },
+    {
+      "path": "./infrastructure"
+    },
+    {
+      "path": "./src/dapp"
+    },
+    {
+      "path": "./src/algorand"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "infrastructure/": true,
+      "src/": true
+    },
+    "vite.port": 5173,
+    "dotenv.enableAutocloaking": false,
+    "jest.disabledWorkspaceFolders": [
+      "infrastructure",
+      "algorand",
+      "ROOT"
+    ],
+  },
+  "extensions": {
+    "recommendations": ["joshx.workspace-terminals"]
+  },
+  "launch": {
+    "configurations": [],
+    "compounds": [
+      {
+        "name": "Run All",
+        "configurations": [
+          { "name": "Run dApp", "folder": "dapp" },
+          { "name": "Build & Deploy Beaker application", "folder": "algorand" }
+        ],
+        "presentation": {
+          "hidden": false,
+          "group": "0. Run workspace"
+        }
+      }
+    ]
+  }
+}

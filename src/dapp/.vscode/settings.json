@@ -5,6 +5,5 @@
     "source.fixAll.eslint": true,
     "source.organizeImports": true
   },
-  "vite.port": 5173,
   "dotenv.enableAutocloaking": false
 }

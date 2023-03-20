@@ -5,7 +5,7 @@
     "dbaeumer.vscode-eslint",
     "krysenlo.vite-plugin-eslint-problemmatcher",
     "bradlc.vscode-tailwindcss",
-    "csstools.postcss"
+    "csstools.postcss",
+    "dotenv.dotenv-vscode"
   ]
 }
-
