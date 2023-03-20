@@ -1,7 +1,7 @@
 export type RoundInfo = {
   end: string;
-  minimumVotes: number;
-  snapshotFile?: string;
+  minimumVotes?: number | undefined;
+  snapshotFile?: string | undefined;
   start: string;
   voteDescription: string;
   voteInformationUrl: string;

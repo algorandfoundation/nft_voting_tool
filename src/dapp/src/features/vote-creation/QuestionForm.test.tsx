@@ -1,8 +1,9 @@
-import { Fields, formSchema } from "./Questions";
+import { Question } from "../../shared/types";
+import { formSchema } from "./Questions";
 
 describe("QuestionForm", () => {
   it("should validate when all fields are filled", () => {
-    const values: Fields = {
+    const values: Question = {
       answers: ["one", "two"],
       questionTitle: "title",
     };
@@ -11,7 +12,7 @@ describe("QuestionForm", () => {
     }).not.toThrow();
   });
   it("should not allow empty answer", () => {
-    const values: Fields = {
+    const values: Question = {
       answers: ["one", "two", ""],
       questionTitle: "title",
     };
