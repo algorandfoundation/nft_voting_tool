@@ -15,7 +15,7 @@ export const formSchema = zfd.formData({
   answers: zfd.repeatable(z.array(zfd.text(z.string().trim().min(1, "Required"))).min(2, "Must have at least 2 answers")),
 });
 
-export type Fields = z.infer<typeof formSchema>;
+type Fields = z.infer<typeof formSchema>;
 
 export default function Questions() {
   const { voteTitle } = useRoundInfo();

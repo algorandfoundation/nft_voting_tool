@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import ErrorPage from "./error-page";
+import VotingRounds from "./features/rounds";
 import HomePage from "./features/vote";
 import Questions from "./features/vote-creation/Questions";
 import Review from "./features/vote-creation/review";
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "cast/:voteCid",
         element: <CastVote />,
+      },
+      {
+        path: "rounds",
+        element: <VotingRounds />,
       },
     ],
   },
