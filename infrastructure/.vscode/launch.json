@@ -1,0 +1,19 @@
+{
+  "configurations": [
+    {
+      "name": "Deploy AWS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "deploy:local"],
+      "preLaunchTask": "npm: cdk bootstrap",
+      "presentation": {
+        "hidden": false,
+        "group": "1. Run Project",
+        "order": 3
+      }
+    }
+  ]
+}
