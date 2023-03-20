@@ -1,15 +1,14 @@
-import { atom, DefaultValue, selector, useRecoilValue, useSetRecoilState } from "recoil";
-import { Fields as QuestionFields } from "./Questions";
-import { Fields as RoundInfoFields } from "./RoundInfo";
+import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil";
+import { Question, RoundInfo } from "../../shared/types";
 import { VoteCreationSteps } from "./VoteCreationSteps";
 
 type VoteCreationState = {
-  roundInfo: RoundInfoFields;
-  questions: QuestionFields;
+  roundInfo: RoundInfo;
+  questions: Question;
   step: VoteCreationSteps;
 };
 
-const defaultRoundInfo: RoundInfoFields = {
+const defaultRoundInfo: RoundInfo = {
   end: "",
   // @ts-expect-error setting this to an empty string forces the value to be controlled from the start
   minimumVotes: "",
@@ -20,7 +19,7 @@ const defaultRoundInfo: RoundInfoFields = {
   voteTitle: "",
 };
 
-const defaultQuestions: QuestionFields = {
+const defaultQuestions: Question = {
   questionTitle: "",
   questionDescription: "",
   // these need to be spaces because react-hook-form acts weird if they are empty strings
@@ -69,3 +68,4 @@ export const useQuestions = () => useRecoilValue(questionsSelector);
 export const useSetQuestions = () => useSetRecoilState(questionsSelector);
 export const useStep = () => useRecoilValue(stepSelector);
 export const useSetStep = () => useSetRecoilState(stepSelector);
+export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom);
