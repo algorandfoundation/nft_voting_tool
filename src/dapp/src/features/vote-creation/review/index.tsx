@@ -4,11 +4,13 @@ import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuestions, useRoundInfo } from "../state";
+import api from "../../../shared/api";
+import { useQuestions, useResetCreateRound, useRoundInfo } from "../state";
 import { useStepRedirect } from "../useStepRedirect";
 import { VoteCreationSteps } from "../VoteCreationSteps";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Link } from "./Link";
+import { LoadingDialog } from "./LoadingDialog";
 import { Row } from "./Row";
 dayjs.extend(localizedFormat);
 dayjs.extend(timezone);
@@ -16,11 +18,25 @@ dayjs.extend(timezone);
 export default function Review() {
   const utcOffset = dayjs().utcOffset() / 60;
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
-  const handleConfirmationDialogOpen = () => setConfirmationDialogOpen(!confirmationDialogOpen);
+  const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen);
   const roundInfo = useRoundInfo();
   const questions = useQuestions();
   const navigate = useNavigate();
   useStepRedirect(VoteCreationSteps.Review);
+  const resetCreateState = useResetCreateRound();
+  const { loading: creatingVotingRound, execute: createVotingRoundApi } = api.useAddVotingRound();
+  const createVotingRound = async () => {
+    try {
+      await createVotingRoundApi({
+        ...roundInfo,
+        ...questions,
+      });
+      resetCreateState();
+      navigate("/rounds", {});
+    } catch (e) {
+      // TODO: handle failure
+    }
+  };
   return (
     <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
@@ -86,13 +102,14 @@ export default function Review() {
         </Button>
       </div>
       <ConfirmationDialog
-        handleOpen={handleConfirmationDialogOpen}
+        handleOpen={toggleConfirmationDialog}
         open={confirmationDialogOpen}
         onConfirm={() => {
-          // TODO: create the round
-          handleConfirmationDialogOpen();
+          toggleConfirmationDialog();
+          createVotingRound();
         }}
       />
+      <LoadingDialog loading={creatingVotingRound} title="Creating voting round..." />
     </div>
   );
 }

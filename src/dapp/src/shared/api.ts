@@ -2,8 +2,8 @@
  * Returns mock data for now, this should be replaced with real API calls
  */
 
-import { useEffect, useState } from "react";
-import { atom, useRecoilValue } from "recoil";
+import { useCallback, useEffect, useState } from "react";
+import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import { VotingRound } from "./types";
 
 type VotingRoundsState = {
@@ -34,23 +34,51 @@ const votingRoundsAtom = atom<VotingRoundsState>({
   },
 });
 
-const useMockApi = <T>(payload: T) => {
+const useMockGetter = <T>(payload: T) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T | null>(null);
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
       setData(payload);
+      // simulate loading time
     }, Math.random() * 400);
     return () => clearTimeout(timeout);
   }, []);
   return { loading, data };
 };
 
+const useMockSetter = <T>(action: (payload: T) => void, extraDelayMs = 0) => {
+  const [loading, setLoading] = useState(false);
+  const execute = useCallback((payload: T) => {
+    setLoading(true);
+    const promise = new Promise((resolve) =>
+      setTimeout(() => {
+        action(payload);
+        setLoading(false);
+        resolve(true);
+        // simulate loading time
+      }, Math.random() * 400 + extraDelayMs)
+    );
+    return promise;
+  }, []);
+
+  return { loading, execute };
+};
+
 const api = {
   useVotingRounds: () => {
     const data = useRecoilValue(votingRoundsAtom);
-    return useMockApi(data);
+    return useMockGetter(data);
+  },
+  useAddVotingRound: () => {
+    const setState = useSetRecoilState(votingRoundsAtom);
+    return useMockSetter((newRound: VotingRound) => {
+      setState((state) => ({
+        ...state,
+        openRounds: [...state.openRounds, newRound],
+      }));
+    }, 3000);
   },
 };
 

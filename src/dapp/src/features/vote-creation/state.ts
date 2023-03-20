@@ -1,4 +1,4 @@
-import { atom, DefaultValue, selector, useRecoilValue, useSetRecoilState } from "recoil";
+import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from "recoil";
 import { Question, RoundInfo } from "../../shared/types";
 import { VoteCreationSteps } from "./VoteCreationSteps";
 
@@ -68,3 +68,4 @@ export const useQuestions = () => useRecoilValue(questionsSelector);
 export const useSetQuestions = () => useSetRecoilState(questionsSelector);
 export const useStep = () => useRecoilValue(stepSelector);
 export const useSetStep = () => useSetRecoilState(stepSelector);
+export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom);
