@@ -7,6 +7,22 @@
                 {
                     "type": "byte[]",
                     "name": "snapshot_public_key"
+                },
+                {
+                    "type": "string",
+                    "name": "metadata_ipfs_cid"
+                },
+                {
+                    "type": "uint64",
+                    "name": "start_time"
+                },
+                {
+                    "type": "uint64",
+                    "name": "end_time"
+                },
+                {
+                    "type": "uint64",
+                    "name": "quorum"
                 }
             ],
             "returns": {
@@ -14,7 +30,21 @@
             }
         },
         {
-            "name": "verify",
+            "name": "metadata_ipfs_cid",
+            "args": [],
+            "returns": {
+                "type": "string"
+            }
+        },
+        {
+            "name": "is_voting_open",
+            "args": [],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "is_allowed_to_vote",
             "args": [
                 {
                     "type": "byte[]",
@@ -22,7 +52,26 @@
                 }
             ],
             "returns": {
-                "type": "string"
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "has_already_voted",
+            "args": [],
+            "returns": {
+                "type": "uint64"
+            }
+        },
+        {
+            "name": "vote",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "signature"
+                }
+            ],
+            "returns": {
+                "type": "void"
             }
         }
     ],
