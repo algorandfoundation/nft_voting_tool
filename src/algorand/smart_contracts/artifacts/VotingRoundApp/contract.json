@@ -1,0 +1,30 @@
+{
+    "name": "VotingRoundApp",
+    "methods": [
+        {
+            "name": "create",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "snapshot_public_key"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "verify",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "signature"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        }
+    ],
+    "networks": {}
+}

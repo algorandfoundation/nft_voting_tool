@@ -1,0 +1,158 @@
+#pragma version 8
+intcblock 0 1 5
+bytecblock 0x736e617073686f745f7075626c69635f6b6579 0x068101
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l6
+txna ApplicationArgs 0
+pushbytes 0x8e79358d // "create(byte[])void"
+==
+bnz main_l5
+txna ApplicationArgs 0
+pushbytes 0xbb3fc1af // "verify(byte[])string"
+==
+bnz main_l4
+err
+main_l4:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+callsub verify_3
+store 0
+pushbytes 0x151f7c75 // 0x151f7c75
+load 0
+concat
+log
+intc_1 // 1
+return
+main_l5:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+==
+&&
+assert
+txna ApplicationArgs 1
+callsub create_2
+intc_1 // 1
+return
+main_l6:
+txn OnCompletion
+pushint 4 // UpdateApplication
+==
+bnz main_l10
+txn OnCompletion
+intc_2 // DeleteApplication
+==
+bnz main_l9
+err
+main_l9:
+txn ApplicationID
+intc_0 // 0
+!=
+assert
+callsub delete_1
+intc_1 // 1
+return
+main_l10:
+txn ApplicationID
+intc_0 // 0
+!=
+assert
+callsub update_0
+intc_1 // 1
+return
+
+// update
+update_0:
+proto 0 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+pushint TMPL_UPDATABLE // TMPL_UPDATABLE
+// Check app is updatable
+assert
+retsub
+
+// delete
+delete_1:
+proto 0 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+pushint TMPL_DELETABLE // TMPL_DELETABLE
+// Check app is deletable
+assert
+retsub
+
+// create
+create_2:
+proto 1 0
+intc_0 // 0
+bytec_0 // "snapshot_public_key"
+app_global_get_ex
+store 2
+store 1
+load 2
+!
+assert
+bytec_0 // "snapshot_public_key"
+frame_dig -1
+extract 2 0
+app_global_put
+retsub
+
+// verify
+verify_3:
+proto 1 1
+pushbytes 0x // ""
+pushint 2000 // 2000
+pushint 10 // 10
++
+store 3
+verify_3_l1:
+load 3
+global OpcodeBudget
+>
+bnz verify_3_l5
+txn Sender
+frame_dig -1
+extract 2 0
+bytec_0 // "snapshot_public_key"
+app_global_get
+ed25519verify_bare
+bnz verify_3_l4
+pushbytes 0x000c4e6f7420616c6c6f77656421 // 0x000c4e6f7420616c6c6f77656421
+frame_bury 0
+b verify_3_l6
+verify_3_l4:
+pushbytes 0x0007416c6c6f776564 // 0x0007416c6c6f776564
+frame_bury 0
+b verify_3_l6
+verify_3_l5:
+itxn_begin
+pushint 6 // appl
+itxn_field TypeEnum
+intc_2 // DeleteApplication
+itxn_field OnCompletion
+bytec_1 // 0x068101
+itxn_field ApprovalProgram
+bytec_1 // 0x068101
+itxn_field ClearStateProgram
+itxn_submit
+b verify_3_l1
+verify_3_l6:
+retsub
