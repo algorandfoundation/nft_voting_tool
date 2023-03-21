@@ -15,6 +15,7 @@ module.exports = {
           coal: "#201F21",
           "arctic-lime": "#DCFE54",
           "orange-coral": "#FF684E",
+          warning: "#ffcbcb",
         },
         grey: {
           dark: "#222222",

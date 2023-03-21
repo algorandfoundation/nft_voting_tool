@@ -7,7 +7,7 @@ type VotingRoundTileProps = {
 };
 export const VotingRoundTile = ({ round }: VotingRoundTileProps) => {
   return (
-    <div className="container border-2 border-slate-800 p-2">
+    <div className="container border-solid border-2 border-slate-800 p-2">
       <div className="text-center pt-4 pb-12">
         <Typography variant="h6">{round.voteTitle}</Typography>
       </div>

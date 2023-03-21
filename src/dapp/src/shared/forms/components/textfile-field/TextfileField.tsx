@@ -35,7 +35,7 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
       <div className="flex gap-4 items-center">
         {!value && (
           <Button variant="contained" onClick={() => ref.current?.click()}>
-            Choose file
+            Upload
           </Button>
         )}
         <Typography>{value ? `${value.split("\n").length} lines` : ""} </Typography>

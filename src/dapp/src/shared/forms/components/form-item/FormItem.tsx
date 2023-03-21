@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { InputLabel, Typography } from "@mui/material";
 import clsx from "clsx";
 import type { ReactElement } from "react";
 import { cloneElement } from "react";
@@ -30,10 +30,10 @@ export function FormItem<TSchema extends Record<string, any> = Record<string, an
   const errorMessage = errors[field]?.message;
   return (
     <div>
-      <Typography variant="h6">
+      <InputLabel className="text-black">
         {label}
         {!required && " (optional)"}
-      </Typography>
+      </InputLabel>
       {children && cloneElement(children, { className: clsx(children.props.className) })}
       {hint && (
         <div>

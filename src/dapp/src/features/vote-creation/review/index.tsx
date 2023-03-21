@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Alert, Button, Link, Stack, TextField, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import timezone from "dayjs/plugin/timezone";
@@ -9,7 +9,6 @@ import { useQuestions, useResetCreateRound, useRoundInfo } from "../state";
 import { useStepRedirect } from "../useStepRedirect";
 import { VoteCreationSteps } from "../VoteCreationSteps";
 import { ConfirmationDialog } from "./ConfirmationDialog";
-import { Link } from "./Link";
 import { LoadingDialog } from "./LoadingDialog";
 import { Row } from "./Row";
 dayjs.extend(localizedFormat);
@@ -40,7 +39,9 @@ export default function Review() {
   return (
     <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
-      <Typography>Review everything on this page carefully, as it cannot be changed once you create the voting round.</Typography>
+      <Alert className="max-w-xl bg-algorand-warning font-semibold" icon={false}>
+        Review everything on this page carefully, as it cannot be changed once you create the voting round.
+      </Alert>
       <Typography variant="h4" className="mt-6 mb-2">
         Vote set up
       </Typography>
@@ -63,12 +64,14 @@ export default function Review() {
         <Row label="Min votes" value={roundInfo.minimumVotes?.toString() ?? "-"} />
         <div className="col-span-2">
           <Link
-            label="Edit vote set up"
             onClick={(e) => {
               e.preventDefault();
               navigate(-2);
             }}
-          />
+            href="#"
+          >
+            Edit vote information
+          </Link>
         </div>
       </div>
       <Typography variant="h4" className="mt-6 mb-2">
@@ -77,23 +80,32 @@ export default function Review() {
       <div className="container grid grid-cols-8 gap-4 ">
         <Row label="Question or category" value={questions.questionTitle} />
         <Row label="Description" value={questions.questionDescription ?? "-"} />
-        <Row label="Options" value={questions.answers[0]} />
-        {questions.answers.slice(1).map((answer, index) => (
-          <div key={index} className="col-span-6 col-start-3">
-            <Typography className="m-0">{answer}</Typography>
-          </div>
-        ))}
+        <Row
+          label="Options"
+          value={
+            <Stack spacing={1}>
+              {questions.answers.map((option, index) => (
+                <Button className="w-72 uppercase" key={index} variant="outlined">
+                  {option}
+                </Button>
+              ))}
+            </Stack>
+          }
+        />
+
         <div className="col-span-2">
           <Link
-            label="Edit question"
+            href="#"
             onClick={(e) => {
               e.preventDefault();
               navigate(-1);
             }}
-          />
+          >
+            Edit question
+          </Link>
         </div>
       </div>
-      <div className="mt-8 flex gap-6 justify-end max-w-md">
+      <div className="mt-8 flex gap-6 justify-end max-w-xl">
         <Button variant="outlined" onClick={() => navigate(-1)}>
           Back
         </Button>

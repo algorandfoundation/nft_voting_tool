@@ -32,9 +32,9 @@ export default function RoundInfo() {
   };
   return (
     <>
-      <Steps currentStep={VoteCreationSteps.RoundInfo} />
+      <Steps activeStep={VoteCreationSteps.RoundInfo} />
       <div className="mt-8 w-full max-w-lg">
-        <Typography variant="h3">New Voting Round</Typography>
+        <Typography variant="h4">Vote information</Typography>
         <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={roundInfo}>
           {(helper) => (
             <>
@@ -45,11 +45,12 @@ export default function RoundInfo() {
               {helper.textareaField({
                 label: "Vote description",
                 field: "voteDescription",
+                maxLength: 200,
+                hint: "Max 200 characters",
               })}
               {helper.textField({
                 label: "Vote information URL",
                 field: "voteInformationUrl",
-
                 hint: "URL where voters can get more information about the vote",
               })}
               <div className="flex justify-between">
@@ -65,6 +66,7 @@ export default function RoundInfo() {
               {helper.documentField({
                 label: "Snapshot file",
                 field: "snapshotFile",
+                hint: "Upload snapshot .csv file",
               })}
               {helper.textField({
                 label: "Minimum number of votes (quorum)",
@@ -72,7 +74,7 @@ export default function RoundInfo() {
               })}
 
               <div className="text-right">
-                <SubmitButton className="mt-8">Next: Questions</SubmitButton>
+                <SubmitButton className="mt-8">Next</SubmitButton>
               </div>
             </>
           )}

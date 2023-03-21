@@ -31,9 +31,9 @@ export default function Questions() {
   useStepRedirect(VoteCreationSteps.Questions);
   return (
     <>
-      <Steps currentStep={VoteCreationSteps.Questions} />
+      <Steps activeStep={VoteCreationSteps.Questions} />
       <div className="mt-8 w-full max-w-md">
-        <Typography variant="h3">{voteTitle}</Typography>
+        <Typography variant="h3">Vote questions and answers</Typography>
         <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={questions}>
           {(helper) => (
             <>
@@ -51,11 +51,13 @@ export default function Questions() {
                 minimumItemCount: 2,
               })}
 
-              <div className="mt-8 flex gap-6 justify-end">
-                <Button variant="outlined" onClick={() => navigate(-1)}>
-                  Back
-                </Button>
-                <SubmitButton>Next: Review</SubmitButton>
+              <div className="!mt-12">
+                <div className="flex gap-6 justify-end">
+                  <Button variant="outlined" onClick={() => navigate(-1)}>
+                    Back
+                  </Button>
+                  <SubmitButton>Next</SubmitButton>
+                </div>
               </div>
             </>
           )}

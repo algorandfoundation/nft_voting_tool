@@ -1,16 +1,26 @@
-import { Step } from "./Step";
-import { VoteCreationSteps } from "./VoteCreationSteps";
+import { Step, StepLabel, Stepper, Typography } from "@mui/material";
 
 type StepsProps = {
-  currentStep: VoteCreationSteps;
+  activeStep: number;
 };
-export const Steps = ({ currentStep: currentStep }: StepsProps) => {
+
+const steps = ["Info", "Q&A", "Review", "Sign"];
+
+export const Steps = ({ activeStep }: StepsProps) => {
   return (
-    <div className="flex gap-16">
-      <Step step={VoteCreationSteps.RoundInfo} currentStep={currentStep} />
-      <Step step={VoteCreationSteps.Questions} currentStep={currentStep} />
-      <Step step={VoteCreationSteps.Review} currentStep={currentStep} />
-      <Step step={VoteCreationSteps.Sign} currentStep={currentStep} />
-    </div>
+    <>
+      <div>
+        <Typography variant="h3">New voting round</Typography>
+      </div>
+      <div className="max-w-2xl mt-10">
+        <Stepper sx={{ position: "relative", left: "calc(-10%)" }} alternativeLabel activeStep={activeStep}>
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </div>
+    </>
   );
 };

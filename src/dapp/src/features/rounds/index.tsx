@@ -14,9 +14,7 @@ const VotingRounds = () => {
   const { data, loading } = api.useVotingRounds();
   return (
     <div className="container">
-      <Typography className="mb-2" variant="h3">
-        My voting rounds
-      </Typography>
+      <Typography variant="h3">My voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
       ) : (

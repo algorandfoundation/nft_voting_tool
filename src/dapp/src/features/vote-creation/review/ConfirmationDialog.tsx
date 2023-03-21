@@ -13,10 +13,12 @@ export const ConfirmationDialog = ({ open, handleOpen, onConfirm }: Confirmation
       <div className="mt-6">It can take up to 30 seconds to create the voting round once you sign the transaction.</div>
     </DialogContent>
     <DialogActions>
-      <Button variant="text" color="secondary" onClick={handleOpen} className="mr-1">
+      <Button variant="outlined" onClick={handleOpen} className="mr-1">
         Cancel
       </Button>
-      <Button onClick={onConfirm}>Confirm</Button>
+      <Button variant="contained" onClick={onConfirm}>
+        Confirm
+      </Button>
     </DialogActions>
   </Dialog>
 );
