@@ -2,15 +2,17 @@ import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import fetch from 'node-fetch'
+import { singleton } from 'tsyringe'
 import { File, Web3Storage } from 'web3.storage'
-import { ObjectCache } from './cache'
-import { IPFS } from './ipfs'
+import { IIpfsService } from './ipfsService'
+import type { IObjectCacheService } from './objectCacheService'
 
-export class Web3StorageWithCache implements IPFS {
-  private cache: ObjectCache
+@singleton()
+export class Web3StorageWithCacheService implements IIpfsService {
+  private cache: IObjectCacheService
   private storage: Web3Storage
 
-  constructor(storage: Web3Storage, cache: ObjectCache) {
+  constructor(storage: Web3Storage, cache: IObjectCacheService) {
     this.storage = storage
     this.cache = cache
   }

@@ -12,6 +12,9 @@
     },
     {
       "path": "./src/algorand"
+    },
+    {
+      "path": "./src/voting-metadata-api"
     }
   ],
   "settings": {
