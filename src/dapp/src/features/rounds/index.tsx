@@ -5,8 +5,8 @@ import { VotingRoundTile } from "./VotingRoundTile";
 
 const VotingRoundTileLoading = () => (
   <>
-    <Skeleton className="!h-32" variant="rectangular" />
-    <Skeleton className="!h-32" variant="rectangular" />
+    <Skeleton className="h-32" variant="rectangular" />
+    <Skeleton className="h-32" variant="rectangular" />
   </>
 );
 
@@ -14,7 +14,7 @@ const VotingRounds = () => {
   const { data, loading } = api.useVotingRounds();
   return (
     <div className="container">
-      <Typography className="!mb-2" variant="h3">
+      <Typography className="mb-2" variant="h3">
         My voting rounds
       </Typography>
       {loading ? (
@@ -22,11 +22,11 @@ const VotingRounds = () => {
       ) : (
         <Typography variant="body1">Voting rounds created by wallet {data?.walletAddress}</Typography>
       )}
-      <Button href="/create" className="!my-8" variant="contained">
+      <Button href="/create" className="my-8" variant="contained">
         Create new voting round
       </Button>
 
-      <Typography className="!mb-3" variant="h4">
+      <Typography className="mb-3" variant="h4">
         Open voting rounds
       </Typography>
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
@@ -38,7 +38,7 @@ const VotingRounds = () => {
           data?.openRounds.map((round) => <VotingRoundTile round={round} />)
         )}
       </div>
-      <Typography className="!mt-8 !mb-3" variant="h4">
+      <Typography className="mt-8 mb-3" variant="h4">
         Closed voting rounds
       </Typography>
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">

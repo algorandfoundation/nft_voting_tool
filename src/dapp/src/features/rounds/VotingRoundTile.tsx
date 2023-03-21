@@ -12,10 +12,10 @@ export const VotingRoundTile = ({ round }: VotingRoundTileProps) => {
         <Typography variant="h6">{round.voteTitle}</Typography>
       </div>
       <div className="flex justify-between">
-        <Typography className="!text-xs" variant="body1">
+        <Typography className="text-xs" variant="body1">
           Vote start: {dayjs(round.start).format("LL")}
         </Typography>
-        <Typography className="!text-xs" variant="body1">
+        <Typography className="text-xs" variant="body1">
           Vote end: {dayjs(round.end).format("LL")}
         </Typography>
       </div>

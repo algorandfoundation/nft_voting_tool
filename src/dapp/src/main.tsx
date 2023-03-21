@@ -1,4 +1,5 @@
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { StyledEngineProvider } from "@mui/material/styles";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -12,6 +13,7 @@ import RoundInfo from "./features/vote-creation/RoundInfo";
 import CastVote from "./features/vote/cast";
 import "./main.css";
 import Root from "./root";
+import { theme } from "./theme";
 
 const router = createBrowserRouter([
   {
@@ -55,8 +57,12 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <CssBaseline />
-    <RecoilRoot>
-      <RouterProvider router={router} />
-    </RecoilRoot>
+    <StyledEngineProvider>
+      <ThemeProvider theme={theme}>
+        <RecoilRoot>
+          <RouterProvider router={router} />
+        </RecoilRoot>
+      </ThemeProvider>
+    </StyledEngineProvider>
   </React.StrictMode>
 );

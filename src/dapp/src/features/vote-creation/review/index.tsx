@@ -41,7 +41,7 @@ export default function Review() {
     <div className="max-w-3xl">
       <Typography variant="h3">{roundInfo.voteTitle}</Typography>
       <Typography>Review everything on this page carefully, as it cannot be changed once you create the voting round.</Typography>
-      <Typography variant="h4" className="!mt-6 !mb-2">
+      <Typography variant="h4" className="mt-6 mb-2">
         Vote set up
       </Typography>
       <div className="container grid grid-cols-8 gap-4">
@@ -71,7 +71,7 @@ export default function Review() {
           />
         </div>
       </div>
-      <Typography variant="h4" className="!mt-6 !mb-2">
+      <Typography variant="h4" className="mt-6 mb-2">
         Question or category
       </Typography>
       <div className="container grid grid-cols-8 gap-4 ">
