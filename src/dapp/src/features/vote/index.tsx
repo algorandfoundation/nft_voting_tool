@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../shared/api";
 import { getTimezone } from "../../shared/getTimezone";
-import { getVoteStarted } from "../../shared/vote";
+import { VotingRound } from "../../shared/types";
+import { getVoteEnded, getVoteStarted } from "../../shared/vote";
 import { getWalletAddresses } from "../../shared/wallet";
 import { LoadingDialog } from "../vote-creation/review/LoadingDialog";
 import { WalletVoteStatus } from "./WalletVoteStatus";
@@ -15,8 +16,9 @@ type SkeletonArrayProps = {
   count: number;
 };
 
-const getVotingStateDescription = (start: string) => {
-  if (dayjs(start) > dayjs()) return "Voting opens soon!";
+const getVotingStateDescription = (round: VotingRound) => {
+  if (getVoteEnded(round)) return "Voting round is closed!";
+  if (getVoteStarted(round)) return "Voting opens soon!";
   return "Voting round is open!";
 };
 
@@ -24,7 +26,7 @@ const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
   <Stack spacing={1}>
     {range(0, count + 1).map((ix) => (
       <Skeleton key={ix} className={className} variant="rectangular" />
-    ))}{" "}
+    ))}
   </Stack>
 );
 
@@ -34,6 +36,7 @@ function Vote() {
   const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
   const [vote, setVote] = useState<number | null>(null);
   const voteStarted = !data ? false : getVoteStarted(data);
+  const voteEnded = !data ? false : getVoteEnded(data);
 
   const handleSubmitVote = async () => {
     if (vote === null || !data) return;
@@ -71,6 +74,17 @@ function Vote() {
             <WalletVoteStatus round={data} />
           )}
 
+          {!loading && voteEnded && (
+            <div className="mt-5">
+              <Typography variant="h4">Vote results</Typography>
+              <Box className="flex h-56 w-56 items-center justify-center border-solid border-black border-y border-x ">
+                <div className="text-center">
+                  <Typography>Image of NFT with vote results. Link to NFT source</Typography>
+                </div>
+              </Box>
+            </div>
+          )}
+
           <div className="mt-7">
             {loading ? <Skeleton className="h-8 w-1/2" variant="text" /> : <Typography variant="h4">{data?.questionTitle}</Typography>}
 
@@ -94,7 +108,7 @@ function Vote() {
                       </Button>
                     ))}
                   </Stack>
-                  {voteStarted && (
+                  {!voteEnded && voteStarted && (
                     <Button disabled={vote === null} onClick={() => handleSubmitVote()} className="uppercase mt-4" variant="contained">
                       Submit vote
                     </Button>
@@ -107,10 +121,10 @@ function Vote() {
         <div>
           <Box className="bg-algorand-diamond rounded-xl p-4">
             <div className="text-center">
-              {loading ? (
+              {loading || !data ? (
                 <Skeleton variant="rectangular" className="h-5 w-3/4 mx-auto" />
               ) : (
-                <Typography variant="h5">{getVotingStateDescription(data?.start ?? "")}</Typography>
+                <Typography variant="h5">{getVotingStateDescription(data)}</Typography>
               )}
             </div>
             <Stack className="mt-3">
