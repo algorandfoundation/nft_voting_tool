@@ -80,7 +80,7 @@ jobs:
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: ""
+          WEB3_STORAGE_API_TOKEN: "Test"
         with:
           app-artifact-unzips: |
             dapp:dapp/dist
@@ -111,7 +111,7 @@ jobs:
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: ""
+          WEB3_STORAGE_API_TOKEN: "Test"
         with:
           app-artifact-unzips: |
             dapp:dapp/dist
