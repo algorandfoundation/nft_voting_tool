@@ -28,18 +28,18 @@ export interface DnsPropsWithCert extends BaseDnsProps {
 
 export type CertificateRequest =
   | {
-      /** Root certificate in hosted zone `domainName` */
-      isRoot: true
-      /** Generate cert as a wildcard cert */
-      isWildCard: boolean
-    }
+    /** Root certificate in hosted zone `domainName` */
+    isRoot: true
+    /** Generate cert as a wildcard cert */
+    isWildCard: boolean
+  }
   | {
-      isRoot?: false
-      /** Generate cert as a subdomain of `{subDomain}.domainName` */
-      subDomain: string
-      /** Generate cert as a wildcard cert */
-      isWildCard: boolean
-    }
+    isRoot?: false
+    /** Generate cert as a subdomain of `{subDomain}.domainName` */
+    subDomain: string
+    /** Generate cert as a wildcard cert */
+    isWildCard: boolean
+  }
 
 /** Generates Route53 hosted zone to house DNS and optionally creates SSL certificates with validation records in Route53, deploy this to us-east-1 if you want SSL that works with Cloudfront */
 export class DnsStack extends Stack {
@@ -98,24 +98,24 @@ export class DnsStack extends Stack {
    * @param domainName Optional domain name override; if unspecified then the domain name of the DNSStack will be used
    * @returns The props for the custom domain config
    */
-  public getDefaultCustomDomainProps(region: string, domainName?: string): CustomDomainConfigProps {
+  public getDefaultCustomDomainProps(region: string, domainName?: string, certificateRequest?: CertificateRequest): CustomDomainConfigProps {
     return this.hasCertificate
       ? ({
-          type: 'dns-stack',
-          hasSSL: true,
-          dnsStack: this,
-          certificateRequest: this.certificateRequests[0],
-          domainName: domainName ?? this.domainName,
-          region: region,
-        } as CustomDomainConfigViaDnsWithSSLStackProps)
+        type: 'dns-stack',
+        hasSSL: true,
+        dnsStack: this,
+        certificateRequest: certificateRequest ?? this.certificateRequests[0],
+        domainName: domainName ?? this.domainName,
+        region: region,
+      } as CustomDomainConfigViaDnsWithSSLStackProps)
       : ({
-          type: 'dns-stack',
-          hasSSL: false,
-          dnsStack: this,
-          domainName: domainName ?? this.domainName,
-          region: region,
-          dnsRecordType: !domainName || domainName === this.domainName ? 'ALIAS' : 'CNAME',
-        } as CustomDomainConfigViaDnsStackProps)
+        type: 'dns-stack',
+        hasSSL: false,
+        dnsStack: this,
+        domainName: domainName ?? this.domainName,
+        region: region,
+        dnsRecordType: !domainName || domainName === this.domainName ? 'ALIAS' : 'CNAME',
+      } as CustomDomainConfigViaDnsStackProps)
   }
 
   constructor(scope: Construct, id: string, props: DnsProps | DnsPropsWithCert) {
