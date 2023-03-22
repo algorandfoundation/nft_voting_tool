@@ -1,20 +1,16 @@
-import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Link, Skeleton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import range from "lodash.range";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../../shared/api";
+import api, { useConnectedWallet } from "../../shared/api";
 import { getTimezone } from "../../shared/getTimezone";
+import { SkeletonArray } from "../../shared/SkeletonArray";
 import { VotingRound } from "../../shared/types";
-import { getVoteEnded, getVoteStarted } from "../../shared/vote";
-import { getWalletAddresses } from "../../shared/wallet";
+import { getMyVote, getVoteEnded, getVoteStarted } from "../../shared/vote";
+import { getIsAllowedToVote, getWalletAddresses } from "../../shared/wallet";
 import { LoadingDialog } from "../vote-creation/review/LoadingDialog";
+import { VoteResults } from "./VoteResults";
+import { VoteSubmission } from "./VoteSubmission";
 import { WalletVoteStatus } from "./WalletVoteStatus";
-
-type SkeletonArrayProps = {
-  className: string;
-  count: number;
-};
 
 const getVotingStateDescription = (round: VotingRound) => {
   if (getVoteEnded(round)) return "Voting round is closed!";
@@ -22,26 +18,22 @@ const getVotingStateDescription = (round: VotingRound) => {
   return "Voting round is open!";
 };
 
-const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
-  <Stack spacing={1}>
-    {range(0, count + 1).map((ix) => (
-      <Skeleton key={ix} className={className} variant="rectangular" />
-    ))}
-  </Stack>
-);
-
 function Vote() {
   const { voteCid } = useParams();
   const { data, loading, refetch } = api.useVotingRound(voteCid!);
   const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
-  const [vote, setVote] = useState<number | null>(null);
+
   const voteStarted = !data ? false : getVoteStarted(data);
   const voteEnded = !data ? false : getVoteEnded(data);
+  const walletAddress = useConnectedWallet();
+  const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile));
+  const alreadyVoted = !data ? true : getMyVote(data, walletAddress);
+  const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted;
 
-  const handleSubmitVote = async () => {
-    if (vote === null || !data) return;
+  const handleSubmitVote = async (selectedOption: string) => {
+    if (!selectedOption) return;
     try {
-      const result = await submitVote({ selectedOption: data.answers[vote] });
+      const result = await submitVote({ selectedOption });
       await refetch(result.openRounds.find((p) => p.id === voteCid));
     } catch (e) {
       // TODO: handle failure
@@ -91,29 +83,12 @@ function Vote() {
             {loading ? <Skeleton variant="text" className="w-1/2" /> : <Typography>{data?.questionDescription}</Typography>}
 
             <div className="mt-4">
-              {loading ? (
+              {loading || !data ? (
                 <SkeletonArray className="max-w-xs" count={4} />
+              ) : canVote ? (
+                <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} />
               ) : (
-                <>
-                  <Stack spacing={1} className="max-w-xs">
-                    {data?.answers.map((answer, ix) => (
-                      <Button
-                        disabled={!voteStarted}
-                        variant={vote === ix ? "contained" : "outlined"}
-                        key={ix}
-                        onClick={() => setVote(ix)}
-                        className="w-full uppercase"
-                      >
-                        {answer}
-                      </Button>
-                    ))}
-                  </Stack>
-                  {!voteEnded && voteStarted && (
-                    <Button disabled={vote === null} onClick={() => handleSubmitVote()} className="uppercase mt-4" variant="contained">
-                      Submit vote
-                    </Button>
-                  )}
-                </>
+                <VoteResults round={data} />
               )}
             </div>
           </div>
