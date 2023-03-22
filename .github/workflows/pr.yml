@@ -4,10 +4,10 @@ on:
   pull_request:
     branches: [main]
     paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - '.vscode/**'
-      - '.idea/**'
+      - "docs/**"
+      - "**.md"
+      - ".vscode/**"
+      - ".idea/**"
 
 permissions:
   contents: read
@@ -20,10 +20,16 @@ jobs:
     with:
       working-directory: ./src/dapp
       run-build: true
+  build-api:
+    name: Api
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      node-version: 18.x
+      working-directory: ./src/voting-metadata-api
+      run-build: true
   build-infrastructure:
     name: Infrastructure
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./infrastructure
       run-build: true
-

@@ -21,6 +21,12 @@ jobs:
     with:
       working-directory: ./src/dapp
       compile-script: npm run typecheck
+  ci-api:
+    name: CI API
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/voting-metadata-api
+      compile-script: npm run typecheck
   ci-infrastructure:
     name: CI Infrastructure
     uses: ./.github/workflows/node-ci.yml
@@ -36,6 +42,14 @@ jobs:
       artifact-name: dapp
       static-site: true
       static-site-env-prefix: VITE
+    needs:
+      - ci-dapp
+  build-api:
+    name: Build API
+    uses: ./.github/workflows/node-build-zip.yml
+    with:
+      working-directory: ./src/voting-metadata-api
+      artifact-name: api
     needs:
       - ci-dapp
   build-infrastructure:
@@ -64,8 +78,12 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
+          API_BUILD_PATH: ${{ github.workspace }}/api/build
+          WEB3_STORAGE_API_TOKEN: ""
         with:
-          app-artifact-unzips: dapp:dapp/dist
+          app-artifact-unzips: |
+            dapp:dapp/dist
+            api:api/build
           aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEV_AWS_ACCESS_KEY_SECRET }}
           aws-region: us-west-2
@@ -91,8 +109,12 @@ jobs:
           AWS_DEFAULT_REGION: us-west-2
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
+          API_BUILD_PATH: ${{ github.workspace }}/api/build
+          WEB3_STORAGE_API_TOKEN: ""
         with:
-          app-artifact-unzips: dapp:dapp/dist
+          app-artifact-unzips: |
+            dapp:dapp/dist
+            api:api/build
           aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
           aws-region: us-west-2
