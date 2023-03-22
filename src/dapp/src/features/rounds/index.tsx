@@ -33,7 +33,7 @@ const VotingRounds = () => {
         ) : !data?.openRounds.length ? (
           <NoRounds label="open" />
         ) : (
-          data?.openRounds.map((round) => <VotingRoundTile round={round} />)
+          data?.openRounds.map((round) => <VotingRoundTile key={round.id} round={round} />)
         )}
       </div>
       <Typography className="mt-8 mb-3" variant="h4">
@@ -45,7 +45,7 @@ const VotingRounds = () => {
         ) : !data?.closedRounds.length ? (
           <NoRounds label="closed" />
         ) : (
-          data?.closedRounds.map((round) => <VotingRoundTile round={round} />)
+          data?.closedRounds.map((round) => <VotingRoundTile key={round.id} round={round} />)
         )}
       </div>
     </div>

@@ -29,7 +29,7 @@ export default function Review() {
         ...questions,
       });
       resetCreateState();
-      navigate("/rounds", {});
+      navigate("/", {});
     } catch (e) {
       // TODO: handle failure
     }
