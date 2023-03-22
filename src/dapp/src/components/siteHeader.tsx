@@ -45,7 +45,7 @@ export default function SiteHeader() {
   return (
     <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
       {({ open }) => (
-        <div>
+        <div className="container mx-auto">
           {/*Header Content*/}
           <div className="flex justify-between lg:justify-start px-6">
             {/*Site Icon + Name */}
@@ -99,7 +99,7 @@ export default function SiteHeader() {
           </div>
           {/*Mobile Site Links*/}
           <Disclosure.Panel className="lg:hidden">
-            <div className="pt-2">
+            <div className="ml-10 mb-5 pt-2">
               {navigation.map((link, index) => (
                 <Disclosure.Button as="span" key={index}>
                   <NavLink
