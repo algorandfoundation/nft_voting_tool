@@ -22,7 +22,14 @@ const dns = appDomainName
       domainName: appDomainName,
       generateCertificate: true,
       parameterRegions: [deployer.defaultRegion],
-      certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
+      certificateRequests: [
+        DnsStack.ROOT_CERT_REQUEST,
+        {
+          isWildCard: false,
+          subDomain: 'api',
+          isRoot: false
+        }
+      ],
     },
     'us-east-1',
   )
