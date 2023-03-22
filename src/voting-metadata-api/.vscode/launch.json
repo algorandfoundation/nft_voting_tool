@@ -4,7 +4,7 @@
       "type": "msedge",
       "request": "launch",
       "name": "Run (Edge)",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}",
       "presentation": {
         "hidden": false,
@@ -15,7 +15,7 @@
       "type": "chrome",
       "request": "launch",
       "name": "Run (Chrome)",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}",
       "presentation": {
         "hidden": false,
@@ -26,7 +26,7 @@
       "type": "firefox",
       "request": "launch",
       "name": "Run (Firefox)",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}",
       "presentation": {
         "hidden": false,
