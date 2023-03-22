@@ -1,4 +1,5 @@
 import { Button, Skeleton, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 import api from "../../shared/api";
 import { getWalletLabel } from "../../shared/wallet";
 import { NoRounds } from "./NoRounds";
@@ -20,7 +21,7 @@ const VotingRounds = () => {
         <Skeleton variant="text" />
       ) : !data?.myWalletAddress ? (
         <div className="my-8">
-          <Button variant="contained" href="/connect-wallet">
+          <Button variant="contained" component={Link} to="/connect-wallet">
             Connect wallet
           </Button>
         </div>
@@ -29,7 +30,7 @@ const VotingRounds = () => {
       )}
 
       {data?.myWalletAddress && (
-        <Button href="/create" className="my-8" variant="contained">
+        <Button component={Link} to="/create" className="my-8" variant="contained">
           Create new voting round
         </Button>
       )}
