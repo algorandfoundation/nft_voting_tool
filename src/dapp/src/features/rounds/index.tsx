@@ -18,17 +18,17 @@ const VotingRounds = () => {
       <Typography variant="h3">My voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
-      ) : !data?.walletAddress ? (
+      ) : !data?.myWalletAddress ? (
         <div className="my-8">
           <Button variant="contained" href="/connect-wallet">
             Connect wallet
           </Button>
         </div>
       ) : (
-        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(data?.walletAddress)}</Typography>
+        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(data?.myWalletAddress)}</Typography>
       )}
 
-      {data?.walletAddress && (
+      {data?.myWalletAddress && (
         <Button href="/create" className="my-8" variant="contained">
           Create new voting round
         </Button>

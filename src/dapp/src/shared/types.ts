@@ -12,10 +12,15 @@ export type RoundInfo = {
   voteTitle: string;
 };
 
+export type Vote = {
+  walletAddress: string;
+  selectedOption: string;
+};
+
 export type Question = {
   questionTitle: string;
   questionDescription?: string;
   answers: string[];
 };
 
-export type VotingRound = RoundInfo & Question & VoteId;
+export type VotingRound = RoundInfo & Question & VoteId & { votes: Vote[] };

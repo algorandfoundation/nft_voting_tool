@@ -17,6 +17,7 @@ module.exports = {
           "arctic-lime": "#DCFE54",
           "orange-coral": "#FF684E",
           warning: "#ffcbcb",
+          green: "#b4f5df",
         },
         grey: {
           dark: "#333333",

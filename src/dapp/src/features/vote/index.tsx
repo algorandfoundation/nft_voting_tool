@@ -5,7 +5,9 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../shared/api";
 import { getTimezone } from "../../shared/getTimezone";
+import { getVoteStarted } from "../../shared/vote";
 import { getWalletAddresses } from "../../shared/wallet";
+import { LoadingDialog } from "../vote-creation/review/LoadingDialog";
 import { WalletVoteStatus } from "./WalletVoteStatus";
 
 type SkeletonArrayProps = {
@@ -28,9 +30,20 @@ const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
 
 function Vote() {
   const { voteCid } = useParams();
-  const { data, loading } = api.useVotingRound(voteCid!);
+  const { data, loading, refetch } = api.useVotingRound(voteCid!);
+  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
   const [vote, setVote] = useState<number | null>(null);
+  const voteStarted = !data ? false : getVoteStarted(data);
 
+  const handleSubmitVote = async () => {
+    if (vote === null || !data) return;
+    try {
+      const result = await submitVote({ selectedOption: data.answers[vote] });
+      await refetch(result.openRounds.find((p) => p.id === voteCid));
+    } catch (e) {
+      // TODO: handle failure
+    }
+  };
   return (
     <div className="max-w-4xl">
       <div className="grid grid-cols-3 gap-4">
@@ -70,14 +83,22 @@ function Vote() {
                 <>
                   <Stack spacing={1} className="max-w-xs">
                     {data?.answers.map((answer, ix) => (
-                      <Button variant={vote === ix ? "contained" : "outlined"} key={ix} onClick={() => setVote(ix)} className="w-full">
+                      <Button
+                        disabled={!voteStarted}
+                        variant={vote === ix ? "contained" : "outlined"}
+                        key={ix}
+                        onClick={() => setVote(ix)}
+                        className="w-full uppercase"
+                      >
                         {answer}
                       </Button>
                     ))}
                   </Stack>
-                  <Button disabled={vote === null} className="uppercase mt-4" variant="contained">
-                    Submit vote
-                  </Button>
+                  {voteStarted && (
+                    <Button disabled={vote === null} onClick={() => handleSubmitVote()} className="uppercase mt-4" variant="contained">
+                      Submit vote
+                    </Button>
+                  )}
                 </>
               )}
             </div>
@@ -131,6 +152,7 @@ function Vote() {
           </Stack>
         </div>
       </div>
+      <LoadingDialog loading={submittingVote} title="Submitting vote" />
     </div>
   );
 }
