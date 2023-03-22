@@ -48,19 +48,15 @@ function Vote() {
           <Typography className="mt-5" variant="h4">
             How to vote
           </Typography>
-          {loading ? (
-            <Skeleton variant="text" className="w-1/2" />
-          ) : getWalletAddresses(data?.snapshotFile).length ? (
-            <Typography>
-              This voting round is restricted to wallets on the{" "}
-              <Link className="font-normal" href="/">
-                allow list
-              </Link>
-              .
-            </Typography>
-          ) : null}
 
-          {loading ? <Skeleton variant="rectangular" className="h-10" /> : <WalletVoteStatus />}
+          {loading || !data ? (
+            <Stack spacing={1}>
+              <Skeleton variant="text" className="w-1/2" />
+              <Skeleton variant="rectangular" className="h-10" />
+            </Stack>
+          ) : (
+            <WalletVoteStatus round={data} />
+          )}
 
           <div className="mt-7">
             {loading ? <Skeleton className="h-8 w-1/2" variant="text" /> : <Typography variant="h4">{data?.questionTitle}</Typography>}
