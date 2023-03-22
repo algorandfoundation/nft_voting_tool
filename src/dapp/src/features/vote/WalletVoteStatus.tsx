@@ -1,8 +1,8 @@
-import { Button, Link, Typography } from "@mui/material";
+import { Box, Button, Link, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useConnectedWallet } from "../../shared/api";
 import { VotingRound } from "../../shared/types";
-import { getWalletAddresses } from "../../shared/wallet";
+import { getIsAllowedToVote, getWalletAddresses } from "../../shared/wallet";
 
 type WalletVoteStatusProps = {
   round: VotingRound;
@@ -10,6 +10,7 @@ type WalletVoteStatusProps = {
 
 export const WalletVoteStatus = ({ round: { start, snapshotFile } }: WalletVoteStatusProps) => {
   const walletAddress = useConnectedWallet();
+  const allowedToVote = getIsAllowedToVote(walletAddress, getWalletAddresses(snapshotFile));
   return (
     <>
       {getWalletAddresses(snapshotFile).length ? (
@@ -24,9 +25,14 @@ export const WalletVoteStatus = ({ round: { start, snapshotFile } }: WalletVoteS
         </div>
       ) : null}
       {!walletAddress && (
-        <Button variant="contained" disabled={dayjs(start) > dayjs()}>
+        <Button href="/connect-wallet" variant="contained" disabled={dayjs(start) > dayjs()}>
           Connect wallet to vote
         </Button>
+      )}
+      {walletAddress && !allowedToVote && (
+        <Box className="bg-algorand-warning text-center p-3 rounded-xl">
+          <Typography className="font-semibold text-grey-dark">Your wallet is not on the allow list for this voting round</Typography>
+        </Box>
       )}
     </>
   );
