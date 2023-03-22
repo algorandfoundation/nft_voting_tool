@@ -12,6 +12,7 @@ import { Row } from "./Row";
 
 import dayjs from "dayjs";
 import { getTimezone } from "../../../shared/getTimezone";
+import { getWalletAddresses } from "../../../shared/wallet";
 import { Steps } from "../Steps";
 
 export default function Review() {
@@ -55,7 +56,7 @@ export default function Review() {
           <Row label="Timezone" value={getTimezone(dayjs(roundInfo.start))} />
           <Row
             label="Snapshot file"
-            value={roundInfo.snapshotFile ? `${roundInfo.snapshotFile.split("\n").length.toLocaleString()} wallets` : "-"}
+            value={roundInfo.snapshotFile ? `${getWalletAddresses(roundInfo.snapshotFile).length.toLocaleString()} wallets` : "-"}
           />
           {roundInfo.snapshotFile && (
             <div className="col-span-6 col-start-3 max-w-xs">
@@ -122,7 +123,11 @@ export default function Review() {
             createVotingRound();
           }}
         />
-        <LoadingDialog loading={creatingVotingRound} title="Creating voting round..." />
+        <LoadingDialog
+          loading={creatingVotingRound}
+          title="Creating voting round..."
+          note="It can take up to 30 seconds to create the voting round once you sign the transaction."
+        />
       </div>
     </>
   );

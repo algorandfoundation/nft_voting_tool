@@ -1,30 +1,44 @@
-import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Link, Skeleton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import range from "lodash.range";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../../shared/api";
+import api, { useConnectedWallet } from "../../shared/api";
 import { getTimezone } from "../../shared/getTimezone";
+import { SkeletonArray } from "../../shared/SkeletonArray";
+import { VotingRound } from "../../shared/types";
+import { getMyVote, getVoteEnded, getVoteStarted } from "../../shared/vote";
+import { getIsAllowedToVote, getWalletAddresses } from "../../shared/wallet";
+import { LoadingDialog } from "../vote-creation/review/LoadingDialog";
+import { VoteResults } from "./VoteResults";
+import { VoteSubmission } from "./VoteSubmission";
 import { WalletVoteStatus } from "./WalletVoteStatus";
 
-type SkeletonArrayProps = {
-  className: string;
-  count: number;
+const getVotingStateDescription = (round: VotingRound) => {
+  if (getVoteEnded(round)) return "Voting round is closed!";
+  if (!getVoteStarted(round)) return "Voting opens soon!";
+  return "Voting round is open!";
 };
-
-const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
-  <Stack spacing={1}>
-    {range(0, count + 1).map((ix) => (
-      <Skeleton key={ix} className={className} variant="rectangular" />
-    ))}{" "}
-  </Stack>
-);
 
 function Vote() {
   const { voteCid } = useParams();
-  const { data, loading } = api.useVotingRound(voteCid!);
-  const [vote, setVote] = useState<number | null>(null);
+  const { data, loading, refetch } = api.useVotingRound(voteCid!);
+  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
 
+  const voteStarted = !data ? false : getVoteStarted(data);
+  const voteEnded = !data ? false : getVoteEnded(data);
+  const walletAddress = useConnectedWallet();
+  const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile));
+  const alreadyVoted = !data ? true : getMyVote(data, walletAddress);
+  const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted;
+
+  const handleSubmitVote = async (selectedOption: string) => {
+    if (!selectedOption) return;
+    try {
+      const result = await submitVote({ selectedOption });
+      await refetch(result.openRounds.find((p) => p.id === voteCid));
+    } catch (e) {
+      // TODO: handle failure
+    }
+  };
   return (
     <div className="max-w-4xl">
       <div className="grid grid-cols-3 gap-4">
@@ -42,19 +56,26 @@ function Vote() {
           <Typography className="mt-5" variant="h4">
             How to vote
           </Typography>
-          {loading ? (
-            <Skeleton variant="text" className="w-1/2" />
-          ) : data?.snapshotFile?.split("\n").length ? (
-            <Typography>
-              This voting round is restricted to wallets on the{" "}
-              <Link className="font-normal" href="/">
-                allow list
-              </Link>
-              .
-            </Typography>
-          ) : null}
 
-          {loading ? <Skeleton variant="rectangular" className="h-10" /> : <WalletVoteStatus />}
+          {loading || !data ? (
+            <Stack spacing={1}>
+              <Skeleton variant="text" className="w-1/2" />
+              <Skeleton variant="rectangular" className="h-10" />
+            </Stack>
+          ) : (
+            <WalletVoteStatus round={data} />
+          )}
+
+          {!loading && voteEnded && (
+            <div className="mt-5">
+              <Typography variant="h4">Vote results</Typography>
+              <Box className="flex h-56 w-56 items-center justify-center border-solid border-black border-y border-x ">
+                <div className="text-center">
+                  <Typography>Image of NFT with vote results. Link to NFT source</Typography>
+                </div>
+              </Box>
+            </div>
+          )}
 
           <div className="mt-7">
             {loading ? <Skeleton className="h-8 w-1/2" variant="text" /> : <Typography variant="h4">{data?.questionTitle}</Typography>}
@@ -62,21 +83,12 @@ function Vote() {
             {loading ? <Skeleton variant="text" className="w-1/2" /> : <Typography>{data?.questionDescription}</Typography>}
 
             <div className="mt-4">
-              {loading ? (
+              {loading || !data ? (
                 <SkeletonArray className="max-w-xs" count={4} />
+              ) : canVote || !voteStarted ? (
+                <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} />
               ) : (
-                <>
-                  <Stack spacing={1} className="max-w-xs">
-                    {data?.answers.map((answer, ix) => (
-                      <Button variant={vote === ix ? "contained" : "outlined"} key={ix} onClick={() => setVote(ix)} className="w-full">
-                        {answer}
-                      </Button>
-                    ))}
-                  </Stack>
-                  <Button disabled={vote === null} className="uppercase mt-4" variant="contained">
-                    Submit vote
-                  </Button>
-                </>
+                <VoteResults round={data} />
               )}
             </div>
           </div>
@@ -84,19 +96,31 @@ function Vote() {
         <div>
           <Box className="bg-algorand-diamond rounded-xl p-4">
             <div className="text-center">
-              <Typography variant="h5">Voting round is open!</Typography>
+              {loading || !data ? (
+                <Skeleton variant="rectangular" className="h-5 w-3/4 mx-auto" />
+              ) : (
+                <Typography variant="h5">{getVotingStateDescription(data)}</Typography>
+              )}
             </div>
             <Stack className="mt-3">
               <Typography variant="h6">From</Typography>
-              <Typography>
-                {dayjs(data?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.start))}
-              </Typography>
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  {dayjs(data?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.start))}
+                </Typography>
+              )}
             </Stack>
             <Stack className="mt-3">
               <Typography variant="h6">To</Typography>
-              <Typography>
-                {dayjs(data?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.end))}
-              </Typography>
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  {dayjs(data?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.end))}
+                </Typography>
+              )}
             </Stack>
           </Box>
 
@@ -104,15 +128,20 @@ function Vote() {
             <Typography className="mt-5" variant="h5">
               Vote details
             </Typography>
-            <Typography>
-              Voting round created by <Link className="font-normal">NF Domain</Link>
-            </Typography>
-            <Link>Smart contract</Link>
-            <Link>Voting round details in IPFS</Link>
-            <Link>Allow list</Link>
+            {loading ? (
+              <Skeleton variant="text" />
+            ) : (
+              <Typography>
+                Voting round created by <Link className="font-normal">NF Domain</Link>
+              </Typography>
+            )}
+            {loading ? <Skeleton variant="text" /> : <Link>Smart contract</Link>}
+            {loading ? <Skeleton variant="text" /> : <Link>Voting round details in IPFS</Link>}
+            {loading ? <Skeleton variant="text" /> : getWalletAddresses(data?.snapshotFile).length ? <Link>Allow list</Link> : null}
           </Stack>
         </div>
       </div>
+      <LoadingDialog loading={submittingVote} title="Submitting vote" />
     </div>
   );
 }

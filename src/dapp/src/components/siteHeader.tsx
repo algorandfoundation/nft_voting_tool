@@ -3,6 +3,8 @@ import { Typography } from "@mui/material";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import algorandFoundationLogo from "../assets/algorand-foundation-logo.svg";
+import { useConnectedWallet } from "../shared/api";
+import { getWalletLabel } from "../shared/wallet";
 import { MenuIcon, XIcon } from "./icons";
 
 interface Link {
@@ -21,6 +23,7 @@ const createNavigation = () =>
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
   const classes = "no-underline text-black";
+
   return (
     <>
       {!props.link.href ? (
@@ -41,11 +44,12 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
 
 export default function SiteHeader() {
   const navigation = createNavigation();
-
+  const connectedWallet = useConnectedWallet();
+  const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : "Connect wallet";
   return (
     <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
       {({ open }) => (
-        <div>
+        <div className="container mx-auto">
           {/*Header Content*/}
           <div className="flex justify-between lg:justify-start px-6">
             {/*Site Icon + Name */}
@@ -81,6 +85,10 @@ export default function SiteHeader() {
                       return [pipe, navLink];
                     })}
                 </Popover.Group>
+
+                <Link className="justify-self-end inline-flex items-center no-underline text-black" to="/connect-wallet">
+                  <Typography>{walletLabel}</Typography>
+                </Link>
               </div>
 
               <span className="flex-auto block"></span>
@@ -99,8 +107,8 @@ export default function SiteHeader() {
           </div>
           {/*Mobile Site Links*/}
           <Disclosure.Panel className="lg:hidden">
-            <div className="pt-2">
-              {navigation.map((link, index) => (
+            <div className="ml-10 mb-5 pt-2">
+              {[...navigation, { name: walletLabel, href: "/connect-wallet" }].map((link, index) => (
                 <Disclosure.Button as="span" key={index}>
                   <NavLink
                     link={link}

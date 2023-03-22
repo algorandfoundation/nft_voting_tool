@@ -1,6 +1,7 @@
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button, IconButton, Typography } from "@mui/material";
 import { useCallback, useRef } from "react";
+import { getWalletAddresses } from "../../../wallet";
 
 export interface TextfileFieldProps {
   disabled?: boolean;
@@ -38,7 +39,7 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
             Upload
           </Button>
         )}
-        <Typography>{value ? `${value.split("\n").length} lines` : ""} </Typography>
+        <Typography>{value ? `${getWalletAddresses(value).length} lines` : ""} </Typography>
         {value && (
           <IconButton aria-label="delete" onClick={() => onChange("")}>
             <DeleteIcon />

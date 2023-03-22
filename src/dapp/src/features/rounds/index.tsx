@@ -1,5 +1,7 @@
 import { Button, Skeleton, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
 import api from "../../shared/api";
+import { getWalletLabel } from "../../shared/wallet";
 import { NoRounds } from "./NoRounds";
 import { VotingRoundTile } from "./VotingRoundTile";
 
@@ -17,12 +19,21 @@ const VotingRounds = () => {
       <Typography variant="h3">My voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
+      ) : !data?.myWalletAddress ? (
+        <div className="my-8">
+          <Button variant="contained" component={Link} to="/connect-wallet">
+            Connect wallet
+          </Button>
+        </div>
       ) : (
-        <Typography variant="body1">Voting rounds created by wallet {data?.walletAddress}</Typography>
+        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(data?.myWalletAddress)}</Typography>
       )}
-      <Button href="/create" className="my-8" variant="contained">
-        Create new voting round
-      </Button>
+
+      {data?.myWalletAddress && (
+        <Button component={Link} to="/create" className="my-8" variant="contained">
+          Create new voting round
+        </Button>
+      )}
 
       <Typography className="mb-3" variant="h4">
         Open voting rounds

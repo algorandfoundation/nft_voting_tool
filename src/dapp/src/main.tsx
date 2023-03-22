@@ -10,6 +10,7 @@ import Vote from "./features/vote";
 import Questions from "./features/vote-creation/Questions";
 import Review from "./features/vote-creation/review";
 import RoundInfo from "./features/vote-creation/RoundInfo";
+import ConnectWallet from "./features/wallet/ConnectWallet";
 import "./main.css";
 import Root from "./root";
 import { theme } from "./theme";
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: "vote/:voteCid",
         element: <Vote />,
+      },
+      {
+        path: "connect-wallet",
+        element: <ConnectWallet />,
       },
     ],
   },

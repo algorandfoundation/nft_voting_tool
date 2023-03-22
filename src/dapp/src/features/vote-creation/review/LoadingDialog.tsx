@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogTitle, LinearProgress } from "@mui/materia
 type LoadingDialogProps = {
   loading: boolean;
   title: string;
+  note?: string;
 };
-export const LoadingDialog = ({ loading, title }: LoadingDialogProps) => (
+export const LoadingDialog = ({ loading, title, note }: LoadingDialogProps) => (
   <Dialog open={loading}>
     <DialogTitle>{title}</DialogTitle>
     <DialogContent>
       <LinearProgress />
-      <div className="mt-6">It can take up to 30 seconds to create the voting round once you sign the transaction.</div>
+      <div className="mt-6">{note}</div>
     </DialogContent>
   </Dialog>
 );
