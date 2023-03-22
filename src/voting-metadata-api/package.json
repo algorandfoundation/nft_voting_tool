@@ -4,10 +4,10 @@
   "description": "Caddi Poller",
   "main": "src/lambda-handler.js",
   "author": "MakerX",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
-    "dev": "nodemon -r dotenv/config src/server.ts",
-    "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production && rimraf package.json package-lock.json index.js",
+    "dev": "ts-node-dev --transpile-only --watch .env -r dotenv/config src/server.ts",
+    "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production",
     "routes": "tsoa routes",
     "clean": "rimraf build",
     "typecheck": "tsc --noEmit"
@@ -38,13 +38,11 @@
     "@types/sharp": "^0.31.1",
     "@types/superagent": "^4.1.16",
     "@types/uuid": "^9.0.1",
-    "concurrently": "^7.6.0",
     "copyfiles": "^2.4.1",
     "dotenv": "^16.0.3",
-    "nodemon": "^2.0.21",
     "prettier": "^2.8.4",
     "rimraf": "^4.4.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "ts-node-dev": "^2.0.0"
   }
 }
