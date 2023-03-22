@@ -14,7 +14,7 @@ import { WalletVoteStatus } from "./WalletVoteStatus";
 
 const getVotingStateDescription = (round: VotingRound) => {
   if (getVoteEnded(round)) return "Voting round is closed!";
-  if (getVoteStarted(round)) return "Voting opens soon!";
+  if (!getVoteStarted(round)) return "Voting opens soon!";
   return "Voting round is open!";
 };
 
@@ -85,7 +85,7 @@ function Vote() {
             <div className="mt-4">
               {loading || !data ? (
                 <SkeletonArray className="max-w-xs" count={4} />
-              ) : canVote ? (
+              ) : canVote || !voteStarted ? (
                 <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} />
               ) : (
                 <VoteResults round={data} />
