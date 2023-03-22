@@ -2,12 +2,12 @@
   "name": "@makerx/caddi-poller",
   "version": "1.0.0",
   "description": "Caddi Poller",
-  "main": "index.js",
+  "main": "src/lambda-handler.js",
   "author": "MakerX",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec-and-routes\"",
-    "build": "tsoa spec-and-routes && tsc",
+    "dev": "nodemon -r dotenv/config src/server.ts",
+    "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production && rimraf package.json package-lock.json index.js",
     "routes": "tsoa routes",
     "clean": "rimraf build",
     "typecheck": "tsc --noEmit"

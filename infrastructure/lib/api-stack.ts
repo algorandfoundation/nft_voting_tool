@@ -117,7 +117,7 @@ export class ApiStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       code: lambda.Code.fromAsset(appBuildPath),
       tracing: lambda.Tracing.ACTIVE,
-      handler: 'lambda-handler.handler',
+      handler: 'src/lambda-handler.handler',
       timeout: props.timeout,
       memorySize: props.memorySize,
       retryAttempts: 0,

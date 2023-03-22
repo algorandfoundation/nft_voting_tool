@@ -34,14 +34,20 @@
       }
     },
     {
-      "name": "Run dApp",
+      "name": "Run api",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node_modules/**"
+      ],
       "presentation": {
         "hidden": false,
         "group": "1. Run Project",

@@ -1,7 +1,7 @@
 import { SecretsManager } from 'aws-sdk'
 import serverless from 'serverless-http'
-import { app } from './src/app'
-import { AwsSecretsService } from './src/services/awsSecretsService'
+import { app } from './app'
+import { AwsSecretsService } from './services/awsSecretsService'
 
 
 const init = async () => {
