@@ -5,11 +5,17 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../shared/api";
 import { getTimezone } from "../../shared/getTimezone";
+import { getWalletAddresses } from "../../shared/wallet";
 import { WalletVoteStatus } from "./WalletVoteStatus";
 
 type SkeletonArrayProps = {
   className: string;
   count: number;
+};
+
+const getVotingStateDescription = (start: string) => {
+  if (dayjs(start) > dayjs()) return "Voting opens soon!";
+  return "Voting round is open!";
 };
 
 const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
@@ -44,7 +50,7 @@ function Vote() {
           </Typography>
           {loading ? (
             <Skeleton variant="text" className="w-1/2" />
-          ) : data?.snapshotFile?.split("\n").length ? (
+          ) : getWalletAddresses(data?.snapshotFile).length ? (
             <Typography>
               This voting round is restricted to wallets on the{" "}
               <Link className="font-normal" href="/">
@@ -84,19 +90,31 @@ function Vote() {
         <div>
           <Box className="bg-algorand-diamond rounded-xl p-4">
             <div className="text-center">
-              <Typography variant="h5">Voting round is open!</Typography>
+              {loading ? (
+                <Skeleton variant="rectangular" className="h-5 w-3/4 mx-auto" />
+              ) : (
+                <Typography variant="h5">{getVotingStateDescription(data?.start ?? "")}</Typography>
+              )}
             </div>
             <Stack className="mt-3">
               <Typography variant="h6">From</Typography>
-              <Typography>
-                {dayjs(data?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.start))}
-              </Typography>
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  {dayjs(data?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.start))}
+                </Typography>
+              )}
             </Stack>
             <Stack className="mt-3">
               <Typography variant="h6">To</Typography>
-              <Typography>
-                {dayjs(data?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.end))}
-              </Typography>
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  {dayjs(data?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.end))}
+                </Typography>
+              )}
             </Stack>
           </Box>
 
@@ -104,12 +122,16 @@ function Vote() {
             <Typography className="mt-5" variant="h5">
               Vote details
             </Typography>
-            <Typography>
-              Voting round created by <Link className="font-normal">NF Domain</Link>
-            </Typography>
-            <Link>Smart contract</Link>
-            <Link>Voting round details in IPFS</Link>
-            <Link>Allow list</Link>
+            {loading ? (
+              <Skeleton variant="text" />
+            ) : (
+              <Typography>
+                Voting round created by <Link className="font-normal">NF Domain</Link>
+              </Typography>
+            )}
+            {loading ? <Skeleton variant="text" /> : <Link>Smart contract</Link>}
+            {loading ? <Skeleton variant="text" /> : <Link>Voting round details in IPFS</Link>}
+            {loading ? <Skeleton variant="text" /> : getWalletAddresses(data?.snapshotFile).length ? <Link>Allow list</Link> : null}
           </Stack>
         </div>
       </div>

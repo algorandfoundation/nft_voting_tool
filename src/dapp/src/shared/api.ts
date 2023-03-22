@@ -16,7 +16,7 @@ type VotingRoundsState = {
 const votingRoundsAtom = atom<VotingRoundsState>({
   key: "votingRoundsState",
   default: {
-    walletAddress: `ZS9T3...WD04E`,
+    walletAddress: "",
     openRounds: [
       {
         id: "b34fb9cb-7e69-4ac6-a6cb-976edf1fd8d8",
@@ -26,6 +26,18 @@ const votingRoundsAtom = atom<VotingRoundsState>({
         voteInformationUrl: "https://www.algorand.com",
         questionDescription: "Select the best candidate!",
         end: "2023-04-21T00:00:00.000Z",
+        questionTitle: "Who should be on the council?",
+        answers: ["Sammy", "Charlotte", "Roman", "Maxine"],
+        snapshotFile: "wallet-one\nwallet-two\nwallet-three",
+      },
+      {
+        id: "222fb9cb-7e69-4ac6-a6cb-976edf1fd8d8",
+        voteTitle: "Future vote",
+        voteDescription: "This is the vote description",
+        start: "2024-03-01T00:00:00.000Z",
+        voteInformationUrl: "https://www.algorand.com",
+        questionDescription: "Select the best candidate!",
+        end: "2024-04-21T00:00:00.000Z",
         questionTitle: "Who should be on the council?",
         answers: ["Sammy", "Charlotte", "Roman", "Maxine"],
         snapshotFile: "wallet-one\nwallet-two\nwallet-three",
@@ -55,6 +67,8 @@ const votingRoundsAtom = atom<VotingRoundsState>({
     ],
   },
 });
+
+export const useConnectedWallet = () => useRecoilValue(votingRoundsAtom).walletAddress;
 
 const useMockGetter = <T>(payload: T) => {
   const [loading, setLoading] = useState(true);
@@ -89,6 +103,15 @@ const useMockSetter = <T>(action: (payload: T) => void, extraDelayMs = 0) => {
 };
 
 const api = {
+  useConnectWallet: () => {
+    const setState = useSetRecoilState(votingRoundsAtom);
+    return useMockSetter((address: string) => {
+      setState((state) => ({
+        ...state,
+        walletAddress: address,
+      }));
+    }, 2000);
+  },
   useVotingRounds: () => {
     const data = useRecoilValue(votingRoundsAtom);
     return useMockGetter(data);
