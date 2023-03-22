@@ -51,7 +51,7 @@ jobs:
       working-directory: ./src/voting-metadata-api
       artifact-name: api
     needs:
-      - ci-dapp
+      - ci-api
   build-infrastructure:
     name: Build Infrastructure
     uses: ./.github/workflows/node-build-zip.yml
@@ -69,6 +69,7 @@ jobs:
     needs:
       - build-dapp
       - build-infrastructure
+      - build-api
     steps:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
