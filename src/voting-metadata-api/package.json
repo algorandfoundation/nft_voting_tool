@@ -10,7 +10,7 @@
     "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production",
     "routes": "tsoa routes",
     "clean": "rimraf build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsoa routes && tsc --noEmit"
   },
   "dependencies": {
     "@ipld/dag-pb": "^4.0.2",
