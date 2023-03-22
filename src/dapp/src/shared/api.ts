@@ -57,6 +57,7 @@ const votingRoundsAtom = atom<AppState>({
         voteDescription: "This is the vote description",
         voteInformationUrl: "https://www.algorand.com",
         votes: [],
+        snapshotFile: "wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I",
       },
       {
         id: "4727d3e7-6cfb-4530-a4c9-980c0a3ba90f",
