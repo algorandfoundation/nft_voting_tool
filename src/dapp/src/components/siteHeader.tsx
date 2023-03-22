@@ -16,7 +16,6 @@ interface Link {
 const createNavigation = () =>
   [
     { name: "Home", href: "/" },
-    { name: "Voting Rounds", href: "/rounds" },
     { name: "Create", href: "/create" },
   ] as Link[];
 

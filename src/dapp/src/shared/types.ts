@@ -1,3 +1,7 @@
+export type VoteId = {
+  id: string;
+};
+
 export type RoundInfo = {
   end: string;
   minimumVotes?: number | undefined;
@@ -14,4 +18,4 @@ export type Question = {
   answers: string[];
 };
 
-export type VotingRound = RoundInfo & Question;
+export type VotingRound = RoundInfo & Question & VoteId;

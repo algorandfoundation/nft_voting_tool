@@ -12,6 +12,7 @@ module.exports = {
         algorand: {
           teal: "#006883",
           "sky-teal": "#31D8EE",
+          diamond: "#c2f3fa",
           coal: "#201F21",
           "arctic-lime": "#DCFE54",
           "orange-coral": "#FF684E",

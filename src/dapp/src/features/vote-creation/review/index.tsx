@@ -1,7 +1,5 @@
 import { Alert, Button, Link, Stack, TextField, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import localizedFormat from "dayjs/plugin/localizedFormat";
-import timezone from "dayjs/plugin/timezone";
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../shared/api";
@@ -11,11 +9,11 @@ import { VoteCreationSteps } from "../VoteCreationSteps";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { LoadingDialog } from "./LoadingDialog";
 import { Row } from "./Row";
-dayjs.extend(localizedFormat);
-dayjs.extend(timezone);
+
+import dayjs from "dayjs";
+import { getTimezone } from "../../../shared/getTimezone";
 
 export default function Review() {
-  const utcOffset = dayjs().utcOffset() / 60;
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen);
   const roundInfo = useRoundInfo();
@@ -51,7 +49,7 @@ export default function Review() {
         <Row label="Vote information" value={roundInfo.voteInformationUrl} />
         <Row label="Start date" value={dayjs(roundInfo.start).format("LLL")} />
         <Row label="End date" value={dayjs(roundInfo.end).format("LLL")} />
-        <Row label="Timezone" value={`${dayjs.tz.guess()} (UTC ${utcOffset >= 0 ? "+" : ""}${utcOffset})`} />
+        <Row label="Timezone" value={getTimezone(dayjs(roundInfo.start))} />
         <Row
           label="Snapshot file"
           value={roundInfo.snapshotFile ? `${roundInfo.snapshotFile.split("\n").length.toLocaleString()} wallets` : "-"}

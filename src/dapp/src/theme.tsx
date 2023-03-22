@@ -41,6 +41,12 @@ export const theme = createTheme({
       fontWeight: "bold",
       marginBottom: 12,
     },
+    h5: {
+      fontSize: 20,
+    },
+    h6: {
+      fontSize: 16,
+    },
   },
   components: {
     MuiLink: {
@@ -55,6 +61,13 @@ export const theme = createTheme({
         root: {
           textTransform: "none",
           minWidth: 128,
+        },
+      },
+    },
+    MuiSkeleton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
         },
       },
     },
