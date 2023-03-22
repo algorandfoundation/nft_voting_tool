@@ -10,7 +10,7 @@ const init = async () => {
     .map(async (key) => {
       console.log(`Fetching secret with a key : ${key}`)
       let arn = process.env[key] as string
-      var secretsClient = new SecretsManager({
+      const secretsClient = new SecretsManager({
         region: process.env.AWS_REGION,
       })
       const secretsService = new AwsSecretsService(secretsClient)
