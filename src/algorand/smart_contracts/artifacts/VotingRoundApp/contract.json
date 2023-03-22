@@ -30,21 +30,7 @@
             }
         },
         {
-            "name": "metadata_ipfs_cid",
-            "args": [],
-            "returns": {
-                "type": "string"
-            }
-        },
-        {
-            "name": "is_voting_open",
-            "args": [],
-            "returns": {
-                "type": "uint64"
-            }
-        },
-        {
-            "name": "is_allowed_to_vote",
+            "name": "get_preconditions",
             "args": [
                 {
                     "type": "byte[]",
@@ -52,14 +38,7 @@
                 }
             ],
             "returns": {
-                "type": "uint64"
-            }
-        },
-        {
-            "name": "has_already_voted",
-            "args": [],
-            "returns": {
-                "type": "uint64"
+                "type": "(uint64,uint64,uint64,uint64)"
             }
         },
         {
