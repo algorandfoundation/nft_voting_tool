@@ -32,19 +32,25 @@ const votingRoundsAtom = atom<VotingRoundsState>({
       },
     ],
     closedRounds: [
-      // @ts-expect-error partial mock
       {
         id: "129c3c52-1961-4e42-b88b-2a42cc5b50ca",
-        voteTitle: "Title of voting round 2",
+        voteTitle: "Another Round",
         start: "2023-02-26T00:00:00.000Z",
         end: "2023-03-06T00:00:00.000Z",
+        answers: ["Yes", "No"],
+        questionTitle: "Should we do this?",
+        voteDescription: "This is the vote description",
+        voteInformationUrl: "https://www.algorand.com",
       },
-      // @ts-expect-error partial mock
       {
         id: "4727d3e7-6cfb-4530-a4c9-980c0a3ba90f",
-        voteTitle: "Title of voting round 1",
+        voteTitle: "An earlier vote",
         start: "2023-02-18T00:00:00.000Z",
         end: "2023-02-23T00:00:00.000Z",
+        answers: ["Yes", "No", "Maybe"],
+        questionTitle: "Will you answer Yes, No or Maybe?",
+        voteDescription: "This is the vote description",
+        voteInformationUrl: "https://www.algorand.com",
       },
     ],
   },
