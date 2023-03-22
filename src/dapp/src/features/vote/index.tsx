@@ -1,25 +1,120 @@
-import clsx from "clsx";
-import { Link } from "react-router-dom";
+import { Box, Button, Link, Skeleton, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import range from "lodash.range";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import api from "../../shared/api";
+import { getTimezone } from "../../shared/getTimezone";
+import { WalletVoteStatus } from "./WalletVoteStatus";
 
-const polygonClipPath = "polygon(calc(2rem) 0, 100% 0, 100% calc(100% - 2rem), calc(100% - 2rem) 100%, 0 100%, 0 calc(2rem))";
+type SkeletonArrayProps = {
+  className: string;
+  count: number;
+};
 
-function HomePage() {
-  const style = {
-    clipPath: polygonClipPath,
-  };
+const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
+  <Stack spacing={1}>
+    {range(0, count + 1).map((ix) => (
+      <Skeleton key={ix} className={className} variant="rectangular" />
+    ))}{" "}
+  </Stack>
+);
+
+function Vote() {
+  const { voteCid } = useParams();
+  const { data, loading } = api.useVotingRound(voteCid!);
+  const [vote, setVote] = useState<number | null>(null);
+
   return (
-    <div className="bg-algorand-coal p-[2px] max-w-screen-xl mx-auto" style={style}>
-      <div className={clsx("bg-white", "py-8", "px-4", "min-h-full", "min-w-full", "flex", "justify-between")} style={style}>
-        <h3 className="font-bold my-auto flex-3 pl-8">Algorand council&nbsp;-&nbsp;Open until 21st March</h3>
-        <Link
-          className="shadow button bg-algorand-arctic-lime hover:bg-algorand-orange-coral focus:shadow-outline focus:outline-none hover:text-white font-bold pt-3 px-4 rounded-full"
-          to="/cast/algo-council"
-        >
-          Cast my vote
-        </Link>
+    <div className="max-w-4xl">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2">
+          {loading ? <Skeleton className="h-12 w-1/2" variant="text" /> : <Typography variant="h3">{data?.voteTitle}</Typography>}
+          {loading ? <Skeleton variant="text" /> : <Typography>{data?.voteDescription}</Typography>}
+
+          <div className="mt-3">
+            {loading ? (
+              <Skeleton variant="text" className="w-56" />
+            ) : (
+              <Link href={data?.voteInformationUrl ?? ""}>Learn about the vote and candidates</Link>
+            )}
+          </div>
+          <Typography className="mt-5" variant="h4">
+            How to vote
+          </Typography>
+          {loading ? (
+            <Skeleton variant="text" className="w-1/2" />
+          ) : data?.snapshotFile?.split("\n").length ? (
+            <Typography>
+              This voting round is restricted to wallets on the{" "}
+              <Link className="font-normal" href="/">
+                allow list
+              </Link>
+              .
+            </Typography>
+          ) : null}
+
+          {loading ? <Skeleton variant="rectangular" className="h-10" /> : <WalletVoteStatus />}
+
+          <div className="mt-7">
+            {loading ? <Skeleton className="h-8 w-1/2" variant="text" /> : <Typography variant="h4">{data?.questionTitle}</Typography>}
+
+            {loading ? <Skeleton variant="text" className="w-1/2" /> : <Typography>{data?.questionDescription}</Typography>}
+
+            <div className="mt-4">
+              {loading ? (
+                <SkeletonArray className="max-w-xs" count={4} />
+              ) : (
+                <>
+                  <Stack spacing={1} className="max-w-xs">
+                    {data?.answers.map((answer, ix) => (
+                      <Button variant={vote === ix ? "contained" : "outlined"} key={ix} onClick={() => setVote(ix)} className="w-full">
+                        {answer}
+                      </Button>
+                    ))}
+                  </Stack>
+                  <Button disabled={vote === null} className="uppercase mt-4" variant="contained">
+                    Submit vote
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <div>
+          <Box className="bg-algorand-diamond rounded-xl p-4">
+            <div className="text-center">
+              <Typography variant="h5">Voting round is open!</Typography>
+            </div>
+            <Stack className="mt-3">
+              <Typography variant="h6">From</Typography>
+              <Typography>
+                {dayjs(data?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.start))}
+              </Typography>
+            </Stack>
+            <Stack className="mt-3">
+              <Typography variant="h6">To</Typography>
+              <Typography>
+                {dayjs(data?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(data?.end))}
+              </Typography>
+            </Stack>
+          </Box>
+
+          <Stack spacing={1}>
+            <Typography className="mt-5" variant="h5">
+              Vote details
+            </Typography>
+            <Typography>
+              Voting round created by <Link className="font-normal">NF Domain</Link>
+            </Typography>
+            <Link>Smart contract</Link>
+            <Link>Voting round details in IPFS</Link>
+            <Link>Allow list</Link>
+          </Stack>
+        </div>
       </div>
     </div>
   );
 }
 
-export default HomePage;
+export default Vote;

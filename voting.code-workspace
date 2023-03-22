@@ -17,7 +17,7 @@
   "settings": {
     "files.exclude": {
       "infrastructure/": true,
-      "src/": true
+      "/src/": true
     },
     "vite.port": 5173,
     "dotenv.enableAutocloaking": false,

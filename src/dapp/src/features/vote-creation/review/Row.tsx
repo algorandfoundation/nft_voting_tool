@@ -1,8 +1,9 @@
 import { Typography } from "@mui/material";
+import { ReactNode } from "react";
 
 type RowProp = {
   label: string;
-  value: string;
+  value: string | ReactNode;
 };
 export const Row = ({ label, value }: RowProp) => (
   <>
@@ -11,8 +12,6 @@ export const Row = ({ label, value }: RowProp) => (
         {label}
       </Typography>
     </div>
-    <div className="col-span-6">
-      <Typography className="m-0">{value}</Typography>
-    </div>
+    <div className="col-span-6">{typeof value === "string" ? <Typography className="m-0">{value}</Typography> : <>{value}</>}</div>
   </>
 );

@@ -17,17 +17,15 @@ export default function Root() {
   });
 
   return (
-    <>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <WalletProvider value={walletProviders.walletProviders}>
-          <SiteHeader />
-          <div className="min-h-screen py-8 px-8">
-            <Outlet />
-          </div>
-          <SiteFooter />
-          <ScrollToTop />
-        </WalletProvider>
-      </LocalizationProvider>
-    </>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <WalletProvider value={walletProviders.walletProviders}>
+        <SiteHeader />
+        <div className="min-h-screen py-8 px-8">
+          <Outlet />
+        </div>
+        <SiteFooter />
+        <ScrollToTop />
+      </WalletProvider>
+    </LocalizationProvider>
   );
 }

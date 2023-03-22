@@ -10,12 +10,14 @@ export interface TextfileFormItemProps<TSchema extends Record<string, unknown>>
   className?: string;
   label: string;
   field: FieldPath<TSchema>;
+  hint?: string;
 }
 
 export function TextfileFormItem<TSchema extends Record<string, unknown>>({
   className,
   label,
   field,
+  hint,
   ...fieldProps
 }: TextfileFormItemProps<TSchema>) {
   const { setValue, setError, clearErrors, getValues } = useFormContext<TSchema>();
@@ -33,7 +35,7 @@ export function TextfileFormItem<TSchema extends Record<string, unknown>>({
   );
 
   return (
-    <FormItem label={label} field={field}>
+    <FormItem label={label} field={field} hint={hint}>
       <TextfileField value={getValues(field) as string} onChange={onChange} {...fieldProps} />
     </FormItem>
   );

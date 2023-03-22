@@ -1,4 +1,5 @@
 import { Disclosure, Popover } from "@headlessui/react";
+import { Typography } from "@mui/material";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import algorandFoundationLogo from "../assets/algorand-foundation-logo.svg";
@@ -15,23 +16,23 @@ interface Link {
 const createNavigation = () =>
   [
     { name: "Home", href: "/" },
-    { name: "Voting Rounds", href: "/rounds" },
     { name: "Create", href: "/create" },
   ] as Link[];
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
+  const classes = "no-underline text-black";
   return (
     <>
       {!props.link.href ? (
         <></>
       ) : props.link.href.match(/^https?:\/\//) ? (
-        <a href={props.link.href} className={props.defaultClasses} target={props.link.target}>
-          {props.link.name}
+        <a href={props.link.href} className={clsx(props.defaultClasses, classes)} target={props.link.target}>
+          <Typography>{props.link.name}</Typography>
         </a>
       ) : (
-        <Link to={props.link.href} className={props.defaultClasses}>
+        <Link to={props.link.href} className={clsx(props.defaultClasses, classes)}>
           {props.link.logo && <img src={props.link.logo} height="24px" width="24px" className="mr-1 inline-block" />}
-          {props.displayName ?? props.link.name}
+          <Typography className="font-bold">{props.displayName ?? props.link.name}</Typography>
         </Link>
       )}
     </>
@@ -42,13 +43,13 @@ export default function SiteHeader() {
   const navigation = createNavigation();
 
   return (
-    <Disclosure as="nav" className="border-b border-solid border-grey-light shadow-sm shadow-grey-light">
+    <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
       {({ open }) => (
         <div>
           {/*Header Content*/}
           <div className="flex justify-between lg:justify-start px-6">
             {/*Site Icon + Name */}
-            <div className="py-4 lg:border-r-[0.5px] lg:border-black lg:border-solid pr-6">
+            <div className="py-4 border-0 lg:border-r-[0.5px] lg:border-black lg:border-solid pr-6">
               <Link to="/" className="my-auto cursor-pointer">
                 <div className={clsx("flex")}>
                   <img className="h-[73px] w-auto my-auto" src={algorandFoundationLogo} alt="Algorand Foundation logo" />
@@ -68,7 +69,7 @@ export default function SiteHeader() {
                           key={index}
                           link={link}
                           defaultClasses="inline-flex items-center font-[600] text-l"
-                          currentClasses="inline-flex items-center font-[600] text-l underline decoration-orange-600 underline-offset-[6px]"
+                          currentClasses="inline-flex items-center font-[600] text-l decoration-orange-600 underline-offset-[6px]"
                         />
                       );
                       const pipe = (
@@ -85,7 +86,7 @@ export default function SiteHeader() {
               <span className="flex-auto block"></span>
               {/* Mobile Menu Open/Close */}
               <div className="lg:hidden -mr-2 flex items-center">
-                <Disclosure.Button className="p-2">
+                <Disclosure.Button className="p-2 border-none bg-white cursor-pointer">
                   <span className="sr-only">Open main menu</span>
                   {open ? (
                     <XIcon className="block h-6 w-6" aria-hidden="true" />

@@ -3,13 +3,18 @@ import { Controller, useFormContext } from "react-hook-form";
 import type { FormItemProps } from "../form-item/FormItem";
 import { FormItem } from "../form-item/FormItem";
 
-export type TextareaFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children">;
+export type TextareaFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children"> & {
+  maxLength?: number;
+  hint?: string;
+};
 
 export function TextareaFormItem<TSchema extends Record<string, any> = Record<string, any>>({
   field,
   disabled,
   label,
   className,
+  hint,
+  maxLength,
   ...textAreaProps
 }: TextareaFormItemProps<TSchema>) {
   const {
@@ -18,13 +23,16 @@ export function TextareaFormItem<TSchema extends Record<string, any> = Record<st
   } = useFormContext();
   const error = errors[field];
   return (
-    <FormItem field={field} label={label} disabled={disabled} className={className}>
+    <FormItem field={field} label={label} disabled={disabled} className={className} hint={hint}>
       <Controller
         name={field}
         control={control}
         render={({ field: { onChange, onBlur, value, name, ref } }) => (
           <TextField
             fullWidth
+            inputProps={{
+              maxLength,
+            }}
             rows={4}
             multiline
             {...textAreaProps}

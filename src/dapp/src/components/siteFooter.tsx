@@ -7,7 +7,7 @@ interface Link {
 
 function NavLink(props: { link: Link }) {
   return (
-    <a href={props.link.href} className="px-4 break-words" target="_blank">
+    <a href={props.link.href} className="px-4 break-words no-underline text-white" target="_blank">
       {props.link.name}
     </a>
   );

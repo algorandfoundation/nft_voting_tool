@@ -1,5 +1,4 @@
 import { Button } from "@mui/material";
-import clsx from "clsx";
 import React from "react";
 
 export type SubmitButtonProps = {
@@ -9,7 +8,7 @@ export type SubmitButtonProps = {
 
 export function SubmitButton({ className, children, ...rest }: SubmitButtonProps) {
   return (
-    <Button variant="contained" type="submit" className={clsx(className)} {...rest}>
+    <Button variant="contained" type="submit" className={className} {...rest}>
       {children}
     </Button>
   );
