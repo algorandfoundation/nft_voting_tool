@@ -34,7 +34,7 @@ const ConnectWallet = () => {
           You will need approximately [A100] to create the voting round. Ensure your wallet has this amount before you start.{" "}
         </Typography>
       </div>
-      <div className="mt-6 grid grid-cols-3 justify-items-stretch gap-4">
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 justify-items-stretch gap-4">
         <Button onClick={() => selectWallet("PERAG7V9V3SR9ZBTO690MV6I")} className="h-20" variant="outlined" color="primary">
           PERA
         </Button>

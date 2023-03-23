@@ -87,7 +87,7 @@ export default function Review() {
             value={
               <Stack spacing={1}>
                 {questions.answers.map((option, index) => (
-                  <Button className="w-72 uppercase" key={index} variant="outlined">
+                  <Button className="w-64 sm:w-72 uppercase" key={index} variant="outlined">
                     {option}
                   </Button>
                 ))}
