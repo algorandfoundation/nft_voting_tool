@@ -145,14 +145,14 @@ export class StaticWebsiteStack extends cdk.Stack {
         props.queryStringCache === 'all'
           ? cloudfront.CacheQueryStringBehavior.all()
           : props.queryStringCache === 'none'
-          ? cloudfront.CacheQueryStringBehavior.none()
-          : cloudfront.CacheQueryStringBehavior.allowList(...props.queryStringCache),
+            ? cloudfront.CacheQueryStringBehavior.none()
+            : cloudfront.CacheQueryStringBehavior.allowList(...props.queryStringCache),
       cookieBehavior:
         props.cookieCache === 'all'
           ? cloudfront.CacheCookieBehavior.all()
           : props.cookieCache === 'none'
-          ? cloudfront.CacheCookieBehavior.none()
-          : cloudfront.CacheCookieBehavior.allowList(...props.cookieCache),
+            ? cloudfront.CacheCookieBehavior.none()
+            : cloudfront.CacheCookieBehavior.allowList(...props.cookieCache),
     })
 
     const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, `${id}-request-handler-policy`, {
@@ -161,21 +161,21 @@ export class StaticWebsiteStack extends cdk.Stack {
         props.queryStringPassthrough === 'all'
           ? cloudfront.OriginRequestQueryStringBehavior.all()
           : props.queryStringPassthrough === 'none'
-          ? cloudfront.OriginRequestQueryStringBehavior.none()
-          : cloudfront.OriginRequestQueryStringBehavior.allowList(...props.queryStringPassthrough),
+            ? cloudfront.OriginRequestQueryStringBehavior.none()
+            : cloudfront.OriginRequestQueryStringBehavior.allowList(...props.queryStringPassthrough),
       cookieBehavior:
         props.cookiePassthrough === 'all'
           ? cloudfront.OriginRequestCookieBehavior.all()
           : props.cookiePassthrough === 'none'
-          ? cloudfront.OriginRequestCookieBehavior.none()
-          : cloudfront.OriginRequestCookieBehavior.allowList(...props.cookiePassthrough),
+            ? cloudfront.OriginRequestCookieBehavior.none()
+            : cloudfront.OriginRequestCookieBehavior.allowList(...props.cookiePassthrough),
       // https://stackoverflow.com/questions/65243953/pass-query-params-from-cloudfront-to-api-gateway
       headerBehavior:
         props.httpHeaderPassthrough === 'all'
           ? cloudfront.OriginRequestHeaderBehavior.all()
           : props.httpHeaderPassthrough === 'none'
-          ? cloudfront.OriginRequestHeaderBehavior.none()
-          : cloudfront.OriginRequestHeaderBehavior.allowList(...props.httpHeaderPassthrough),
+            ? cloudfront.OriginRequestHeaderBehavior.none()
+            : cloudfront.OriginRequestHeaderBehavior.allowList(...props.httpHeaderPassthrough),
     })
 
     const distribution = new cloudfront.Distribution(this, `${id}-cloudfront`, {
@@ -187,7 +187,7 @@ export class StaticWebsiteStack extends cdk.Stack {
         {
           httpStatus: 403,
           responseHttpStatus: 403,
-          responsePagePath: '/error.html',
+          responsePagePath: '/index.html',
           ttl: Duration.minutes(30),
         },
       ],
