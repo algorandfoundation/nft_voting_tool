@@ -30,6 +30,18 @@
             }
         },
         {
+            "name": "bootstrap",
+            "args": [
+                {
+                    "type": "byte[16][]",
+                    "name": "questions"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
             "name": "get_preconditions",
             "args": [
                 {

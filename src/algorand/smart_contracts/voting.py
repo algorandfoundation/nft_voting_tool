@@ -1,5 +1,7 @@
 import beaker
 import pyteal as pt
+import beaker.lib.storage as storage
+from typing import Literal
 
 from smart_contracts.helpers.deployment_standard import (
     deploy_time_permanence_control,
@@ -32,6 +34,12 @@ class VotingState:
         static=True,
         descr="The minimum number of voters to reach quorum.",
     )
+    votes = storage.BoxMapping(
+        # 18 = 16 bytes question ID key (GUID value) + 2 bytes prefix ("Q_")
+        key_type=pt.abi.StaticBytes[Literal[18]],
+        value_type=pt.abi.Uint64,
+        prefix=pt.Bytes("Q_"),
+    )
 
 
 app = beaker.Application("VotingRoundApp", state=VotingState).apply(deploy_time_permanence_control)
@@ -51,6 +59,32 @@ def create(
         app.state.start_time.set(start_time.get()),
         app.state.end_time.set(end_time.get()),
         app.state.quorum.set(quorum.get()),
+    )
+
+
+@app.external(authorize=beaker.Authorize.only_creator())
+def bootstrap(
+    # fund_min_bal_req: pt.abi.PaymentTransaction,
+    questions: pt.abi.DynamicArray[pt.abi.StaticBytes[Literal[16]]],
+) -> pt.Expr:
+    i = pt.ScratchVar(pt.TealType.uint64)
+    min_bal_req = pt.ScratchVar(pt.TealType.uint64)
+    return pt.Seq(
+        min_bal_req.store(
+            pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
+            + (questions.length() * pt.Int(16) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE))
+        ),
+        # pt.Assert(
+        #     fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
+        #     comment="Payment must be to app address",
+        # ),
+        # pt.Assert(
+        #     fund_min_bal_req.get().amount() >= min_bal_req.load(),
+        #     comment="Payment must be for >= min balance requirement",
+        # ),
+        pt.For(i.store(pt.Int(0)), i.load() < questions.length(), i.store(i.load() + pt.Int(1))).Do(
+            questions[i.load()].use(lambda question: app.state.votes[question.get()].set(pt.abi.Uint64()))
+        ),
     )
 
 

@@ -22,6 +22,13 @@ algokit.Config.configure({
       )
       continue
     }
-    await deploy(app, appSpec)
+    try {
+      await deploy(app, appSpec)
+    } catch (e) {
+      if ('led' in e) {
+        console.error('Received logic error', e.led)
+      }
+      throw e
+    }
   }
 })()

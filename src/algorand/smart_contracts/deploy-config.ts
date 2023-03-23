@@ -1,10 +1,41 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { AppReference, BoxReference } from '@algorandfoundation/algokit-utils/types/app'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import algosdk from 'algosdk'
+import * as uuid from 'uuid'
+import { LogicError } from '@algorandfoundation/algokit-utils/types/logic-error'
 
 // Edit this to add in your contracts
 export const contracts = ['VotingRoundApp'] as const
+
+function encodeQuestionIds(ids: string[]): Uint8Array[] {
+  return ids.map((id) => {
+    if (uuid.validate(id)) {
+      return uuid.parse(id)
+    }
+
+    if (id.length > 16) {
+      throw new Error(`Question IDs must either be a GUID or a string <= 16 bytes, but received: ${id}`)
+    }
+
+    return Buffer.from(id.padEnd(16, '\0'))
+  })
+}
+
+function encodeQuestionIdBoxRefs(ids: string[], ref?: AppReference): BoxReference[] {
+  const prefix = Buffer.from('Q_')
+
+  return encodeQuestionIds(ids).map((encodedId) => {
+    const buffer = new Uint8Array(16 + 'Q_'.length)
+    buffer.set(prefix, 0)
+    buffer.set(encodedId, prefix.length)
+    return {
+      appId: ref?.appId ?? 0,
+      name: buffer,
+    }
+  })
+}
 
 export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec) {
   const algod = algokit.getAlgoClient()
@@ -54,10 +85,47 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         onSchemaBreak: isLocal ? 'replace' : 'fail',
         onUpdate: isLocal ? 'replace' : 'fail',
         createArgs: {
-          method: appClient.getABIMethod('create')!,
-          args: [publicKey, 'a', currentTime, currentTime + 5000, 1],
+          method: 'create',
+          methodArgs: [publicKey, 'a', currentTime, currentTime + 5000, 1],
         },
       })
+      const appRef = await appClient.getAppReference()
+
+      const questionIds = [uuid.v4()]
+      const payTxn = (
+        await algokit.transferAlgos(
+          {
+            from: deployer,
+            to: appRef.appAddress,
+            amount: algokit.microAlgos(
+              100_000 + 400 * /* key size */ (18 + /* value size */ 8) * questionIds.length + 2500,
+            ),
+            skipSending: true,
+          },
+          algod,
+        )
+      ).transaction
+      const q = encodeQuestionIds(questionIds)
+      const boxes = encodeQuestionIdBoxRefs(questionIds)
+      const bootstrapTxn = await appClient.call({
+        method: 'bootstrap',
+        methodArgs: {
+          args: [/*payTxn, */ q],
+          boxes: boxes,
+        },
+        sendParams: { skipSending: true },
+      })
+      try {
+        await algokit.sendGroupOfTransactions(
+          {
+            transactions: [payTxn, bootstrapTxn.transaction],
+            signer: deployer,
+          },
+          algod,
+        )
+      } catch (e) {
+        throw appClient.exposeLogicError(e)
+      }
 
       // Generate some dummy data using the public key
       const decoded = algosdk.decodeAddress(deployer.addr)
@@ -67,8 +135,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const result = await appClient.call({
         method: 'get_preconditions',
         methodArgs: [signature],
-        callType: 'normal',
-        sendParams: { fee: algokit.microAlgos(3_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
       })
       const [isVotingOpen, isAllowedToVote, hasAlreadyVoted, time] = result.return!.returnValue! as any[]
       console.log({ isVotingOpen, isAllowedToVote, hasAlreadyVoted, time })
