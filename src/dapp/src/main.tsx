@@ -54,11 +54,13 @@ const router = createBrowserRouter([
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+const rootElement = document.getElementById("root") as HTMLElement;
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <CssBaseline />
     <StyledEngineProvider>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme(rootElement)}>
         <RecoilRoot>
           <RouterProvider router={router} />
         </RecoilRoot>

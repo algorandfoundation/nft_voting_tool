@@ -5,6 +5,7 @@ import { PropsWithChildren } from "react";
 import { Outlet } from "react-router-dom";
 import SiteFooter from "./components/siteFooter";
 import SiteHeader from "./components/siteHeader";
+import ConnectWallet from "./features/wallet/ConnectWallet";
 import ScrollToTop from "./shared/router/ScrollToTop";
 import { useAlgoWallet } from "./utils/useAlgoWalletProvider";
 
@@ -32,6 +33,7 @@ export default function Root() {
             <Outlet />
           </div>
         </SiteContent>
+        <ConnectWallet />
         <SiteFooter />
         <ScrollToTop />
       </WalletProvider>

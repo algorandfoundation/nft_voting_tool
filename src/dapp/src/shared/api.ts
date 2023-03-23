@@ -6,10 +6,10 @@ import sortBy from "lodash.sortby";
 import { useCallback, useEffect, useState } from "react";
 import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import { v4 as uuid } from "uuid";
+import { useSetConnectedWallet } from "../features/wallet/state";
 import { Vote, VotingRound } from "./types";
 
 type AppState = {
-  myWalletAddress: string;
   openRounds: VotingRound[];
   closedRounds: VotingRound[];
 };
@@ -17,7 +17,6 @@ type AppState = {
 const votingRoundsAtom = atom<AppState>({
   key: "appState",
   default: {
-    myWalletAddress: "",
     openRounds: [
       {
         id: "b34fb9cb-7e69-4ac6-a6cb-976edf1fd8d8",
@@ -74,8 +73,6 @@ const votingRoundsAtom = atom<AppState>({
   },
 });
 
-export const useConnectedWallet = () => useRecoilValue(votingRoundsAtom).myWalletAddress;
-
 const useMockGetter = <T>(payload: T) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<T | null>(null);
@@ -102,13 +99,13 @@ const useMockGetter = <T>(payload: T) => {
   return { loading, data, refetch };
 };
 
-const useMockSetter = <T>(action: (payload: T) => Promise<AppState>, extraDelayMs = 0) => {
+const useMockSetter = <T, K>(action: (payload: T) => Promise<K>, extraDelayMs = 0) => {
   const [loading, setLoading] = useState(false);
   const execute = useCallback((payload: T) => {
     setLoading(true);
-    const promise = new Promise<AppState>((resolve) =>
-      setTimeout(() => {
-        const state = action(payload);
+    const promise = new Promise<K>((resolve) =>
+      setTimeout(async () => {
+        const state = await action(payload);
         setLoading(false);
         resolve(state);
         // simulate loading time
@@ -122,23 +119,17 @@ const useMockSetter = <T>(action: (payload: T) => Promise<AppState>, extraDelayM
 
 const api = {
   useConnectWallet: () => {
-    const setState = useSetRecoilState(votingRoundsAtom);
+    const setConnectedWallet = useSetConnectedWallet();
     return useMockSetter((address: string) => {
       return new Promise((resolve) => {
-        setState((state) => {
-          const newState = {
-            ...state,
-            myWalletAddress: address,
-          };
-          resolve(newState);
-          return newState;
-        });
+        setConnectedWallet(address);
+        resolve(address);
       });
     }, 2000);
   },
   useSubmitVote: (roundId: string) => {
     const setState = useSetRecoilState(votingRoundsAtom);
-    return useMockSetter<Omit<Vote, "walletAddress">>(({ selectedOption }) => {
+    return useMockSetter<Vote, AppState>(({ selectedOption, walletAddress }) => {
       return new Promise((resolve) => {
         setState((state) => {
           const round = state.openRounds.find((p) => p.id === roundId);
@@ -155,7 +146,7 @@ const api = {
                 votes: [
                   ...round.votes,
                   {
-                    walletAddress: state.myWalletAddress,
+                    walletAddress,
                     selectedOption,
                   },
                 ],

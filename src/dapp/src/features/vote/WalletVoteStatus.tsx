@@ -1,8 +1,8 @@
 import { Box, Button, Link, Typography } from "@mui/material";
-import { useConnectedWallet } from "../../shared/api";
 import { VotingRound } from "../../shared/types";
 import { getMyVote, getVoteEnded, getVoteStarted } from "../../shared/vote";
 import { getIsAllowedToVote, getWalletAddresses, getWalletLabel } from "../../shared/wallet";
+import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
 
 type WalletVoteStatusProps = {
   round: VotingRound;
@@ -15,6 +15,8 @@ export const WalletVoteStatus = ({ round }: WalletVoteStatusProps) => {
   const voteStarted = getVoteStarted(round);
   const voteEnded = getVoteEnded(round);
   const myVote = getMyVote(round, walletAddress);
+  const setShowConnectedWalletModal = useSetShowConnectWalletModal();
+  const showConnectWalletModal = () => setShowConnectedWalletModal(true);
   return (
     <>
       {allowList.length ? (
@@ -29,7 +31,7 @@ export const WalletVoteStatus = ({ round }: WalletVoteStatusProps) => {
         </div>
       ) : null}
       {!walletAddress && !voteEnded && (
-        <Button href="/connect-wallet" variant="contained" disabled={!voteStarted}>
+        <Button onClick={showConnectWalletModal} variant="contained" disabled={!voteStarted}>
           Connect wallet to vote
         </Button>
       )}

@@ -10,8 +10,8 @@ import { useStepRedirect } from "./useStepRedirect";
 import { VoteCreationSteps } from "./VoteCreationSteps";
 
 export const formSchema = zfd.formData({
-  questionTitle: zfd.text(),
-  questionDescription: zfd.text(z.string().optional()),
+  questionTitle: zfd.text(z.string().trim().min(1, "Required")),
+  questionDescription: zfd.text(z.string().trim().optional()),
   answers: zfd.repeatable(z.array(zfd.text(z.string().trim().min(1, "Required"))).min(2, "Must have at least 2 answers")),
 });
 

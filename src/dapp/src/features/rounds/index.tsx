@@ -2,6 +2,7 @@ import { Button, Skeleton, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import api from "../../shared/api";
 import { getWalletLabel } from "../../shared/wallet";
+import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
 import { NoRounds } from "./NoRounds";
 import { VotingRoundTile } from "./VotingRoundTile";
 
@@ -14,22 +15,24 @@ const VotingRoundTileLoading = () => (
 
 const VotingRounds = () => {
   const { data, loading } = api.useVotingRounds();
+  const setShowConnectWalletModal = useSetShowConnectWalletModal();
+  const myWalletAddress = useConnectedWallet();
   return (
     <div className="container">
       <Typography variant="h3">My voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
-      ) : !data?.myWalletAddress ? (
+      ) : !myWalletAddress ? (
         <div className="my-8">
-          <Button variant="contained" component={Link} to="/connect-wallet">
+          <Button variant="contained" onClick={() => setShowConnectWalletModal(true)}>
             Connect wallet
           </Button>
         </div>
       ) : (
-        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(data?.myWalletAddress)}</Typography>
+        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(myWalletAddress)}</Typography>
       )}
 
-      {data?.myWalletAddress && (
+      {myWalletAddress && (
         <Button component={Link} to="/create" className="my-8" variant="contained">
           Create new voting round
         </Button>

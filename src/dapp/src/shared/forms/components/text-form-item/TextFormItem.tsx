@@ -25,7 +25,17 @@ export function TextFormItem<TSchema extends Record<string, any> = Record<string
         name={field}
         control={control}
         render={({ field: { onChange, onBlur, value, name, ref } }) => (
-          <TextField fullWidth {...inputProps} error={!!error} onChange={onChange} onBlur={onBlur} value={value} name={name} ref={ref} />
+          <TextField
+            fullWidth
+            {...inputProps}
+            error={!!error}
+            onChange={onChange}
+            onBlur={onBlur}
+            value={value}
+            name={name}
+            ref={ref}
+            inputProps={{ "aria-label": label }}
+          />
         )}
       />
     </FormItem>
