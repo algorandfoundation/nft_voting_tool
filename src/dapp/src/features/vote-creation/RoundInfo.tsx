@@ -9,9 +9,9 @@ import { Steps } from "./Steps";
 import { VoteCreationSteps } from "./VoteCreationSteps";
 
 const formSchema = zfd.formData({
-  voteTitle: zfd.text(),
-  voteDescription: zfd.text(),
-  voteInformationUrl: zfd.text(),
+  voteTitle: zfd.text(z.string().trim().min(1, "Required")),
+  voteDescription: zfd.text(z.string().trim().min(1, "Required")),
+  voteInformationUrl: zfd.text(z.string().trim().url()),
   start: zfd.text(),
   end: zfd.text(),
   snapshotFile: zfd.text(z.string().optional()),

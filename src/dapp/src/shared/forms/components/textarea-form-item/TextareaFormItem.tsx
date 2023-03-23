@@ -32,6 +32,7 @@ export function TextareaFormItem<TSchema extends Record<string, any> = Record<st
             fullWidth
             inputProps={{
               maxLength,
+              "aria-label": label,
             }}
             rows={4}
             multiline

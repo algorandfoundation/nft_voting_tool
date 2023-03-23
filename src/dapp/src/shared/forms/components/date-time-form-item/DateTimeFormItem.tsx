@@ -24,7 +24,11 @@ export function DateFormItem<TSchema extends Record<string, any> = Record<string
         render={({ field: { onChange, onBlur, value } }) => {
           return (
             <div className="flex gap-4">
-              <DateTimePicker onChange={(v) => onChange(dayjs(v).format())} value={dayjs(value)} />
+              <DateTimePicker
+                onChange={(v) => onChange(dayjs(v).format())}
+                value={dayjs(value)}
+                slotProps={{ textField: { inputProps: { "aria-label": label } } }}
+              />
             </div>
           );
         }}

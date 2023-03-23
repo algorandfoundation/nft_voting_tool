@@ -26,7 +26,7 @@ const defaultQuestions: Question = {
   answers: [" ", " "],
 };
 
-const voteCreationAtom = atom<VoteCreationState>({
+export const voteCreationAtom = atom<VoteCreationState>({
   key: "voteCreationState",
   default: {
     roundInfo: defaultRoundInfo,
