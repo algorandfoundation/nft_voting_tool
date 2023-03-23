@@ -1,10 +1,11 @@
 import { Box, Link, Skeleton, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
-import api, { useConnectedWallet } from "../../shared/api";
+import api from "../../shared/api";
+import { LoadingDialog } from "../../shared/loading/LoadingDialog";
 import { SkeletonArray } from "../../shared/SkeletonArray";
 import { getMyVote, getVoteEnded, getVoteStarted } from "../../shared/vote";
 import { getIsAllowedToVote, getWalletAddresses } from "../../shared/wallet";
-import { LoadingDialog } from "../vote-creation/review/LoadingDialog";
+import { useConnectedWallet } from "../wallet/state";
 import { VoteDetails } from "./VoteDetails";
 import { VoteResults } from "./VoteResults";
 import { VoteSubmission } from "./VoteSubmission";
@@ -14,11 +15,10 @@ import { WalletVoteStatus } from "./WalletVoteStatus";
 function Vote() {
   const { voteCid } = useParams();
   const { data, loading, refetch } = api.useVotingRound(voteCid!);
+  const walletAddress = useConnectedWallet();
   const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
-
   const voteStarted = !data ? false : getVoteStarted(data);
   const voteEnded = !data ? false : getVoteEnded(data);
-  const walletAddress = useConnectedWallet();
   const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile));
   const alreadyVoted = !data ? true : getMyVote(data, walletAddress);
   const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted;
@@ -26,7 +26,7 @@ function Vote() {
   const handleSubmitVote = async (selectedOption: string) => {
     if (!selectedOption) return;
     try {
-      const result = await submitVote({ selectedOption });
+      const result = await submitVote({ selectedOption, walletAddress });
       await refetch(result.openRounds.find((p) => p.id === voteCid));
     } catch (e) {
       // TODO: handle failure

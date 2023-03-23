@@ -19,99 +19,105 @@ const defaultSansFontFamily = [
 
 const StepIcon = () => <CircleIcon />;
 
-export const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#ed7157",
-      contrastText: "#fff",
-    },
-  },
-  shape: {
-    borderRadius: 12,
-  },
-  typography: {
-    fontFamily: ['"Suisse Intl"', ...defaultSansFontFamily].join(","),
-    h3: {
-      fontSize: 32,
-      fontWeight: "bold",
-      marginBottom: 18,
-    },
-    h4: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 12,
-    },
-    h5: {
-      fontSize: 20,
-    },
-    h6: {
-      fontSize: 16,
-    },
-  },
-  components: {
-    MuiLink: {
-      styleOverrides: {
-        root: {
-          fontWeight: "bold",
-        },
+export const theme = (rootElement: HTMLElement) =>
+  createTheme({
+    palette: {
+      primary: {
+        main: "#ed7157",
+        contrastText: "#fff",
       },
     },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: "none",
-          minWidth: 128,
-        },
+    shape: {
+      borderRadius: 12,
+    },
+    typography: {
+      fontFamily: ['"Suisse Intl"', ...defaultSansFontFamily].join(","),
+      h3: {
+        fontSize: 32,
+        fontWeight: "bold",
+        marginBottom: 18,
+      },
+      h4: {
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 12,
+      },
+      h5: {
+        fontSize: 20,
+      },
+      h6: {
+        fontSize: 16,
       },
     },
-    MuiSkeleton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 0,
+    components: {
+      MuiDialog: {
+        defaultProps: {
+          container: rootElement,
         },
       },
-    },
-    MuiStepLabel: {
-      defaultProps: {
-        StepIconComponent: StepIcon,
-      },
-      styleOverrides: {
-        label: {
-          fontSize: 16,
-        },
-        iconContainer: ({ theme }) => ({
-          color: grey[400],
-          [`&.${stepLabelClasses.active}`]: {
-            color: theme.palette.primary.main,
+      MuiLink: {
+        styleOverrides: {
+          root: {
+            fontWeight: "bold",
           },
-          [`&.${stepLabelClasses.completed}`]: {
-            color: theme.palette.primary.main,
-          },
-        }),
+        },
       },
-    },
-    MuiStepConnector: {
-      styleOverrides: {
-        root: ({ theme }) => ({
-          left: "calc(-50%)",
-          right: "calc(50%)",
-          top: 9,
-          zIndex: -1,
-          [`&.${stepConnectorClasses.active}`]: {
-            [`& .${stepConnectorClasses.line}`]: {
-              borderColor: theme.palette.primary.main,
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            minWidth: 128,
+          },
+        },
+      },
+      MuiSkeleton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 0,
+          },
+        },
+      },
+      MuiStepLabel: {
+        defaultProps: {
+          StepIconComponent: StepIcon,
+        },
+        styleOverrides: {
+          label: {
+            fontSize: 16,
+          },
+          iconContainer: ({ theme }) => ({
+            color: grey[400],
+            [`&.${stepLabelClasses.active}`]: {
+              color: theme.palette.primary.main,
             },
-          },
-          [`&.${stepConnectorClasses.completed}`]: {
-            [`& .${stepConnectorClasses.line}`]: {
-              borderColor: theme.palette.primary.main,
+            [`&.${stepLabelClasses.completed}`]: {
+              color: theme.palette.primary.main,
             },
+          }),
+        },
+      },
+      MuiStepConnector: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            left: "calc(-50%)",
+            right: "calc(50%)",
+            top: 9,
+            zIndex: -1,
+            [`&.${stepConnectorClasses.active}`]: {
+              [`& .${stepConnectorClasses.line}`]: {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+            [`&.${stepConnectorClasses.completed}`]: {
+              [`& .${stepConnectorClasses.line}`]: {
+                borderColor: theme.palette.primary.main,
+              },
+            },
+          }),
+          line: {
+            borderTopWidth: 6,
           },
-        }),
-        line: {
-          borderTopWidth: 6,
         },
       },
     },
-  },
-});
+  });

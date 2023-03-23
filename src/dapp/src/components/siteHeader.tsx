@@ -3,7 +3,7 @@ import { Typography } from "@mui/material";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
 import algorandFoundationLogo from "../assets/algorand-foundation-logo.svg";
-import { useConnectedWallet } from "../shared/api";
+import { useConnectedWallet, useSetShowConnectWalletModal } from "../features/wallet/state";
 import { getWalletLabel } from "../shared/wallet";
 import { MenuIcon, XIcon } from "./icons";
 
@@ -13,6 +13,7 @@ interface Link {
   target?: string;
   subItems?: Link[];
   logo?: string;
+  onClick?: () => void;
 }
 
 const createNavigation = () =>
@@ -29,11 +30,11 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
       {!props.link.href ? (
         <></>
       ) : props.link.href.match(/^https?:\/\//) ? (
-        <a href={props.link.href} className={clsx(props.defaultClasses, classes)} target={props.link.target}>
+        <a href={props.link.href} className={clsx(props.defaultClasses, classes)} target={props.link.target} onClick={props.link.onClick}>
           <Typography>{props.link.name}</Typography>
         </a>
       ) : (
-        <Link to={props.link.href} className={clsx(props.defaultClasses, classes)}>
+        <Link to={props.link.href} className={clsx(props.defaultClasses, classes)} onClick={props.link.onClick}>
           {props.link.logo && <img src={props.link.logo} height="24px" width="24px" className="mr-1 inline-block" />}
           <Typography className="font-bold">{props.displayName ?? props.link.name}</Typography>
         </Link>
@@ -45,6 +46,8 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
 export default function SiteHeader() {
   const navigation = createNavigation();
   const connectedWallet = useConnectedWallet();
+  const setShowConnectedWalletModal = useSetShowConnectWalletModal();
+  const showConnectWalletModal = () => setShowConnectedWalletModal(true);
   const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : "Connect wallet";
   return (
     <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
@@ -86,7 +89,7 @@ export default function SiteHeader() {
                     })}
                 </Popover.Group>
 
-                <Link className="justify-self-end inline-flex items-center no-underline text-black" to="/connect-wallet">
+                <Link className="justify-self-end inline-flex items-center no-underline text-black" to="#" onClick={showConnectWalletModal}>
                   <Typography>{walletLabel}</Typography>
                 </Link>
               </div>
@@ -108,7 +111,7 @@ export default function SiteHeader() {
           {/*Mobile Site Links*/}
           <Disclosure.Panel className="lg:hidden">
             <div className="ml-10 mb-5 pt-2">
-              {[...navigation, { name: walletLabel, href: "/connect-wallet" }].map((link, index) => (
+              {[...navigation, { name: walletLabel, href: "#", onClick: showConnectWalletModal }].map((link, index) => (
                 <Disclosure.Button as="span" key={index}>
                   <NavLink
                     link={link}
