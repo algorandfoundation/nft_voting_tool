@@ -4,30 +4,29 @@ import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import algosdk from 'algosdk'
 import * as uuid from 'uuid'
-import { LogicError } from '@algorandfoundation/algokit-utils/types/logic-error'
 
 // Edit this to add in your contracts
 export const contracts = ['VotingRoundApp'] as const
 
-function encodeQuestionIds(ids: string[]): Uint8Array[] {
+function encodeAnswerIds(ids: string[]): Uint8Array[] {
   return ids.map((id) => {
     if (uuid.validate(id)) {
       return uuid.parse(id)
     }
 
     if (id.length > 16) {
-      throw new Error(`Question IDs must either be a GUID or a string <= 16 bytes, but received: ${id}`)
+      throw new Error(`Answer IDs must either be a GUID or a string <= 16 bytes, but received: ${id}`)
     }
 
     return Buffer.from(id.padEnd(16, '\0'))
   })
 }
 
-function encodeQuestionIdBoxRefs(ids: string[], ref?: AppReference): BoxReference[] {
-  const prefix = Buffer.from('Q_')
+function encodeAnswerIdBoxRefs(ids: string[], ref?: AppReference): BoxReference[] {
+  const prefix = Buffer.from('V_')
 
-  return encodeQuestionIds(ids).map((encodedId) => {
-    const buffer = new Uint8Array(16 + 'Q_'.length)
+  return encodeAnswerIds(ids).map((encodedId) => {
+    const buffer = new Uint8Array(16 + 'V_'.length)
     buffer.set(prefix, 0)
     buffer.set(encodedId, prefix.length)
     return {
@@ -105,20 +104,20 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           algod,
         )
       ).transaction
-      const q = encodeQuestionIds(questionIds)
-      const boxes = encodeQuestionIdBoxRefs(questionIds)
-      const bootstrapTxn = await appClient.call({
-        method: 'bootstrap',
-        methodArgs: {
-          args: [/*payTxn, */ q],
-          boxes: boxes,
-        },
-        sendParams: { skipSending: true },
-      })
+      const callTxn = (
+        await appClient.call({
+          method: 'bootstrap',
+          methodArgs: {
+            args: [payTxn, encodeAnswerIds(questionIds)],
+            boxes: encodeAnswerIdBoxRefs(questionIds),
+          },
+          sendParams: { skipSending: true },
+        })
+      ).transaction
       try {
         await algokit.sendGroupOfTransactions(
           {
-            transactions: [payTxn, bootstrapTxn.transaction],
+            transactions: [payTxn, callTxn],
             signer: deployer,
           },
           algod,

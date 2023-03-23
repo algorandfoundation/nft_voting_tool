@@ -35,10 +35,10 @@ class VotingState:
         descr="The minimum number of voters to reach quorum.",
     )
     votes = storage.BoxMapping(
-        # 18 = 16 bytes question ID key (GUID value) + 2 bytes prefix ("Q_")
+        # 18 = 16 bytes question ID key (GUID value) + 2 bytes prefix ("V_")
         key_type=pt.abi.StaticBytes[Literal[18]],
         value_type=pt.abi.Uint64,
-        prefix=pt.Bytes("Q_"),
+        prefix=pt.Bytes("V_"),
     )
 
 
@@ -64,26 +64,26 @@ def create(
 
 @app.external(authorize=beaker.Authorize.only_creator())
 def bootstrap(
-    # fund_min_bal_req: pt.abi.PaymentTransaction,
-    questions: pt.abi.DynamicArray[pt.abi.StaticBytes[Literal[16]]],
+    fund_min_bal_req: pt.abi.PaymentTransaction,
+    answers: pt.abi.DynamicArray[pt.abi.StaticBytes[Literal[16]]],
 ) -> pt.Expr:
     i = pt.ScratchVar(pt.TealType.uint64)
     min_bal_req = pt.ScratchVar(pt.TealType.uint64)
     return pt.Seq(
         min_bal_req.store(
             pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
-            + (questions.length() * pt.Int(16) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE))
+            + (answers.length() * pt.Int(16) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE))
         ),
-        # pt.Assert(
-        #     fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
-        #     comment="Payment must be to app address",
-        # ),
-        # pt.Assert(
-        #     fund_min_bal_req.get().amount() >= min_bal_req.load(),
-        #     comment="Payment must be for >= min balance requirement",
-        # ),
-        pt.For(i.store(pt.Int(0)), i.load() < questions.length(), i.store(i.load() + pt.Int(1))).Do(
-            questions[i.load()].use(lambda question: app.state.votes[question.get()].set(pt.abi.Uint64()))
+        pt.Assert(
+            fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
+            comment="Payment must be to app address",
+        ),
+        pt.Assert(
+            fund_min_bal_req.get().amount() >= min_bal_req.load(),
+            comment="Payment must be for >= min balance requirement",
+        ),
+        pt.For(i.store(pt.Int(0)), i.load() < answers.length(), i.store(i.load() + pt.Int(1))).Do(
+            answers[i.load()].use(lambda answer: app.state.votes[answer.get()].set(pt.abi.Uint64()))
         ),
     )
 
