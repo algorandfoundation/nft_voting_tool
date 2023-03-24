@@ -108,7 +108,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         await appClient.call({
           method: 'bootstrap',
           methodArgs: {
-            args: [payTxn, encodeAnswerIds(questionIds)],
+            args: [/*payTxn, */ encodeAnswerIds(questionIds)],
             boxes: encodeAnswerIdBoxRefs(questionIds),
           },
           sendParams: { skipSending: true },

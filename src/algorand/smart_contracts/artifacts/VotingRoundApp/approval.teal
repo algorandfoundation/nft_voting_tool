@@ -10,7 +10,7 @@ pushbytes 0xe392890b // "create(byte[],string,uint64,uint64,uint64)void"
 ==
 bnz main_l9
 txna ApplicationArgs 0
-pushbytes 0xb5f951bf // "bootstrap(pay,byte[16][])void"
+pushbytes 0x90aac5ec // "bootstrap(byte[16][])void"
 ==
 bnz main_l8
 txna ApplicationArgs 0
@@ -46,9 +46,9 @@ intc_0 // 0
 assert
 txna ApplicationArgs 1
 callsub getpreconditions_6
-store 7
+store 5
 pushbytes 0x151f7c75 // 0x151f7c75
-load 7
+load 5
 concat
 log
 intc_1 // 1
@@ -63,18 +63,6 @@ intc_0 // 0
 &&
 assert
 txna ApplicationArgs 1
-store 6
-txn GroupIndex
-intc_1 // 1
--
-store 5
-load 5
-gtxns TypeEnum
-intc_1 // pay
-==
-assert
-load 5
-load 6
 callsub bootstrap_2
 intc_1 // 1
 return
@@ -142,9 +130,9 @@ proto 5 0
 intc_0 // 0
 bytec_0 // "snapshot_public_key"
 app_global_get_ex
-store 9
-store 8
-load 9
+store 7
+store 6
+load 7
 !
 assert
 bytec_0 // "snapshot_public_key"
@@ -154,9 +142,9 @@ app_global_put
 intc_0 // 0
 bytec 4 // "metadata_ipfs_cid"
 app_global_get_ex
-store 11
-store 10
-load 11
+store 9
+store 8
+load 9
 !
 assert
 bytec 4 // "metadata_ipfs_cid"
@@ -166,9 +154,9 @@ app_global_put
 intc_0 // 0
 bytec_1 // "start_time"
 app_global_get_ex
-store 13
-store 12
-load 13
+store 11
+store 10
+load 11
 !
 assert
 bytec_1 // "start_time"
@@ -177,9 +165,9 @@ app_global_put
 intc_0 // 0
 bytec_2 // "end_time"
 app_global_get_ex
-store 15
-store 14
-load 15
+store 13
+store 12
+load 13
 !
 assert
 bytec_2 // "end_time"
@@ -188,9 +176,9 @@ app_global_put
 intc_0 // 0
 bytec 5 // "quorum"
 app_global_get_ex
-store 17
-store 16
-load 17
+store 15
+store 14
+load 15
 !
 assert
 bytec 5 // "quorum"
@@ -200,7 +188,7 @@ retsub
 
 // bootstrap
 bootstrap_2:
-proto 2 0
+proto 1 0
 intc_0 // 0
 dup
 bytec_3 // ""
@@ -222,23 +210,11 @@ intc_2 // 16
 pushint 400 // 400
 *
 +
-store 19
-frame_dig -2
-gtxns Receiver
-global CurrentApplicationAddress
-==
-// Payment must be to app address
-assert
-frame_dig -2
-gtxns Amount
-load 19
->=
-// Payment must be for >= min balance requirement
-assert
+store 17
 intc_0 // 0
-store 18
+store 16
 bootstrap_2_l1:
-load 18
+load 16
 frame_dig -1
 intc_0 // 0
 extract_uint16
@@ -248,7 +224,7 @@ frame_dig 1
 bz bootstrap_2_l3
 frame_dig -1
 intc_2 // 16
-load 18
+load 16
 *
 pushint 2 // 2
 +
@@ -266,10 +242,10 @@ concat
 frame_dig 4
 itob
 box_put
-load 18
+load 16
 intc_1 // 1
 +
-store 18
+store 16
 b bootstrap_2_l1
 bootstrap_2_l3:
 retsub
@@ -280,9 +256,9 @@ proto 1 1
 pushint 2000 // 2000
 pushint 10 // 10
 +
-store 20
+store 18
 allowedtovote_3_l1:
-load 20
+load 18
 global OpcodeBudget
 >
 bz allowedtovote_3_l3

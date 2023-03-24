@@ -33,10 +33,6 @@
             "name": "bootstrap",
             "args": [
                 {
-                    "type": "pay",
-                    "name": "fund_min_bal_req"
-                },
-                {
                     "type": "byte[16][]",
                     "name": "answers"
                 }
