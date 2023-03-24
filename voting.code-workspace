@@ -26,9 +26,9 @@
     "vite.port": 5173,
     "jest.disabledWorkspaceFolders": [
       "infrastructure",
-      "algorand",
       "ROOT"
     ],
+    "dotenv.enableAutocloaking": true,
   },
   "extensions": {
     "recommendations": ["joshx.workspace-terminals"]

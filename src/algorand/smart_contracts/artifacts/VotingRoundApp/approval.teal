@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1 16 5
-bytecblock 0x736e617073686f745f7075626c69635f6b6579 0x73746172745f74696d65 0x656e645f74696d65 0x 0x6d657461646174615f697066735f636964 0x71756f72756d 0x565f 0x068101
+bytecblock 0x565f 0x69735f626f6f747374726170706564 0x736e617073686f745f7075626c69635f6b6579 0x73746172745f74696d65 0x656e645f74696d65 0x 0x6d657461646174615f697066735f636964 0x71756f72756d 0x068101
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -18,7 +18,7 @@ pushbytes 0xbcb15896 // "get_preconditions(byte[])(uint64,uint64,uint64,uint64)"
 ==
 bnz main_l7
 txna ApplicationArgs 0
-pushbytes 0x7983f95c // "vote(byte[])void"
+pushbytes 0x3c18294b // "vote(byte[],byte[16])void"
 ==
 bnz main_l6
 err
@@ -32,6 +32,11 @@ intc_0 // 0
 &&
 assert
 txna ApplicationArgs 1
+store 6
+txna ApplicationArgs 2
+store 7
+load 6
+load 7
 callsub vote_7
 intc_1 // 1
 return
@@ -128,61 +133,64 @@ retsub
 create_1:
 proto 5 0
 intc_0 // 0
-bytec_0 // "snapshot_public_key"
-app_global_get_ex
-store 7
-store 6
-load 7
-!
-assert
-bytec_0 // "snapshot_public_key"
-frame_dig -5
-extract 2 0
-app_global_put
-intc_0 // 0
-bytec 4 // "metadata_ipfs_cid"
+bytec_2 // "snapshot_public_key"
 app_global_get_ex
 store 9
 store 8
 load 9
 !
 assert
-bytec 4 // "metadata_ipfs_cid"
-frame_dig -4
+bytec_2 // "snapshot_public_key"
+frame_dig -5
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec_1 // "start_time"
+bytec 6 // "metadata_ipfs_cid"
 app_global_get_ex
 store 11
 store 10
 load 11
 !
 assert
-bytec_1 // "start_time"
-frame_dig -3
+bytec 6 // "metadata_ipfs_cid"
+frame_dig -4
+extract 2 0
 app_global_put
 intc_0 // 0
-bytec_2 // "end_time"
+bytec_3 // "start_time"
 app_global_get_ex
 store 13
 store 12
 load 13
 !
 assert
-bytec_2 // "end_time"
-frame_dig -2
+bytec_3 // "start_time"
+frame_dig -3
 app_global_put
 intc_0 // 0
-bytec 5 // "quorum"
+bytec 4 // "end_time"
 app_global_get_ex
 store 15
 store 14
 load 15
 !
 assert
-bytec 5 // "quorum"
+bytec 4 // "end_time"
+frame_dig -2
+app_global_put
+intc_0 // 0
+bytec 7 // "quorum"
+app_global_get_ex
+store 17
+store 16
+load 17
+!
+assert
+bytec 7 // "quorum"
 frame_dig -1
+app_global_put
+bytec_1 // "is_bootstrapped"
+intc_0 // 0
 app_global_put
 retsub
 
@@ -191,14 +199,21 @@ bootstrap_2:
 proto 1 0
 intc_0 // 0
 dup
-bytec_3 // ""
+bytec 5 // ""
 intc_0 // 0
-dup
 txn Sender
 global CreatorAddress
 ==
 // unauthorized
 assert
+bytec_1 // "is_bootstrapped"
+app_global_get
+!
+// Already bootstrapped
+assert
+bytec_1 // "is_bootstrapped"
+intc_1 // 1
+app_global_put
 pushint 2500 // 2500
 frame_dig -1
 intc_0 // 0
@@ -210,11 +225,11 @@ intc_2 // 16
 pushint 400 // 400
 *
 +
-store 17
+store 19
 intc_0 // 0
-store 16
+store 18
 bootstrap_2_l1:
-load 16
+load 18
 frame_dig -1
 intc_0 // 0
 extract_uint16
@@ -224,28 +239,28 @@ frame_dig 1
 bz bootstrap_2_l3
 frame_dig -1
 intc_2 // 16
-load 16
+load 18
 *
 pushint 2 // 2
 +
 intc_2 // 16
 extract3
 frame_bury 2
-bytec 6 // "V_"
+bytec_0 // "V_"
 frame_dig 2
 concat
 box_del
 pop
-bytec 6 // "V_"
+bytec_0 // "V_"
 frame_dig 2
 concat
-frame_dig 4
+intc_0 // 0
 itob
 box_put
-load 16
+load 18
 intc_1 // 1
 +
-store 16
+store 18
 b bootstrap_2_l1
 bootstrap_2_l3:
 retsub
@@ -256,9 +271,9 @@ proto 1 1
 pushint 2000 // 2000
 pushint 10 // 10
 +
-store 18
+store 20
 allowedtovote_3_l1:
-load 18
+load 20
 global OpcodeBudget
 >
 bz allowedtovote_3_l3
@@ -269,16 +284,16 @@ intc_0 // 0
 itxn_field Fee
 intc_3 // DeleteApplication
 itxn_field OnCompletion
-bytec 7 // 0x068101
+bytec 8 // 0x068101
 itxn_field ApprovalProgram
-bytec 7 // 0x068101
+bytec 8 // 0x068101
 itxn_field ClearStateProgram
 itxn_submit
 b allowedtovote_3_l1
 allowedtovote_3_l3:
 txn Sender
 frame_dig -1
-bytec_0 // "snapshot_public_key"
+bytec_2 // "snapshot_public_key"
 app_global_get
 ed25519verify_bare
 retsub
@@ -286,12 +301,17 @@ retsub
 // voting_open
 votingopen_4:
 proto 0 1
+bytec_1 // "is_bootstrapped"
+app_global_get
+intc_1 // 1
+==
 global LatestTimestamp
-bytec_1 // "start_time"
+bytec_3 // "start_time"
 app_global_get
 >=
+&&
 global LatestTimestamp
-bytec_2 // "end_time"
+bytec 4 // "end_time"
 app_global_get
 <
 &&
@@ -308,10 +328,10 @@ retsub
 // get_preconditions
 getpreconditions_6:
 proto 1 1
-bytec_3 // ""
+bytec 5 // ""
 intc_0 // 0
 dupn 5
-bytec_3 // ""
+bytec 5 // ""
 dup
 callsub votingopen_4
 frame_bury 1
@@ -339,13 +359,62 @@ retsub
 
 // vote
 vote_7:
-proto 1 0
-frame_dig -1
+proto 2 0
+frame_dig -2
 extract 2 0
 callsub allowedtovote_3
+// Allowed to vote
 assert
 callsub votingopen_4
+// Voting open
 assert
 callsub alreadyvoted_5
+!
+// Hasn't already voted
 assert
+bytec_0 // "V_"
+frame_dig -1
+concat
+box_len
+store 24
+store 23
+load 24
+// Answer ID valid
+assert
+bytec_0 // "V_"
+frame_dig -1
+concat
+box_get
+store 26
+store 25
+load 26
+assert
+load 25
+btoi
+store 21
+load 21
+intc_1 // 1
++
+store 22
+load 21
+intc_0 // 0
+>=
+// currentVoteTally >= 0
+assert
+load 22
+load 21
+>
+// newVoteTally > currentVoteTally
+assert
+bytec_0 // "V_"
+frame_dig -1
+concat
+box_del
+pop
+bytec_0 // "V_"
+frame_dig -1
+concat
+load 22
+itob
+box_put
 retsub

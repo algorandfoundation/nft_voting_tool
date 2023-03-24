@@ -59,6 +59,10 @@
                 {
                     "type": "byte[]",
                     "name": "signature"
+                },
+                {
+                    "type": "byte[16]",
+                    "name": "answer_id"
                 }
             ],
             "returns": {

@@ -18,7 +18,12 @@
 
   // TypeScript
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  
+  "jest.jestCommandLine": "npm run test --",
+  "jest.rootPath": "smart_contracts",
+  "jest.autoRun": {
+    "watch": false,
+    "onSave": "test-file"
+  },
 
   // Python
   "python.analysis.indexing": true,
@@ -35,9 +40,9 @@
   },
   "python.linting.enabled": true,
   "python.linting.lintOnSave": true,
-  
+
   "ruff.importStrategy": "fromEnvironment",
-  
+
   "python.linting.pylintEnabled": false,
   "python.linting.mypyEnabled": false,
   "mypy.configFile": "pyproject.toml",
@@ -64,8 +69,8 @@
       }
     ]
   },
-  
+
   // On Windows, if execution policy is set to Signed (default) then it won't be able to activate the venv
   //  so instead let's set it to RemoteSigned for VS Code terminal
-  "terminal.integrated.shellArgs.windows": ["-ExecutionPolicy", "RemoteSigned"],
+  "terminal.integrated.shellArgs.windows": ["-ExecutionPolicy", "RemoteSigned"]
 }

@@ -40,6 +40,9 @@ class VotingState:
         value_type=pt.abi.Uint64,
         prefix=pt.Bytes("V_"),
     )
+    is_bootstrapped = beaker.GlobalStateValue(
+        pt.TealType.uint64, descr="Whether or not the contract has been bootstrapped with answers"
+    )
 
 
 app = beaker.Application("VotingRoundApp", state=VotingState).apply(deploy_time_permanence_control)
@@ -59,6 +62,7 @@ def create(
         app.state.start_time.set(start_time.get()),
         app.state.end_time.set(end_time.get()),
         app.state.quorum.set(quorum.get()),
+        app.state.is_bootstrapped.set(pt.Int(0)),
     )
 
 
@@ -70,6 +74,8 @@ def bootstrap(
     i = pt.ScratchVar(pt.TealType.uint64)
     min_bal_req = pt.ScratchVar(pt.TealType.uint64)
     return pt.Seq(
+        pt.Assert(pt.Not(app.state.is_bootstrapped.get()), comment="Already bootstrapped"),
+        app.state.is_bootstrapped.set(pt.Int(1)),
         min_bal_req.store(
             pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
             + (answers.length() * pt.Int(16) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE))
@@ -83,7 +89,7 @@ def bootstrap(
         #     comment="Payment must be for >= min balance requirement",
         # ),
         pt.For(i.store(pt.Int(0)), i.load() < answers.length(), i.store(i.load() + pt.Int(1))).Do(
-            answers[i.load()].use(lambda answer: app.state.votes[answer.get()].set(pt.abi.Uint64()))
+            answers[i.load()].use(lambda answer: app.state.votes[answer.get()].set(pt.Itob(pt.Int(0))))
         ),
     )
 
@@ -107,6 +113,7 @@ def allowed_to_vote(signature: pt.Expr) -> pt.Expr:
 @pt.Subroutine(pt.TealType.uint64)
 def voting_open() -> pt.Expr:
     return pt.And(
+        pt.Eq(app.state.is_bootstrapped.get(), pt.Int(1)),
         pt.Ge(pt.Global.latest_timestamp(), app.state.start_time.get()),
         pt.Lt(pt.Global.latest_timestamp(), app.state.end_time.get()),
     )
@@ -143,7 +150,19 @@ def get_preconditions(signature: pt.abi.DynamicBytes, *, output: VotingPrecondit
 
 
 @app.external(read_only=True)
-def vote(signature: pt.abi.DynamicBytes) -> pt.Expr:
+def vote(signature: pt.abi.DynamicBytes, answer_id: pt.abi.StaticBytes[Literal[16]]) -> pt.Expr:
+    tally_box = app.state.votes[answer_id.get()]
+    currentVoteTally = pt.ScratchVar(pt.TealType.uint64)
+    newVoteTally = pt.ScratchVar(pt.TealType.uint64)
+
     return pt.Seq(
-        pt.Assert(allowed_to_vote(signature.get()), voting_open(), already_voted()),
+        pt.Assert(allowed_to_vote(signature.get()), comment="Allowed to vote"),
+        pt.Assert(voting_open(), comment="Voting open"),
+        pt.Assert(pt.Not(already_voted()), comment="Hasn't already voted"),
+        pt.Assert(tally_box.exists(), comment="Answer ID valid"),
+        currentVoteTally.store(pt.Btoi(tally_box.get())),
+        newVoteTally.store(pt.Add(currentVoteTally.load(), pt.Int(1))),
+        pt.Assert(pt.Ge(currentVoteTally.load(), pt.Int(0)), comment="currentVoteTally >= 0"),
+        pt.Assert(pt.Gt(newVoteTally.load(), currentVoteTally.load()), comment="newVoteTally > currentVoteTally"),
+        tally_box.set(pt.Itob(newVoteTally.load())),
     )
