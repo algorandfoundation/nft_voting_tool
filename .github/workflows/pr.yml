@@ -27,6 +27,11 @@ jobs:
       node-version: 18.x
       working-directory: ./src/voting-metadata-api
       run-build: true
+  build-algorand:
+    name: Algorand build
+    uses: ./.github/workflows/smart-contract-ci.yml
+    with:
+      working-directory: ./src/algorand
   build-infrastructure:
     name: Infrastructure
     uses: ./.github/workflows/node-ci.yml

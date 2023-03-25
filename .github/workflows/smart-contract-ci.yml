@@ -1,0 +1,100 @@
+name: "Smart Contract CI"
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        required: false
+        type: string
+        default: "."
+      node-version:
+        required: false
+        type: string
+        default: 16.x
+      python-version:
+        required: false
+        type: string
+        default: "3.10"
+    secrets:
+      npm-auth-token:
+        description: NPM auth token (optional, GITHUB_TOKEN is used by default)
+        required: false
+
+jobs:
+  smart-contract-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # install poetry
+      - name: Install poetry
+        run: pipx install poetry
+
+      # setup python
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: "poetry"
+          cache-dependency-path: ${{ inputs.working-directory }}
+
+      # setup node + private repo access
+      - name: Use Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "npm"
+          cache-dependency-path: ${{ inputs.working-directory }}/smart_contracts/package-lock.json
+      
+      # python dependencies
+      - name: poetry install
+        run: poetry install --no-interaction
+        working-directory: ${{ inputs.working-directory }}
+
+      # run npm ci preventing script access to npm auth token
+      - run: npm ci --ignore-scripts
+        working-directory: ${{ inputs.working-directory }}/smart_contracts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+
+      # allow scripts to run without npm auth token
+      - run: npm rebuild && npm run prepare --if-present
+        working-directory: ${{ inputs.working-directory }}/smart_contracts
+
+      # run LocalNet
+      - name: Run LocalNet
+        run: |
+          pipx install algokit
+          algokit localnet start
+          cp ./smart_contracts/.env.template ./smart_contracts/.env
+        working-directory: ${{ inputs.working-directory }}
+
+      # run all the CI scripts
+
+      - name: Build smart contracts
+        run: poetry run python -m smart_contracts build
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Check output stability of the smart contracts
+        shell: bash
+        run: |
+          # Add untracked files as empty so they come up in diff
+          git add -N ./smart_contracts/artifacts
+          # Print changed files and error out if there are changes after generating docs
+          git diff --exit-code --name-only ./smart_contracts/artifacts
+        working-directory: ${{ inputs.working-directory }}
+
+      - name: Run deployer against LocalNet
+        run: npm run deploy
+        working-directory: ${{ inputs.working-directory }}/smart_contracts
+
+      - name: Tests
+        run: npm run test
+        working-directory: ${{ inputs.working-directory }}/smart_contracts
