@@ -32,6 +32,11 @@ jobs:
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./infrastructure
+  ci-algorand:
+    name: Algorand build
+    uses: ./.github/workflows/smart-contract-ci.yml
+    with:
+      working-directory: ./src/algorand
 
   build-dapp:
     name: Build Dapp
@@ -44,6 +49,7 @@ jobs:
       static-site-env-prefix: VITE
     needs:
       - ci-dapp
+      - ci-algorand
   build-api:
     name: Build API
     uses: ./.github/workflows/node-build-zip.yml

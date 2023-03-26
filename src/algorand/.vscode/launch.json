@@ -3,10 +3,13 @@
   "configurations": [
     {
       "name": "Build & Deploy Beaker application",
-      "type": "node-terminal",
+      "type": "node",
       "request": "launch",
-      "command": "npm run deploy",
-      "cwd": "${workspaceFolder}/smart_contracts",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "deploy"],
+      "cwd": "${workspaceRoot}/smart_contracts",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
       "preLaunchTask": "Build Beaker application (+ LocalNet)",
       "presentation": {
         "hidden": false,
@@ -16,10 +19,13 @@
     },
     {
       "name": "Deploy Built Beaker application",
-      "type": "node-terminal",
+      "type": "node",
       "request": "launch",
-      "command": "npm run deploy",
-      "cwd": "${workspaceFolder}/smart_contracts",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "deploy"],
+      "cwd": "${workspaceRoot}/smart_contracts",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
       "presentation": {
         "hidden": false,
         "group": "3. Algorand",

@@ -5,14 +5,21 @@
   "main": "index.ts",
   "scripts": {
     "deploy": "ts-node-dev --transpile-only --watch .env -r dotenv/config index.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "jest --coverage --passWithNoTests"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "^1.0.0-beta.9"
+    "@algorandfoundation/algokit-utils": "^1.0.0-beta.21",
+    "@noble/ed25519": "^1.7.3",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/uuid": "^9.0.1",
     "dotenv": "^16.0.3",
     "prettier": "^2.8.4",
+    "tiny-invariant": "^1.3.1",
+    "ts-jest": "^29.0.5",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.5"
   }

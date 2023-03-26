@@ -1,10 +1,11 @@
-import { AlgoKitConfig, consoleLogger } from '@algorandfoundation/algokit-utils'
+import * as algokit from '@algorandfoundation/algokit-utils'
+import { consoleLogger } from '@algorandfoundation/algokit-utils/types/logging'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import fs from 'fs/promises'
 import path from 'path'
 import { contracts, deploy } from './deploy-config'
 
-AlgoKitConfig.configure({
+algokit.Config.configure({
   logger: consoleLogger,
 })
 ;(async () => {
@@ -21,6 +22,13 @@ AlgoKitConfig.configure({
       )
       continue
     }
-    await deploy(app, appSpec)
+    try {
+      await deploy(app, appSpec)
+    } catch (e) {
+      if ('led' in e) {
+        console.error('Received logic error', e.led)
+      }
+      throw e
+    }
   }
 })()

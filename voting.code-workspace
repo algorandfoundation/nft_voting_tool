@@ -19,16 +19,16 @@
   ],
   "settings": {
     "files.exclude": {
-      "infrastructure/": true,
-      "/src/": true
+      "/infrastructure/": true,
+      "/src/dapp/": true,
+      "/src/algorand/": true
     },
     "vite.port": 5173,
-    "dotenv.enableAutocloaking": false,
     "jest.disabledWorkspaceFolders": [
       "infrastructure",
-      "algorand",
       "ROOT"
     ],
+    "dotenv.enableAutocloaking": true,
   },
   "extensions": {
     "recommendations": ["joshx.workspace-terminals"]
