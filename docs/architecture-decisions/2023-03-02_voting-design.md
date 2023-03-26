@@ -1,11 +1,11 @@
 # On-chain voting design
 
-- **Status**: Draft
+- **Status**: Approved
 - **Owner**: Rob Moore
-- **Deciders**: Rob Moore (MakerX), Richard Watts-Seale (MakerX), Alessandro Cappellato (Algorand Foundation), Stephane Barroso (Algorand Foundation), Benjamin Guidarelli (Algorand Foundation)
+- **Deciders**: Rob Moore (MakerX), Richard Watts-Seale (MakerX), Alessandro Cappellato (Algorand Foundation), Stephane Barroso (Algorand Foundation), Benjamin Guidarelli (Algorand Foundation), Joana Lacerda (Algorand Foundation)
 - **Date created**: 2023-03-02
-- **Date decided**: TBD
-- **Date updated**: 2023-03-06
+- **Date decided**: 2023-03-10
+- **Date updated**: 2023-03-26
 
 ## Context
 
@@ -172,7 +172,7 @@ To ensure minimum balance requirement is catered for box storage the voting roun
 
 **Pros**
 
-- No confidential server required after voting round smart contract creation (i.e. fully decentralised)
+- No confidential server required at any point (i.e. fully decentralised)
 - Low storage requirement, low minimum balance requirement, relatively low clean up complexity
 - Simple vote caster experience
 
@@ -181,18 +181,34 @@ To ensure minimum balance requirement is catered for box storage the voting roun
 - Complex smart contract logic (Merkle proof validation, opup required to get more opcode budget for Keccak256 hashing, bitwise participation get and set logic), snapshot logic (Merkle tree creation), and dApp logic (Merkle proof calculation) required
 - Application args are complex (lining up passthrough of Merkle proof and loading correct box storage for bitwise logic)
 - Delegated voting is not easily possible (you could implement delegation using box storage, but it's complex to implement)
+- The size of the Merkle proof and the opcode budget needed for all of the hashing to check the Merkle proof can become significant as the number of accounts on the allow list grows into the hundreds of thousands and millions.
+
+### Option VG6 - Ephemeral private key encryption
+
+When the snapshot is generated, an ephemeral, cryptographically secure random private key is generated and used to encrypt snapshot entries. Once this is done the public key corresponding to that private key is stored and the private key is discarded. This allows for a similar design to VG5 - Merkle Tree, but the implementation is much simpler since a single signature can be provided rather than an array of signatures. The signed entries could have the same layout as the VG5 option, namely `{account address - 32 bytes}{voting weight - 4 bytes}{snapshot index - 4 bytes}`. Similarly, the same double voting protection approach can be utilised.
+
+**Pros**
+
+- No confidential server required at any point (i.e. fully decentralised), assuming you trust the device that generates the snapshot (and trust that the private key is properly disposed of)
+- Low storage requirement, low minimum balance requirement, relatively low clean up complexity
+- Simple vote caster experience
+
+**Cons**
+
+- Potential exists for vote stuffing if the private key is not properly disposed of, but it would be possible to see if this had happened after the fact by comparing the voters against the immutable snapshot
+- Some semi-complex smart contract logic (opup required to get more opcode budget for Ed25519 signature verification, bitwise participation get and set logic) required
+- Application args are semi-complex; loading the correct box storage for bitwise logic
+- Delegated voting is not easily possible (you could implement delegation using box storage, but it's complex to implement)
 
 ### Preferred option
 
-Option VG5 - Merkle tree.
+Option VG5 - Ephemeral private key encryption.
 
-It's the most elegant solution that provides a great user experience, a truly decentralised voting mechanism without need for a confidential server, relatively easy clean up.
-
-Requires spike to ensure viable implementation is possible, but initial feeling is this is the case. If it's not then the option is Option VG4 - Box storage since it is reasonable decentralised and has a great user experience and simple dApp implementation.
+It's the most elegant solution that provides a great user experience, a truly decentralised voting mechanism without need for a confidential server, relatively easy clean up and logic that isn't too complex.
 
 ### Selected option
 
-Option VG5 - Merkle tree.
+Option VG6 - Ephemeral private key encryption.
 
 
 ## Capability: Metadata storage
@@ -294,6 +310,7 @@ To determine a result there are numerous voting algorithms including first past 
 
 - dApp logic is more complex (need to load boxes)
 - Retrieving data from algod is harder (N+1 requests for N boxes, rather than 1 call to get all global storage values)
+- Contract creation requires two separate transaction groups to be signed - one to create the contract and a second to then fund and bootstrap the contract
 
 ### Preferred option
 
@@ -378,6 +395,7 @@ If there is no cache then the following requests would be required:
 * One call to algod to return all apps created by the creator wallet (including global state)
 * Per each app:
     * One call to algod **per box** to get current box storage values (to see current voting state)
+      * Alternatively, this could be changed to a single smart contract call using dry run to retrieve all box values
     * One call to indexer to get any transactions from the current user's account to that app (to see if/what the current user voted) (cacheable once voted, assuming voting is immutable)
     * One call to algod to get any assets created by the app account (to see if there is a result NFT)
       * One call to indexer to get creation transaction note for result NFT if there is one
@@ -442,7 +460,9 @@ A good balance between terrible user experience and centralisation / lack of por
 
 ### Selected option
 
-Option FR3 - Collection cache records.
+Option FR1 - dApp querying.
+
+Simpler initial option with less coordination needed in the dApp to manage the collection cache. If a method is added to the smart contract to return questions then the number of extra calls can be limited.
 
 
 ## Capability: Multiple questions
