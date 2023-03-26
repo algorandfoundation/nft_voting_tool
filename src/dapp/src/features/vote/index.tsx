@@ -1,5 +1,7 @@
 import { Box, Link, Skeleton, Stack, Typography } from "@mui/material";
+import { useWallet } from "@txnlab/use-wallet";
 import { useParams } from "react-router-dom";
+import * as uuid from "uuid";
 import api from "../../shared/api";
 import { LoadingDialog } from "../../shared/loading/LoadingDialog";
 import { SkeletonArray } from "../../shared/SkeletonArray";
@@ -14,6 +16,7 @@ import { WalletVoteStatus } from "./WalletVoteStatus";
 
 function Vote() {
   const { voteCid } = useParams();
+  const { activeAddress, signer } = useWallet();
   const { data, loading, refetch } = api.useVotingRound(voteCid!);
   const walletAddress = useConnectedWallet();
   const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
@@ -24,10 +27,16 @@ function Vote() {
   const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted;
 
   const handleSubmitVote = async (selectedOption: string) => {
-    if (!selectedOption) return;
+    if (!selectedOption || !activeAddress) return;
     try {
-      const result = await submitVote({ selectedOption, walletAddress });
-      await refetch(result.openRounds.find((p) => p.id === voteCid));
+      const result = await submitVote({
+        activeAddress,
+        signature: "XxbdiHICkPAtpyPwgvXoISjtODjWmVFRrQRddftW4OO36EPTwzZoxGknV+stq51+2XgUkd0HCxZhdonfcPJoBQ==",
+        selectedOption: uuid.v4(),
+        signer,
+        appId: 65,
+      });
+      // await refetch(result.openRounds.find((p) => p.id === voteCid));
     } catch (e) {
       // TODO: handle failure
     }

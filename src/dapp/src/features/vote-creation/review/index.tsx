@@ -10,6 +10,7 @@ import { VoteCreationSteps } from "../VoteCreationSteps";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { Row } from "./Row";
 
+import { useWallet } from "@txnlab/use-wallet";
 import dayjs from "dayjs";
 import { getTimezone } from "../../../shared/getTimezone";
 import { getWalletAddresses } from "../../../shared/wallet";
@@ -17,6 +18,7 @@ import { Steps } from "../Steps";
 
 export default function Review() {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const { activeAddress, signer } = useWallet();
   const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen);
   const roundInfo = useRoundInfo();
   const questions = useQuestions();
@@ -27,8 +29,9 @@ export default function Review() {
   const createVotingRound = async () => {
     try {
       await createVotingRoundApi({
-        ...roundInfo,
-        ...questions,
+        newRound: { ...roundInfo, ...questions },
+        activeAddress,
+        signer,
       });
       resetCreateState();
       navigate("/", {});
