@@ -117,15 +117,31 @@ const useMockSetter = <T, K>(action: (payload: T) => Promise<K>, extraDelayMs = 
   return { loading, execute };
 };
 
+const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
+  const [loading, setLoading] = useState(false);
+  const execute = useCallback((payload: T) => {
+    setLoading(true);
+    const promise = new Promise<K>((resolve) => {
+      action(payload).then((state) => {
+        resolve(state);
+        setLoading(false);
+      });
+    });
+    return promise;
+  }, []);
+
+  return { loading, execute };
+};
+
 const api = {
   useConnectWallet: () => {
     const setConnectedWallet = useSetConnectedWallet();
-    return useMockSetter((address: string) => {
+    return useSetter((address: string) => {
       return new Promise((resolve) => {
         setConnectedWallet(address);
         resolve(address);
       });
-    }, 2000);
+    });
   },
   useSubmitVote: (roundId: string) => {
     const setState = useSetRecoilState(votingRoundsAtom);
