@@ -1,15 +1,15 @@
 {
-  "name": "@makerx/caddi-poller",
+  "name": "voting-metadata",
   "version": "1.0.0",
-  "description": "Caddi Poller",
+  "description": "Voting Metadata API",
   "main": "src/lambda-handler.js",
-  "author": "MakerX",
+  "author": "Algorand Foundation",
   "type": "commonjs",
   "scripts": {
     "dev": "ts-node-dev --transpile-only --watch .env -r dotenv/config src/server.ts",
-    "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --production",
+    "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --omit=dev",
     "routes": "tsoa routes",
-    "clean": "rimraf build",
+    "clean": "rimraf node_modules && rimraf build",
     "typecheck": "tsoa routes && tsc --noEmit"
   },
   "dependencies": {
@@ -20,7 +20,7 @@
     "date-fns": "^2.29.3",
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "multiformats": "^11.0.2",
+    "multiformats": "^9.9.0",
     "node-fetch": "^3.3.1",
     "reflect-metadata": "^0.1.13",
     "serverless-http": "^3.2.0",

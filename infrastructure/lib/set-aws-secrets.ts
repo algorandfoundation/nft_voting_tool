@@ -22,7 +22,7 @@ const outputs: { arn: string; environmentKey: string }[] = []
 Object.keys(cfnOutputs).forEach((stackKey) => {
   Object.keys(cfnOutputs[stackKey])
     .filter((outputKey) => {
-      return /secretarn$/i.test(outputKey)
+      return /secretarn$/i.test(outputKey);
     })
     .forEach((outputKey) => {
       outputs.push(JSON.parse(cfnOutputs[stackKey][outputKey]) as { arn: string; environmentKey: string })

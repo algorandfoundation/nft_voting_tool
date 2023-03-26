@@ -1,7 +1,8 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
-import { sha256 } from "multiformats/dist/types/src/hashes/sha2"
+import { sha256 } from "multiformats/hashes/sha2"
 import { singleton } from 'tsyringe'
+import { NotFoundException } from '../models/errors/httpResponseException'
 import type { IIpfsService } from "./ipfsService"
 
 @singleton()
@@ -11,7 +12,7 @@ export class InMemoryIPFSService implements IIpfsService {
     async get<T>(cid: string): Promise<T> {
         const cached = this.cache[cid]
         if (!cached) {
-            throw new Error('404')
+            throw new NotFoundException('Could not find the IPFS File')
         }
 
         return JSON.parse(cached) as T

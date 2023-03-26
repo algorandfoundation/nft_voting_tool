@@ -1,7 +1,8 @@
 import { IocContainer } from '@tsoa/runtime';
 import { S3, SecretsManager } from 'aws-sdk';
 import path from 'path';
-import { container } from 'tsyringe';
+import { container, Lifecycle } from 'tsyringe';
+import { AwsSecretsService } from './services/awsSecretsService';
 import { CacheOnlyIPFSService } from './services/cacheOnlyIpfsService';
 import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService';
 import { InMemoryIPFSService } from './services/inMemoryIpfsService';
@@ -16,11 +17,17 @@ if (env === 'development') {
         useValue: path.join(__dirname, "..", ".cache")
     });
     container.register<IObjectCacheService>("IObjectCacheService", {
-        useClass: FileSystemObjectCacheService
-    });
+        useClass: FileSystemObjectCacheService,
+    },
+        {
+            lifecycle: Lifecycle.Singleton
+        });
     container.register<IIpfsService>("IIpfsService", {
         useClass: InMemoryIPFSService
-    });
+    },
+        {
+            lifecycle: Lifecycle.Singleton
+        });
 }
 else {
     container.register<S3>("S3Client", {
@@ -35,10 +42,16 @@ else {
     });
     container.register<IObjectCacheService>("IObjectCacheService", {
         useClass: S3ObjectCacheService
-    });
+    },
+        {
+            lifecycle: Lifecycle.Singleton
+        });
     container.register<IIpfsService>("IIpfsService", {
         useClass: CacheOnlyIPFSService
-    });
+    },
+        {
+            lifecycle: Lifecycle.Singleton
+        });
     container.register<SecretsManager>("SecretsManager", {
         useFactory: (_) => {
             return new SecretsManager({
@@ -46,7 +59,15 @@ else {
             })
         }
     });
+    container.register<AwsSecretsService>("AwsSecretsService", {
+        useClass: AwsSecretsService
+    },
+        {
+            lifecycle: Lifecycle.Singleton
+        });
 }
+
+
 
 export const iocContainer: IocContainer = {
     get: <T>(controller: { prototype: T }): T => {
