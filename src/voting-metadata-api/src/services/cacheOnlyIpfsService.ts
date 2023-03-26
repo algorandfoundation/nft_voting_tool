@@ -1,18 +1,12 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import { inject, registry, singleton } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 import { IIpfsService } from "./ipfsService"
 import { IObjectCacheService } from "./objectCacheService"
-import { S3ObjectCacheService } from './s3ObjectCacheService'
 
 @singleton()
-@registry([
-    {
-        token: 'IObjectCacheService',
-        useClass: S3ObjectCacheService
-    }
-])
+
 export class CacheOnlyIPFSService implements IIpfsService {
     private cache: IObjectCacheService
 

@@ -8,7 +8,7 @@ import { IIpfsService } from './ipfsService'
 import type { IObjectCacheService } from './objectCacheService'
 
 @singleton()
-export class Web3StorageWithCacheService implements IIpfsService {
+export class Web3StorageWithCacheIpfsService implements IIpfsService {
   private cache: IObjectCacheService
   private storage: Web3Storage
 

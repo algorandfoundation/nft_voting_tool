@@ -1,21 +1,11 @@
 import { SecretsManager } from 'aws-sdk'
-import { inject, registry, singleton } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 
 @singleton()
-@registry([
-  {
-    token: SecretsManager,
-    useFactory: (c) => {
-      return new SecretsManager({
-        region: process.env.AWS_REGION
-      })
-    }
-  }
-])
 export class AwsSecretsService {
   private secretsClient: SecretsManager
 
-  constructor(@inject(SecretsManager) secretsClient: SecretsManager) {
+  constructor(@inject("SecretsManager") secretsClient: SecretsManager) {
     this.secretsClient = secretsClient
   }
 
@@ -35,5 +25,15 @@ export class AwsSecretsService {
         }
       })
     })
+  }
+
+  public resolveSecrets(): void {
+    Object.keys(process.env)
+      .filter((key) => key.match(/_ARN$/))
+      .map(async (key) => {
+        console.log(`Fetching secret with a key : ${key}`)
+        let arn = process.env[key] as string
+        process.env[key.replace(/_ARN$/, '')] = await this.getSecret(arn)
+      })
   }
 }

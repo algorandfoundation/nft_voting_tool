@@ -1,27 +1,14 @@
 import { S3 } from "aws-sdk"
-import { registry, singleton } from "tsyringe"
+import { inject, singleton } from "tsyringe"
 import { IObjectCacheService } from "./objectCacheService"
 
 @singleton()
-@registry([
-    {
-        token: S3,
-        useFactory: (c) => {
-            return new S3({
-                region: process.env.AWS_REGION,
-            })
-        }
-    },
-    {
-        token: 'bucket',
-        useValue: process.env.CACHE_BUCKET_NAME!
-    }
-])
+
 export class S3ObjectCacheService implements IObjectCacheService {
     private s3Client: S3
     private bucket: string
 
-    constructor(s3Client: S3, bucket: string) {
+    constructor(@inject("S3Client") s3Client: S3, @inject("S3Bucket") bucket: string) {
         this.s3Client = s3Client
         this.bucket = bucket
     }

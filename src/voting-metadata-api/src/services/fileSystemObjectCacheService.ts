@@ -4,7 +4,7 @@ import { singleton } from 'tsyringe'
 import { IObjectCacheService } from "./objectCacheService"
 
 @singleton()
-export class FileSystemObjectCache implements IObjectCacheService {
+export class FileSystemObjectCacheService implements IObjectCacheService {
     private cacheDirectory: string
     constructor(cacheDirectory: string) {
         this.cacheDirectory = cacheDirectory
