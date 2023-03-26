@@ -1,7 +1,5 @@
-import { Body, Controller, Get, Path, Post, Route } from "tsoa";
+import { Controller, Get, Path, Post, Route, UploadedFile } from "tsoa";
 import { inject, injectable } from "tsyringe";
-import { Snapshot } from "../models/snapshot";
-import { Vote } from "../models/vote";
 import { IIpfsService } from "../services/ipfsService";
 
 @injectable()
@@ -15,12 +13,12 @@ export class SnapshotController extends Controller {
     }
 
     @Get("{cid}")
-    public async getWalletSnapshotFile(@Path() cid: string): Promise<Snapshot> {
-        return this.ipfsService.get<Vote>(cid);
+    public async getWalletSnapshotFile(@Path() cid: string): Promise<Express.Multer.File> {
+        return this.ipfsService.get<Express.Multer.File>(cid);
     }
 
     @Post()
-    public async postWalletSnapshot(@Body() snapshot: Snapshot): Promise<{ cid: string }> {
-        return this.ipfsService.put(snapshot);
+    public async postWalletSnapshot(@UploadedFile() snapshot: Express.Multer.File): Promise<{ cid: string }> {
+        return this.ipfsService.put<Express.Multer.File>(snapshot);
     }
 }
