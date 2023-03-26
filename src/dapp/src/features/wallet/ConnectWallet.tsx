@@ -1,28 +1,36 @@
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
-import { useState } from "react";
+import { useWallet } from "@txnlab/use-wallet";
+import { useEffect, useState } from "react";
 import api from "../../shared/api";
 import { Loading } from "../../shared/loading/Loading";
+import { getWalletLabel } from "../../shared/wallet";
 import { useSetShowConnectWalletModal, useShowConnectWalletModal } from "./state";
 
 const ConnectWallet = () => {
-  const { execute: connectWallet } = api.useConnectWallet();
   const [connecting, setConnecting] = useState(false);
 
   const showConnectWalletModal = useShowConnectWalletModal();
   const setShowConnectWalletModal = useSetShowConnectWalletModal();
 
-  const selectWallet = async (address: string) => {
-    try {
+  const { execute: connectWallet } = api.useConnectWallet();
+  const { providers, activeAddress } = useWallet();
+
+  useEffect(() => {
+    (async () => {
+      await Promise.all((providers ?? []).map(async (p) => p.reconnect()));
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       setConnecting(true);
-      await connectWallet(address);
-      setShowConnectWalletModal(false);
-      setTimeout(() => {
-        setConnecting(false);
-      }, 100);
-    } catch (e) {
-      // TODO: handle failure
-    }
-  };
+      if (activeAddress) {
+        await connectWallet(activeAddress);
+      }
+      setConnecting(false);
+    })();
+  }, [activeAddress]);
 
   const onClose = () => {
     setShowConnectWalletModal(false);
@@ -43,30 +51,29 @@ const ConnectWallet = () => {
               </Typography>
             </div>
             <div>
-              <Typography>
-                You will need approximately [A100] to create the voting round. Ensure your wallet has this amount before you start.{" "}
-              </Typography>
+              {activeAddress && (
+                <Typography>
+                  Connected wallet: <strong>{getWalletLabel(activeAddress)}</strong>
+                </Typography>
+              )}
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 justify-items-stretch gap-4">
-              <Button onClick={() => selectWallet("PERAG7V9V3SR9ZBTO690MV6I")} className="h-30" variant="outlined" color="primary">
-                PERA
-              </Button>
-              <Button onClick={() => selectWallet("DEFLYDPZOO51XYT6V1PO8I7VM")} className="h-20" variant="outlined" color="primary">
-                DEFLY
-              </Button>
-              <Button onClick={() => selectWallet("EXODUS0109JLI7ZZI1I85TRSPZ")} className="h-20" variant="outlined" color="primary">
-                EXODUS
-              </Button>
-              <Button onClick={() => selectWallet("FOURMIXVO4CL9YG7BKQT71N1")} className="h-20" variant="outlined" color="primary">
-                WALLET APP FOUR
-              </Button>
-              <Button onClick={() => selectWallet("FIVEP11PEX71HCF3N3AOAS7U")} className="h-20" variant="outlined" color="primary">
-                WALLET APP FIVE
-              </Button>
-              <Button onClick={() => selectWallet("SIX7Q1LLIVJMXRT000ORWQD")} className="h-20" variant="outlined" color="primary">
-                WALLET APP SIX
-              </Button>
+              {providers?.map((provider) => (
+                <Button
+                  key={`provider-${provider.metadata.id}`}
+                  className="p-4"
+                  variant="outlined"
+                  color="primary"
+                  // startIcon={<img width={30} height={30} alt="" src={provider.metadata.icon} className="mr-2 flex-shrink" />}
+                  endIcon={provider.isActive ? <CheckCircleIcon height={30} width={30} /> : ""}
+                  onClick={() => {
+                    return provider.isConnected ? provider.setActiveProvider() : provider.connect();
+                  }}
+                >
+                  <img width={30} height={30} alt="" src={provider.metadata.icon} className="mr-2 flex-shrink" />
+                  <span className="flex-1">{provider.metadata.name}</span>
+                </Button>
+              ))}
             </div>
           </Stack>
         )}
@@ -74,7 +81,7 @@ const ConnectWallet = () => {
       {!connecting && (
         <DialogActions>
           <Button onClick={onClose} className="mr-1">
-            Cancel
+            Close
           </Button>
         </DialogActions>
       )}
