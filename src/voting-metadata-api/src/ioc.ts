@@ -18,16 +18,14 @@ if (env === 'development') {
     });
     container.register<IObjectCacheService>("IObjectCacheService", {
         useClass: FileSystemObjectCacheService,
-    },
-        {
-            lifecycle: Lifecycle.Singleton
-        });
+    }, {
+        lifecycle: Lifecycle.Singleton
+    });
     container.register<IIpfsService>("IIpfsService", {
         useClass: InMemoryIPFSService
-    },
-        {
-            lifecycle: Lifecycle.Singleton
-        });
+    }, {
+        lifecycle: Lifecycle.Singleton
+    });
 }
 else {
     container.register<S3>("S3Client", {
@@ -42,16 +40,14 @@ else {
     });
     container.register<IObjectCacheService>("IObjectCacheService", {
         useClass: S3ObjectCacheService
-    },
-        {
-            lifecycle: Lifecycle.Singleton
-        });
+    }, {
+        lifecycle: Lifecycle.Singleton
+    });
     container.register<IIpfsService>("IIpfsService", {
         useClass: CacheOnlyIPFSService
-    },
-        {
-            lifecycle: Lifecycle.Singleton
-        });
+    }, {
+        lifecycle: Lifecycle.Singleton
+    });
     container.register<SecretsManager>("SecretsManager", {
         useFactory: (_) => {
             return new SecretsManager({
@@ -61,10 +57,9 @@ else {
     });
     container.register<AwsSecretsService>("AwsSecretsService", {
         useClass: AwsSecretsService
-    },
-        {
-            lifecycle: Lifecycle.Singleton
-        });
+    }, {
+        lifecycle: Lifecycle.Singleton
+    });
 }
 
 
