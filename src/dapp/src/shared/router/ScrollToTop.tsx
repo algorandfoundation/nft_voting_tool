@@ -11,7 +11,7 @@ export default function ScrollToTop() {
           left: 0,
           behavior: 'smooth',
         }),
-      25
+      25,
     )
   }, [pathname])
 

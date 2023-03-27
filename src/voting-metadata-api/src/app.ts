@@ -1,11 +1,4 @@
-import express, {
-  Application,
-  json,
-  NextFunction,
-  Request as ExRequest,
-  Response as ExResponse,
-  urlencoded,
-} from 'express'
+import express, { Application, json, NextFunction, Request as ExRequest, Response as ExResponse, urlencoded } from 'express'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
 import { RegisterRoutes } from '../routes/routes'
@@ -23,7 +16,7 @@ export default function CreateApp(): Application {
   app.use(
     urlencoded({
       extended: true,
-    })
+    }),
   )
   app.use(json())
 
@@ -35,12 +28,7 @@ export default function CreateApp(): Application {
     })
   })
 
-  app.use(function errorHandler(
-    err: unknown,
-    req: ExRequest,
-    res: ExResponse,
-    next: NextFunction
-  ): ExResponse | void {
+  app.use(function errorHandler(err: unknown, req: ExRequest, res: ExResponse, next: NextFunction): ExResponse | void {
     if (err instanceof ValidateError) {
       console.warn(`Caught Validation Error for ${req.path}:`, err.fields)
       return res.status(422).json({

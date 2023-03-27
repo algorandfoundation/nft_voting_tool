@@ -94,7 +94,7 @@ const useMockGetter = <T>(payload: T) => {
         // simulate loading time
       }, Math.random() * 400)
     },
-    [data, setData]
+    [data, setData],
   )
   return { loading, data, refetch }
 }
@@ -109,7 +109,7 @@ const useMockSetter = <T, K>(action: (payload: T) => Promise<K>, extraDelayMs = 
         setLoading(false)
         resolve(state)
         // simulate loading time
-      }, Math.random() * 400 + extraDelayMs)
+      }, Math.random() * 400 + extraDelayMs),
     )
     return promise
   }, [])

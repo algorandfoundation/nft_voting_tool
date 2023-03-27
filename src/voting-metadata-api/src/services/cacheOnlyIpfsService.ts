@@ -18,13 +18,11 @@ export class CacheOnlyIPFSService implements IIpfsService {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
       (_e) => {
-        throw new NotFoundException(
-          `Could not find IPFS object with CID: ${cid}`
-        )
+        throw new NotFoundException(`Could not find IPFS object with CID: ${cid}`)
       },
       undefined,
       undefined,
-      true
+      true,
     )
   }
 
@@ -32,12 +30,10 @@ export class CacheOnlyIPFSService implements IIpfsService {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       (_e) => {
-        throw new NotFoundException(
-          `Could not finf IPFS object with CID: ${cid}`
-        )
+        throw new NotFoundException(`Could not finf IPFS object with CID: ${cid}`)
       },
       undefined,
-      true
+      true,
     )
   }
 
@@ -49,7 +45,7 @@ export class CacheOnlyIPFSService implements IIpfsService {
         return Promise.resolve(data)
       },
       0,
-      false
+      false,
     )
     return { cid: cid.toString() }
   }
@@ -63,7 +59,7 @@ export class CacheOnlyIPFSService implements IIpfsService {
       },
       mimeType,
       0,
-      false
+      false,
     )
     return { cid: cid.toString() }
   }

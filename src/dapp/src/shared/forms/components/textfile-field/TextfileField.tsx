@@ -26,7 +26,7 @@ export function TextfileField({ onChange, disabled, value }: TextfileFieldProps)
         onChange(new Error('Error reading file'))
       }
     },
-    [disabled, onChange]
+    [disabled, onChange],
   )
 
   const ref = useRef<HTMLInputElement>(null)

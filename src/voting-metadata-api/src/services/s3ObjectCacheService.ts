@@ -7,10 +7,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
   private s3Client: S3
   private bucket: string
 
-  constructor(
-    @inject('S3Client') s3Client: S3,
-    @inject('S3Bucket') bucket: string
-  ) {
+  constructor(@inject('S3Client') s3Client: S3, @inject('S3Bucket') bucket: string) {
     this.s3Client = s3Client
     this.bucket = bucket
   }
@@ -23,11 +20,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
     })
   }
 
-  async putBuffer(
-    cacheKey: string,
-    data: Buffer,
-    mimeType: string
-  ): Promise<void> {
+  async putBuffer(cacheKey: string, data: Buffer, mimeType: string): Promise<void> {
     const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}` }
     await this.s3Client.putObject({
       ...bucketAndKey,
@@ -40,31 +33,21 @@ export class S3ObjectCacheService implements IObjectCacheService {
     cacheKey: string,
     generator: (existing: T | undefined) => Promise<T>,
     staleAfterSeconds?: number,
-    returnStaleResult?: boolean
+    returnStaleResult?: boolean,
   ): Promise<T> {
     const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}.json` }
-    const existingCache = await this.s3Client
-      .getObject(bucketAndKey)
-      .catch(() => undefined)
-    const expired =
-      staleAfterSeconds &&
-      existingCache &&
-      (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
+    const existingCache = await this.s3Client.getObject(bucketAndKey).catch(() => undefined)
+    const expired = staleAfterSeconds && existingCache && (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
 
-    const existingJson = !!existingCache
-      ? existingCache.Body!.toString()
-      : undefined
-    const existing =
-      !!existingCache && !!existingJson
-        ? (JSON.parse(existingJson) as T)
-        : undefined
+    const existingJson = !!existingCache ? existingCache.Body!.toString() : undefined
+    const existing = !!existingCache && !!existingJson ? (JSON.parse(existingJson) as T) : undefined
 
     let value = existing
     if (!existing || expired) {
       console.debug(
         !existingCache
           ? `Cache value '${cacheKey}' empty; getting data for the first time`
-          : `Cache value '${cacheKey}' expired: ${existingCache.LastModified!.toISOString()}`
+          : `Cache value '${cacheKey}' expired: ${existingCache.LastModified!.toISOString()}`,
       )
       try {
         value = await generator(existing)
@@ -74,18 +57,14 @@ export class S3ObjectCacheService implements IObjectCacheService {
         if (existingCache && returnStaleResult) {
           console.error(e)
           console.warn(
-            `Received error ${
-              e?.message || e
-            } when trying to repopulate cache value '${cacheKey}'; failing gracefully and using the cache`
+            `Received error ${e?.message || e} when trying to repopulate cache value '${cacheKey}'; failing gracefully and using the cache`,
           )
         } else {
           throw e
         }
       }
     } else {
-      console.debug(
-        `Found cached value '${cacheKey}.json' which is within ${staleAfterSeconds} seconds old so using that`
-      )
+      console.debug(`Found cached value '${cacheKey}.json' which is within ${staleAfterSeconds} seconds old so using that`)
     }
 
     return value!
@@ -96,31 +75,23 @@ export class S3ObjectCacheService implements IObjectCacheService {
     generator: (existing: Buffer | undefined) => Promise<[Buffer, string]>,
     mimeType: string | undefined,
     staleAfterSeconds?: number | undefined,
-    returnStaleResult?: boolean | undefined
+    returnStaleResult?: boolean | undefined,
   ): Promise<[Buffer, string]> {
     const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}` }
-    const existingCache = await this.s3Client
-      .getObject(bucketAndKey)
-      .catch(() => undefined)
-    const expired =
-      staleAfterSeconds &&
-      existingCache &&
-      (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
+    const existingCache = await this.s3Client.getObject(bucketAndKey).catch(() => undefined)
+    const expired = staleAfterSeconds && existingCache && (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
 
     if (mimeType === undefined) {
       mimeType = existingCache?.ContentType ?? 'application/octet-stream'
     }
     const existingBody = !!existingCache ? existingCache.Body! : undefined
-    const existing =
-      !!existingCache && !!existingBody
-        ? Buffer.from(await existingBody.transformToByteArray())
-        : undefined
+    const existing = !!existingCache && !!existingBody ? Buffer.from(await existingBody.transformToByteArray()) : undefined
     let value = existing
     if (!existing || expired) {
       console.debug(
         !existingCache
           ? `Cache value '${cacheKey}' empty; getting data for the first time`
-          : `Cache value '${cacheKey}' expired: ${existingCache.LastModified!.toISOString()}`
+          : `Cache value '${cacheKey}' expired: ${existingCache.LastModified!.toISOString()}`,
       )
       try {
         const [genValue, type] = await generator(existing)
@@ -131,18 +102,14 @@ export class S3ObjectCacheService implements IObjectCacheService {
         if (existingCache && returnStaleResult) {
           console.error(e)
           console.warn(
-            `Received error ${
-              e?.message || e
-            } when trying to repopulate cache value '${cacheKey}'; failing gracefully and using the cache`
+            `Received error ${e?.message || e} when trying to repopulate cache value '${cacheKey}'; failing gracefully and using the cache`,
           )
         } else {
           throw e
         }
       }
     } else {
-      console.debug(
-        `Found cached value '${cacheKey}.json' which is within ${staleAfterSeconds} seconds old so using that`
-      )
+      console.debug(`Found cached value '${cacheKey}.json' which is within ${staleAfterSeconds} seconds old so using that`)
     }
 
     return [value!, mimeType]

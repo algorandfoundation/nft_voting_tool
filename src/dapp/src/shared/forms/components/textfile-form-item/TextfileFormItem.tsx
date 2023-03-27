@@ -31,7 +31,7 @@ export function TextfileFormItem<TSchema extends Record<string, unknown>>({
         setValue(field, value as any)
       }
     },
-    [clearErrors, field, setError, setValue]
+    [clearErrors, field, setError, setValue],
   )
 
   return (

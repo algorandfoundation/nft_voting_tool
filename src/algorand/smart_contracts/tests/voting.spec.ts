@@ -23,13 +23,7 @@ describe('voting', () => {
     appSpec = JSON.parse(appSpecBuffer.toString('utf-8')) as AppSpec
   })
 
-  const setupApp = async (setup?: {
-    cid?: string
-    start?: number
-    end?: number
-    quorum?: number
-    questionIds?: string[]
-  }) => {
+  const setupApp = async (setup?: { cid?: string; start?: number; end?: number; quorum?: number; questionIds?: string[] }) => {
     let { cid, start, end, quorum, questionIds } = setup ?? {}
     const { algod, testAccount } = localnet.context
 
@@ -75,9 +69,7 @@ describe('voting', () => {
           {
             from: testAccount,
             to: app.appAddress,
-            amount: algokit.microAlgos(
-              100_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
-            ),
+            amount: algokit.microAlgos(100_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
             skipSending: true,
           },
           algod,
@@ -182,9 +174,7 @@ describe('voting', () => {
     expect(globalState.is_bootstrapped.value).toBe(1)
 
     const boxes = await appClient.getBoxNames()
-    expect(boxes.map((b) => b.nameBase64).sort()).toEqual(
-      questions.boxRefs.map((b) => Buffer.from(b.name).toString('base64')).sort(),
-    )
+    expect(boxes.map((b) => b.nameBase64).sort()).toEqual(questions.boxRefs.map((b) => Buffer.from(b.name).toString('base64')).sort())
 
     const boxValues = await appClient.getBoxValuesAsABIType(new ABIUintType(64))
     expect(boxValues.map((v) => v.value)).toEqual([0n, 0n, 0n, 0n])

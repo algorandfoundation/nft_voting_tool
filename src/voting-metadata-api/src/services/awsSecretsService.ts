@@ -11,29 +11,22 @@ export class AwsSecretsService {
 
   public async getSecret(secretArn: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.secretsClient.getSecretValue(
-        { SecretId: secretArn },
-        (err, data) => {
-          if (err) {
-            console.log(JSON.stringify(err))
-            reject(err)
-            return
-          }
-          if (data === undefined) {
-            reject(new Error('Secret data is undefined'))
+      this.secretsClient.getSecretValue({ SecretId: secretArn }, (err, data) => {
+        if (err) {
+          console.log(JSON.stringify(err))
+          reject(err)
+          return
+        }
+        if (data === undefined) {
+          reject(new Error('Secret data is undefined'))
+        } else {
+          if ('SecretString' in data) {
+            resolve(data.SecretString as string)
           } else {
-            if ('SecretString' in data) {
-              resolve(data.SecretString as string)
-            } else {
-              resolve(
-                Buffer.from(data.SecretBinary as any, 'base64').toString(
-                  'ascii'
-                )
-              )
-            }
+            resolve(Buffer.from(data.SecretBinary as any, 'base64').toString('ascii'))
           }
         }
-      )
+      })
     })
   }
 

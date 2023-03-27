@@ -25,7 +25,7 @@ if (env === 'development') {
     },
     {
       lifecycle: Lifecycle.Singleton,
-    }
+    },
   )
   container.register<IIpfsService>(
     'IIpfsService',
@@ -34,7 +34,7 @@ if (env === 'development') {
     },
     {
       lifecycle: Lifecycle.Singleton,
-    }
+    },
   )
 } else {
   container.register<S3>('S3Client', {
@@ -54,7 +54,7 @@ if (env === 'development') {
     },
     {
       lifecycle: Lifecycle.Singleton,
-    }
+    },
   )
   container.register<Web3Storage>('Web3StorageClient', {
     useFactory: (_) => {
@@ -70,7 +70,7 @@ if (env === 'development') {
     },
     {
       lifecycle: Lifecycle.Singleton,
-    }
+    },
   )
   container.register<SecretsManager>('SecretsManager', {
     useFactory: (_) => {
@@ -86,7 +86,7 @@ if (env === 'development') {
     },
     {
       lifecycle: Lifecycle.Singleton,
-    }
+    },
   )
 }
 

@@ -66,5 +66,5 @@ ReactDOM.createRoot(rootElement).render(
         </RecoilRoot>
       </ThemeProvider>
     </StyledEngineProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 )
