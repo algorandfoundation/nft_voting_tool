@@ -1,5 +1,5 @@
-import { SecretsManager } from 'aws-sdk'
-import { inject, singleton } from 'tsyringe'
+import { SecretsManager } from "@aws-sdk/client-secrets-manager";
+import { inject, singleton } from 'tsyringe';
 
 @singleton()
 export class AwsSecretsService {
@@ -17,11 +17,14 @@ export class AwsSecretsService {
           reject(err)
           return
         }
-
-        if ('SecretString' in data) {
-          resolve(data.SecretString as string)
+        if (data === undefined) {
+          reject(new Error("Secret data is undefined"))
         } else {
-          resolve(Buffer.from(data.SecretBinary as any, 'base64').toString('ascii'))
+          if ('SecretString' in data) {
+            resolve(data.SecretString as string)
+          } else {
+            resolve(Buffer.from(data.SecretBinary as any, 'base64').toString('ascii'))
+          }
         }
       })
     })

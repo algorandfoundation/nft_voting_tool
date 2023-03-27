@@ -1,6 +1,6 @@
-import { S3 } from "aws-sdk"
-import { inject, singleton } from "tsyringe"
-import { IObjectCacheService } from "./objectCacheService"
+import { S3 } from "@aws-sdk/client-s3";
+import { inject, singleton } from "tsyringe";
+import { IObjectCacheService } from "./objectCacheService";
 
 @singleton()
 export class S3ObjectCacheService implements IObjectCacheService {
@@ -11,6 +11,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
         this.s3Client = s3Client
         this.bucket = bucket
     }
+
     async put<T>(cacheKey: string, data: T): Promise<void> {
         const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}.json` }
         await this.s3Client
@@ -18,7 +19,6 @@ export class S3ObjectCacheService implements IObjectCacheService {
                 ...bucketAndKey,
                 Body: JSON.stringify(data, null, 2),
             })
-            .promise()
     }
 
     async putBuffer(cacheKey: string, data: Buffer, mimeType: string): Promise<void> {
@@ -29,7 +29,6 @@ export class S3ObjectCacheService implements IObjectCacheService {
                 Body: data,
                 ContentType: mimeType
             })
-            .promise()
     }
 
     async getAndCache<T>(
@@ -41,12 +40,11 @@ export class S3ObjectCacheService implements IObjectCacheService {
         const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}.json` }
         const existingCache = await this.s3Client
             .getObject(bucketAndKey)
-            .promise()
             .catch(() => undefined)
         const expired =
             staleAfterSeconds && existingCache && (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
 
-        const existingJson = !!existingCache ? existingCache.Body!.toString('utf-8') : undefined
+        const existingJson = !!existingCache ? existingCache.Body!.toString() : undefined
         const existing = !!existingCache && !!existingJson ? (JSON.parse(existingJson) as T) : undefined
 
         let value = existing
@@ -84,7 +82,6 @@ export class S3ObjectCacheService implements IObjectCacheService {
         const bucketAndKey = { Bucket: this.bucket, Key: `${cacheKey}` }
         const existingCache = await this.s3Client
             .getObject(bucketAndKey)
-            .promise()
             .catch(() => undefined)
         const expired =
             staleAfterSeconds && existingCache && (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
@@ -93,7 +90,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
             mimeType = existingCache?.ContentType ?? 'application/octet-stream'
         }
         const existingBody = !!existingCache ? existingCache.Body! : undefined
-        const existing = !!existingCache && !!existingBody ? existingBody as Buffer : undefined
+        const existing = !!existingCache && !!existingBody ? Buffer.from((await existingBody.transformToByteArray())) : undefined
         let value = existing
         if (!existing || expired) {
             console.debug(

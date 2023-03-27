@@ -1,14 +1,16 @@
 import { IocContainer } from '@tsoa/runtime';
-import { S3, SecretsManager } from 'aws-sdk';
+import { S3 } from "@aws-sdk/client-s3";
+import { SecretsManager } from "@aws-sdk/client-secrets-manager";
 import path from 'path';
 import { container, Lifecycle } from 'tsyringe';
+import { Web3Storage } from 'web3.storage';
 import { AwsSecretsService } from './services/awsSecretsService';
-import { CacheOnlyIPFSService } from './services/cacheOnlyIpfsService';
 import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService';
 import { InMemoryIPFSService } from './services/inMemoryIpfsService';
 import { IIpfsService } from './services/ipfsService';
 import { IObjectCacheService } from './services/objectCacheService';
 import { S3ObjectCacheService } from './services/s3ObjectCacheService';
+import { Web3StorageWithCacheIpfsService } from './services/web3StorageIpfsService';
 
 let env = process.env.NODE_ENV || 'development';
 
@@ -43,8 +45,15 @@ else {
     }, {
         lifecycle: Lifecycle.Singleton
     });
+    container.register<Web3Storage>("Web3StorageClient", {
+        useFactory: (_) => {
+            return new Web3Storage({
+                token: process.env.WEB3_STORAGE_API_TOKEN!
+            })
+        }
+    })
     container.register<IIpfsService>("IIpfsService", {
-        useClass: CacheOnlyIPFSService
+        useClass: Web3StorageWithCacheIpfsService
     }, {
         lifecycle: Lifecycle.Singleton
     });

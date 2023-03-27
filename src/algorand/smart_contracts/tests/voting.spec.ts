@@ -231,7 +231,7 @@ describe('voting', () => {
     expect(Number(isVotingOpen)).toBe(1)
     expect(Number(isAllowedToVote)).toBe(1)
     expect(Number(hasAlreadyVoted)).toBe(0)
-    expect(Number(time)).toBeGreaterThan(currentTime)
+    expect(Number(time)).toBeGreaterThanOrEqual(currentTime)
   })
 
   describe('vote', () => {

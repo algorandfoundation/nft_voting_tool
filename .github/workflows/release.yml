@@ -86,7 +86,7 @@ jobs:
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: "Test"
+          WEB3_STORAGE_API_TOKEN: ${{ secrets.DEV_WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: "testnet"
         with:
           app-artifact-unzips: |-

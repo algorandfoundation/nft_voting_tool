@@ -1,9 +1,9 @@
-import mime from 'mime'
+import axios from 'axios'
+import * as mime from 'mime'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import fetch from 'node-fetch'
-import { singleton } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 import { File, Web3Storage } from 'web3.storage'
 import { IIpfsService } from './ipfsService'
 import type { IObjectCacheService } from './objectCacheService'
@@ -13,7 +13,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
   private cache: IObjectCacheService
   private storage: Web3Storage
 
-  constructor(storage: Web3Storage, cache: IObjectCacheService) {
+  constructor(@inject('Web3StorageClient') storage: Web3Storage, @inject('IObjectCacheService') cache: IObjectCacheService) {
     this.storage = storage
     this.cache = cache
   }
@@ -22,8 +22,8 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetch(`https://${cid}.ipfs.cf-ipfs.com/`)
-        const json = await response.json()
+        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const json = await response.data.json()
         return json as T
       },
       undefined,
@@ -35,9 +35,9 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await fetch(`https://${cid}.ipfs.cf-ipfs.com/`)
-        const mimeType = response.headers.get('content-type') ?? 'application/octet-stream'
-        const buffer = await response.arrayBuffer()
+        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, { responseType: 'arraybuffer' })
+        const mimeType = response.headers['Content-Type'] as string ?? 'application/octet-stream'
+        const buffer = await response.data as ArrayBuffer
         return Promise.resolve([Buffer.from(buffer), mimeType])
       },
       undefined,
@@ -61,7 +61,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
       wrapWithDirectory: false,
     })
     // Save time later if we need to retrieve it again
-    await this.cache.put(`ipfs-${file}`, data)
+    await this.cache.putBuffer(`ipfs-${file}`, data, mimeType)
     return { cid: file.toString() }
   }
 

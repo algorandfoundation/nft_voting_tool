@@ -1,3 +1,4 @@
+import { Readable } from "stream";
 import { Controller, Get, Path, Post, Route, UploadedFile } from "tsoa";
 import { inject, injectable } from "tsyringe";
 import { IIpfsService } from "../services/ipfsService";
@@ -13,10 +14,10 @@ export class IpfsController extends Controller {
     }
 
     @Get("{cid}")
-    public async getWalletSnapshotFile(@Path() cid: string): Promise<Buffer> {
+    public async getWalletSnapshotFile(@Path() cid: string): Promise<Readable> {
         const [buffer, mimeType] = await this.ipfsService.getBuffer(cid);
         this.setHeader("Content-Type", mimeType);
-        return Promise.resolve(buffer);
+        return Readable.from(buffer);
     }
 
     @Post()

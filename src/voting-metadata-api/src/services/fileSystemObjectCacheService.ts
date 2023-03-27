@@ -1,14 +1,15 @@
 import fs from 'fs/promises'
 import { glob } from 'glob'
-import mime from 'mime'
+import * as mime from 'mime'
 import path from 'path'
-import { singleton } from 'tsyringe'
+import { inject, singleton } from 'tsyringe'
 import { IObjectCacheService } from "./objectCacheService"
 
 @singleton()
 export class FileSystemObjectCacheService implements IObjectCacheService {
     private cacheDirectory: string
-    constructor(cacheDirectory: string) {
+
+    constructor(@inject('CacheDirectory') cacheDirectory: string) {
         this.cacheDirectory = cacheDirectory
     }
 
