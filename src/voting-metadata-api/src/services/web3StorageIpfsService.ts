@@ -1,3 +1,4 @@
+import mime from 'mime'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
@@ -30,6 +31,21 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     )
   }
 
+  async getBuffer(cid: string): Promise<[Buffer, string]> {
+    return await this.cache.getAndCacheBuffer(
+      `ipfs-${cid}`,
+      async (_e) => {
+        const response = await fetch(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const mimeType = response.headers.get('content-type') ?? 'application/octet-stream'
+        const buffer = await response.arrayBuffer()
+        return Promise.resolve([Buffer.from(buffer), mimeType])
+      },
+      undefined,
+      undefined,
+      true
+    )
+  }
+
   async put<T>(data: T): Promise<{ cid: string }> {
     const file = await this.storage.put([new File([JSON.stringify(data)], 'data.json', { type: 'application/json' })], {
       wrapWithDirectory: false,
@@ -39,8 +55,22 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     return { cid: file.toString() }
   }
 
+  async putBuffer(data: Buffer, mimeType: string): Promise<{ cid: string }> {
+    const extension = mime.getExtension(mimeType)
+    const file = await this.storage.put([new File([data], `data.${extension}`, { type: mimeType })], {
+      wrapWithDirectory: false,
+    })
+    // Save time later if we need to retrieve it again
+    await this.cache.put(`ipfs-${file}`, data)
+    return { cid: file.toString() }
+  }
+
   async getCID<T>(data: T): Promise<string> {
-    const bytes = raw.encode(Buffer.from(JSON.stringify(data)))
+    return this.getBufferCID(Buffer.from(JSON.stringify(data)))
+  }
+
+  async getBufferCID(data: Buffer): Promise<string> {
+    const bytes = raw.encode(data)
     const hash = await sha256.digest(bytes)
     const cid = CID.create(1, raw.code, hash)
     return cid.toString()

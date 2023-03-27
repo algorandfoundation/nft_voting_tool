@@ -3,8 +3,8 @@ import { inject, injectable } from "tsyringe";
 import { IIpfsService } from "../services/ipfsService";
 
 @injectable()
-@Route('wallet-snapshot')
-export class SnapshotController extends Controller {
+@Route('ipfs')
+export class IpfsController extends Controller {
     private ipfsService: IIpfsService;
 
     constructor(@inject("IIpfsService") ipfsService: IIpfsService) {
@@ -13,12 +13,14 @@ export class SnapshotController extends Controller {
     }
 
     @Get("{cid}")
-    public async getWalletSnapshotFile(@Path() cid: string): Promise<Express.Multer.File> {
-        return this.ipfsService.get<Express.Multer.File>(cid);
+    public async getWalletSnapshotFile(@Path() cid: string): Promise<Buffer> {
+        const [buffer, mimeType] = await this.ipfsService.getBuffer(cid);
+        this.setHeader("Content-Type", mimeType);
+        return Promise.resolve(buffer);
     }
 
     @Post()
     public async postWalletSnapshot(@UploadedFile() snapshot: Express.Multer.File): Promise<{ cid: string }> {
-        return this.ipfsService.put<Express.Multer.File>(snapshot);
+        return this.ipfsService.putBuffer(snapshot.buffer, snapshot.mimetype);
     }
 }
