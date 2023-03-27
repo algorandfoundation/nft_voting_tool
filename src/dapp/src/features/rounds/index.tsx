@@ -1,6 +1,7 @@
 import { Button, Skeleton, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import api from "../../shared/api";
+import { VotingRound } from "../../shared/types";
 import { getWalletLabel } from "../../shared/wallet";
 import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
 import { NoRounds } from "./NoRounds";
@@ -14,9 +15,10 @@ const VotingRoundTileLoading = () => (
 );
 
 const VotingRounds = () => {
-  const { data, loading } = api.useVotingRounds();
   const setShowConnectWalletModal = useSetShowConnectWalletModal();
   const myWalletAddress = useConnectedWallet();
+  const { data, loading } = api.useVotingRounds(myWalletAddress);
+
   return (
     <div className="container">
       <Typography variant="h3">My voting rounds</Typography>
@@ -47,7 +49,7 @@ const VotingRounds = () => {
         ) : !data?.openRounds.length ? (
           <NoRounds label="open" />
         ) : (
-          data?.openRounds.map((round) => <VotingRoundTile key={round.id} round={round} />)
+          data?.openRounds.map((round: VotingRound) => <VotingRoundTile key={round.id} round={round} />)
         )}
       </div>
       <Typography className="mt-8 mb-3" variant="h4">
@@ -59,7 +61,7 @@ const VotingRounds = () => {
         ) : !data?.closedRounds.length ? (
           <NoRounds label="closed" />
         ) : (
-          data?.closedRounds.map((round) => <VotingRoundTile key={round.id} round={round} />)
+          data?.closedRounds.map((round: VotingRound) => <VotingRoundTile key={round.id} round={round} />)
         )}
       </div>
     </div>

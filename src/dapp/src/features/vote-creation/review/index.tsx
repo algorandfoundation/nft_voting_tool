@@ -28,6 +28,9 @@ export default function Review() {
   const { loading: creatingVotingRound, execute: createVotingRoundApi } = api.useAddVotingRound();
   const createVotingRound = async () => {
     try {
+      if (!activeAddress) {
+        throw new Error("User does not have an active address");
+      }
       await createVotingRoundApi({
         newRound: { ...roundInfo, ...questions },
         activeAddress,

@@ -2,15 +2,15 @@
  * Returns mock data for now, this should be replaced with real API calls
  */
 
+import { ApplicationResponse, TealValue } from "@algorandfoundation/algokit-utils/types/algod";
 import * as ed from "@noble/ed25519";
 import { TransactionSigner } from "algosdk";
-import sortBy from "lodash.sortby";
 import { useCallback, useEffect, useState } from "react";
 import { atom, useRecoilValue, useSetRecoilState } from "recoil";
 import * as uuid from "uuid";
 import { useSetConnectedWallet } from "../features/wallet/state";
 import { VotingRound } from "./types";
-import { VotingRoundContract } from "./VotingRoundContract";
+import { indexer, VotingRoundContract } from "./VotingRoundContract";
 
 type AppState = {
   openRounds: VotingRound[];
@@ -22,7 +22,7 @@ const votingRoundsAtom = atom<AppState>({
   default: {
     openRounds: [
       {
-        id: "b34fb9cb-7e69-4ac6-a6cb-976edf1fd8d8",
+        id: 1,
         voteTitle: "Algorand Council",
         voteDescription: "This is the vote description",
         start: "2023-03-01T00:00:00.000Z",
@@ -36,7 +36,7 @@ const votingRoundsAtom = atom<AppState>({
         votes: [],
       },
       {
-        id: "222fb9cb-7e69-4ac6-a6cb-976edf1fd8d8",
+        id: 2,
         voteTitle: "Future vote",
         voteDescription: "This is the vote description",
         start: "2024-03-01T00:00:00.000Z",
@@ -52,7 +52,7 @@ const votingRoundsAtom = atom<AppState>({
     ],
     closedRounds: [
       {
-        id: "129c3c52-1961-4e42-b88b-2a42cc5b50ca",
+        id: 3,
         voteTitle: "Another Round",
         start: "2023-02-26T00:00:00.000Z",
         end: "2023-03-06T00:00:00.000Z",
@@ -65,7 +65,7 @@ const votingRoundsAtom = atom<AppState>({
           "wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU",
       },
       {
-        id: "4727d3e7-6cfb-4530-a4c9-980c0a3ba90f",
+        id: 4,
         voteTitle: "An earlier vote",
         start: "2023-02-18T00:00:00.000Z",
         end: "2023-02-23T00:00:00.000Z",
@@ -78,40 +78,6 @@ const votingRoundsAtom = atom<AppState>({
     ],
   },
 });
-
-// const castVote = async (activeAddress: string, signature: string, selectedOption: string, signer: TransactionSigner, appId: number) => {
-//   const algod = algokit.getAlgoClient({
-//     server: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
-//     port: import.meta.env.VITE_ALGOD_NOTE_CONFIG_PORT,
-//     token: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN,
-//   });
-
-//   const client = algokit.getApplicationClient(
-//     {
-//       app: appSpec,
-//       id: appId,
-//     },
-//     algod
-//   );
-
-//   const signatureByArray = Buffer.from(signature, "base64");
-//   const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000);
-
-//   const transaction = await client.call({
-//     method: "vote",
-//     methodArgs: {
-//       args: [signatureByArray, encodeAnswerId(selectedOption)],
-//       boxes: [encodeAnswerIdBoxRef(selectedOption, await client.getAppReference())],
-//     },
-//     sender: {
-//       addr: activeAddress,
-//       signer: signer,
-//     },
-//     sendParams: { fee: voteFee },
-//   });
-
-//   return transaction;
-// };
 
 const useMockGetter = <T>(payload: T) => {
   const [loading, setLoading] = useState(true);
@@ -139,22 +105,86 @@ const useMockGetter = <T>(payload: T) => {
   return { loading, data, refetch };
 };
 
-const useMockSetter = <T, K>(action: (payload: T) => Promise<K>, extraDelayMs = 0) => {
-  const [loading, setLoading] = useState(false);
-  const execute = useCallback((payload: T) => {
-    setLoading(true);
-    const promise = new Promise<K>((resolve) =>
-      setTimeout(async () => {
-        const state = await action(payload);
-        setLoading(false);
-        resolve(state);
-        // simulate loading time
-      }, Math.random() * 400 + extraDelayMs)
-    );
-    return promise;
-  }, []);
+const useFetchVoteRounds = (address: string) => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<T | null>(null);
 
-  return { loading, execute };
+  useEffect(() => {
+    if (address) {
+      setLoading(true);
+      fetchVotingRounds(address).then((votingRounds) => {
+        setData({
+          openRounds: votingRounds.filter((round) => new Date(round.start) < new Date() && new Date(round.end) > new Date()),
+          closedRounds: votingRounds.filter((round) => new Date(round.end) < new Date()),
+        });
+        setLoading(false);
+      });
+    }
+  }, [address]);
+
+  const refetch = useCallback(() => {
+    if (address) {
+      setLoading(true);
+      fetchVotingRounds(address).then((votingRounds) => {
+        setData({
+          openRounds: votingRounds.filter((round) => new Date(round.start) < new Date() && new Date(round.end) > new Date()),
+          closedRounds: votingRounds.filter((round) => new Date(round.end) < new Date()),
+        });
+        setLoading(false);
+      });
+    }
+  }, [data, setData]);
+
+  return { loading, data, refetch };
+};
+
+const fetchVotingRounds = async (address: string) => {
+  const voteRounds: VotingRound[] = [];
+  const applicationsByCreator = await indexer.lookupAccountCreatedApplications(address).do();
+  applicationsByCreator.applications.map((app: ApplicationResponse) => {
+    if (app.params["global-state"]) {
+      const decodedState = decodeGlobalState(app.params["global-state"]);
+      const voteRound = {
+        id: app.id,
+        voteTitle: `Vote Round for App ID: ${app.id}`,
+        start: decodedState.start_time,
+        end: decodedState.end_time,
+        answers: ["Yes", "No"],
+        questionTitle: "Should we do this?",
+        voteDescription: "This is the vote description",
+        voteInformationUrl: "https://www.algorand.com",
+        votes: [],
+        snapshotFile:
+          "wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU",
+      };
+      voteRounds.push(voteRound);
+    }
+  });
+  return voteRounds;
+};
+
+const decodeGlobalState = (
+  globalState: {
+    key: string;
+    value: TealValue;
+  }[]
+) => {
+  const decodedState = {
+    start_time: "0",
+    end_time: "0",
+  };
+  globalState.map((state) => {
+    const globalKey = Buffer.from(state.key, "base64").toString();
+    switch (globalKey) {
+      case "start_time":
+        decodedState.start_time = new Date(state.value.uint).toISOString();
+        break;
+      case "end_time":
+        decodedState.end_time = new Date(state.value.uint).toISOString();
+        break;
+    }
+  });
+  return decodedState;
 };
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
@@ -232,15 +262,10 @@ const api = {
       }
     );
   },
-  useVotingRounds: () => {
-    const data = useRecoilValue(votingRoundsAtom);
-    return useMockGetter({
-      ...data,
-      openRounds: sortBy(data.openRounds, (round) => round.start),
-      closedRounds: sortBy(data.closedRounds, (round) => round.start),
-    });
+  useVotingRounds: (address: string) => {
+    return useFetchVoteRounds(address);
   },
-  useVotingRound: (id: string) => {
+  useVotingRound: (id: number) => {
     const data = useRecoilValue(votingRoundsAtom);
     return useMockGetter([...data.openRounds, ...data.closedRounds].find((round) => round.id === id));
   },
@@ -260,10 +285,13 @@ const api = {
 
         const privateKey = ed.utils.randomPrivateKey();
         const publicKey = await ed.getPublicKeyAsync(privateKey);
-        console.log(newRound);
+        //need to sign the allowlist addresses
+        //Upload the vote round data to the API/IPFS
+        const cid = "cid";
+
         const app = await votingRoundContract.create(
           publicKey,
-          "cid",
+          cid,
           Date.parse(newRound.start),
           Date.parse(newRound.end),
           newRound.minimumVotes ? newRound.minimumVotes : 0

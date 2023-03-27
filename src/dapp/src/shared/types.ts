@@ -1,5 +1,5 @@
 export type VoteId = {
-  id: string;
+  id: number;
 };
 
 export type RoundInfo = {
