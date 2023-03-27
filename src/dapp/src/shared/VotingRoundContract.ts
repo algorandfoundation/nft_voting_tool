@@ -25,7 +25,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
   const create = async (publicKey: Uint8Array, cid: string, start: number, end: number, quorum: number): Promise<AppReference> => {
     const appClient = algokit.getApplicationClient(
       {
-        app: appSpec,
+        app: JSON.stringify(appSpec),
         id: 0,
         sender,
       },
@@ -43,7 +43,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
   const bootstrap = async (app: AppReference, questionIds: string[]) => {
     const appClient = algokit.getApplicationClient(
       {
-        app: appSpec,
+        app: JSON.stringify(appSpec),
         id: app.appId,
         sender,
       },
@@ -93,7 +93,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
   const castVote = async (signature: string, selectedOption: string, appId: number) => {
     const client = algokit.getApplicationClient(
       {
-        app: appSpec,
+        app: JSON.stringify(appSpec),
         id: appId,
       },
       algod

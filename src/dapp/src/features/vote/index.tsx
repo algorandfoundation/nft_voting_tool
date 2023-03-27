@@ -17,9 +17,9 @@ import { WalletVoteStatus } from "./WalletVoteStatus";
 function Vote() {
   const { voteCid } = useParams();
   const { activeAddress, signer } = useWallet();
-  const { data, loading, refetch } = api.useVotingRound(voteCid!);
+  const { data, loading, refetch } = api.useVotingRound(Number(voteCid!));
   const walletAddress = useConnectedWallet();
-  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(voteCid!);
+  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(Number(voteCid!));
   const voteStarted = !data ? false : getVoteStarted(data);
   const voteEnded = !data ? false : getVoteEnded(data);
   const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile));

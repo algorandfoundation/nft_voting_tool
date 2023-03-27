@@ -1,6 +1,8 @@
 import { Button, Skeleton, Typography } from "@mui/material";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import api from "../../shared/api";
+import { useSetRecoilState } from "recoil";
+import api, { votingRoundsAtom } from "../../shared/api";
 import { VotingRound } from "../../shared/types";
 import { getWalletLabel } from "../../shared/wallet";
 import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
@@ -18,6 +20,11 @@ const VotingRounds = () => {
   const setShowConnectWalletModal = useSetShowConnectWalletModal();
   const myWalletAddress = useConnectedWallet();
   const { data, loading } = api.useVotingRounds(myWalletAddress);
+  const setState = useSetRecoilState(votingRoundsAtom);
+
+  useEffect(() => {
+    setState(data);
+  }, [data]);
 
   return (
     <div className="container">

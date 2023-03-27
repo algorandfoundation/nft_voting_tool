@@ -7,7 +7,6 @@ import * as ed from "@noble/ed25519";
 import { TransactionSigner } from "algosdk";
 import { useCallback, useEffect, useState } from "react";
 import { atom, useRecoilValue, useSetRecoilState } from "recoil";
-import * as uuid from "uuid";
 import { useSetConnectedWallet } from "../features/wallet/state";
 import { VotingRound } from "./types";
 import { indexer, VotingRoundContract } from "./VotingRoundContract";
@@ -17,7 +16,7 @@ type AppState = {
   closedRounds: VotingRound[];
 };
 
-const votingRoundsAtom = atom<AppState>({
+export const votingRoundsAtom = atom<AppState>({
   key: "appState",
   default: {
     openRounds: [
@@ -107,7 +106,10 @@ const useMockGetter = <T>(payload: T) => {
 
 const useFetchVoteRounds = (address: string) => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<AppState>({
+    openRounds: [],
+    closedRounds: [],
+  });
 
   useEffect(() => {
     if (address) {
@@ -175,13 +177,15 @@ const decodeGlobalState = (
   };
   globalState.map((state) => {
     const globalKey = Buffer.from(state.key, "base64").toString();
-    switch (globalKey) {
-      case "start_time":
-        decodedState.start_time = new Date(state.value.uint).toISOString();
-        break;
-      case "end_time":
-        decodedState.end_time = new Date(state.value.uint).toISOString();
-        break;
+    if (state.value.type === 2) {
+      switch (globalKey) {
+        case "start_time":
+          decodedState.start_time = new Date(Number(state.value.uint)).toISOString();
+          break;
+        case "end_time":
+          decodedState.end_time = new Date(Number(state.value.uint)).toISOString();
+          break;
+      }
     }
   });
   return decodedState;
@@ -213,7 +217,7 @@ const api = {
       });
     });
   },
-  useSubmitVote: (roundId: string) => {
+  useSubmitVote: (roundId: number) => {
     const setState = useSetRecoilState(votingRoundsAtom);
     // return useSetter(({ activeAddress, signature, selectedOption, signer }) => {
     return useSetter(
@@ -306,7 +310,7 @@ const api = {
                 ...state.openRounds,
                 {
                   ...newRound,
-                  id: uuid.v4(),
+                  id: Math.floor(Math.random() * 1000),
                   votes: [],
                 },
               ],
