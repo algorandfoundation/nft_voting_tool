@@ -17,24 +17,21 @@ const apiDomainName = `api.${appDomainName}`
 const apiCertificateRequest: CertificateRequest = {
   isWildCard: false,
   subDomain: 'api',
-  isRoot: false
+  isRoot: false,
 }
 
 const dns = appDomainName
   ? deployer.deploy(
-    DnsStack,
-    'dns-web',
-    {
-      domainName: appDomainName,
-      generateCertificate: true,
-      parameterRegions: [deployer.defaultRegion],
-      certificateRequests: [
-        DnsStack.ROOT_CERT_REQUEST,
-        apiCertificateRequest
-      ],
-    },
-    'us-east-1',
-  )
+      DnsStack,
+      'dns-web',
+      {
+        domainName: appDomainName,
+        generateCertificate: true,
+        parameterRegions: [deployer.defaultRegion],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
+      },
+      'us-east-1'
+    )
   : undefined
 
 const app = deployer.deploy(StaticWebsiteStack, 'web', {
@@ -48,10 +45,9 @@ const api = deployer.deploy(ApiStack, 'api', {
   apiNpmBuildCommand: 'build',
   customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, apiDomainName, apiCertificateRequest),
   envVars: {
-    WEB3_STORAGE_API_TOKEN: getRequiredEnv("WEB3_STORAGE_API_TOKEN"),
-    NODE_ENV: getRequiredEnv("NODE_ENV")
+    WEB3_STORAGE_API_TOKEN: getRequiredEnv('WEB3_STORAGE_API_TOKEN'),
+    NODE_ENV: getRequiredEnv('NODE_ENV'),
   },
-
 })
 
 if (dns) {

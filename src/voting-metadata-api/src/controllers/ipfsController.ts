@@ -21,9 +21,7 @@ export class IpfsController extends Controller {
   }
 
   @Post()
-  public async post(
-    @UploadedFile() snapshot: Express.Multer.File
-  ): Promise<{ cid: string }> {
+  public async post(@UploadedFile() snapshot: Express.Multer.File): Promise<{ cid: string }> {
     return this.ipfsService.putBuffer(snapshot.buffer, snapshot.mimetype)
   }
 }

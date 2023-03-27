@@ -11,8 +11,8 @@ import {
   pera,
   reconnectProviders,
   walletconnect,
-} from "@txnlab/use-wallet";
-import { useEffect } from "react";
+} from '@txnlab/use-wallet'
+import { useEffect } from 'react'
 
 /*type SupportedProviders = Partial<{
   kmd: Promise<WalletClient | null>
@@ -23,19 +23,19 @@ import { useEffect } from "react";
   exodus: Promise<WalletClient | null>
   walletconnect: Promise<WalletClient | null>
 }>*/
-import { DeflyWalletConnect } from "@blockshake/defly-connect";
-import { PeraWalletConnect } from "@perawallet/connect";
-import WalletConnect from "@walletconnect/client";
-import QRCodeModal from "algorand-walletconnect-qrcode-modal";
-import algosdk from "algosdk";
+import { DeflyWalletConnect } from '@blockshake/defly-connect'
+import { PeraWalletConnect } from '@perawallet/connect'
+import WalletConnect from '@walletconnect/client'
+import QRCodeModal from 'algorand-walletconnect-qrcode-modal'
+import algosdk from 'algosdk'
 
 export function useAlgoWallet(context: { autoConnect: boolean; network: string; nodeServer: string; nodePort: string; nodeToken: string }) {
   const algodOptions = [
     context.nodeToken ?? DEFAULT_NODE_TOKEN,
     context.nodeServer ?? DEFAULT_NODE_BASEURL,
     context.nodePort ?? DEFAULT_NODE_PORT,
-  ] as AlgodClientOptions;
-  const network = context.network ?? DEFAULT_NETWORK;
+  ] as AlgodClientOptions
+  const network = context.network ?? DEFAULT_NETWORK
   const walletProviders = {
     [PROVIDER_ID.PERA]: pera.init({
       algosdkStatic: algosdk,
@@ -66,15 +66,15 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       algodOptions: algodOptions,
       network: network,
     }),
-  };
+  }
 
   useEffect(() => {
     if (context.autoConnect) {
-      reconnectProviders(walletProviders);
+      reconnectProviders(walletProviders)
     }
-  }, []);
+  }, [])
 
   return {
     walletProviders,
-  };
+  }
 }

@@ -10,7 +10,8 @@
     "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --omit=dev",
     "routes": "tsoa routes",
     "clean": "rimraf node_modules && rimraf build",
-    "typecheck": "tsoa routes && tsc --noEmit"
+    "typecheck": "tsoa routes && tsc --noEmit",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "axios": "^1.3.4",
@@ -40,10 +41,15 @@
     "@types/node": "^18.15.3",
     "@types/sharp": "^0.31.1",
     "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
     "aws-lambda": "^1.0.7",
     "aws-xray-sdk": "^3.4.1",
     "copyfiles": "^2.4.1",
     "dotenv": "^16.0.3",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.4",
     "rimraf": "^4.4.0",
     "ts-node-dev": "^2.0.0",

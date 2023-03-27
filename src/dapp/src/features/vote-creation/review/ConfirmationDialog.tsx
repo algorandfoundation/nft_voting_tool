@@ -1,10 +1,10 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 
 type ConfirmationDialogProps = {
-  open: boolean;
-  handleOpen: () => void;
-  onConfirm: () => void;
-};
+  open: boolean
+  handleOpen: () => void
+  onConfirm: () => void
+}
 export const ConfirmationDialog = ({ open, handleOpen, onConfirm }: ConfirmationDialogProps) => (
   <Dialog open={open} onClose={handleOpen}>
     <DialogTitle>Confirm voting round creation</DialogTitle>
@@ -21,4 +21,4 @@ export const ConfirmationDialog = ({ open, handleOpen, onConfirm }: Confirmation
       </Button>
     </DialogActions>
   </Dialog>
-);
+)

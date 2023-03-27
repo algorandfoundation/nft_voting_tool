@@ -12,7 +12,7 @@
     "experimentalDecorators": true /* Enables experimental support for ES7 decorators. */,
     "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
     "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "Node",
@@ -22,11 +22,7 @@
     "jsx": "react-jsx",
     "outDir": "./dist/"
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "vite.config.js"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.js"],
   "references": [
     {
       "path": "./tsconfig.node.json"

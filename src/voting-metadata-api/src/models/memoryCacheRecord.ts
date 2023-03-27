@@ -1,4 +1,4 @@
 interface MemoryCacheRecord {
-    ContentType: string;
-    Data: Buffer;
+  ContentType: string
+  Data: Buffer
 }

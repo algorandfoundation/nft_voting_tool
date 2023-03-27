@@ -1,10 +1,10 @@
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
-import { Loading, LoadingProps } from "./Loading";
+import { Dialog, DialogContent, DialogTitle } from '@mui/material'
+import { Loading, LoadingProps } from './Loading'
 
 type LoadingDialogProps = {
-  loading: boolean;
-  title: string;
-} & LoadingProps;
+  loading: boolean
+  title: string
+} & LoadingProps
 
 export const LoadingDialog = ({ loading, title, note }: LoadingDialogProps) => (
   <Dialog open={loading}>
@@ -13,4 +13,4 @@ export const LoadingDialog = ({ loading, title, note }: LoadingDialogProps) => (
       <Loading note={note} />
     </DialogContent>
   </Dialog>
-);
+)

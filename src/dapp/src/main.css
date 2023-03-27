@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "Suise Intl";
-  src: url("/fonts/SuisseIntl-Regular.ttf") format("truetype");
-  font-display: "swapping";
+  font-family: 'Suise Intl';
+  src: url('/fonts/SuisseIntl-Regular.ttf') format('truetype');
+  font-display: 'swapping';
 }

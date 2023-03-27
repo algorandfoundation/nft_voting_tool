@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint --ext .ts,.tsx \"src/\"",
     "lint:fix": "eslint --ext .ts,.tsx \"src/\" --fix",
+    "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "jest"
   },

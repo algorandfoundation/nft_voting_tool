@@ -1,17 +1,17 @@
-import { Typography } from "@mui/material";
-import { Fragment } from "react";
-import { VotingRound } from "../../shared/types";
+import { Typography } from '@mui/material'
+import { Fragment } from 'react'
+import { VotingRound } from '../../shared/types'
 
 type VoteResultsProps = {
-  round: VotingRound;
-};
+  round: VotingRound
+}
 
-const values = [200, 561, 302, 482];
+const values = [200, 561, 302, 482]
 
 export const VoteResults = ({ round }: VoteResultsProps) => {
-  const max = Math.max(...values);
-  const sum = values.reduce((a, b) => a + b, 0);
-  const pixelWidth = values.map((v) => (v / max) * 150);
+  const max = Math.max(...values)
+  const sum = values.reduce((a, b) => a + b, 0)
+  const pixelWidth = values.map((v) => (v / max) * 150)
   return (
     <>
       <div className="grid grid-cols-3 w-80 gap-2">
@@ -30,5 +30,5 @@ export const VoteResults = ({ round }: VoteResultsProps) => {
         <Typography className="ml-4">{sum.toLocaleString()}</Typography>
       </div>
     </>
-  );
-};
+  )
+}

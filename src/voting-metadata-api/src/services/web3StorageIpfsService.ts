@@ -27,7 +27,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
         return json as T
       },
       undefined,
-      true
+      true,
     )
   }
 
@@ -35,21 +35,30 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, { responseType: 'arraybuffer' })
-        const mimeType = response.headers['Content-Type'] as string ?? 'application/octet-stream'
-        const buffer = await response.data as ArrayBuffer
+        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, {
+          responseType: 'arraybuffer',
+        })
+        const mimeType = (response.headers['Content-Type'] as string) ?? 'application/octet-stream'
+        const buffer = (await response.data) as ArrayBuffer
         return Promise.resolve([Buffer.from(buffer), mimeType])
       },
       undefined,
       undefined,
-      true
+      true,
     )
   }
 
   async put<T>(data: T): Promise<{ cid: string }> {
-    const file = await this.storage.put([new File([JSON.stringify(data)], 'data.json', { type: 'application/json' })], {
-      wrapWithDirectory: false,
-    })
+    const file = await this.storage.put(
+      [
+        new File([JSON.stringify(data)], 'data.json', {
+          type: 'application/json',
+        }),
+      ],
+      {
+        wrapWithDirectory: false,
+      },
+    )
     // Save time later if we need to retrieve it again
     await this.cache.put(`ipfs-${file}`, data)
     return { cid: file.toString() }

@@ -1,11 +1,11 @@
-import { DateTimePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import { Controller, useFormContext } from "react-hook-form";
-import type { FormItemProps } from "../form-item/FormItem";
-import { FormItem } from "../form-item/FormItem";
+import { DateTimePicker } from '@mui/x-date-pickers'
+import dayjs from 'dayjs'
+import { Controller, useFormContext } from 'react-hook-form'
+import type { FormItemProps } from '../form-item/FormItem'
+import { FormItem } from '../form-item/FormItem'
 
-const noTime = { hours: undefined, minutes: undefined, ampm: undefined };
-export type DateTimeFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children">;
+const noTime = { hours: undefined, minutes: undefined, ampm: undefined }
+export type DateTimeFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, 'children'>
 
 export function DateFormItem<TSchema extends Record<string, any> = Record<string, any>>({
   field,
@@ -14,7 +14,7 @@ export function DateFormItem<TSchema extends Record<string, any> = Record<string
   className,
   hint,
 }: DateTimeFormItemProps<TSchema>) {
-  const { control } = useFormContext();
+  const { control } = useFormContext()
 
   return (
     <FormItem field={field} label={label} hint={hint} disabled={disabled} className={className}>
@@ -27,12 +27,12 @@ export function DateFormItem<TSchema extends Record<string, any> = Record<string
               <DateTimePicker
                 onChange={(v) => onChange(dayjs(v).format())}
                 value={dayjs(value)}
-                slotProps={{ textField: { inputProps: { "aria-label": label } } }}
+                slotProps={{ textField: { inputProps: { 'aria-label': label } } }}
               />
             </div>
-          );
+          )
         }}
       />
     </FormItem>
-  );
+  )
 }

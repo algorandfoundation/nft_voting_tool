@@ -1,20 +1,20 @@
-import { Box, Skeleton, Stack, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import { getTimezone } from "../../shared/getTimezone";
-import { VotingRound } from "../../shared/types";
-import { getVoteEnded, getVoteStarted } from "../../shared/vote";
+import { Box, Skeleton, Stack, Typography } from '@mui/material'
+import dayjs from 'dayjs'
+import { getTimezone } from '../../shared/getTimezone'
+import { VotingRound } from '../../shared/types'
+import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 
 const getVotingStateDescription = (round: VotingRound) => {
-  if (getVoteEnded(round)) return "Voting round is closed!";
-  if (!getVoteStarted(round)) return "Voting opens soon!";
-  return "Voting round is open!";
-};
+  if (getVoteEnded(round)) return 'Voting round is closed!'
+  if (!getVoteStarted(round)) return 'Voting opens soon!'
+  return 'Voting round is open!'
+}
 
 type VotingTimeProps = {
-  loading: boolean;
-  round: VotingRound | undefined | null;
-  className: string;
-};
+  loading: boolean
+  round: VotingRound | undefined | null
+  className: string
+}
 
 export const VotingTime = ({ loading, round, className }: VotingTimeProps) => (
   <div className={className}>
@@ -32,7 +32,7 @@ export const VotingTime = ({ loading, round, className }: VotingTimeProps) => (
           <Skeleton variant="text" />
         ) : (
           <Typography>
-            {dayjs(round?.start).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(round?.start))}
+            {dayjs(round?.start).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(round?.start))}
           </Typography>
         )}
       </Stack>
@@ -42,10 +42,10 @@ export const VotingTime = ({ loading, round, className }: VotingTimeProps) => (
           <Skeleton variant="text" />
         ) : (
           <Typography>
-            {dayjs(round?.end).format("D MMMM YYYY HH:mm")} {getTimezone(dayjs(round?.end))}
+            {dayjs(round?.end).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(round?.end))}
           </Typography>
         )}
       </Stack>
     </Box>
   </div>
-);
+)

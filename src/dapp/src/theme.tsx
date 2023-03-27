@@ -1,45 +1,45 @@
-import CircleIcon from "@mui/icons-material/Circle";
-import { createTheme, stepLabelClasses } from "@mui/material";
-import { grey } from "@mui/material/colors";
-import { stepConnectorClasses } from "@mui/material/StepConnector";
+import CircleIcon from '@mui/icons-material/Circle'
+import { createTheme, stepLabelClasses } from '@mui/material'
+import { grey } from '@mui/material/colors'
+import { stepConnectorClasses } from '@mui/material/StepConnector'
 
 const defaultSansFontFamily = [
-  "-apple-system",
-  "BlinkMacSystemFont",
-  "Segoe UI",
-  "Roboto",
-  "Oxygen",
-  "Ubuntu",
-  "Cantarell",
-  "Fira Sans",
-  "Droid Sans",
-  "Helvetica Neue",
-  "sans-serif",
-];
+  '-apple-system',
+  'BlinkMacSystemFont',
+  'Segoe UI',
+  'Roboto',
+  'Oxygen',
+  'Ubuntu',
+  'Cantarell',
+  'Fira Sans',
+  'Droid Sans',
+  'Helvetica Neue',
+  'sans-serif',
+]
 
-const StepIcon = () => <CircleIcon />;
+const StepIcon = () => <CircleIcon />
 
 export const theme = (rootElement: HTMLElement) =>
   createTheme({
     palette: {
       primary: {
-        main: "#ed7157",
-        contrastText: "#fff",
+        main: '#ed7157',
+        contrastText: '#fff',
       },
     },
     shape: {
       borderRadius: 12,
     },
     typography: {
-      fontFamily: ['"Suisse Intl"', ...defaultSansFontFamily].join(","),
+      fontFamily: ['"Suisse Intl"', ...defaultSansFontFamily].join(','),
       h3: {
         fontSize: 32,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginBottom: 18,
       },
       h4: {
         fontSize: 24,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         marginBottom: 12,
       },
       h5: {
@@ -58,14 +58,14 @@ export const theme = (rootElement: HTMLElement) =>
       MuiLink: {
         styleOverrides: {
           root: {
-            fontWeight: "bold",
+            fontWeight: 'bold',
           },
         },
       },
       MuiButton: {
         styleOverrides: {
           root: {
-            textTransform: "none",
+            textTransform: 'none',
             minWidth: 128,
           },
         },
@@ -99,8 +99,8 @@ export const theme = (rootElement: HTMLElement) =>
       MuiStepConnector: {
         styleOverrides: {
           root: ({ theme }) => ({
-            left: "calc(-50%)",
-            right: "calc(50%)",
+            left: 'calc(-50%)',
+            right: 'calc(50%)',
             top: 9,
             zIndex: -1,
             [`&.${stepConnectorClasses.active}`]: {
@@ -120,4 +120,4 @@ export const theme = (rootElement: HTMLElement) =>
         },
       },
     },
-  });
+  })

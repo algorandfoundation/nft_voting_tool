@@ -3,7 +3,7 @@ export interface IObjectCacheService {
     cacheKey: string,
     generator: (existing: T | undefined) => Promise<T>,
     staleAfterSeconds?: number,
-    returnStaleResult?: boolean
+    returnStaleResult?: boolean,
   ): Promise<T>
 
   put<T>(cacheKey: string, data: T): Promise<void>
@@ -18,6 +18,3 @@ export interface IObjectCacheService {
 
   putBuffer(cacheKey: string, data: Buffer, mimeType: string): Promise<void>
 }
-
-
-

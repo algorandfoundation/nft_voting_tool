@@ -1,44 +1,44 @@
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
-import { useWallet } from "@txnlab/use-wallet";
-import { useEffect, useState } from "react";
-import api from "../../shared/api";
-import { Loading } from "../../shared/loading/Loading";
-import { getWalletLabel } from "../../shared/wallet";
-import { useSetShowConnectWalletModal, useShowConnectWalletModal } from "./state";
+import { CheckCircleIcon } from '@heroicons/react/24/outline'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
+import { useWallet } from '@txnlab/use-wallet'
+import { useEffect, useState } from 'react'
+import api from '../../shared/api'
+import { Loading } from '../../shared/loading/Loading'
+import { getWalletLabel } from '../../shared/wallet'
+import { useSetShowConnectWalletModal, useShowConnectWalletModal } from './state'
 
 const ConnectWallet = () => {
-  const [connecting, setConnecting] = useState(false);
+  const [connecting, setConnecting] = useState(false)
 
-  const showConnectWalletModal = useShowConnectWalletModal();
-  const setShowConnectWalletModal = useSetShowConnectWalletModal();
+  const showConnectWalletModal = useShowConnectWalletModal()
+  const setShowConnectWalletModal = useSetShowConnectWalletModal()
 
-  const { execute: connectWallet } = api.useConnectWallet();
-  const { providers, activeAddress } = useWallet();
-
-  useEffect(() => {
-    (async () => {
-      await Promise.all((providers ?? []).map(async (p) => p.reconnect()));
-    })();
-  }, []);
+  const { execute: connectWallet } = api.useConnectWallet()
+  const { providers, activeAddress } = useWallet()
 
   useEffect(() => {
-    (async () => {
-      setConnecting(true);
+    ;(async () => {
+      await Promise.all((providers ?? []).map(async (p) => p.reconnect()))
+    })()
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      setConnecting(true)
       if (activeAddress) {
-        await connectWallet(activeAddress);
+        await connectWallet(activeAddress)
       }
-      setConnecting(false);
-    })();
-  }, [activeAddress]);
+      setConnecting(false)
+    })()
+  }, [activeAddress])
 
   const onClose = () => {
-    setShowConnectWalletModal(false);
-  };
+    setShowConnectWalletModal(false)
+  }
 
   return (
     <Dialog open={showConnectWalletModal} onClose={onClose}>
-      <DialogTitle>{connecting ? "Connecting wallet... " : "Select a wallet"}</DialogTitle>
+      <DialogTitle>{connecting ? 'Connecting wallet... ' : 'Select a wallet'}</DialogTitle>
       <DialogContent>
         {connecting ? (
           <Loading />
@@ -65,9 +65,9 @@ const ConnectWallet = () => {
                   variant="outlined"
                   color="primary"
                   // startIcon={<img width={30} height={30} alt="" src={provider.metadata.icon} className="mr-2 flex-shrink" />}
-                  endIcon={provider.isActive ? <CheckCircleIcon height={30} width={30} /> : ""}
+                  endIcon={provider.isActive ? <CheckCircleIcon height={30} width={30} /> : ''}
                   onClick={() => {
-                    return provider.isConnected ? provider.setActiveProvider() : provider.connect();
+                    return provider.isConnected ? provider.setActiveProvider() : provider.connect()
                   }}
                 >
                   <img width={30} height={30} alt="" src={provider.metadata.icon} className="mr-2 flex-shrink" />
@@ -86,6 +86,6 @@ const ConnectWallet = () => {
         </DialogActions>
       )}
     </Dialog>
-  );
-};
-export default ConnectWallet;
+  )
+}
+export default ConnectWallet

@@ -1,11 +1,11 @@
-import { SecretsManager } from "@aws-sdk/client-secrets-manager";
-import { inject, singleton } from 'tsyringe';
+import { SecretsManager } from '@aws-sdk/client-secrets-manager'
+import { inject, singleton } from 'tsyringe'
 
 @singleton()
 export class AwsSecretsService {
   private secretsClient: SecretsManager
 
-  constructor(@inject("SecretsManager") secretsClient: SecretsManager) {
+  constructor(@inject('SecretsManager') secretsClient: SecretsManager) {
     this.secretsClient = secretsClient
   }
 
@@ -18,7 +18,7 @@ export class AwsSecretsService {
           return
         }
         if (data === undefined) {
-          reject(new Error("Secret data is undefined"))
+          reject(new Error('Secret data is undefined'))
         } else {
           if ('SecretString' in data) {
             resolve(data.SecretString as string)

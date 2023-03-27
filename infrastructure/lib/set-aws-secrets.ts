@@ -4,8 +4,8 @@
 // This script allows us to output SecretsManager::Secret ARNs by convention
 //  and the values populated.
 
-import { PutSecretValueCommandOutput, PutSecretValueResponse, SecretsManager } from "@aws-sdk/client-secrets-manager";
-import { readFileSync } from 'fs';
+import { PutSecretValueCommandOutput, PutSecretValueResponse, SecretsManager } from '@aws-sdk/client-secrets-manager'
+import { readFileSync } from 'fs'
 
 const client = new SecretsManager({
   region: process.env.AWS_DEFAULT_REGION,
@@ -21,7 +21,7 @@ const outputs: { arn: string; environmentKey: string }[] = []
 Object.keys(cfnOutputs).forEach((stackKey) => {
   Object.keys(cfnOutputs[stackKey])
     .filter((outputKey) => {
-      return /secretarn$/i.test(outputKey);
+      return /secretarn$/i.test(outputKey)
     })
     .forEach((outputKey) => {
       outputs.push(JSON.parse(cfnOutputs[stackKey][outputKey]) as { arn: string; environmentKey: string })
