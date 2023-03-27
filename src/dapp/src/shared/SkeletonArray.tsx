@@ -1,10 +1,10 @@
-import { Skeleton, Stack } from "@mui/material";
-import range from "lodash.range";
+import { Skeleton, Stack } from '@mui/material'
+import range from 'lodash.range'
 
 type SkeletonArrayProps = {
-  className: string;
-  count: number;
-};
+  className: string
+  count: number
+}
 
 export const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
   <Stack spacing={1}>
@@ -12,4 +12,4 @@ export const SkeletonArray = ({ className, count }: SkeletonArrayProps) => (
       <Skeleton key={ix} className={className} variant="rectangular" />
     ))}
   </Stack>
-);
+)

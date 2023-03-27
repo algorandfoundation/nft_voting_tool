@@ -1,13 +1,13 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Button, IconButton, TextField } from "@mui/material";
-import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import type { FormItemProps } from "../form-item/FormItem";
-import { FormItem } from "../form-item/FormItem";
-import { ValidationErrorMessage } from "../validation-error-message/ValidationErrorMessage";
+import DeleteIcon from '@mui/icons-material/Delete'
+import { Button, IconButton, TextField } from '@mui/material'
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form'
+import type { FormItemProps } from '../form-item/FormItem'
+import { FormItem } from '../form-item/FormItem'
+import { ValidationErrorMessage } from '../validation-error-message/ValidationErrorMessage'
 
-export type TextArrayFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, "children"> & {
-  minimumItemCount: number;
-};
+export type TextArrayFormItemProps<TSchema extends Record<string, any> = Record<string, any>> = Omit<FormItemProps<TSchema>, 'children'> & {
+  minimumItemCount: number
+}
 
 export function TextArrayFormItem<TSchema extends Record<string, any> = Record<string, any>>({
   field,
@@ -17,18 +17,18 @@ export function TextArrayFormItem<TSchema extends Record<string, any> = Record<s
   hint,
   minimumItemCount,
 }: TextArrayFormItemProps<TSchema>) {
-  const { control } = useFormContext();
+  const { control } = useFormContext()
   const { fields, append, remove } = useFieldArray({
     name: field,
     rules: {
       required: true,
     },
-  });
+  })
 
   const addOption = () => {
     // @ts-expect-error typescript doesn't like this but it works
-    append(" ");
-  };
+    append(' ')
+  }
 
   return (
     <FormItem field={field} label={label} hint={hint} disabled={disabled} className={className}>
@@ -41,9 +41,9 @@ export function TextArrayFormItem<TSchema extends Record<string, any> = Record<s
             render={({ field: { onChange, onBlur, value, name, ref } }) => {
               const {
                 formState: { errors },
-              } = useFormContext();
+              } = useFormContext()
               // @ts-expect-error typescript doesn't like this but it works
-              const errorMessage = errors[field] ? errors[field][ix]?.message : "";
+              const errorMessage = errors[field] ? errors[field][ix]?.message : ''
 
               return (
                 <div>
@@ -57,7 +57,7 @@ export function TextArrayFormItem<TSchema extends Record<string, any> = Record<s
                   </div>
                   {errorMessage && <ValidationErrorMessage message={errorMessage} />}
                 </div>
-              );
+              )
             }}
           />
         ))}
@@ -68,5 +68,5 @@ export function TextArrayFormItem<TSchema extends Record<string, any> = Record<s
         </div>
       </div>
     </FormItem>
-  );
+  )
 }

@@ -1,18 +1,18 @@
-import CheckIcon from "@mui/icons-material/Check";
-import { Typography } from "@mui/material";
-import { VoteCreationSteps } from "./VoteCreationSteps";
+import CheckIcon from '@mui/icons-material/Check'
+import { Typography } from '@mui/material'
+import { VoteCreationSteps } from './VoteCreationSteps'
 
 const stepNames: Record<VoteCreationSteps, string> = {
-  [VoteCreationSteps.RoundInfo]: "Round info",
-  [VoteCreationSteps.Questions]: "Q&A",
-  [VoteCreationSteps.Review]: "Review",
-  [VoteCreationSteps.Sign]: "Sign",
-};
+  [VoteCreationSteps.RoundInfo]: 'Round info',
+  [VoteCreationSteps.Questions]: 'Q&A',
+  [VoteCreationSteps.Review]: 'Review',
+  [VoteCreationSteps.Sign]: 'Sign',
+}
 
 type StepProps = {
-  step: VoteCreationSteps;
-  currentStep: VoteCreationSteps;
-};
+  step: VoteCreationSteps
+  currentStep: VoteCreationSteps
+}
 
 export const Step = ({ step, currentStep }: StepProps) => (
   <div className="text-center">
@@ -21,4 +21,4 @@ export const Step = ({ step, currentStep }: StepProps) => (
     </div>
     <Typography variant="caption">{stepNames[step]}</Typography>
   </div>
-);
+)

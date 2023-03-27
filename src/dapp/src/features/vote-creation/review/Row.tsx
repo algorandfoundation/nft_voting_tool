@@ -1,10 +1,10 @@
-import { Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { Typography } from '@mui/material'
+import { ReactNode } from 'react'
 
 type RowProp = {
-  label: string;
-  value: string | ReactNode;
-};
+  label: string
+  value: string | ReactNode
+}
 export const Row = ({ label, value }: RowProp) => (
   <>
     <div className="col-span-2">
@@ -12,6 +12,6 @@ export const Row = ({ label, value }: RowProp) => (
         {label}
       </Typography>
     </div>
-    <div className="col-span-6">{typeof value === "string" ? <Typography className="m-0">{value}</Typography> : <>{value}</>}</div>
+    <div className="col-span-6">{typeof value === 'string' ? <Typography className="m-0">{value}</Typography> : <>{value}</>}</div>
   </>
-);
+)

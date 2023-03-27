@@ -82,7 +82,6 @@ export class ApiStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     })
 
-
     /*****************/
     // Secrets
     /*****************/
@@ -156,7 +155,7 @@ export class ApiStack extends cdk.Stack {
           customDomainConfig.config.dnsRecordType === 'ALIAS'
             ? new targets.ApiGateway(gateway)
             : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            gateway.domainName!.domainNameAliasDomainName,
+              gateway.domainName!.domainNameAliasDomainName,
       })
     } else {
       new apiGateway.LambdaRestApi(this, `${id}-api-gateway`, {

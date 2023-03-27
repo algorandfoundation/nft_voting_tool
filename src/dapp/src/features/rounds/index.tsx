@@ -1,22 +1,22 @@
-import { Button, Skeleton, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
-import api from "../../shared/api";
-import { getWalletLabel } from "../../shared/wallet";
-import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
-import { NoRounds } from "./NoRounds";
-import { VotingRoundTile } from "./VotingRoundTile";
+import { Button, Skeleton, Typography } from '@mui/material'
+import { Link } from 'react-router-dom'
+import api from '../../shared/api'
+import { getWalletLabel } from '../../shared/wallet'
+import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
+import { NoRounds } from './NoRounds'
+import { VotingRoundTile } from './VotingRoundTile'
 
 const VotingRoundTileLoading = () => (
   <>
     <Skeleton className="h-32" variant="rectangular" />
     <Skeleton className="h-32" variant="rectangular" />
   </>
-);
+)
 
 const VotingRounds = () => {
-  const { data, loading } = api.useVotingRounds();
-  const setShowConnectWalletModal = useSetShowConnectWalletModal();
-  const myWalletAddress = useConnectedWallet();
+  const { data, loading } = api.useVotingRounds()
+  const setShowConnectWalletModal = useSetShowConnectWalletModal()
+  const myWalletAddress = useConnectedWallet()
   return (
     <div className="container">
       <Typography variant="h3">My voting rounds</Typography>
@@ -63,7 +63,7 @@ const VotingRounds = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VotingRounds;
+export default VotingRounds

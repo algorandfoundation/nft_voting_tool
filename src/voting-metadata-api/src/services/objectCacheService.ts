@@ -13,11 +13,8 @@ export interface IObjectCacheService {
     generator: (existing: Buffer | undefined) => Promise<[Buffer, string]>,
     mimeType: string | undefined,
     staleAfterSeconds?: number,
-    returnStaleResult?: boolean,
+    returnStaleResult?: boolean
   ): Promise<[Buffer, string]>
 
   putBuffer(cacheKey: string, data: Buffer, mimeType: string): Promise<void>
 }
-
-
-

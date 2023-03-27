@@ -9,7 +9,7 @@ import {
   ChevronRightIcon,
   DocumentDuplicateIcon,
   XMarkIcon,
-} from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/solid'
 
 export {
   Bars4Icon as MenuIcon,
@@ -21,10 +21,10 @@ export {
   ChevronLeftIcon as ChevronLeftIcon,
   ChevronRightIcon as ChevronRightIcon,
   ChevronDownIcon as ChevronDownIcon,
-};
+}
 
 export function OpenInNewTabIcon() {
-  return <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-flex cursor-pointer"></ArrowTopRightOnSquareIcon>;
+  return <ArrowTopRightOnSquareIcon className="h-4 w-4 inline-flex cursor-pointer"></ArrowTopRightOnSquareIcon>
 }
 
 export function AlgorandIcon() {
@@ -39,5 +39,5 @@ export function AlgorandIcon() {
         stroke="black"
       />
     </svg>
-  );
+  )
 }
