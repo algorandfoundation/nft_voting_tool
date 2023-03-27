@@ -78,7 +78,9 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
             {
               from: deployer,
               to: appRef.appAddress,
-              amount: algokit.microAlgos(100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+              amount: algokit.microAlgos(
+                100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
+              ),
               skipSending: true,
             },
             algod,
