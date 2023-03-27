@@ -87,7 +87,7 @@ jobs:
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.DEV_WEB3_STORAGE_API_TOKEN }}
-          NODE_ENV: "testnet"
+          NODE_ENV: production
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
