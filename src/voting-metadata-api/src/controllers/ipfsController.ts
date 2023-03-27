@@ -1,11 +1,29 @@
-import { Controller, Get, Path, Route } from "tsoa";
-import { injectable } from "tsyringe";
+import { Readable } from 'stream'
+import { Controller, Get, Path, Post, Route, UploadedFile } from 'tsoa'
+import { inject, injectable } from 'tsyringe'
+import { IIpfsService } from '../services/ipfsService'
 
 @injectable()
 @Route('ipfs')
 export class IpfsController extends Controller {
-    @Get("{cid}")
-    public async getIpfsFile(@Path() cid: string): Promise<string> {
-        return "Hello from Controller"
-    }
+  private ipfsService: IIpfsService
+
+  constructor(@inject('IIpfsService') ipfsService: IIpfsService) {
+    super()
+    this.ipfsService = ipfsService
+  }
+
+  @Get('{cid}')
+  public async get(@Path() cid: string): Promise<Readable> {
+    const [buffer, mimeType] = await this.ipfsService.getBuffer(cid)
+    this.setHeader('Content-Type', mimeType)
+    return Readable.from(buffer)
+  }
+
+  @Post()
+  public async post(
+    @UploadedFile() snapshot: Express.Multer.File
+  ): Promise<{ cid: string }> {
+    return this.ipfsService.putBuffer(snapshot.buffer, snapshot.mimetype)
+  }
 }

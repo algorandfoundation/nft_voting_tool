@@ -48,7 +48,8 @@ const api = deployer.deploy(ApiStack, 'api', {
   apiNpmBuildCommand: 'build',
   customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, apiDomainName, apiCertificateRequest),
   envVars: {
-    WEB3_STORAGE_API_TOKEN: getRequiredEnv("WEB3_STORAGE_API_TOKEN")
+    WEB3_STORAGE_API_TOKEN: getRequiredEnv("WEB3_STORAGE_API_TOKEN"),
+    NODE_ENV: getRequiredEnv("NODE_ENV")
   },
 
 })

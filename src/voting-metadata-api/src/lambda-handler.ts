@@ -1,23 +1,5 @@
-import { SecretsManager } from 'aws-sdk'
-import serverless from 'serverless-http'
-import { app } from './app'
-import { AwsSecretsService } from './services/awsSecretsService'
+import serverless from 'serverless-http';
+import CreateApp from './app';
 
-
-const init = async () => {
-  const load = Object.keys(process.env)
-    .filter((key) => key.match(/_ARN$/))
-    .map(async (key) => {
-      console.log(`Fetching secret with a key : ${key}`)
-      let arn = process.env[key] as string
-      const secretsClient = new SecretsManager({
-        region: process.env.AWS_REGION,
-      })
-      const secretsService = new AwsSecretsService(secretsClient)
-      process.env[key.replace(/_ARN$/, '')] = await secretsService.getSecret(arn)
-    })
-
-  await Promise.all(load)
-}
-
+const app = CreateApp();
 export const handler = serverless(app)
