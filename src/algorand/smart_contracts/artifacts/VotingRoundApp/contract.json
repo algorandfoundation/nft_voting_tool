@@ -1,74 +1,74 @@
 {
-  "name": "VotingRoundApp",
-  "methods": [
-    {
-      "name": "create",
-      "args": [
+    "name": "VotingRoundApp",
+    "methods": [
         {
-          "type": "byte[]",
-          "name": "snapshot_public_key"
+            "name": "create",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "snapshot_public_key"
+                },
+                {
+                    "type": "string",
+                    "name": "metadata_ipfs_cid"
+                },
+                {
+                    "type": "uint64",
+                    "name": "start_time"
+                },
+                {
+                    "type": "uint64",
+                    "name": "end_time"
+                },
+                {
+                    "type": "uint64",
+                    "name": "quorum"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
         },
         {
-          "type": "string",
-          "name": "metadata_ipfs_cid"
+            "name": "bootstrap",
+            "args": [
+                {
+                    "type": "byte[16][]",
+                    "name": "answers"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
         },
         {
-          "type": "uint64",
-          "name": "start_time"
+            "name": "get_preconditions",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "signature"
+                }
+            ],
+            "returns": {
+                "type": "(uint64,uint64,uint64,uint64)"
+            }
         },
         {
-          "type": "uint64",
-          "name": "end_time"
-        },
-        {
-          "type": "uint64",
-          "name": "quorum"
+            "name": "vote",
+            "args": [
+                {
+                    "type": "byte[]",
+                    "name": "signature"
+                },
+                {
+                    "type": "byte[16]",
+                    "name": "answer_id"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
         }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "bootstrap",
-      "args": [
-        {
-          "type": "byte[16][]",
-          "name": "answers"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "get_preconditions",
-      "args": [
-        {
-          "type": "byte[]",
-          "name": "signature"
-        }
-      ],
-      "returns": {
-        "type": "(uint64,uint64,uint64,uint64)"
-      }
-    },
-    {
-      "name": "vote",
-      "args": [
-        {
-          "type": "byte[]",
-          "name": "signature"
-        },
-        {
-          "type": "byte[16]",
-          "name": "answer_id"
-        }
-      ],
-      "returns": {
-        "type": "void"
-      }
-    }
-  ],
-  "networks": {}
+    ],
+    "networks": {}
 }
