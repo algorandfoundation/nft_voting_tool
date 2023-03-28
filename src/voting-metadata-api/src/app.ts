@@ -1,4 +1,4 @@
-import express, { Application, json, NextFunction, Request as ExRequest, Response as ExResponse, urlencoded } from 'express'
+import express, { Application, Request as ExRequest, Response as ExResponse, NextFunction, json, urlencoded } from 'express'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
 import { RegisterRoutes } from '../routes/routes'
@@ -8,7 +8,7 @@ import { AwsSecretsService } from './services/awsSecretsService'
 
 export default function CreateApp(): Application {
   const app: Application = express()
-  let env = process.env.NODE_ENV || 'development'
+  const env = process.env.NODE_ENV || 'development'
   if (env !== 'development') {
     container.resolve<AwsSecretsService>('AwsSecretsService').resolveSecrets()
   }

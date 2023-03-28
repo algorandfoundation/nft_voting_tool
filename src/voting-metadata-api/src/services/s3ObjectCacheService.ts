@@ -39,7 +39,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
     const existingCache = await this.s3Client.getObject(bucketAndKey).catch(() => undefined)
     const expired = staleAfterSeconds && existingCache && (+new Date() - +existingCache.LastModified!) / 1000 > staleAfterSeconds
 
-    const existingJson = !!existingCache ? existingCache.Body!.toString() : undefined
+    const existingJson = existingCache?.Body?.toString() ?? undefined
     const existing = !!existingCache && !!existingJson ? (JSON.parse(existingJson) as T) : undefined
 
     let value = existing
@@ -84,7 +84,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
     if (mimeType === undefined) {
       mimeType = existingCache?.ContentType ?? 'application/octet-stream'
     }
-    const existingBody = !!existingCache ? existingCache.Body! : undefined
+    const existingBody = existingCache?.Body ?? undefined
     const existing = !!existingCache && !!existingBody ? Buffer.from(await existingBody.transformToByteArray()) : undefined
     let value = existing
     if (!existing || expired) {
