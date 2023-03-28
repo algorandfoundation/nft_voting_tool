@@ -41,7 +41,7 @@ const VotingRounds = () => {
       <Typography className="mb-3" variant="h4">
         Open voting rounds
       </Typography>
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 md:gap-8">
         {loading ? (
           <VotingRoundTileLoading />
         ) : !data?.openRounds.length ? (
@@ -53,7 +53,7 @@ const VotingRounds = () => {
       <Typography className="mt-8 mb-3" variant="h4">
         Closed voting rounds
       </Typography>
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 md:gap-8">
         {loading ? (
           <VotingRoundTileLoading />
         ) : !data?.closedRounds.length ? (
