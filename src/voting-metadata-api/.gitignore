@@ -24,4 +24,4 @@ dist-ssr
 .env
 routes/
 build/
-
+.cache/

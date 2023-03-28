@@ -1,46 +1,46 @@
-import { Box, Link, Skeleton, Stack, Typography } from "@mui/material";
-import { useWallet } from "@txnlab/use-wallet";
-import { useParams } from "react-router-dom";
-import * as uuid from "uuid";
-import api from "../../shared/api";
-import { LoadingDialog } from "../../shared/loading/LoadingDialog";
-import { SkeletonArray } from "../../shared/SkeletonArray";
-import { getMyVote, getVoteEnded, getVoteStarted } from "../../shared/vote";
-import { getIsAllowedToVote, getWalletAddresses } from "../../shared/wallet";
-import { useConnectedWallet } from "../wallet/state";
-import { VoteDetails } from "./VoteDetails";
-import { VoteResults } from "./VoteResults";
-import { VoteSubmission } from "./VoteSubmission";
-import { VotingTime } from "./VotingTime";
-import { WalletVoteStatus } from "./WalletVoteStatus";
+import { Box, Link, Skeleton, Stack, Typography } from '@mui/material'
+import { useWallet } from '@txnlab/use-wallet'
+import { useParams } from 'react-router-dom'
+import * as uuid from 'uuid'
+import api from '../../shared/api'
+import { LoadingDialog } from '../../shared/loading/LoadingDialog'
+import { SkeletonArray } from '../../shared/SkeletonArray'
+import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
+import { getIsAllowedToVote, getWalletAddresses } from '../../shared/wallet'
+import { useConnectedWallet } from '../wallet/state'
+import { VoteDetails } from './VoteDetails'
+import { VoteResults } from './VoteResults'
+import { VoteSubmission } from './VoteSubmission'
+import { VotingTime } from './VotingTime'
+import { WalletVoteStatus } from './WalletVoteStatus'
 
 function Vote() {
-  const { voteCid } = useParams();
-  const { activeAddress, signer } = useWallet();
-  const { data, loading, refetch } = api.useVotingRound(Number(voteCid!));
-  const walletAddress = useConnectedWallet();
-  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(Number(voteCid!));
-  const voteStarted = !data ? false : getVoteStarted(data);
-  const voteEnded = !data ? false : getVoteEnded(data);
-  const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile));
-  const alreadyVoted = !data ? true : getMyVote(data, walletAddress);
-  const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted;
+  const { voteCid } = useParams()
+  const { activeAddress, signer } = useWallet()
+  const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
+  const walletAddress = useConnectedWallet()
+  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(Number(voteCid!))
+  const voteStarted = !data ? false : getVoteStarted(data)
+  const voteEnded = !data ? false : getVoteEnded(data)
+  const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile))
+  const alreadyVoted = !data ? true : getMyVote(data, walletAddress)
+  const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted
 
   const handleSubmitVote = async (selectedOption: string) => {
-    if (!selectedOption || !activeAddress) return;
+    if (!selectedOption || !activeAddress) return
     try {
       const result = await submitVote({
         activeAddress,
-        signature: "XxbdiHICkPAtpyPwgvXoISjtODjWmVFRrQRddftW4OO36EPTwzZoxGknV+stq51+2XgUkd0HCxZhdonfcPJoBQ==",
+        signature: 'XxbdiHICkPAtpyPwgvXoISjtODjWmVFRrQRddftW4OO36EPTwzZoxGknV+stq51+2XgUkd0HCxZhdonfcPJoBQ==',
         selectedOption: uuid.v4(),
         signer,
         appId: 65,
-      });
+      })
       // await refetch(result.openRounds.find((p) => p.id === voteCid));
     } catch (e) {
       // TODO: handle failure
     }
-  };
+  }
 
   return (
     <div className="max-w-4xl">
@@ -53,7 +53,7 @@ function Vote() {
             {loading ? (
               <Skeleton variant="text" className="w-56" />
             ) : (
-              <Link href={data?.voteInformationUrl ?? ""}>Learn about the vote and candidates</Link>
+              <Link href={data?.voteInformationUrl ?? ''}>Learn about the vote and candidates</Link>
             )}
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
@@ -104,7 +104,7 @@ function Vote() {
       </div>
       <LoadingDialog loading={submittingVote} title="Submitting vote" />
     </div>
-  );
+  )
 }
 
-export default Vote;
+export default Vote

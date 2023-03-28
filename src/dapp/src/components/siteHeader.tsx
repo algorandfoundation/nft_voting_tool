@@ -1,29 +1,29 @@
-import { Disclosure, Popover } from "@headlessui/react";
-import { Typography } from "@mui/material";
-import clsx from "clsx";
-import { Link } from "react-router-dom";
-import algorandFoundationLogo from "../assets/algorand-foundation-logo.svg";
-import { useConnectedWallet, useSetShowConnectWalletModal } from "../features/wallet/state";
-import { getWalletLabel } from "../shared/wallet";
-import { MenuIcon, XIcon } from "./icons";
+import { Disclosure, Popover } from '@headlessui/react'
+import { Typography } from '@mui/material'
+import clsx from 'clsx'
+import { Link } from 'react-router-dom'
+import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
+import { useConnectedWallet, useSetShowConnectWalletModal } from '../features/wallet/state'
+import { getWalletLabel } from '../shared/wallet'
+import { MenuIcon, XIcon } from './icons'
 
 interface Link {
-  name: string;
-  href: string;
-  target?: string;
-  subItems?: Link[];
-  logo?: string;
-  onClick?: () => void;
+  name: string
+  href: string
+  target?: string
+  subItems?: Link[]
+  logo?: string
+  onClick?: () => void
 }
 
 const createNavigation = () =>
   [
-    { name: "Home", href: "/" },
-    { name: "Create", href: "/create" },
-  ] as Link[];
+    { name: 'Home', href: '/' },
+    { name: 'Create', href: '/create' },
+  ] as Link[]
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
-  const classes = "no-underline text-black";
+  const classes = 'no-underline text-black'
 
   return (
     <>
@@ -40,15 +40,15 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
         </Link>
       )}
     </>
-  );
+  )
 }
 
 export default function SiteHeader() {
-  const navigation = createNavigation();
-  const connectedWallet = useConnectedWallet();
-  const setShowConnectedWalletModal = useSetShowConnectWalletModal();
-  const showConnectWalletModal = () => setShowConnectedWalletModal(true);
-  const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : "Connect wallet";
+  const navigation = createNavigation()
+  const connectedWallet = useConnectedWallet()
+  const setShowConnectedWalletModal = useSetShowConnectWalletModal()
+  const showConnectWalletModal = () => setShowConnectedWalletModal(true)
+  const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : 'Connect wallet'
   return (
     <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
       {({ open }) => (
@@ -58,7 +58,7 @@ export default function SiteHeader() {
             {/*Site Icon + Name */}
             <div className="py-4 border-0 lg:border-r-[0.5px] lg:border-black lg:border-solid pr-6">
               <Link to="/" className="my-auto cursor-pointer">
-                <div className={clsx("flex")}>
+                <div className={clsx('flex')}>
                   <img className="h-[73px] w-auto my-auto" src={algorandFoundationLogo} alt="Algorand Foundation logo" />
                 </div>
               </Link>
@@ -78,14 +78,14 @@ export default function SiteHeader() {
                           defaultClasses="inline-flex items-center font-[600] text-l"
                           currentClasses="inline-flex items-center font-[600] text-l decoration-orange-600 underline-offset-[6px]"
                         />
-                      );
+                      )
                       const pipe = (
                         <div key={`${index}-pipe`} className="inline-flex items-center font-medium text-lg">
                           |
                         </div>
-                      );
-                      if (index === 0) return [navLink];
-                      return [pipe, navLink];
+                      )
+                      if (index === 0) return [navLink]
+                      return [pipe, navLink]
                     })}
                 </Popover.Group>
 
@@ -111,7 +111,7 @@ export default function SiteHeader() {
           {/*Mobile Site Links*/}
           <Disclosure.Panel className="lg:hidden">
             <div className="ml-10 mb-5 pt-2">
-              {[...navigation, { name: walletLabel, href: "#", onClick: showConnectWalletModal }].map((link, index) => (
+              {[...navigation, { name: walletLabel, href: '#', onClick: showConnectWalletModal }].map((link, index) => (
                 <Disclosure.Button as="span" key={index}>
                   <NavLink
                     link={link}
@@ -125,5 +125,5 @@ export default function SiteHeader() {
         </div>
       )}
     </Disclosure>
-  );
+  )
 }

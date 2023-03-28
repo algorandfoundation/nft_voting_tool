@@ -1,47 +1,47 @@
-import { Alert, Button, Link, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Button, Link, Stack, TextField, Typography } from '@mui/material'
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../../../shared/api";
-import { LoadingDialog } from "../../../shared/loading/LoadingDialog";
-import { useQuestions, useResetCreateRound, useRoundInfo } from "../state";
-import { useStepRedirect } from "../useStepRedirect";
-import { VoteCreationSteps } from "../VoteCreationSteps";
-import { ConfirmationDialog } from "./ConfirmationDialog";
-import { Row } from "./Row";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import api from '../../../shared/api'
+import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
+import { useQuestions, useResetCreateRound, useRoundInfo } from '../state'
+import { useStepRedirect } from '../useStepRedirect'
+import { VoteCreationSteps } from '../VoteCreationSteps'
+import { ConfirmationDialog } from './ConfirmationDialog'
+import { Row } from './Row'
 
-import { useWallet } from "@txnlab/use-wallet";
-import dayjs from "dayjs";
-import { getTimezone } from "../../../shared/getTimezone";
-import { getWalletAddresses } from "../../../shared/wallet";
-import { Steps } from "../Steps";
+import { useWallet } from '@txnlab/use-wallet'
+import dayjs from 'dayjs'
+import { getTimezone } from '../../../shared/getTimezone'
+import { getWalletAddresses } from '../../../shared/wallet'
+import { Steps } from '../Steps'
 
 export default function Review() {
-  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
-  const { activeAddress, signer } = useWallet();
-  const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen);
-  const roundInfo = useRoundInfo();
-  const questions = useQuestions();
-  const navigate = useNavigate();
-  useStepRedirect(VoteCreationSteps.Review);
-  const resetCreateState = useResetCreateRound();
-  const { loading: creatingVotingRound, execute: createVotingRoundApi } = api.useAddVotingRound();
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
+  const { activeAddress, signer } = useWallet()
+  const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen)
+  const roundInfo = useRoundInfo()
+  const questions = useQuestions()
+  const navigate = useNavigate()
+  useStepRedirect(VoteCreationSteps.Review)
+  const resetCreateState = useResetCreateRound()
+  const { loading: creatingVotingRound, execute: createVotingRoundApi } = api.useAddVotingRound()
   const createVotingRound = async () => {
     try {
       if (!activeAddress) {
-        throw new Error("User does not have an active address");
+        throw new Error('User does not have an active address')
       }
       await createVotingRoundApi({
         newRound: { ...roundInfo, ...questions },
         activeAddress,
         signer,
-      });
-      resetCreateState();
-      navigate("/", {});
+      })
+      resetCreateState()
+      navigate('/', {})
     } catch (e) {
       // TODO: handle failure
     }
-  };
+  }
   return (
     <>
       <Steps activeStep={VoteCreationSteps.Review} />
@@ -55,26 +55,26 @@ export default function Review() {
         </Typography>
         <div className="container grid grid-cols-8 gap-4">
           <Row label="Vote title" value={roundInfo.voteTitle} />
-          <Row label="Vote description" value={roundInfo.voteDescription ?? "-"} />
+          <Row label="Vote description" value={roundInfo.voteDescription ?? '-'} />
           <Row label="Vote information" value={roundInfo.voteInformationUrl} />
-          <Row label="Start date" value={dayjs(roundInfo.start).format("LLL")} />
-          <Row label="End date" value={dayjs(roundInfo.end).format("LLL")} />
+          <Row label="Start date" value={dayjs(roundInfo.start).format('LLL')} />
+          <Row label="End date" value={dayjs(roundInfo.end).format('LLL')} />
           <Row label="Timezone" value={getTimezone(dayjs(roundInfo.start))} />
           <Row
             label="Snapshot file"
-            value={roundInfo.snapshotFile ? `${getWalletAddresses(roundInfo.snapshotFile).length.toLocaleString()} wallets` : "-"}
+            value={roundInfo.snapshotFile ? `${getWalletAddresses(roundInfo.snapshotFile).length.toLocaleString()} wallets` : '-'}
           />
           {roundInfo.snapshotFile && (
             <div className="col-span-6 col-start-3 max-w-xs">
               <TextField rows={6} fullWidth multiline className="max-w-md" disabled value={roundInfo.snapshotFile} />
             </div>
           )}
-          <Row label="Min votes" value={roundInfo.minimumVotes?.toString() ?? "-"} />
+          <Row label="Min votes" value={roundInfo.minimumVotes?.toString() ?? '-'} />
           <div className="col-span-2">
             <Link
               onClick={(e) => {
-                e.preventDefault();
-                navigate(-2);
+                e.preventDefault()
+                navigate(-2)
               }}
               href="#"
             >
@@ -87,7 +87,7 @@ export default function Review() {
         </Typography>
         <div className="container grid grid-cols-8 gap-4 ">
           <Row label="Question or category" value={questions.questionTitle} />
-          <Row label="Description" value={questions.questionDescription ?? "-"} />
+          <Row label="Description" value={questions.questionDescription ?? '-'} />
           <Row
             label="Options"
             value={
@@ -105,8 +105,8 @@ export default function Review() {
             <Link
               href="#"
               onClick={(e) => {
-                e.preventDefault();
-                navigate(-1);
+                e.preventDefault()
+                navigate(-1)
               }}
             >
               Edit question
@@ -125,8 +125,8 @@ export default function Review() {
           handleOpen={toggleConfirmationDialog}
           open={confirmationDialogOpen}
           onConfirm={() => {
-            toggleConfirmationDialog();
-            createVotingRound();
+            toggleConfirmationDialog()
+            createVotingRound()
           }}
         />
         <LoadingDialog
@@ -136,5 +136,5 @@ export default function Review() {
         />
       </div>
     </>
-  );
+  )
 }

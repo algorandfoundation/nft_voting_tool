@@ -1,30 +1,30 @@
-import { Button, Skeleton, Typography } from "@mui/material";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
-import api, { votingRoundsAtom } from "../../shared/api";
-import { VotingRound } from "../../shared/types";
-import { getWalletLabel } from "../../shared/wallet";
-import { useConnectedWallet, useSetShowConnectWalletModal } from "../wallet/state";
-import { NoRounds } from "./NoRounds";
-import { VotingRoundTile } from "./VotingRoundTile";
+import { Button, Skeleton, Typography } from '@mui/material'
+import { useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useSetRecoilState } from 'recoil'
+import api, { votingRoundsAtom } from '../../shared/api'
+import { VotingRound } from '../../shared/types'
+import { getWalletLabel } from '../../shared/wallet'
+import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
+import { NoRounds } from './NoRounds'
+import { VotingRoundTile } from './VotingRoundTile'
 
 const VotingRoundTileLoading = () => (
   <>
     <Skeleton className="h-32" variant="rectangular" />
     <Skeleton className="h-32" variant="rectangular" />
   </>
-);
+)
 
 const VotingRounds = () => {
-  const setShowConnectWalletModal = useSetShowConnectWalletModal();
-  const myWalletAddress = useConnectedWallet();
-  const { data, loading } = api.useVotingRounds(myWalletAddress);
-  const setState = useSetRecoilState(votingRoundsAtom);
+  const setShowConnectWalletModal = useSetShowConnectWalletModal()
+  const myWalletAddress = useConnectedWallet()
+  const { data, loading } = api.useVotingRounds(myWalletAddress)
+  const setState = useSetRecoilState(votingRoundsAtom)
 
   useEffect(() => {
-    setState(data);
-  }, [data]);
+    setState(data)
+  }, [data])
 
   return (
     <div className="container">
@@ -72,7 +72,7 @@ const VotingRounds = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default VotingRounds;
+export default VotingRounds

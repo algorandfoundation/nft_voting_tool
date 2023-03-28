@@ -1,19 +1,19 @@
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { WalletProvider } from "@txnlab/use-wallet";
-import { PropsWithChildren } from "react";
-import { Outlet } from "react-router-dom";
-import SiteFooter from "./components/siteFooter";
-import SiteHeader from "./components/siteHeader";
-import ConnectWallet from "./features/wallet/ConnectWallet";
-import ScrollToTop from "./shared/router/ScrollToTop";
-import { useAlgoWallet } from "./utils/useAlgoWalletProvider";
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { WalletProvider } from '@txnlab/use-wallet'
+import { PropsWithChildren } from 'react'
+import { Outlet } from 'react-router-dom'
+import SiteFooter from './components/siteFooter'
+import SiteHeader from './components/siteHeader'
+import ConnectWallet from './features/wallet/ConnectWallet'
+import ScrollToTop from './shared/router/ScrollToTop'
+import { useAlgoWallet } from './utils/useAlgoWalletProvider'
 
-type LayoutProps = PropsWithChildren<unknown>;
+type LayoutProps = PropsWithChildren<unknown>
 
 const SiteContent = ({ children }: LayoutProps) => {
-  return <div className="container mx-auto">{children}</div>;
-};
+  return <div className="container mx-auto">{children}</div>
+}
 
 export default function Root() {
   const walletProviders = useAlgoWallet({
@@ -22,7 +22,7 @@ export default function Root() {
     nodePort: import.meta.env.VITE_ALGOD_NODE_CONFIG_PORT,
     network: import.meta.env.VITE_ALGOD_NETWORK,
     autoConnect: true,
-  });
+  })
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -38,5 +38,5 @@ export default function Root() {
         <ScrollToTop />
       </WalletProvider>
     </LocalizationProvider>
-  );
+  )
 }

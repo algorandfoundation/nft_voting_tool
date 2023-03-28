@@ -4,8 +4,7 @@
 // This script allows us to output SecretsManager::Secret ARNs by convention
 //  and the values populated.
 
-import { AWSError, SecretsManager } from 'aws-sdk'
-import { PutSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
+import { PutSecretValueCommandOutput, PutSecretValueResponse, SecretsManager } from '@aws-sdk/client-secrets-manager'
 import { readFileSync } from 'fs'
 
 const client = new SecretsManager({
@@ -42,7 +41,7 @@ const setSecretsResults = outputs.map((output) => {
         reject(err)
         return
       }
-      resolve(data)
+      resolve(data!)
     })
   })
 })
@@ -52,16 +51,16 @@ void (async () => {
     (successes) => {
       successes
         .filter((s) => s !== null)
-        .map((s) => s as PutSecretValueResponse)
-        .forEach((success: PutSecretValueResponse) => {
+        .map((s) => s as PutSecretValueCommandOutput)
+        .forEach((success: PutSecretValueCommandOutput) => {
           console.log(`Secret set for ${success.Name ?? ''} with version ${success.VersionId ?? ''}`)
         })
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (failures: any) => {
       if (failures instanceof Array) {
-        failures.forEach((failure: AWSError) => {
-          console.error(`Secret set FAILED: [${failure.code}] ${failure.name}: ${failure.message}`)
+        failures.forEach((failure: any) => {
+          console.error(`Secret set FAILED: ${JSON.stringify(failure)}}`)
         })
         throw 'Failed'
       } else {

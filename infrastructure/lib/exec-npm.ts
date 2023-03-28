@@ -33,4 +33,3 @@ export function execNpm(command: string) {
 
   console.group(buildProcess.stdout.toString())
 }
-

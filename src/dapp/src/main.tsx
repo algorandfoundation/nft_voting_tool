@@ -1,60 +1,60 @@
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { StyledEngineProvider } from "@mui/material/styles";
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { RecoilRoot } from "recoil";
-import ErrorPage from "./error-page";
-import VotingRounds from "./features/rounds";
-import Vote from "./features/vote";
-import Questions from "./features/vote-creation/Questions";
-import Review from "./features/vote-creation/review";
-import RoundInfo from "./features/vote-creation/RoundInfo";
-import ConnectWallet from "./features/wallet/ConnectWallet";
-import "./main.css";
-import Root from "./root";
-import { theme } from "./theme";
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import { StyledEngineProvider } from '@mui/material/styles'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { RecoilRoot } from 'recoil'
+import ErrorPage from './error-page'
+import VotingRounds from './features/rounds'
+import Vote from './features/vote'
+import Questions from './features/vote-creation/Questions'
+import Review from './features/vote-creation/review'
+import RoundInfo from './features/vote-creation/RoundInfo'
+import ConnectWallet from './features/wallet/ConnectWallet'
+import './main.css'
+import Root from './root'
+import { theme } from './theme'
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Root />,
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "",
+        path: '',
         element: <VotingRounds />,
       },
       {
-        path: "create",
+        path: 'create',
         children: [
           {
-            path: "",
+            path: '',
             element: <RoundInfo />,
           },
           {
-            path: "questions",
+            path: 'questions',
             element: <Questions />,
           },
           {
-            path: "review",
+            path: 'review',
             element: <Review />,
           },
         ],
       },
       {
-        path: "vote/:voteCid",
+        path: 'vote/:voteCid',
         element: <Vote />,
       },
       {
-        path: "connect-wallet",
+        path: 'connect-wallet',
         element: <ConnectWallet />,
       },
     ],
   },
-]);
+])
 
-const rootElement = document.getElementById("root") as HTMLElement;
+const rootElement = document.getElementById('root') as HTMLElement
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
@@ -66,5 +66,5 @@ ReactDOM.createRoot(rootElement).render(
         </RecoilRoot>
       </ThemeProvider>
     </StyledEngineProvider>
-  </React.StrictMode>
-);
+  </React.StrictMode>,
+)
