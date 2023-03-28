@@ -1,27 +1,23 @@
 import { Card, CardContent, Typography } from '@mui/material'
-import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
 import { VotingRound } from '../../shared/types'
+import { VotingRoundStatus } from './VotingRoundStatus'
 
-type VotingRoundTileProps = {
+export type VotingRoundTileProps = {
   round: VotingRound
 }
+
 export const VotingRoundTile = ({ round }: VotingRoundTileProps) => {
   return (
     <Link className="no-underline" to={`/vote/${round.id}`}>
-      <Card className="cursor-pointer" variant="outlined">
-        <CardContent>
-          <div className="text-center pt-4 pb-12">
-            <Typography variant="h6">{round.voteTitle}</Typography>
-          </div>
-          <div className="flex justify-between">
-            <Typography className="text-xs" variant="body1">
-              Vote start: {dayjs(round.start).format('LL')}
-            </Typography>
-            <Typography className="text-xs" variant="body1">
-              Vote end: {dayjs(round.end).format('LL')}
+      <Card className="cursor-pointer">
+        <CardContent className="p-2 sm:p-6">
+          <div className="text-start: sm:text-center pt-4 pb-3.5 sm:pb-12">
+            <Typography variant="h5" className="font-semibold text-base sm:text-xl">
+              {round.voteTitle}
             </Typography>
           </div>
+          <VotingRoundStatus round={round} />
         </CardContent>
       </Card>
     </Link>

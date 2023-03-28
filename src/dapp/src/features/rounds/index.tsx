@@ -1,20 +1,31 @@
 import { Button, Skeleton, Typography } from '@mui/material'
+import sortBy from 'lodash.sortby'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useSetRecoilState } from 'recoil'
 import api, { votingRoundsAtom } from '../../shared/api'
 import { VotingRound } from '../../shared/types'
+import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { getWalletLabel } from '../../shared/wallet'
 import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
-import { NoRounds } from './NoRounds'
-import { VotingRoundTile } from './VotingRoundTile'
+import { VotingRoundSection } from './VotingRoundSection'
 
-const VotingRoundTileLoading = () => (
+export const VotingRoundTileLoading = () => (
   <>
     <Skeleton className="h-32" variant="rectangular" />
     <Skeleton className="h-32" variant="rectangular" />
   </>
 )
+
+const getRounds = (
+  rounds: VotingRound[],
+  filterPredicate: (r: VotingRound) => boolean,
+  sortPredicate: Parameters<typeof sortBy>[1],
+): VotingRound[] => {
+  const filtered = rounds.filter(filterPredicate)
+  const sorted = sortBy(filtered, sortPredicate)
+  return sorted
+}
 
 const VotingRounds = () => {
   const setShowConnectWalletModal = useSetShowConnectWalletModal()
@@ -25,6 +36,30 @@ const VotingRounds = () => {
   useEffect(() => {
     setState(data)
   }, [data])
+
+  const openRounds = data
+    ? getRounds(
+        data.rounds,
+        (r) => getVoteStarted(r) && !getVoteEnded(r),
+        (r: VotingRound) => r.end,
+      )
+    : []
+
+  const upcomingRounds = data
+    ? getRounds(
+        data.rounds,
+        (r) => !getVoteStarted(r),
+        (r: VotingRound) => r.start,
+      )
+    : []
+
+  const closedRounds = data
+    ? getRounds(
+        data.rounds,
+        (r) => getVoteEnded(r),
+        (r: VotingRound) => r.end,
+      )
+    : []
 
   return (
     <div className="container">
@@ -47,30 +82,9 @@ const VotingRounds = () => {
         </Button>
       )}
 
-      <Typography className="mb-3" variant="h4">
-        Open voting rounds
-      </Typography>
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
-        {loading ? (
-          <VotingRoundTileLoading />
-        ) : !data?.openRounds.length ? (
-          <NoRounds label="open" />
-        ) : (
-          data?.openRounds.map((round: VotingRound) => <VotingRoundTile key={round.id} round={round} />)
-        )}
-      </div>
-      <Typography className="mt-8 mb-3" variant="h4">
-        Closed voting rounds
-      </Typography>
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-8">
-        {loading ? (
-          <VotingRoundTileLoading />
-        ) : !data?.closedRounds.length ? (
-          <NoRounds label="closed" />
-        ) : (
-          data?.closedRounds.map((round: VotingRound) => <VotingRoundTile key={round.id} round={round} />)
-        )}
-      </div>
+      <VotingRoundSection label="Open" rounds={openRounds} loading={loading} />
+      <VotingRoundSection label="Opening soon" rounds={upcomingRounds} loading={loading} />
+      <VotingRoundSection label="Closed" rounds={closedRounds} loading={loading} />
     </div>
   )
 }

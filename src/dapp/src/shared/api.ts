@@ -12,14 +12,13 @@ import { VotingRound } from './types'
 import { indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
-  openRounds: VotingRound[]
-  closedRounds: VotingRound[]
+  rounds: VotingRound[]
 }
 
 export const votingRoundsAtom = atom<AppState>({
   key: 'appState',
   default: {
-    openRounds: [
+    rounds: [
       {
         id: 1,
         voteTitle: 'Algorand Council',
@@ -48,8 +47,7 @@ export const votingRoundsAtom = atom<AppState>({
           'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
         votes: [],
       },
-    ],
-    closedRounds: [
+
       {
         id: 3,
         voteTitle: 'Another Round',
@@ -107,8 +105,7 @@ const useMockGetter = <T>(payload: T) => {
 const useFetchVoteRounds = (address: string) => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<AppState>({
-    openRounds: [],
-    closedRounds: [],
+    rounds: [],
   })
 
   useEffect(() => {
@@ -116,8 +113,7 @@ const useFetchVoteRounds = (address: string) => {
       setLoading(true)
       fetchVotingRounds(address).then((votingRounds) => {
         setData({
-          openRounds: votingRounds.filter((round) => new Date(round.start) < new Date() && new Date(round.end) > new Date()),
-          closedRounds: votingRounds.filter((round) => new Date(round.end) < new Date()),
+          rounds: votingRounds,
         })
         setLoading(false)
       })
@@ -129,8 +125,7 @@ const useFetchVoteRounds = (address: string) => {
       setLoading(true)
       fetchVotingRounds(address).then((votingRounds) => {
         setData({
-          openRounds: votingRounds.filter((round) => new Date(round.start) < new Date() && new Date(round.end) > new Date()),
-          closedRounds: votingRounds.filter((round) => new Date(round.end) < new Date()),
+          rounds: votingRounds,
         })
         setLoading(false)
       })
@@ -238,7 +233,7 @@ const api = {
         const transaction = await votingRoundContract.castVote(signature, selectedOption, appId)
         return await new Promise((resolve) => {
           setState((state) => {
-            const round = state.openRounds.find((p) => p.id === roundId)
+            const round = state.rounds.find((p) => p.id === roundId)
             if (!round) {
               resolve(state)
               return state
@@ -246,7 +241,7 @@ const api = {
             const newState = {
               ...state,
               openRounds: [
-                ...state.openRounds.filter((p_1) => p_1.id !== roundId),
+                ...state.rounds.filter((p_1) => p_1.id !== roundId),
                 {
                   ...round,
                   votes: [
@@ -271,7 +266,7 @@ const api = {
   },
   useVotingRound: (id: number) => {
     const data = useRecoilValue(votingRoundsAtom)
-    return useMockGetter([...data.openRounds, ...data.closedRounds].find((round) => round.id === id))
+    return useMockGetter([...data.rounds].find((round) => round.id === id))
   },
   useAddVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
@@ -306,8 +301,8 @@ const api = {
           setState((state) => {
             const newState = {
               ...state,
-              openRounds: [
-                ...state.openRounds,
+              rounds: [
+                ...state.rounds,
                 {
                   ...newRound,
                   id: Math.floor(Math.random() * 1000),
