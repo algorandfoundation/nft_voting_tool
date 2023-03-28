@@ -26,7 +26,8 @@
     "vite.port": 5173,
     "jest.disabledWorkspaceFolders": [
       "infrastructure",
-      "ROOT"
+      "ROOT",
+      "voting-metadata-api"
     ],
     "dotenv.enableAutocloaking": true,
   },

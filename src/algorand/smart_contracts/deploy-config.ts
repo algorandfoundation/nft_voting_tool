@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
@@ -65,6 +66,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
 
       // Check if it's already been bootstrapped
       const appInfo = await algokit.getAppByIndex(app.appId, algod)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const isBootstrappedValue = appInfo.params['global-state']!.find(
         (s) => s.key === Buffer.from('is_bootstrapped').toString('base64'),
       )!.value
@@ -105,7 +107,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
             algod,
           )
         } catch (e) {
-          throw appClient.exposeLogicError(e)
+          throw appClient.exposeLogicError(e as Error)
         }
       }
 
@@ -129,6 +131,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
       const [isVotingOpen, isAllowedToVote, hasAlreadyVoted, time] = result.return!.returnValue! as any[]
       console.log({ isVotingOpen, isAllowedToVote, hasAlreadyVoted, time })
 

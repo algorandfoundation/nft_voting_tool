@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { test, describe, beforeEach, beforeAll } from '@jest/globals'
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { algorandFixture } from '@algorandfoundation/algokit-utils/testing'
 import fs from 'fs/promises'
 import path from 'path'
-import { Algodv2, Account } from 'algosdk'
+import { Account } from 'algosdk'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import * as uuid from 'uuid'
