@@ -1,8 +1,8 @@
+import axios from 'axios'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { inject, singleton } from 'tsyringe'
-import { NotFoundException } from '../models/errors/httpResponseException'
 import { IIpfsService } from './ipfsService'
 import { IObjectCacheService } from './objectCacheService'
 
@@ -17,8 +17,13 @@ export class CacheOnlyIPFSService implements IIpfsService {
   async getBuffer(cid: string): Promise<[Buffer, string]> {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
-      (_e) => {
-        throw new NotFoundException(`Could not find IPFS object with CID: ${cid}`)
+      async (_e) => {
+        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, {
+          responseType: 'arraybuffer',
+        })
+        const mimeType = (response.headers['content-type'] as string) ?? 'application/octet-stream'
+        const buffer = (await response.data) as ArrayBuffer
+        return Promise.resolve([Buffer.from(buffer), mimeType])
       },
       undefined,
       undefined,
@@ -29,8 +34,10 @@ export class CacheOnlyIPFSService implements IIpfsService {
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
-      (_e) => {
-        throw new NotFoundException(`Could not finf IPFS object with CID: ${cid}`)
+      async (_e) => {
+        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`)
+        const json = await response.data.json()
+        return json as T
       },
       undefined,
       true,

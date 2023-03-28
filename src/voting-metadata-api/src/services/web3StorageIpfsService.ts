@@ -38,7 +38,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
         const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, {
           responseType: 'arraybuffer',
         })
-        const mimeType = (response.headers['Content-Type'] as string) ?? 'application/octet-stream'
+        const mimeType = (response.headers['content-type'] as string) ?? 'application/octet-stream'
         const buffer = (await response.data) as ArrayBuffer
         return Promise.resolve([Buffer.from(buffer), mimeType])
       },

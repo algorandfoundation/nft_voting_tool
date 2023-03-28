@@ -1,8 +1,8 @@
+import axios from 'axios'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { singleton } from 'tsyringe'
-import { NotFoundException } from '../models/errors/httpResponseException'
 import type { IIpfsService } from './ipfsService'
 
 @singleton()
@@ -12,7 +12,9 @@ export class InMemoryIPFSService implements IIpfsService {
   async get<T>(cid: string): Promise<T> {
     const cached = this.cache[cid]
     if (!cached) {
-      throw new NotFoundException('Could not find the IPFS File')
+      const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`)
+      const json = await response.data.json()
+      return json as T
     }
 
     return JSON.parse(cached.Data.toString('utf-8')) as T
@@ -21,7 +23,12 @@ export class InMemoryIPFSService implements IIpfsService {
   async getBuffer(cid: string): Promise<[Buffer, string]> {
     const cached = this.cache[cid]
     if (!cached) {
-      throw new NotFoundException('Could not find the IPFS File')
+      const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, {
+        responseType: 'arraybuffer',
+      })
+      const mimeType = (response.headers['content-type'] as string) ?? 'application/octet-stream'
+      const buffer = (await response.data) as ArrayBuffer
+      return Promise.resolve([Buffer.from(buffer), mimeType])
     }
 
     return [cached.Data, cached.ContentType]
