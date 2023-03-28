@@ -25,13 +25,18 @@ export const VotingRoundStatus = ({ round }: VotingRoundTileProps) => {
   return (
     <div className="flex justify-between items-center">
       <Chip
-        className={clsx('rounded uppercase text-[8px] sm:text-xs', className)}
+        className={clsx('rounded uppercase text-[8px] sm:text-xs h-4 sm:h-8', className)}
         label={label}
-        sx={{
+        sx={({ breakpoints }) => ({
           '& .MuiChip-label': {
-            padding: 1,
+            [breakpoints.down('md')]: {
+              padding: 0.5,
+            },
+            [breakpoints.up('md')]: {
+              padding: 1,
+            },
           },
-        }}
+        })}
       />
 
       <Typography className="text-[8px] sm:text-base" variant="body1">
