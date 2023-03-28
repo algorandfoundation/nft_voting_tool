@@ -1,18 +1,26 @@
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import { singleton } from 'tsyringe'
-import { NotFoundException } from '../models/errors/httpResponseException'
+import { inject, singleton } from 'tsyringe'
+import { MemoryCacheRecord } from '../models/memoryCacheRecord'
+import { CloudFlareIPFSService } from './cloudflareIpfsService'
 import type { IIpfsService } from './ipfsService'
 
 @singleton()
 export class InMemoryIPFSService implements IIpfsService {
   private cache: Record<string, MemoryCacheRecord> = {}
+  private cloudflareIpfsService: CloudFlareIPFSService
+
+  constructor(@inject('CloudFlareIPFSService') cloudflareIpfsService: CloudFlareIPFSService) {
+    this.cloudflareIpfsService = cloudflareIpfsService
+  }
 
   async get<T>(cid: string): Promise<T> {
     const cached = this.cache[cid]
     if (!cached) {
-      throw new NotFoundException('Could not find the IPFS File')
+      const result = await this.cloudflareIpfsService.get<T>(cid)
+      await this.put(result)
+      return result
     }
 
     return JSON.parse(cached.Data.toString('utf-8')) as T
@@ -21,7 +29,9 @@ export class InMemoryIPFSService implements IIpfsService {
   async getBuffer(cid: string): Promise<[Buffer, string]> {
     const cached = this.cache[cid]
     if (!cached) {
-      throw new NotFoundException('Could not find the IPFS File')
+      const [result, mimeType] = await this.cloudflareIpfsService.getBuffer(cid)
+      await this.putBuffer(result, mimeType)
+      return [result, mimeType]
     }
 
     return [cached.Data, cached.ContentType]

@@ -10,6 +10,8 @@
     "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --omit=dev",
     "routes": "tsoa routes",
     "clean": "rimraf node_modules && rimraf build",
+    "lint": "eslint --ext .ts,.tsx \"src/\"",
+    "lint:fix": "eslint --ext .ts,.tsx \"src/\" --fix",
     "typecheck": "tsoa routes && tsc --noEmit",
     "format": "prettier --write ."
   },

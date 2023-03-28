@@ -2,41 +2,44 @@ import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { inject, singleton } from 'tsyringe'
-import { NotFoundException } from '../models/errors/httpResponseException'
+import { CloudFlareIPFSService } from './cloudflareIpfsService'
 import { IIpfsService } from './ipfsService'
 import { IObjectCacheService } from './objectCacheService'
 
 @singleton()
 export class CacheOnlyIPFSService implements IIpfsService {
   private cache: IObjectCacheService
+  private cloudfareIpfsService: CloudFlareIPFSService
 
-  constructor(@inject('IObjectCacheService') cache: IObjectCacheService) {
+  constructor(
+    @inject('IObjectCacheService') cache: IObjectCacheService,
+    @inject('CloudFlareIPFSService') cloudFlareIPFSService: CloudFlareIPFSService,
+  ) {
     this.cache = cache
-  }
-
-  async getBuffer(cid: string): Promise<[Buffer, string]> {
-    return await this.cache.getAndCacheBuffer(
-      `ipfs-${cid}`,
-      (_e) => {
-        throw new NotFoundException(`Could not find IPFS object with CID: ${cid}`)
-      },
-      undefined,
-      undefined,
-      true,
-    )
+    this.cloudfareIpfsService = cloudFlareIPFSService
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
-      (_e) => {
-        throw new NotFoundException(`Could not finf IPFS object with CID: ${cid}`)
+      async (_e) => {
+        return this.cloudfareIpfsService.get<T>(cid)
       },
       undefined,
       true,
     )
   }
-
+  async getBuffer(cid: string): Promise<[Buffer, string]> {
+    return await this.cache.getAndCacheBuffer(
+      `ipfs-${cid}`,
+      async (_e) => {
+        return this.cloudfareIpfsService.getBuffer(cid)
+      },
+      undefined,
+      undefined,
+      true,
+    )
+  }
   async put<T>(data: T): Promise<{ cid: string }> {
     const cid = await this.getCID(data)
     await this.cache.getAndCache<T>(

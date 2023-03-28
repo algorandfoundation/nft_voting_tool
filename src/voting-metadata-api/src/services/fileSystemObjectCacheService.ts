@@ -24,7 +24,7 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
     returnStaleResult?: boolean,
   ): Promise<T> {
     const cachePath = path.join(this.cacheDirectory, `${cacheKey}.json`)
-    const existingCache = await fs.stat(cachePath).catch((e) => false)
+    const existingCache = await fs.stat(cachePath).catch((_) => false)
     const expired =
       staleAfterSeconds && typeof existingCache !== 'boolean' && (+new Date() - +existingCache.mtime) / 1000 > staleAfterSeconds
 
@@ -75,7 +75,7 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
     }
     const extension = mime.getExtension(mimeType)
     const cachePath = path.join(this.cacheDirectory, `${cacheKey}.${extension}`)
-    const existingCache = await fs.stat(cachePath).catch((e) => false)
+    const existingCache = await fs.stat(cachePath).catch((_) => false)
     const expired =
       staleAfterSeconds && typeof existingCache !== 'boolean' && (+new Date() - +existingCache.mtime) / 1000 > staleAfterSeconds
 

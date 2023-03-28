@@ -1,10 +1,11 @@
-import { IocContainer } from '@tsoa/runtime'
 import { S3 } from '@aws-sdk/client-s3'
 import { SecretsManager } from '@aws-sdk/client-secrets-manager'
+import { IocContainer } from '@tsoa/runtime'
 import path from 'path'
 import { container, Lifecycle } from 'tsyringe'
 import { Web3Storage } from 'web3.storage'
 import { AwsSecretsService } from './services/awsSecretsService'
+import { CloudFlareIPFSService } from './services/cloudflareIpfsService'
 import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService'
 import { InMemoryIPFSService } from './services/inMemoryIpfsService'
 import { IIpfsService } from './services/ipfsService'
@@ -12,7 +13,11 @@ import { IObjectCacheService } from './services/objectCacheService'
 import { S3ObjectCacheService } from './services/s3ObjectCacheService'
 import { Web3StorageWithCacheIpfsService } from './services/web3StorageIpfsService'
 
-let env = process.env.NODE_ENV || 'development'
+const env = process.env.NODE_ENV || 'development'
+
+container.register<CloudFlareIPFSService>('CloudFlareIPFSService', {
+  useClass: CloudFlareIPFSService,
+})
 
 if (env === 'development') {
   container.register<string>('CacheDirectory', {
