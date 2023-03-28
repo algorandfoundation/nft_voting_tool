@@ -40,7 +40,7 @@
         "name": "Run All",
         "configurations": [
           { "name": "Run dApp", "folder": "dapp" },
-          { "name": "Build & Deploy Beaker application", "folder": "algorand" }
+          { "name": "Build & Deploy Beaker application", "folder": "algorand" },
           { "name": "Run api", "folder": "voting-metadata-api" }
         ],
         "presentation": {
