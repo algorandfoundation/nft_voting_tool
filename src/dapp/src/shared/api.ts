@@ -2,22 +2,25 @@
  * Returns mock data for now, this should be replaced with real API calls
  */
 
+import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
+import * as ed from '@noble/ed25519'
+import { TransactionSigner } from 'algosdk'
 import { useCallback, useEffect, useState } from 'react'
 import { atom, useRecoilValue, useSetRecoilState } from 'recoil'
-import { v4 as uuid } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
-import { Vote, VotingRound } from './types'
+import { VotingRound } from './types'
+import { indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRound[]
 }
 
-const votingRoundsAtom = atom<AppState>({
+export const votingRoundsAtom = atom<AppState>({
   key: 'appState',
   default: {
     rounds: [
       {
-        id: 'b34fb9cb-7e69-4ac6-a6cb-976edf1fd8d8',
+        id: 1,
         voteTitle: 'Algorand Council',
         voteDescription: 'This is the vote description',
         start: '2023-03-01T00:00:00.000Z',
@@ -26,11 +29,12 @@ const votingRoundsAtom = atom<AppState>({
         end: '2023-04-21T00:00:00.000Z',
         questionTitle: 'Who should be on the council?',
         answers: ['Sammy', 'Charlotte', 'Roman', 'Maxine'],
-        snapshotFile: 'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I',
+        snapshotFile:
+          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
         votes: [],
       },
       {
-        id: '222fb9cb-7e69-4ac6-a6cb-976edf1fd8d8',
+        id: 2,
         voteTitle: 'Future vote',
         voteDescription: 'This is the vote description',
         start: '2024-03-01T00:00:00.000Z',
@@ -39,12 +43,13 @@ const votingRoundsAtom = atom<AppState>({
         end: '2024-04-21T00:00:00.000Z',
         questionTitle: 'Who should be on the council?',
         answers: ['Sammy', 'Charlotte', 'Roman', 'Maxine'],
-        snapshotFile: 'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I',
+        snapshotFile:
+          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
         votes: [],
       },
 
       {
-        id: '129c3c52-1961-4e42-b88b-2a42cc5b50ca',
+        id: 3,
         voteTitle: 'Another Round',
         start: '2023-02-26T00:00:00.000Z',
         end: '2023-03-06T00:00:00.000Z',
@@ -53,10 +58,11 @@ const votingRoundsAtom = atom<AppState>({
         voteDescription: 'This is the vote description',
         voteInformationUrl: 'https://www.algorand.com',
         votes: [],
-        snapshotFile: 'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I',
+        snapshotFile:
+          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
       },
       {
-        id: '4727d3e7-6cfb-4530-a4c9-980c0a3ba90f',
+        id: 4,
         voteTitle: 'An earlier vote',
         start: '2023-02-18T00:00:00.000Z',
         end: '2023-02-23T00:00:00.000Z',
@@ -96,22 +102,88 @@ const useMockGetter = <T>(payload: T) => {
   return { loading, data, refetch }
 }
 
-const useMockSetter = <T, K>(action: (payload: T) => Promise<K>, extraDelayMs = 0) => {
-  const [loading, setLoading] = useState(false)
-  const execute = useCallback((payload: T) => {
-    setLoading(true)
-    const promise = new Promise<K>((resolve) =>
-      setTimeout(async () => {
-        const state = await action(payload)
-        setLoading(false)
-        resolve(state)
-        // simulate loading time
-      }, Math.random() * 400 + extraDelayMs),
-    )
-    return promise
-  }, [])
+const useFetchVoteRounds = (address: string) => {
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<AppState>({
+    rounds: [],
+  })
 
-  return { loading, execute }
+  useEffect(() => {
+    if (address) {
+      setLoading(true)
+      fetchVotingRounds(address).then((votingRounds) => {
+        setData({
+          rounds: votingRounds,
+        })
+        setLoading(false)
+      })
+    }
+  }, [address])
+
+  const refetch = useCallback(() => {
+    if (address) {
+      setLoading(true)
+      fetchVotingRounds(address).then((votingRounds) => {
+        setData({
+          rounds: votingRounds,
+        })
+        setLoading(false)
+      })
+    }
+  }, [data, setData])
+
+  return { loading, data, refetch }
+}
+
+const fetchVotingRounds = async (address: string) => {
+  const voteRounds: VotingRound[] = []
+  const applicationsByCreator = await indexer.lookupAccountCreatedApplications(address).do()
+  applicationsByCreator.applications.map((app: ApplicationResponse) => {
+    if (app.params['global-state']) {
+      const decodedState = decodeGlobalState(app.params['global-state'])
+      const voteRound = {
+        id: app.id,
+        voteTitle: `Vote Round for App ID: ${app.id}`,
+        start: decodedState.start_time,
+        end: decodedState.end_time,
+        answers: ['Yes', 'No'],
+        questionTitle: 'Should we do this?',
+        voteDescription: 'This is the vote description',
+        voteInformationUrl: 'https://www.algorand.com',
+        votes: [],
+        snapshotFile:
+          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
+      }
+      voteRounds.push(voteRound)
+    }
+  })
+  return voteRounds
+}
+
+const decodeGlobalState = (
+  globalState: {
+    key: string
+    value: TealValue
+  }[],
+) => {
+  const decodedState = {
+    start_time: '0',
+    end_time: '0',
+  }
+  globalState.map((state) => {
+    const globalKey = Buffer.from(state.key, 'base64').toString()
+    if (state.value.type === 2) {
+      switch (globalKey) {
+        case 'start_time':
+          decodedState.start_time = new Date(Number(state.value.uint)).toISOString()
+          break
+        case 'end_time':
+          decodedState.end_time = new Date(Number(state.value.uint)).toISOString()
+          break
+      }
+    }
+  })
+  return decodedState
 }
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
@@ -140,69 +212,110 @@ const api = {
       })
     })
   },
-  useSubmitVote: (roundId: string) => {
+  useSubmitVote: (roundId: number) => {
     const setState = useSetRecoilState(votingRoundsAtom)
-    return useMockSetter<Vote, AppState>(({ selectedOption, walletAddress }) => {
-      return new Promise((resolve) => {
-        setState((state) => {
-          const round = state.rounds.find((p) => p.id === roundId)
-          if (!round) {
-            resolve(state)
-            return state
-          }
-          const newState = {
-            ...state,
-            openRounds: [
-              ...state.rounds.filter((p) => p.id !== roundId),
-              {
-                ...round,
-                votes: [
-                  ...round.votes,
-                  {
-                    walletAddress,
-                    selectedOption,
-                  },
-                ],
-              },
-            ],
-          }
-          resolve(newState)
-          return newState
+    // return useSetter(({ activeAddress, signature, selectedOption, signer }) => {
+    return useSetter(
+      async ({
+        activeAddress,
+        signature,
+        selectedOption,
+        signer,
+        appId,
+      }: {
+        activeAddress: string
+        signature: string
+        selectedOption: string
+        signer: TransactionSigner
+        appId: number
+      }) => {
+        const votingRoundContract = VotingRoundContract(activeAddress, signer)
+        const transaction = await votingRoundContract.castVote(signature, selectedOption, appId)
+        return await new Promise((resolve) => {
+          setState((state) => {
+            const round = state.rounds.find((p) => p.id === roundId)
+            if (!round) {
+              resolve(state)
+              return state
+            }
+            const newState = {
+              ...state,
+              openRounds: [
+                ...state.rounds.filter((p_1) => p_1.id !== roundId),
+                {
+                  ...round,
+                  votes: [
+                    ...round.votes,
+                    {
+                      walletAddress: activeAddress,
+                      selectedOption,
+                    },
+                  ],
+                },
+              ],
+            }
+            resolve(newState)
+            return newState
+          })
         })
-      })
-    }, 2000)
+      },
+    )
   },
-  useVotingRounds: () => {
-    const data = useRecoilValue(votingRoundsAtom)
-    return useMockGetter({
-      ...data,
-    })
+  useVotingRounds: (address: string) => {
+    return useFetchVoteRounds(address)
   },
-  useVotingRound: (id: string) => {
+  useVotingRound: (id: number) => {
     const data = useRecoilValue(votingRoundsAtom)
     return useMockGetter([...data.rounds].find((round) => round.id === id))
   },
   useAddVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
-    return useMockSetter((newRound: Omit<VotingRound, 'id' | 'votes'>) => {
-      return new Promise((resolve) => {
-        setState((state) => {
-          const newState = {
-            ...state,
-            openRounds: [
-              ...state.rounds,
-              {
-                ...newRound,
-                id: uuid(),
-                votes: [],
-              },
-            ],
-          }
-          resolve(newState)
-          return newState
+    return useSetter(
+      async ({
+        newRound,
+        activeAddress,
+        signer,
+      }: {
+        newRound: Omit<VotingRound, 'id' | 'votes'>
+        activeAddress: string
+        signer: TransactionSigner
+      }) => {
+        const votingRoundContract = VotingRoundContract(activeAddress, signer)
+
+        const privateKey = ed.utils.randomPrivateKey()
+        const publicKey = await ed.getPublicKeyAsync(privateKey)
+        //need to sign the allowlist addresses
+        //Upload the vote round data to the API/IPFS
+        const cid = 'cid'
+
+        const app = await votingRoundContract.create(
+          publicKey,
+          cid,
+          Date.parse(newRound.start),
+          Date.parse(newRound.end),
+          newRound.minimumVotes ? newRound.minimumVotes : 0,
+        )
+        await votingRoundContract.bootstrap(app, newRound.answers)
+
+        return new Promise((resolve) => {
+          setState((state) => {
+            const newState = {
+              ...state,
+              rounds: [
+                ...state.rounds,
+                {
+                  ...newRound,
+                  id: Math.floor(Math.random() * 1000),
+                  votes: [],
+                },
+              ],
+            }
+            resolve(newState)
+            return newState
+          })
         })
-      })
-    }, 3000)
+      },
+    )
   },
 }
 

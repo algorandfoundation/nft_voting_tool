@@ -98,8 +98,11 @@ jobs:
           static-site-transforms: |-
             VITE_ALGOD_NODE_CONFIG_TOKEN=${{ secrets.DEV_ALGOD_NODE_CONFIG_TOKEN }}
             VITE_ALGOD_NODE_CONFIG_SERVER=${{ vars.DEV_ALGOD_NODE_CONFIG_SERVER }}
-            VITE_ALGOD_NOTE_CONFIG_PORT=${{ vars.DEV_ALGOD_NODE_CONFIG_PORT }}
+            VITE_ALGOD_NODE_CONFIG_PORT=${{ vars.DEV_ALGOD_NODE_CONFIG_PORT }}
             VITE_ALGOD_NETWORK=${{ vars.DEV_ALGOD_NETWORK }}
+            VITE_INDEXER_SERVER=${{ vars.VITE_INDEXER_SERVER }}
+            VITE_INDEXER_PORT=${{ vars.VITE_INDEXER_PORT }}
+            VITE_INDEXER_TOKEN=${{ secrets.VITE_INDEXER_TOKEN }}
 
   # deploy-to-prod:
   #   runs-on: ubuntu-latest
@@ -129,5 +132,5 @@ jobs:
   #         static-site-transforms: |-
   #           VITE_ALGOD_NODE_CONFIG_TOKEN=${{ secrets.ALGOD_NODE_CONFIG_TOKEN }}
   #           VITE_ALGOD_NODE_CONFIG_SERVER=${{ secrets.ALGOD_NODE_CONFIG_SERVER }}
-  #           VITE_ALGOD_NOTE_CONFIG_PORT=${{ secrets.ALGOD_NODE_CONFIG_PORT }}
+  #           VITE_ALGOD_NODE_CONFIG_PORT=${{ secrets.ALGOD_NODE_CONFIG_PORT }}
   #           VITE_ALGOD_NETWORK=${{ secrets.ALGOD_NETWORK }}

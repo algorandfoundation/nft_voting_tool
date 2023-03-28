@@ -1,7 +1,9 @@
 import { Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../shared/api'
+import { useSetRecoilState } from 'recoil'
+import api, { votingRoundsAtom } from '../../shared/api'
 import { VotingRound } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { getWalletLabel } from '../../shared/wallet'
@@ -26,9 +28,14 @@ const getRounds = (
 }
 
 const VotingRounds = () => {
-  const { data, loading } = api.useVotingRounds()
   const setShowConnectWalletModal = useSetShowConnectWalletModal()
   const myWalletAddress = useConnectedWallet()
+  const { data, loading } = api.useVotingRounds(myWalletAddress)
+  const setState = useSetRecoilState(votingRoundsAtom)
+
+  useEffect(() => {
+    setState(data)
+  }, [data])
 
   const openRounds = data
     ? getRounds(
