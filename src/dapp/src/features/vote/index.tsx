@@ -27,7 +27,7 @@ function Vote() {
     if (!selectedOption) return
     try {
       const result = await submitVote({ selectedOption, walletAddress })
-      await refetch(result.openRounds.find((p) => p.id === voteCid))
+      await refetch(result.rounds.find((p) => p.id === voteCid))
     } catch (e) {
       // TODO: handle failure
     }

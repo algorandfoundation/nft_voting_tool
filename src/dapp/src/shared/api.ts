@@ -2,7 +2,6 @@
  * Returns mock data for now, this should be replaced with real API calls
  */
 
-import sortBy from 'lodash.sortby'
 import { useCallback, useEffect, useState } from 'react'
 import { atom, useRecoilValue, useSetRecoilState } from 'recoil'
 import { v4 as uuid } from 'uuid'
@@ -10,14 +9,13 @@ import { useSetConnectedWallet } from '../features/wallet/state'
 import { Vote, VotingRound } from './types'
 
 type AppState = {
-  openRounds: VotingRound[]
-  closedRounds: VotingRound[]
+  rounds: VotingRound[]
 }
 
 const votingRoundsAtom = atom<AppState>({
   key: 'appState',
   default: {
-    openRounds: [
+    rounds: [
       {
         id: 'b34fb9cb-7e69-4ac6-a6cb-976edf1fd8d8',
         voteTitle: 'Algorand Council',
@@ -44,8 +42,7 @@ const votingRoundsAtom = atom<AppState>({
         snapshotFile: 'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I',
         votes: [],
       },
-    ],
-    closedRounds: [
+
       {
         id: '129c3c52-1961-4e42-b88b-2a42cc5b50ca',
         voteTitle: 'Another Round',
@@ -148,7 +145,7 @@ const api = {
     return useMockSetter<Vote, AppState>(({ selectedOption, walletAddress }) => {
       return new Promise((resolve) => {
         setState((state) => {
-          const round = state.openRounds.find((p) => p.id === roundId)
+          const round = state.rounds.find((p) => p.id === roundId)
           if (!round) {
             resolve(state)
             return state
@@ -156,7 +153,7 @@ const api = {
           const newState = {
             ...state,
             openRounds: [
-              ...state.openRounds.filter((p) => p.id !== roundId),
+              ...state.rounds.filter((p) => p.id !== roundId),
               {
                 ...round,
                 votes: [
@@ -179,13 +176,11 @@ const api = {
     const data = useRecoilValue(votingRoundsAtom)
     return useMockGetter({
       ...data,
-      openRounds: sortBy(data.openRounds, (round) => round.start),
-      closedRounds: sortBy(data.closedRounds, (round) => round.start),
     })
   },
   useVotingRound: (id: string) => {
     const data = useRecoilValue(votingRoundsAtom)
-    return useMockGetter([...data.openRounds, ...data.closedRounds].find((round) => round.id === id))
+    return useMockGetter([...data.rounds].find((round) => round.id === id))
   },
   useAddVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
@@ -195,7 +190,7 @@ const api = {
           const newState = {
             ...state,
             openRounds: [
-              ...state.openRounds,
+              ...state.rounds,
               {
                 ...newRound,
                 id: uuid(),

@@ -18,6 +18,8 @@ module.exports = {
           'orange-coral': '#FF684E',
           warning: '#ffcbcb',
           green: '#b4f5df',
+          'vote-open': '#81EECA',
+          'vote-closed': '#DDDDDF',
         },
         grey: {
           dark: '#333333',
