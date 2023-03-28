@@ -6,14 +6,14 @@ import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnsw
 
 export const algod = algokit.getAlgoClient({
   server: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
-  port: import.meta.env.VITE_ALGOD_NOTE_CONFIG_PORT,
+  port: import.meta.env.VITE_ALGOD_NODE_CONFIG_PORT,
   token: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN,
 });
 
 export const indexer = algokit.getAlgoIndexerClient({
-  server: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
+  server: import.meta.env.VITE_INDEXER_SERVER,
   port: import.meta.env.VITE_INDEXER_PORT,
-  token: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN,
+  token: import.meta.env.VITE_INDEXER_TOKEN,
 });
 
 export const VotingRoundContract = (activeAddress: string, signer: TransactionSigner) => {

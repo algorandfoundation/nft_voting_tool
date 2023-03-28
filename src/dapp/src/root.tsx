@@ -19,7 +19,7 @@ export default function Root() {
   const walletProviders = useAlgoWallet({
     nodeToken: import.meta.env.VITE_ALGOD_NODE_CONFIG_TOKEN,
     nodeServer: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
-    nodePort: import.meta.env.VITE_ALGOD_NOTE_CONFIG_PORT,
+    nodePort: import.meta.env.VITE_ALGOD_NODE_CONFIG_PORT,
     network: import.meta.env.VITE_ALGOD_NETWORK,
     autoConnect: true,
   });
