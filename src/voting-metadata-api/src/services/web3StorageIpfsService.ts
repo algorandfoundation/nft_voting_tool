@@ -1,10 +1,10 @@
-import axios from 'axios'
 import * as mime from 'mime'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { inject, singleton } from 'tsyringe'
 import { File, Web3Storage } from 'web3.storage'
+import { CloudFlareIPFSService } from './cloudflareIpfsService'
 import { IIpfsService } from './ipfsService'
 import type { IObjectCacheService } from './objectCacheService'
 
@@ -12,19 +12,23 @@ import type { IObjectCacheService } from './objectCacheService'
 export class Web3StorageWithCacheIpfsService implements IIpfsService {
   private cache: IObjectCacheService
   private storage: Web3Storage
+  private cloudflareIpfsService: CloudFlareIPFSService
 
-  constructor(@inject('Web3StorageClient') storage: Web3Storage, @inject('IObjectCacheService') cache: IObjectCacheService) {
+  constructor(
+    @inject('Web3StorageClient') storage: Web3Storage,
+    @inject('IObjectCacheService') cache: IObjectCacheService,
+    @inject('CloudflareIpfsService') cloudflareIpfsService: CloudFlareIPFSService,
+  ) {
     this.storage = storage
     this.cache = cache
+    this.cloudflareIpfsService = cloudflareIpfsService
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`)
-        const json = await response.data.json()
-        return json as T
+        return await this.cloudflareIpfsService.get<T>(cid)
       },
       undefined,
       true,
@@ -35,12 +39,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
       async (_e) => {
-        const response = await axios.get(`https://${cid}.ipfs.cf-ipfs.com/`, {
-          responseType: 'arraybuffer',
-        })
-        const mimeType = (response.headers['content-type'] as string) ?? 'application/octet-stream'
-        const buffer = (await response.data) as ArrayBuffer
-        return Promise.resolve([Buffer.from(buffer), mimeType])
+        return await this.cloudflareIpfsService.getBuffer(cid)
       },
       undefined,
       undefined,
