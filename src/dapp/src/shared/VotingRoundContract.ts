@@ -52,11 +52,9 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
 
     const questions = {
       unencoded: questionIds,
-      encoded: encodeAnswerIds(questionIds, app),
+      encoded: encodeAnswerIds(questionIds),
       boxRefs: encodeAnswerIdBoxRefs(questionIds, app),
     }
-
-    console.log(JSON.stringify(questions.boxRefs, null, 2))
 
     const payTxn = (
       await algokit.transferAlgos(
