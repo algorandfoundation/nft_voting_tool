@@ -25,7 +25,7 @@ export default function Review() {
   const navigate = useNavigate()
   useStepRedirect(VoteCreationSteps.Review)
   const resetCreateState = useResetCreateRound()
-  const { loading: creatingVotingRound, execute: createVotingRoundApi } = api.useAddVotingRound()
+  const { loading: creatingVotingRound, execute: createVotingRoundApi, error } = api.useAddVotingRound()
   const createVotingRound = async () => {
     try {
       if (!activeAddress) {
@@ -121,6 +121,12 @@ export default function Review() {
             Create voting round
           </Button>
         </div>
+        {error && (
+          <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
+            <Typography>Could not create voting round contract:</Typography>
+            <Typography>{error}</Typography>
+          </Alert>
+        )}
         <ConfirmationDialog
           handleOpen={toggleConfirmationDialog}
           open={confirmationDialogOpen}

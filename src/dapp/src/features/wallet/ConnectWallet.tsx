@@ -4,7 +4,6 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import api from '../../shared/api'
 import { Loading } from '../../shared/loading/Loading'
-import { getWalletLabel } from '../../shared/wallet'
 import { useSetShowConnectWalletModal, useShowConnectWalletModal } from './state'
 
 const ConnectWallet = () => {
@@ -25,9 +24,7 @@ const ConnectWallet = () => {
   useEffect(() => {
     ;(async () => {
       setConnecting(true)
-      if (activeAddress) {
-        await connectWallet(activeAddress)
-      }
+      await connectWallet(activeAddress ? activeAddress : '')
       setConnecting(false)
     })()
   }, [activeAddress])
@@ -50,13 +47,25 @@ const ConnectWallet = () => {
                 set up the voting round.
               </Typography>
             </div>
-            <div>
-              {activeAddress && (
-                <Typography>
-                  Connected wallet: <strong>{getWalletLabel(activeAddress)}</strong>
-                </Typography>
-              )}
-            </div>
+            {(activeAddress || providers?.find((p) => p.isActive)) && (
+              <>
+                <Typography>Selected account</Typography>
+                <p className="text-left">
+                  <strong>
+                    <code className="break-words">{activeAddress}</code>
+                  </strong>
+                </p>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    providers?.find((p) => p.isActive)?.disconnect()
+                  }}
+                >
+                  Disconnect
+                </Button>
+              </>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-3 justify-items-stretch gap-4">
               {providers?.map((provider) => (
                 <Button

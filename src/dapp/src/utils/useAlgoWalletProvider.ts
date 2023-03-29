@@ -4,11 +4,11 @@ import {
   DEFAULT_NODE_BASEURL,
   DEFAULT_NODE_PORT,
   DEFAULT_NODE_TOKEN,
-  PROVIDER_ID,
   defly,
   kmd,
   mnemonic,
   pera,
+  PROVIDER_ID,
   reconnectProviders,
   walletconnect,
 } from '@txnlab/use-wallet'
@@ -66,6 +66,19 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       algodOptions: algodOptions,
       network: network,
     }),
+  }
+
+  if (import.meta.env.MODE === 'development') {
+    walletProviders[PROVIDER_ID.MNEMONIC] = mnemonic.init({
+      algosdkStatic: algosdk,
+      algodOptions: algodOptions,
+      network: network,
+    })
+    walletProviders[PROVIDER_ID.KMD] = kmd.init({
+      algosdkStatic: algosdk,
+      algodOptions: algodOptions,
+      network: network,
+    })
   }
 
   useEffect(() => {
