@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_INDEXER_PORT: string
   readonly VITE_INDEXER_TOKEN: string
   readonly VITE_ALGOD_NETWORK: string
+  readonly VITE_ENVIRONMENT: string
 }
 
 interface ImportMeta {

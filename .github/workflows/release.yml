@@ -103,6 +103,7 @@ jobs:
             VITE_INDEXER_SERVER:${{ vars.DEV_INDEXER_SERVER }}
             VITE_INDEXER_PORT:${{ vars.DEV_INDEXER_PORT }}
             VITE_INDEXER_TOKEN:${{ secrets.DEV_INDEXER_TOKEN }}
+            VITE_ENVIRONMENT:${{ vars.DEV_ENVIRONMENT}}
 
   # deploy-to-prod:
   #   runs-on: ubuntu-latest
