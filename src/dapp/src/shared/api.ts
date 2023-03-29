@@ -198,18 +198,29 @@ const decodeGlobalState = (
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const execute = useCallback((payload: T) => {
     setLoading(true)
+    setError(null)
     const promise = new Promise<K>((resolve) => {
-      action(payload).then((state) => {
-        resolve(state)
-        setLoading(false)
-      })
+      action(payload)
+        .then((state) => {
+          resolve(state)
+          setLoading(false)
+        })
+        .catch((e) => {
+          setLoading(false)
+          if (e instanceof Error) {
+            setError(e.message)
+          } else {
+            setError('Unexpected error')
+          }
+        })
     })
     return promise
   }, [])
 
-  return { loading, execute }
+  return { loading, execute, error }
 }
 
 const api = {
@@ -224,7 +235,6 @@ const api = {
   },
   useSubmitVote: (roundId: number) => {
     const setState = useSetRecoilState(votingRoundsAtom)
-    // return useSetter(({ activeAddress, signature, selectedOption, signer }) => {
     return useSetter(
       async ({
         activeAddress,
