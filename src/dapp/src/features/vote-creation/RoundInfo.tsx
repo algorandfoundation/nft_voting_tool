@@ -1,9 +1,7 @@
+import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Typography } from '@mui/material'
+import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { z } from 'zod'
-import { zfd } from 'zod-form-data'
-import { SubmitButton } from '../../shared/forms/components/submit-button/SubmitButton'
-import { ValidatedForm } from '../../shared/forms/validated-form/ValidatedForm'
 import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
@@ -35,7 +33,7 @@ export default function RoundInfo() {
       <Steps activeStep={VoteCreationSteps.RoundInfo} />
       <div className="mt-8 w-full max-w-lg">
         <Typography variant="h4">Vote information</Typography>
-        <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={roundInfo}>
+        <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} defaultValues={roundInfo}>
           {(helper) => (
             <>
               {helper.textField({
@@ -57,13 +55,17 @@ export default function RoundInfo() {
                 {helper.dateTimeField({
                   label: 'Start',
                   field: 'start',
+                  toISO: (date) => dayjs(date).toISOString(),
+                  fromISO: (date) => dayjs(date) as unknown as Date,
                 })}
                 {helper.dateTimeField({
                   label: 'End',
                   field: 'end',
+                  toISO: (date) => dayjs(date).toISOString(),
+                  fromISO: (date) => dayjs(date) as unknown as Date,
                 })}
               </div>
-              {helper.documentField({
+              {helper.textFileFormField({
                 label: 'Snapshot file',
                 field: 'snapshotFile',
                 hint: 'Upload snapshot .csv file',
@@ -72,10 +74,7 @@ export default function RoundInfo() {
                 label: 'Minimum number of votes (quorum)',
                 field: 'minimumVotes',
               })}
-
-              <div className="text-right">
-                <SubmitButton className="mt-8">Next</SubmitButton>
-              </div>
+              <div className="text-right">{helper.submitButton({ label: 'Next', className: 'mt-8' })}</div>
             </>
           )}
         </ValidatedForm>

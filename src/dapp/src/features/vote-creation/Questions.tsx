@@ -1,10 +1,7 @@
+import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Button, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import { z } from 'zod'
-import { zfd } from 'zod-form-data'
-import { SubmitButton } from '../../shared/forms/components/submit-button/SubmitButton'
-import { ValidatedForm } from '../../shared/forms/validated-form/ValidatedForm'
-import { useQuestions, useRoundInfo, useSetQuestions, useSetStep } from './state'
+import { useQuestions, useSetQuestions, useSetStep } from './state'
 import { Steps } from './Steps'
 import { useStepRedirect } from './useStepRedirect'
 import { VoteCreationSteps } from './VoteCreationSteps'
@@ -18,7 +15,6 @@ export const formSchema = zfd.formData({
 type Fields = z.infer<typeof formSchema>
 
 export default function Questions() {
-  const { voteTitle } = useRoundInfo()
   const questions = useQuestions()
   const setQuestions = useSetQuestions()
   const navigate = useNavigate()
@@ -34,7 +30,7 @@ export default function Questions() {
       <Steps activeStep={VoteCreationSteps.Questions} />
       <div className="mt-8 w-full max-w-md">
         <Typography variant="h3">Vote questions and answers</Typography>
-        <ValidatedForm validator={formSchema} onSubmit={onSubmit} defaultValues={questions}>
+        <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} defaultValues={questions}>
           {(helper) => (
             <>
               {helper.textField({
@@ -56,7 +52,7 @@ export default function Questions() {
                   <Button variant="outlined" onClick={() => navigate(-1)}>
                     Back
                   </Button>
-                  <SubmitButton>Next</SubmitButton>
+                  {helper.submitButton({ label: 'Next' })}
                 </div>
               </div>
             </>
