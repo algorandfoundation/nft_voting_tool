@@ -1,3 +1,5 @@
+import { DeflyWalletConnect } from '@blockshake/defly-connect'
+import { PeraWalletConnect } from '@perawallet/connect'
 import {
   AlgodClientOptions,
   DEFAULT_NETWORK,
@@ -10,11 +12,15 @@ import {
   pera,
   PROVIDER_ID,
   reconnectProviders,
+  WalletClient,
   walletconnect,
 } from '@txnlab/use-wallet'
+import WalletConnect from '@walletconnect/client'
+import QRCodeModal from 'algorand-walletconnect-qrcode-modal'
+import algosdk from 'algosdk'
 import { useEffect } from 'react'
 
-/*type SupportedProviders = Partial<{
+type SupportedProviders = Partial<{
   kmd: Promise<WalletClient | null>
   pera: Promise<WalletClient | null>
   myalgo: Promise<WalletClient | null>
@@ -22,12 +28,8 @@ import { useEffect } from 'react'
   defly: Promise<WalletClient | null>
   exodus: Promise<WalletClient | null>
   walletconnect: Promise<WalletClient | null>
-}>*/
-import { DeflyWalletConnect } from '@blockshake/defly-connect'
-import { PeraWalletConnect } from '@perawallet/connect'
-import WalletConnect from '@walletconnect/client'
-import QRCodeModal from 'algorand-walletconnect-qrcode-modal'
-import algosdk from 'algosdk'
+  mnemonic: Promise<WalletClient | null>
+}>
 
 export function useAlgoWallet(context: { autoConnect: boolean; network: string; nodeServer: string; nodePort: string; nodeToken: string }) {
   const algodOptions = [
@@ -36,7 +38,7 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
     context.nodePort ?? DEFAULT_NODE_PORT,
   ] as AlgodClientOptions
   const network = context.network ?? DEFAULT_NETWORK
-  const walletProviders = {
+  const walletProviders: SupportedProviders = {
     [PROVIDER_ID.PERA]: pera.init({
       algosdkStatic: algosdk,
       clientStatic: PeraWalletConnect,
@@ -56,19 +58,9 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       algodOptions: algodOptions,
       network: network,
     }),
-    [PROVIDER_ID.MNEMONIC]: mnemonic.init({
-      algosdkStatic: algosdk,
-      algodOptions: algodOptions,
-      network: network,
-    }),
-    [PROVIDER_ID.KMD]: kmd.init({
-      algosdkStatic: algosdk,
-      algodOptions: algodOptions,
-      network: network,
-    }),
   }
 
-  if (import.meta.env.NODE_ENV !== 'production') {
+  if (import.meta.env.VITE_ENVIRONMENT === 'local') {
     walletProviders[PROVIDER_ID.MNEMONIC] = mnemonic.init({
       algosdkStatic: algosdk,
       algodOptions: algodOptions,
