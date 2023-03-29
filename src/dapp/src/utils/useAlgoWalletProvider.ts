@@ -68,7 +68,7 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
     }),
   }
 
-  if (import.meta.env.MODE === 'development') {
+  if (import.meta.env.NODE_ENV !== 'production') {
     walletProviders[PROVIDER_ID.MNEMONIC] = mnemonic.init({
       algosdkStatic: algosdk,
       algodOptions: algodOptions,
