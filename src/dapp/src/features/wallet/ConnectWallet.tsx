@@ -24,9 +24,7 @@ const ConnectWallet = () => {
   useEffect(() => {
     ;(async () => {
       setConnecting(true)
-      if (activeAddress) {
-        await connectWallet(activeAddress)
-      }
+      await connectWallet(activeAddress ? activeAddress : '')
       setConnecting(false)
     })()
   }, [activeAddress])

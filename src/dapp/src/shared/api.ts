@@ -103,31 +103,41 @@ const useMockGetter = <T>(payload: T) => {
 }
 
 const useFetchVoteRounds = (address: string) => {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [data, setData] = useState<AppState>({
     rounds: [],
   })
 
   useEffect(() => {
     if (address) {
-      setLoading(true)
-      fetchVotingRounds(address).then((votingRounds) => {
+      ;(async () => {
+        setLoading(true)
+        const votingRounds = await fetchVotingRounds(address)
         setData({
           rounds: votingRounds,
         })
         setLoading(false)
+      })()
+    } else {
+      setData({
+        rounds: [],
       })
     }
   }, [address])
 
   const refetch = useCallback(() => {
     if (address) {
-      setLoading(true)
-      fetchVotingRounds(address).then((votingRounds) => {
+      ;(async () => {
+        setLoading(true)
+        const votingRounds = await fetchVotingRounds(address)
         setData({
           rounds: votingRounds,
         })
         setLoading(false)
+      })()
+    } else {
+      setData({
+        rounds: [],
       })
     }
   }, [data, setData])
