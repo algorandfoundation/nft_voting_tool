@@ -104,6 +104,7 @@ jobs:
             VITE_INDEXER_PORT:${{ vars.DEV_INDEXER_PORT }}
             VITE_INDEXER_TOKEN:${{ secrets.DEV_INDEXER_TOKEN }}
             VITE_ENVIRONMENT:${{ vars.DEV_ENVIRONMENT}}
+            VITE_IPFS_GATEWAY_URL:${{ vars.DEV_IPFS_GATEWAY_URL }}
 
   # deploy-to-prod:
   #   runs-on: ubuntu-latest

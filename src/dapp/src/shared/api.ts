@@ -7,7 +7,10 @@ import * as ed from '@noble/ed25519'
 import { TransactionSigner } from 'algosdk'
 import { useCallback, useEffect, useState } from 'react'
 import { atom, useRecoilValue, useSetRecoilState } from 'recoil'
+import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
+import { signCsv } from './csvSigner'
+import { uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { VotingRound } from './types'
 import { indexer, VotingRoundContract } from './VotingRoundContract'
 
@@ -300,14 +303,54 @@ const api = {
         activeAddress: string
         signer: TransactionSigner
       }) => {
-        const votingRoundContract = VotingRoundContract(activeAddress, signer)
-
         const privateKey = ed.utils.randomPrivateKey()
         const publicKey = await ed.getPublicKeyAsync(privateKey)
-        //need to sign the allowlist addresses
-        //Upload the vote round data to the API/IPFS
-        const cid = 'cid'
+        let voteGatingSnapshotCid = ''
+        if (newRound.snapshotFile) {
+          const signedCsv = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '', privateKey)
 
+          const voteGatingSnapshotResponse = await uploadVoteGatingSnapshot({
+            title: newRound.voteTitle,
+            publicKey: Buffer.from(publicKey).toString('base64'),
+            snapshot: signedCsv,
+            created: {
+              at: new Date().toISOString(),
+              by: activeAddress,
+            },
+          })
+          voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
+        }
+
+        const options = newRound.answers.map((answer) => {
+          return {
+            id: uuidv4(),
+            label: answer,
+          }
+        })
+
+        const { cid } = await uploadVotingRound({
+          title: newRound.voteTitle,
+          description: newRound.voteDescription,
+          informationUrl: newRound.voteInformationUrl,
+          start: newRound.start,
+          end: newRound.end,
+          quorum: newRound.minimumVotes,
+          voteGatingSnapshotCid: voteGatingSnapshotCid,
+          questions: [
+            {
+              id: uuidv4(),
+              prompt: newRound.questionTitle,
+              description: newRound.questionDescription,
+              options: options,
+            },
+          ],
+          created: {
+            at: new Date().toISOString(),
+            by: activeAddress,
+          },
+        })
+
+        const votingRoundContract = VotingRoundContract(activeAddress, signer)
         const app = await votingRoundContract.create(
           publicKey,
           cid,
@@ -315,7 +358,10 @@ const api = {
           Date.parse(newRound.end),
           newRound.minimumVotes ? newRound.minimumVotes : 0,
         )
-        await votingRoundContract.bootstrap(app, newRound.answers)
+        await votingRoundContract.bootstrap(
+          app,
+          options.map((option) => option.id),
+        )
 
         return new Promise((resolve) => {
           setState((state) => {
@@ -325,7 +371,7 @@ const api = {
                 ...state.rounds,
                 {
                   ...newRound,
-                  id: Math.floor(Math.random() * 1000),
+                  id: app.appId,
                   votes: [],
                 },
               ],

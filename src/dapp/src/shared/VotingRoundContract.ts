@@ -40,7 +40,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
     return app
   }
 
-  const bootstrap = async (app: AppReference, questionIds: string[]) => {
+  const bootstrap = async (app: AppReference, optionIds: string[]) => {
     const appClient = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -50,10 +50,10 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       algod,
     )
 
-    const questions = {
-      unencoded: questionIds,
-      encoded: encodeAnswerIds(questionIds),
-      boxRefs: encodeAnswerIdBoxRefs(questionIds, app),
+    const option = {
+      unencoded: optionIds,
+      encoded: encodeAnswerIds(optionIds),
+      boxRefs: encodeAnswerIdBoxRefs(optionIds, app),
     }
 
     const payTxn = (
@@ -61,7 +61,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
         {
           from: sender,
           to: app.appAddress,
-          amount: algokit.microAlgos(100_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+          amount: algokit.microAlgos(100_000 + option.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
           skipSending: true,
         },
         algod,
@@ -71,8 +71,8 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       await appClient.call({
         method: 'bootstrap',
         methodArgs: {
-          args: [/*payTxn, */ questions.encoded],
-          boxes: questions.boxRefs,
+          args: [/*payTxn, */ option.encoded],
+          boxes: option.boxRefs,
         },
         sendParams: { skipSending: true },
       })
