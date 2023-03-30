@@ -10,7 +10,7 @@ import { atom, useRecoilValue, useSetRecoilState } from 'recoil'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { signCsv } from './csvSigner'
-import { uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGatway'
+import { uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { VotingRound } from './types'
 import { indexer, VotingRoundContract } from './VotingRoundContract'
 
@@ -311,7 +311,7 @@ const api = {
 
           const voteGatingSnapshotResponse = await uploadVoteGatingSnapshot({
             title: newRound.voteTitle,
-            publicKey: Buffer.from(String.fromCharCode(...publicKey)).toString('base64'),
+            publicKey: Buffer.from(publicKey).toString('base64'),
             snapshot: signedCsv,
             created: {
               at: new Date().toISOString(),

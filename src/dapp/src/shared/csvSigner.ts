@@ -15,7 +15,7 @@ export async function signCsv(csv: string, privateKey: Uint8Array): Promise<Sign
         return ed.signAsync(algo.decodeAddress(row[0]).publicKey, privateKey).then((signature) => {
           return {
             address: row[0],
-            signature: Buffer.from(String.fromCharCode(...signature)).toString('base64'),
+            signature: Buffer.from(signature).toString('base64'),
           }
         })
       } else {
