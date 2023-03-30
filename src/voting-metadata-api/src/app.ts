@@ -1,4 +1,5 @@
-import express, { Application, Request as ExRequest, Response as ExResponse, NextFunction, json, urlencoded } from 'express'
+import cors from 'cors'
+import express, { Application, json, NextFunction, Request as ExRequest, Response as ExResponse, urlencoded } from 'express'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
 import { RegisterRoutes } from '../routes/routes'
@@ -19,6 +20,7 @@ export default function CreateApp(): Application {
     }),
   )
   app.use(json())
+  app.use(cors())
 
   RegisterRoutes(app)
 
