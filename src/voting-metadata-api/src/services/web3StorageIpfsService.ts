@@ -17,7 +17,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
   constructor(
     @inject('Web3StorageClient') storage: Web3Storage,
     @inject('IObjectCacheService') cache: IObjectCacheService,
-    @inject('CloudflareIpfsService') cloudflareIpfsService: CloudFlareIPFSService,
+    @inject('CloudFlareIPFSService') cloudflareIpfsService: CloudFlareIPFSService,
   ) {
     this.storage = storage
     this.cache = cache
