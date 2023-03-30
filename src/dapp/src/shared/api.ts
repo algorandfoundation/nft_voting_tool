@@ -291,7 +291,7 @@ const api = {
     const data = useRecoilValue(votingRoundsAtom)
     return useMockGetter([...data.rounds].find((round) => round.id === id))
   },
-  useAddVotingRound: () => {
+  useCreateVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
     return useSetter(
       async ({
