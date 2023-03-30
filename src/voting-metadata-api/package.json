@@ -6,7 +6,7 @@
   "author": "Algorand Foundation",
   "type": "commonjs",
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --watch .env -r dotenv/config src/server.ts",
+    "dev": "npm run routes && ts-node-dev --transpile-only --watch .env -r dotenv/config src/server.ts",
     "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --omit=dev",
     "routes": "tsoa routes",
     "clean": "rimraf node_modules && rimraf build",
