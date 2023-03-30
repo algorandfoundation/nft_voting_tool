@@ -50,7 +50,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       algod,
     )
 
-    const optiond = {
+    const option = {
       unencoded: optionIds,
       encoded: encodeAnswerIds(optionIds),
       boxRefs: encodeAnswerIdBoxRefs(optionIds, app),
@@ -61,7 +61,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
         {
           from: sender,
           to: app.appAddress,
-          amount: algokit.microAlgos(100_000 + optiond.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+          amount: algokit.microAlgos(100_000 + option.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
           skipSending: true,
         },
         algod,
@@ -71,8 +71,8 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       await appClient.call({
         method: 'bootstrap',
         methodArgs: {
-          args: [/*payTxn, */ optiond.encoded],
-          boxes: optiond.boxRefs,
+          args: [/*payTxn, */ option.encoded],
+          boxes: option.boxRefs,
         },
         sendParams: { skipSending: true },
       })
