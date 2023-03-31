@@ -1,24 +1,30 @@
 import * as express from 'express'
-import { algo_verify_message } from './services/algorandSignatureService'
+import { ForbiddenException } from './models/errors/httpResponseException'
+import { algoVerifyMessage, getAlgorandTransactionAttributes } from './services/algorandSignatureService'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
-  const allowedAddresses = process.env.ALLOWED_ADDRESSES?.split(',') || []
-
-  if (securityName === 'AlgorandSignature') {
-    const signature: string = request.headers['X-ALGORAND-SIGNATURE'] as string
-    const address: string = request.headers['X-ALGORAND-ADDRESS'] as string
-
-    return new Promise((resolve, reject) => {
-      if (!signature || !address || !allowedAddresses.includes(address)) {
-        reject(new Error('No signature provided'))
+  try {
+    const allowedAddresses = process.env.ALLOWED_ADDRESSES?.split(',') || []
+    if (securityName === 'AlgorandSignature') {
+      const txn: string = request.headers['X-ALGORAND-TRANSACTION'] as string
+      if (!txn) {
+        return Promise.reject(new ForbiddenException('No transaction provided'))
       }
-      const auth = algo_verify_message(address, signature, request.body)
-      if (auth.errmsg) {
-        reject(auth.errmsg)
-      }
-      resolve(auth.sig_sts)
-    })
+      return new Promise((resolve, reject) => {
+        const txnArgs = getAlgorandTransactionAttributes(txn)
+        if (!allowedAddresses.includes(txnArgs.address)) {
+          reject(new ForbiddenException('Address not allowed'))
+        }
+        const [auth, error] = algoVerifyMessage(txnArgs.address, txnArgs.message, txnArgs.signature)
+        if (!auth) {
+          reject(new ForbiddenException(error?.message || 'Could not verify Transaction signature'))
+        }
+        resolve(auth)
+      })
+    }
+  } catch (e: unknown) {
+    return Promise.reject(new ForbiddenException(''))
   }
-  return Promise.reject({})
+  return Promise.reject(new ForbiddenException(''))
 }
