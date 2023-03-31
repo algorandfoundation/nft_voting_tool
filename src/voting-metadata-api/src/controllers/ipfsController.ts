@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { Controller, Get, Path, Post, Route, UploadedFile } from 'tsoa'
+import { Controller, Get, Path, Post, Route, Security, UploadedFile } from 'tsoa'
 import { inject, injectable } from 'tsyringe'
 import { IIpfsService } from '../services/ipfsService'
 
@@ -21,6 +21,7 @@ export class IpfsController extends Controller {
     return Readable.from(buffer)
   }
 
+  @Security('AlgorandSignature')
   @Post()
   public async post(@UploadedFile() file: Express.Multer.File): Promise<{ cid: string }> {
     return this.ipfsService.putBuffer(file.buffer, file.mimetype)

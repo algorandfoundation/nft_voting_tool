@@ -88,6 +88,7 @@ jobs:
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.DEV_WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
+          API_ALLOWED_ADDRESSES: ${{ secrets.DEV_API_ALLOWED_ADDRESSES }}
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist

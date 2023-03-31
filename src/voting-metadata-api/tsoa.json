@@ -1,15 +1,26 @@
 {
   "entryFile": "src/app.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
-  "controllerPathGlobs": ["src/**/*Controller.ts"],
+  "controllerPathGlobs": [
+    "src/**/*Controller.ts"
+  ],
   "spec": {
     "outputDirectory": "build",
-    "specVersion": 3
+    "specVersion": 3,
+    "securityDefinitions": {
+      "AlgorandSignature": {
+        "type": "http",
+        "scheme": "apiKey",
+        "name": "X-ALOGRAND-SIGNATURE",
+        "in": "header"
+      }
+    }
   },
   "routes": {
     "routesDir": "routes",
     "iocModule": "src/ioc",
-    "middleware": "express"
+    "middleware": "express",
+    "authenticationModule": "src/authentication"
   },
   "basePath": "/"
 }
