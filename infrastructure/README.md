@@ -19,7 +19,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 1. Open repository in VS Code
 2. Install recommended extensions
 3. Install graphviz
-4. Copy `.env.sample` to `.env` and fill in the values
+4. Copy `.env.template` to `.env` and fill in the values
 5. Ensure the "Run and Debug" configuration in VS Code is set to "Deploy AWS" and hit F5
 
 ## Generating physical architecture diagram
