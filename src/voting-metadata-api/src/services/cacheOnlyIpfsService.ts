@@ -2,28 +2,22 @@ import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { inject, singleton } from 'tsyringe'
-import { CloudFlareIPFSService } from './cloudflareIpfsService'
 import { IIpfsService } from './ipfsService'
 import { IObjectCacheService } from './objectCacheService'
 
 @singleton()
 export class CacheOnlyIPFSService implements IIpfsService {
   private cache: IObjectCacheService
-  private cloudfareIpfsService: CloudFlareIPFSService
 
-  constructor(
-    @inject('IObjectCacheService') cache: IObjectCacheService,
-    @inject('CloudFlareIPFSService') cloudFlareIPFSService: CloudFlareIPFSService,
-  ) {
+  constructor(@inject('IObjectCacheService') cache: IObjectCacheService) {
     this.cache = cache
-    this.cloudfareIpfsService = cloudFlareIPFSService
   }
 
   async get<T>(cid: string): Promise<T> {
     return await this.cache.getAndCache<T>(
       `ipfs-${cid}`,
       async (_e) => {
-        return this.cloudfareIpfsService.get<T>(cid)
+        throw new Error(`${cid} not found`)
       },
       undefined,
       true,
@@ -33,7 +27,7 @@ export class CacheOnlyIPFSService implements IIpfsService {
     return await this.cache.getAndCacheBuffer(
       `ipfs-${cid}`,
       async (_e) => {
-        return this.cloudfareIpfsService.getBuffer(cid)
+        throw new Error(`${cid} not found`)
       },
       undefined,
       undefined,

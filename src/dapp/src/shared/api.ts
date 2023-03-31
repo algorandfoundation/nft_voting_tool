@@ -6,13 +6,13 @@ import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-util
 import * as ed from '@noble/ed25519'
 import { TransactionSigner } from 'algosdk'
 import { useCallback, useEffect, useState } from 'react'
-import { atom, useRecoilValue, useSetRecoilState } from 'recoil'
+import { atom, useSetRecoilState } from 'recoil'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { signCsv } from './csvSigner'
-import { uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { VotingRound } from './types'
-import { indexer, VotingRoundContract } from './VotingRoundContract'
+import { algod, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRound[]
@@ -111,7 +111,7 @@ const useFetchVoteRounds = (address: string) => {
     rounds: [],
   })
 
-  useEffect(() => {
+  const fetchData = () => {
     if (address) {
       ;(async () => {
         setLoading(true)
@@ -126,50 +126,94 @@ const useFetchVoteRounds = (address: string) => {
         rounds: [],
       })
     }
+  }
+
+  useEffect(() => {
+    fetchData()
   }, [address])
 
-  const refetch = useCallback(() => {
-    if (address) {
-      ;(async () => {
-        setLoading(true)
-        const votingRounds = await fetchVotingRounds(address)
-        setData({
-          rounds: votingRounds,
-        })
-        setLoading(false)
-      })()
-    } else {
-      setData({
-        rounds: [],
-      })
-    }
-  }, [data, setData])
+  const refetch = useCallback(fetchData, [data, setData])
 
   return { loading, data, refetch }
+}
+
+const useFetchVoteRound = (appId: number) => {
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<VotingRound | undefined>(undefined)
+
+  const refetch = useCallback(() => {
+    ;(async () => {
+      setLoading(true)
+      const votingRound = await fetchVotingRound(appId)
+      setData(votingRound)
+      setLoading(false)
+    })()
+  }, [data, setData])
+
+  useEffect(() => {
+    refetch()
+  }, [appId])
+
+  return { loading, data, refetch }
+}
+
+const getRoundFromApp = async (
+  appId: number,
+  globalState: {
+    key: string
+    value: TealValue
+  }[],
+): Promise<VotingRound | undefined> => {
+  try {
+    const decodedState = decodeGlobalState(globalState)
+    if (!decodedState.is_bootstrapped || !decodedState.metadata_ipfs_cid) {
+      return undefined
+    }
+    const round = await getVotingRound(decodedState.metadata_ipfs_cid)
+    const snapshot = await getVotingSnapshot(round)
+    return {
+      id: appId,
+      voteTitle: round.title,
+      start: round.start,
+      end: round.end,
+      // todo: We are losing data here
+      answers: round.questions[0].options.map((o) => o.label),
+      questionTitle: round.questions[0].prompt,
+      voteDescription: round.description,
+      // todo: This is optional
+      voteInformationUrl: round.informationUrl ?? '',
+      votes: [],
+      // todo: We either get rid of this or add the raw snapshot data to the snapshot object in IPFS?
+      snapshotFile: snapshot?.snapshot.map((s) => s.address).join('\n') ?? '',
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error(`Received error trying to process voting round for app ${appId}; skipping app...`, e)
+    return undefined
+  }
+}
+
+const fetchVotingRound = async (appId: number) => {
+  const app = await algod.getApplicationByID(appId).do()
+  if (!app.params['global-state']) {
+    return undefined
+  }
+  return getRoundFromApp(appId, app.params['global-state'])
 }
 
 const fetchVotingRounds = async (address: string) => {
   const voteRounds: VotingRound[] = []
   const applicationsByCreator = await indexer.lookupAccountCreatedApplications(address).do()
-  applicationsByCreator.applications.map((app: ApplicationResponse) => {
-    if (app.params['global-state']) {
-      const decodedState = decodeGlobalState(app.params['global-state'])
-      const voteRound = {
-        id: app.id,
-        voteTitle: `Vote Round for App ID: ${app.id}`,
-        start: decodedState.start_time,
-        end: decodedState.end_time,
-        answers: ['Yes', 'No'],
-        questionTitle: 'Should we do this?',
-        voteDescription: 'This is the vote description',
-        voteInformationUrl: 'https://www.algorand.com',
-        votes: [],
-        snapshotFile:
-          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
+  await Promise.all(
+    applicationsByCreator.applications.map(async (app: ApplicationResponse) => {
+      if (app.params['global-state']) {
+        const round = await getRoundFromApp(app.id, app.params['global-state'])
+        if (round) {
+          voteRounds.push(round)
+        }
       }
-      voteRounds.push(voteRound)
-    }
-  })
+    }),
+  )
   return voteRounds
 }
 
@@ -182,6 +226,8 @@ const decodeGlobalState = (
   const decodedState = {
     start_time: '0',
     end_time: '0',
+    metadata_ipfs_cid: '',
+    is_bootstrapped: false,
   }
   globalState.map((state) => {
     const globalKey = Buffer.from(state.key, 'base64').toString()
@@ -192,6 +238,15 @@ const decodeGlobalState = (
           break
         case 'end_time':
           decodedState.end_time = new Date(Number(state.value.uint)).toISOString()
+          break
+        case 'is_bootstrapped':
+          decodedState.is_bootstrapped = !!state.value.uint
+          break
+      }
+    } else {
+      switch (globalKey) {
+        case 'metadata_ipfs_cid':
+          decodedState.metadata_ipfs_cid = Buffer.from(state.value.bytes, 'base64').toString('utf-8')
           break
       }
     }
@@ -288,8 +343,7 @@ const api = {
     return useFetchVoteRounds(address)
   },
   useVotingRound: (id: number) => {
-    const data = useRecoilValue(votingRoundsAtom)
-    return useMockGetter([...data.rounds].find((round) => round.id === id))
+    return useFetchVoteRound(id)
   },
   useCreateVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
@@ -319,7 +373,6 @@ const api = {
             },
           })
           voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
-          console.log(voteGatingSnapshotResponse, voteGatingSnapshotCid)
         }
 
         const options = newRound.answers.map((answer) => {

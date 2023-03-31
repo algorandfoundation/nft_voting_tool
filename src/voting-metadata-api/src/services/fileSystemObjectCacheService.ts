@@ -68,7 +68,8 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
   ): Promise<[Buffer, string]> {
     if (mimeType === undefined) {
       mimeType = 'application/octet-stream'
-      const files = await glob(path.join(this.cacheDirectory, `${cacheKey}.*`))
+      const searchPattern = path.join(this.cacheDirectory, `${cacheKey}.*`)
+      const files = await glob(searchPattern, { windowsPathsNoEscape: true })
       if (files.length > 0) {
         mimeType = mime.getType(files[0]) ?? 'application/octet-stream'
       }

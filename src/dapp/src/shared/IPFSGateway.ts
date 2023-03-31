@@ -79,13 +79,24 @@ async function uploadFile(url: string, file: File): Promise<Response> {
   return (await response.json()) as Response
 }
 
-export async function getData(cid: string): Promise<VoteGatingSnapshot | VotingRound> {
+export async function getData<T>(cid: string): Promise<T> {
   const response = await fetch(`${apiUrl}/${cid}`)
   if (!response.ok) {
     throw new Error(`Failed to get data: ${response.statusText}`)
   }
   const data = await response.json()
-  return data as VoteGatingSnapshot | VotingRound
+  return data as T
+}
+
+export async function getVotingRound(cid: string): Promise<VotingRound> {
+  return await getData<VotingRound>(cid)
+}
+
+export async function getVotingSnapshot(round: VotingRound): Promise<VoteGatingSnapshot | undefined> {
+  if (!round.voteGatingSnapshotCid) {
+    return undefined
+  }
+  return await getData<VoteGatingSnapshot>(round.voteGatingSnapshotCid)
 }
 
 function generateFile(data: VotingRound | VoteGatingSnapshot, fileName: string): File {
