@@ -291,7 +291,7 @@ const api = {
     const data = useRecoilValue(votingRoundsAtom)
     return useMockGetter([...data.rounds].find((round) => round.id === id))
   },
-  useAddVotingRound: () => {
+  useCreateVotingRound: () => {
     const setState = useSetRecoilState(votingRoundsAtom)
     return useSetter(
       async ({
@@ -319,6 +319,7 @@ const api = {
             },
           })
           voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
+          console.log(voteGatingSnapshotResponse, voteGatingSnapshotCid)
         }
 
         const options = newRound.answers.map((answer) => {
@@ -327,7 +328,6 @@ const api = {
             label: answer,
           }
         })
-
         const { cid } = await uploadVotingRound({
           title: newRound.voteTitle,
           description: newRound.voteDescription,

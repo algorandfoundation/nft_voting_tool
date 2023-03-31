@@ -106,7 +106,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       method: 'vote',
       methodArgs: {
         args: [signatureByArray, encodeAnswerId(selectedOption)],
-        boxes: [encodeAnswerIdBoxRef(selectedOption, await client.getAppReference())],
+        boxes: [encodeAnswerIdBoxRef(selectedOption)],
       },
       sender: {
         addr: activeAddress,

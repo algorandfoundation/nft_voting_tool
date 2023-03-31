@@ -1,13 +1,14 @@
 import { S3 } from '@aws-sdk/client-s3'
 import { SecretsManager } from '@aws-sdk/client-secrets-manager'
 import { IocContainer } from '@tsoa/runtime'
+import fs from 'fs'
 import path from 'path'
 import { container, Lifecycle } from 'tsyringe'
 import { Web3Storage } from 'web3.storage'
 import { AwsSecretsService } from './services/awsSecretsService'
+import { CacheOnlyIPFSService } from './services/cacheOnlyIpfsService'
 import { CloudFlareIPFSService } from './services/cloudflareIpfsService'
 import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService'
-import { InMemoryIPFSService } from './services/inMemoryIpfsService'
 import { IIpfsService } from './services/ipfsService'
 import { IObjectCacheService } from './services/objectCacheService'
 import { S3ObjectCacheService } from './services/s3ObjectCacheService'
@@ -20,9 +21,14 @@ container.register<CloudFlareIPFSService>('CloudFlareIPFSService', {
 })
 
 if (env === 'development') {
+  const cacheDir = path.join(__dirname, '..', '.cache')
   container.register<string>('CacheDirectory', {
-    useValue: path.join(__dirname, '..', '.cache'),
+    useValue: cacheDir,
   })
+  if (!fs.existsSync(cacheDir)) {
+    console.log(`${cacheDir} not found, creating it...`)
+    fs.mkdirSync(cacheDir)
+  }
   container.register<IObjectCacheService>(
     'IObjectCacheService',
     {
@@ -35,7 +41,7 @@ if (env === 'development') {
   container.register<IIpfsService>(
     'IIpfsService',
     {
-      useClass: InMemoryIPFSService,
+      useClass: CacheOnlyIPFSService,
     },
     {
       lifecycle: Lifecycle.Singleton,
