@@ -3,8 +3,6 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import algosdk from 'algosdk'
-import * as uuid from 'uuid'
-import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
 
 // Edit this to add in your contracts
 export const contracts = ['VotingRoundApp'] as const
@@ -53,36 +51,31 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const currentTime = Number(round.block.ts)
 
       // Idempotently deploy (create/update/replace) the app
-      const app = await appClient.deploy({
+      const questionOptions = [3, 4, 2]
+      await appClient.deploy({
         allowDelete: isLocal,
         onSchemaBreak: isLocal ? 'replace' : 'fail',
         onUpdate: isLocal ? 'replace' : 'fail',
         createArgs: {
           method: 'create',
-          methodArgs: [publicKey, 'a', currentTime, currentTime + 50000, 1],
+          methodArgs: [publicKey, 'a', currentTime, currentTime + 50000, questionOptions, 1],
         },
       })
       const appRef = await appClient.getAppReference()
 
       // Check if it's already been bootstrapped
-      const appInfo = await algokit.getAppByIndex(app.appId, algod)
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const isBootstrappedValue = appInfo.params['global-state']!.find(
-        (s) => s.key === Buffer.from('is_bootstrapped').toString('base64'),
-      )!.value
-      const isBootstrapped = isBootstrappedValue.type == 2 && isBootstrappedValue.uint === 1
+      const boxNames = await appClient.getBoxNames()
+      const isBootstrapped = boxNames.some((bn) => bn.name === 'V')
 
       // Bootstrap it if it hasn't
+      const totalQuestionOptions = questionOptions.reduce((a, b) => a + b, 0)
       if (!isBootstrapped) {
-        const questionIds = ['a', uuid.v4()]
         const payTxn = (
           await algokit.transferAlgos(
             {
               from: deployer,
               to: appRef.appAddress,
-              amount: algokit.microAlgos(
-                100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
-              ),
+              amount: algokit.microAlgos(100_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
               skipSending: true,
             },
             algod,
@@ -92,8 +85,13 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           await appClient.call({
             method: 'bootstrap',
             methodArgs: {
-              args: [/*payTxn, */ encodeAnswerIds(questionIds)],
-              boxes: encodeAnswerIdBoxRefs(questionIds),
+              args: [],
+              boxes: [
+                {
+                  appId: appRef.appId,
+                  name: 'V',
+                },
+              ],
             },
             sendParams: { skipSending: true },
           })
@@ -115,7 +113,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const voter = algosdk.generateAccount()
       await algokit.transferAlgos(
         {
-          amount: algokit.microAlgos(100_000 + 4_000 * 2),
+          amount: algokit.microAlgos(100_000 + 5_000 * 2),
           from: deployer,
           to: voter.addr,
         },
@@ -127,8 +125,16 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Call get_preconditions to check it works
       const result = await appClient.call({
         method: 'get_preconditions',
-        methodArgs: [signature],
-        sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
+        methodArgs: {
+          args: [signature],
+          boxes: [
+            {
+              appId: appRef.appId,
+              name: 'V',
+            },
+          ],
+        },
+        sendParams: { fee: algokit.microAlgos(1_000 + 4 /* opup - 700 x 4 to get 2000 */ * 1_000) },
         sender: voter,
       })
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
@@ -136,24 +142,35 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       console.log({ isVotingOpen, isAllowedToVote, hasAlreadyVoted, time })
 
       // Show boxes before voting
-      const boxes = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64))
-      console.log(boxes)
+      const getRawTally = async () => {
+        return (
+          await appClient.getBoxValuesAsABIType(
+            new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
+            (bn) => bn.name == 'V',
+          )
+        )[0].value
+      }
+      console.log(await getRawTally())
 
       // Cast vote
       await appClient.call({
         method: 'vote',
         methodArgs: {
-          args: [signature, encodeAnswerId('a')],
-          boxes: [encodeAnswerIdBoxRef('a')],
+          args: [signature, questionOptions.map((x) => x - 1)], // vote for the last option in each
+          boxes: [
+            {
+              appId: appRef.appId,
+              name: 'V',
+            },
+          ],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 4 /* opup - 700 x 4 to get 2000 */ * 1_000) },
         sender: voter,
       })
       console.log('Voted successfully!')
 
       // Show boxes after voting
-      const boxes2 = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64))
-      console.log(boxes2)
+      console.log(await getRawTally())
 
       break
     default:

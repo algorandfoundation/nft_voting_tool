@@ -288,7 +288,7 @@ retsub
 // allowed_to_vote
 allowedtovote_3:
 proto 1 1
-pushint 2000 // 2000
+pushint 2800 // 2800
 pushint 10 // 10
 +
 store 26

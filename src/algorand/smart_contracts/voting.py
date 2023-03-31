@@ -191,7 +191,7 @@ def bootstrap() -> pt.Expr:
 def allowed_to_vote(signature: pt.Expr) -> pt.Expr:
     opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        opup.ensure_budget(pt.Int(2000), fee_source=pt.OpUpFeeSource.GroupCredit),
+        opup.ensure_budget(pt.Int(2800), fee_source=pt.OpUpFeeSource.GroupCredit),
         pt.Ed25519Verify_Bare(
             pt.Txn.sender(),
             signature,
