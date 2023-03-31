@@ -21,6 +21,10 @@
                     "name": "end_time"
                 },
                 {
+                    "type": "uint8[]",
+                    "name": "option_counts"
+                },
+                {
                     "type": "uint64",
                     "name": "quorum"
                 }
@@ -31,12 +35,7 @@
         },
         {
             "name": "bootstrap",
-            "args": [
-                {
-                    "type": "byte[16][]",
-                    "name": "answers"
-                }
-            ],
+            "args": [],
             "returns": {
                 "type": "void"
             }
@@ -61,8 +60,8 @@
                     "name": "signature"
                 },
                 {
-                    "type": "byte[16]",
-                    "name": "answer_id"
+                    "type": "uint8[]",
+                    "name": "answer_ids"
                 }
             ],
             "returns": {
