@@ -56,7 +56,7 @@ jobs:
 
       # prepare static sites for config transformation upon later deployment
       - if: ${{ inputs.static-site }}
-        run: sed -n 's/\(${{ inputs.static-site-env-prefix }}_[A-Z0-9_]\+\)=\(.*\)/\1="#{\1}#"/p' .env.sample > .env && cat .env
+        run: sed -n 's/\(${{ inputs.static-site-env-prefix }}_[A-Z0-9_]\+\)=\(.*\)/\1="#{\1}#"/p' .env.template > .env && cat .env
 
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts

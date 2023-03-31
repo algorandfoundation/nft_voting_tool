@@ -66,7 +66,7 @@ export class CDKDeployer {
     this._appId = `${systemName}-${appName}`
     const envName = (this._app.node.tryGetContext('environment') as string) ?? process.env.DEPLOYMENT_ENVIRONMENT ?? environment
     if (!envName) {
-      throw 'No environment defined; please pass in via CDK or DEPLOYMENT_ENVIRONMENT environment variable. If running locally be sure you have copied .env.sample to .env and filled in.'
+      throw 'No environment defined; please pass in via CDK or DEPLOYMENT_ENVIRONMENT environment variable. If running locally be sure you have copied .env.template to .env and filled in.'
     }
     this._defaultRegion = region ?? getRequiredEnv('AWS_DEFAULT_REGION')
     this._env = {
@@ -118,7 +118,7 @@ export class CDKDeployer {
     stackCtor: CDKStackConstructor<TStack, TStackProps>,
     stackName: string,
     props: TStackProps,
-    region?: string
+    region?: string,
   ): TStack {
     const stackNameFull = this.getStackName(stackName.toLowerCase())
     const stackProps = {
