@@ -29,7 +29,6 @@
       "ROOT",
       "voting-metadata-api"
     ],
-    "dotenv.enableAutocloaking": true,
   },
   "extensions": {
     "recommendations": ["joshx.workspace-terminals"]
