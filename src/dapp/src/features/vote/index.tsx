@@ -19,7 +19,7 @@ function Vote() {
   const { activeAddress, signer } = useWallet()
   const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
   const walletAddress = useConnectedWallet()
-  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote(Number(voteCid!))
+  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote()
   const voteStarted = !data ? false : getVoteStarted(data)
   const voteEnded = !data ? false : getVoteEnded(data)
   const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile))
@@ -30,10 +30,9 @@ function Vote() {
     if (!selectedOption || !activeAddress) return
     try {
       const result = await submitVote({
-        activeAddress,
         signature: 'XxbdiHICkPAtpyPwgvXoISjtODjWmVFRrQRddftW4OO36EPTwzZoxGknV+stq51+2XgUkd0HCxZhdonfcPJoBQ==',
         selectedOption: uuid.v4(),
-        signer,
+        signer: { addr: activeAddress, signer },
         appId: 65,
       })
       // await refetch(result.openRounds.find((p) => p.id === voteCid));

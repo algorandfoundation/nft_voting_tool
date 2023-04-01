@@ -203,7 +203,7 @@ const api = {
       })
     })
   },
-  useSubmitVote: (roundId: number) => {
+  useSubmitVote: () => {
     return useSetter(
       async ({
         signature,
@@ -217,33 +217,6 @@ const api = {
         appId: number
       }) => {
         await VotingRoundContract(signer).castVote(signature, selectedOption, appId)
-        return await new Promise((resolve) => {
-          setState((state) => {
-            const round = state.rounds.find((p) => p.id === roundId)
-            if (!round) {
-              resolve(true)
-              return state
-            }
-            const newState = {
-              ...state,
-              openRounds: [
-                ...state.rounds.filter((p_1) => p_1.id !== roundId),
-                {
-                  ...round,
-                  votes: [
-                    ...round.votes,
-                    {
-                      walletAddress: signer.addr,
-                      selectedOption,
-                    },
-                  ],
-                },
-              ],
-            }
-            resolve(true)
-            return newState
-          })
-        })
       },
     )
   },
