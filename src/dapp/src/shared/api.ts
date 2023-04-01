@@ -2,107 +2,20 @@
  * Returns mock data for now, this should be replaced with real API calls
  */
 
+import * as algokit from '@algorandfoundation/algokit-utils'
+import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
-import * as ed from '@noble/ed25519'
-import { TransactionSigner } from 'algosdk'
+import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useEffect, useState } from 'react'
-import { atom, useSetRecoilState } from 'recoil'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { signCsv } from './csvSigner'
-import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
 import { VotingRound } from './types'
 import { algod, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRound[]
-}
-
-export const votingRoundsAtom = atom<AppState>({
-  key: 'appState',
-  default: {
-    rounds: [
-      {
-        id: 1,
-        voteTitle: 'Algorand Council',
-        voteDescription: 'This is the vote description',
-        start: '2023-03-01T00:00:00.000Z',
-        voteInformationUrl: 'https://www.algorand.com',
-        questionDescription: 'Select the best candidate!',
-        end: '2023-04-21T00:00:00.000Z',
-        questionTitle: 'Who should be on the council?',
-        answers: ['Sammy', 'Charlotte', 'Roman', 'Maxine'],
-        snapshotFile:
-          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
-        votes: [],
-      },
-      {
-        id: 2,
-        voteTitle: 'Future vote',
-        voteDescription: 'This is the vote description',
-        start: '2024-03-01T00:00:00.000Z',
-        voteInformationUrl: 'https://www.algorand.com',
-        questionDescription: 'Select the best candidate!',
-        end: '2024-04-21T00:00:00.000Z',
-        questionTitle: 'Who should be on the council?',
-        answers: ['Sammy', 'Charlotte', 'Roman', 'Maxine'],
-        snapshotFile:
-          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
-        votes: [],
-      },
-
-      {
-        id: 3,
-        voteTitle: 'Another Round',
-        start: '2023-02-26T00:00:00.000Z',
-        end: '2023-03-06T00:00:00.000Z',
-        answers: ['Yes', 'No'],
-        questionTitle: 'Should we do this?',
-        voteDescription: 'This is the vote description',
-        voteInformationUrl: 'https://www.algorand.com',
-        votes: [],
-        snapshotFile:
-          'wallet-one\nwallet-two\nwallet-three\nPERAG7V9V3SR9ZBTO690MV6I\nALF62RMQWIAT6JO2U4M6N2XWJYM7T2XB5KFWP3K6LXH6KUG73EXFXEABAU',
-      },
-      {
-        id: 4,
-        voteTitle: 'An earlier vote',
-        start: '2023-02-18T00:00:00.000Z',
-        end: '2023-02-23T00:00:00.000Z',
-        answers: ['Yes', 'No', 'Maybe'],
-        questionTitle: 'Will you answer Yes, No or Maybe?',
-        voteDescription: 'This is the vote description',
-        voteInformationUrl: 'https://www.algorand.com',
-        votes: [],
-      },
-    ],
-  },
-})
-
-const useMockGetter = <T>(payload: T) => {
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<T | null>(null)
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(false)
-      setData(payload)
-      // simulate loading time
-    }, Math.random() * 400)
-    return () => clearTimeout(timeout)
-  }, [])
-
-  const refetch = useCallback(
-    (newPayload: T) => {
-      setLoading(true)
-      setTimeout(() => {
-        setLoading(false)
-        setData({ ...newPayload })
-        // simulate loading time
-      }, Math.random() * 400)
-    },
-    [data, setData],
-  )
-  return { loading, data, refetch }
 }
 
 const useFetchVoteRounds = (address: string) => {
@@ -183,8 +96,7 @@ const getRoundFromApp = async (
       // todo: This is optional
       voteInformationUrl: round.informationUrl ?? '',
       votes: [],
-      // todo: We either get rid of this or add the raw snapshot data to the snapshot object in IPFS?
-      snapshotFile: snapshot?.snapshot.map((s) => s.address).join('\n') ?? '',
+      snapshot,
     }
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -287,33 +199,29 @@ const api = {
     return useSetter((address: string) => {
       return new Promise((resolve) => {
         setConnectedWallet(address)
-        resolve(address)
+        resolve(true)
       })
     })
   },
   useSubmitVote: (roundId: number) => {
-    const setState = useSetRecoilState(votingRoundsAtom)
     return useSetter(
       async ({
-        activeAddress,
         signature,
         selectedOption,
         signer,
         appId,
       }: {
-        activeAddress: string
         signature: string
         selectedOption: string
-        signer: TransactionSigner
+        signer: TransactionSignerAccount
         appId: number
       }) => {
-        const votingRoundContract = VotingRoundContract(activeAddress, signer)
-        const transaction = await votingRoundContract.castVote(signature, selectedOption, appId)
+        await VotingRoundContract(signer).castVote(signature, selectedOption, appId)
         return await new Promise((resolve) => {
           setState((state) => {
             const round = state.rounds.find((p) => p.id === roundId)
             if (!round) {
-              resolve(state)
+              resolve(true)
               return state
             }
             const newState = {
@@ -325,14 +233,14 @@ const api = {
                   votes: [
                     ...round.votes,
                     {
-                      walletAddress: activeAddress,
+                      walletAddress: signer.addr,
                       selectedOption,
                     },
                   ],
                 },
               ],
             }
-            resolve(newState)
+            resolve(true)
             return newState
           })
         })
@@ -346,95 +254,128 @@ const api = {
     return useFetchVoteRound(id)
   },
   useCreateVotingRound: () => {
-    const setState = useSetRecoilState(votingRoundsAtom)
-    return useSetter(
-      async ({
-        newRound,
-        activeAddress,
-        signer,
-      }: {
-        newRound: Omit<VotingRound, 'id' | 'votes'>
-        activeAddress: string
-        signer: TransactionSigner
-      }) => {
-        const privateKey = ed.utils.randomPrivateKey()
-        const publicKey = await ed.getPublicKeyAsync(privateKey)
-        let voteGatingSnapshotCid = ''
-        if (newRound.snapshotFile) {
-          const signedCsv = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '', privateKey)
+    return {
+      auth: useSetter(async ({ signer }: { signer: TransactionSignerAccount }) => {
+        const authTransaction = (
+          await signer.signer(
+            [
+              (
+                await algokit.transferAlgos(
+                  {
+                    from: signer,
+                    to: signer.addr,
+                    amount: algokit.algos(0),
+                    note: {
+                      timestamp: new Date().toISOString(),
+                    },
+                    skipSending: true,
+                  },
+                  algod,
+                )
+              ).transaction,
+            ],
+            [0],
+          )
+        )[0]
 
-          const voteGatingSnapshotResponse = await uploadVoteGatingSnapshot({
-            title: newRound.voteTitle,
-            publicKey: Buffer.from(publicKey).toString('base64'),
-            snapshot: signedCsv,
-            created: {
-              at: new Date().toISOString(),
-              by: activeAddress,
-            },
-          })
-          voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
+        return {
+          address: signer.addr,
+          signedTransaction: authTransaction,
         }
+      }),
+      create: useSetter(
+        async ({
+          newRound,
+          signer,
+          auth,
+        }: {
+          newRound: Omit<VotingRound, 'id' | 'votes' | 'snapshot'>
+          signer: TransactionSignerAccount
+          auth: { address: string; signedTransaction: Uint8Array }
+        }) => {
+          let voteGatingSnapshotCid = ''
+          let publicKey = new Uint8Array([])
+          let snapshot: VoteGatingSnapshot | undefined = undefined
+          if (newRound.snapshotFile) {
+            const { signedCsv, publicKey: _publicKey } = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '')
+            publicKey = _publicKey
 
-        const options = newRound.answers.map((answer) => {
-          return {
-            id: uuidv4(),
-            label: answer,
+            snapshot = {
+              title: newRound.voteTitle,
+              publicKey: Buffer.from(publicKey).toString('base64'),
+              snapshot: signedCsv,
+              created: {
+                at: new Date().toISOString(),
+                by: signer.addr,
+              },
+            }
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const voteGatingSnapshotResponse = await uploadVoteGatingSnapshot(snapshot, auth)
+            voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
           }
-        })
-        const { cid } = await uploadVotingRound({
-          title: newRound.voteTitle,
-          description: newRound.voteDescription,
-          informationUrl: newRound.voteInformationUrl,
-          start: newRound.start,
-          end: newRound.end,
-          quorum: newRound.minimumVotes,
-          voteGatingSnapshotCid: voteGatingSnapshotCid,
-          questions: [
-            {
+
+          const options = newRound.answers.map((answer) => {
+            return {
               id: uuidv4(),
-              prompt: newRound.questionTitle,
-              description: newRound.questionDescription,
-              options: options,
-            },
-          ],
-          created: {
-            at: new Date().toISOString(),
-            by: activeAddress,
-          },
-        })
+              label: answer,
+            }
+          })
 
-        const votingRoundContract = VotingRoundContract(activeAddress, signer)
-        const app = await votingRoundContract.create(
-          publicKey,
-          cid,
-          Date.parse(newRound.start),
-          Date.parse(newRound.end),
-          newRound.minimumVotes ? newRound.minimumVotes : 0,
-        )
-        await votingRoundContract.bootstrap(
-          app,
-          options.map((option) => option.id),
-        )
-
-        return new Promise((resolve) => {
-          setState((state) => {
-            const newState = {
-              ...state,
-              rounds: [
-                ...state.rounds,
+          const { cid } = await uploadVotingRound(
+            {
+              title: newRound.voteTitle,
+              description: newRound.voteDescription,
+              informationUrl: newRound.voteInformationUrl,
+              start: newRound.start,
+              end: newRound.end,
+              quorum: newRound.minimumVotes,
+              voteGatingSnapshotCid: voteGatingSnapshotCid,
+              questions: [
                 {
-                  ...newRound,
-                  id: app.appId,
-                  votes: [],
+                  id: uuidv4(),
+                  prompt: newRound.questionTitle,
+                  description: newRound.questionDescription,
+                  options: options,
                 },
               ],
-            }
-            resolve(newState)
-            return newState
-          })
-        })
-      },
-    )
+              created: {
+                at: new Date().toISOString(),
+                by: signer.addr,
+              },
+            },
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            auth,
+          )
+
+          const app = await VotingRoundContract(signer).create(
+            publicKey,
+            cid,
+            Date.parse(newRound.start),
+            Date.parse(newRound.end),
+            newRound.minimumVotes ? newRound.minimumVotes : 0,
+          )
+
+          return {
+            app,
+            options,
+          }
+        },
+      ),
+      bootstrap: useSetter(
+        async ({
+          signer,
+          app,
+        }: {
+          signer: TransactionSignerAccount
+          app: { app: AppReference; options: { id: string; label: string }[] }
+        }) => {
+          await VotingRoundContract(signer).bootstrap(
+            app.app,
+            app.options.map((option) => option.id),
+          )
+        },
+      ),
+    }
   },
 }
 

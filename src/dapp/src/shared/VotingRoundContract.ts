@@ -1,6 +1,6 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
-import { TransactionSigner } from 'algosdk'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
 
@@ -16,12 +16,7 @@ export const indexer = algokit.getAlgoIndexerClient({
   token: import.meta.env.VITE_INDEXER_TOKEN,
 })
 
-export const VotingRoundContract = (activeAddress: string, signer: TransactionSigner) => {
-  const sender = {
-    addr: activeAddress,
-    signer: signer,
-  }
-
+export const VotingRoundContract = (sender: TransactionSignerAccount) => {
   const create = async (publicKey: Uint8Array, cid: string, start: number, end: number, quorum: number): Promise<AppReference> => {
     const appClient = algokit.getApplicationClient(
       {
@@ -71,7 +66,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
       await appClient.call({
         method: 'bootstrap',
         methodArgs: {
-          args: [/*payTxn, */ option.encoded],
+          args: [option.encoded],
           boxes: option.boxRefs,
         },
         sendParams: { skipSending: true },
@@ -108,10 +103,7 @@ export const VotingRoundContract = (activeAddress: string, signer: TransactionSi
         args: [signatureByArray, encodeAnswerId(selectedOption)],
         boxes: [encodeAnswerIdBoxRef(selectedOption)],
       },
-      sender: {
-        addr: activeAddress,
-        signer: signer,
-      },
+      sender,
       sendParams: { fee: voteFee },
     })
 

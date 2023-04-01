@@ -64,13 +64,17 @@ export interface Response {
 
 const apiUrl = import.meta.env.VITE_IPFS_GATEWAY_URL
 
-async function uploadFile(url: string, file: File): Promise<Response> {
+async function uploadFile(file: File, authSignature: { address: string; signedTransaction: Uint8Array }): Promise<Response> {
   const formData = new FormData()
   formData.append('file', file, file.name)
 
   const response = await fetch(apiUrl, {
     method: 'POST',
     body: formData,
+    headers: {
+      'X-ALGORAND-SIGNED-TXN': Buffer.from(authSignature.signedTransaction).toString('base64'),
+      'X-ALGORAND-ADDRESS': authSignature.address,
+    },
   })
 
   if (!response.ok) {
@@ -104,12 +108,18 @@ function generateFile(data: VotingRound | VoteGatingSnapshot, fileName: string):
   return new File([csvBlob], fileName, { type: 'application/json' })
 }
 
-export async function uploadVoteGatingSnapshot(voteGatingSnapshot: VoteGatingSnapshot): Promise<Response> {
+export async function uploadVoteGatingSnapshot(
+  voteGatingSnapshot: VoteGatingSnapshot,
+  authSignature: { address: string; signedTransaction: Uint8Array },
+): Promise<Response> {
   const voteGratingSnapshotFile = generateFile(voteGatingSnapshot, 'voteGatingSnapshot.json')
-  return await uploadFile(apiUrl, voteGratingSnapshotFile)
+  return await uploadFile(voteGratingSnapshotFile, authSignature)
 }
 
-export async function uploadVotingRound(votingRound: VotingRound): Promise<Response> {
+export async function uploadVotingRound(
+  votingRound: VotingRound,
+  authSignature: { address: string; signedTransaction: Uint8Array },
+): Promise<Response> {
   const votingRoundFile = generateFile(votingRound, 'votingRound.json')
-  return await uploadFile(apiUrl, votingRoundFile)
+  return await uploadFile(votingRoundFile, authSignature)
 }

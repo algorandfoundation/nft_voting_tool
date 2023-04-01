@@ -7,9 +7,16 @@ interface SignedCsv {
   signature: string
 }
 
-export async function signCsv(csv: string, privateKey: Uint8Array): Promise<SignedCsv[]> {
+export async function signCsv(csv: string): Promise<{ signedCsv: SignedCsv[]; publicKey: Uint8Array }> {
+  if (!window.isSecureContext) {
+    alert('Page not in a secure context so aborting to avoid potential leak of private signing key')
+    throw new Error('Page not in a secure context so aborting to avoid potential leak of private signing key')
+  }
+
   const results = Papa.parse(csv)
-  const signed = await Promise.all(
+  const privateKey = ed.utils.randomPrivateKey()
+  const publicKey = await ed.getPublicKeyAsync(privateKey)
+  const signedCsv = await Promise.all(
     results.data
       .filter((row) => !Array.isArray(row) || !!row[0])
       .map((row): Promise<SignedCsv> => {
@@ -25,5 +32,7 @@ export async function signCsv(csv: string, privateKey: Uint8Array): Promise<Sign
         }
       }),
   )
-  return signed
+  // Clear out the private key to be sure it's not lingering in memory
+  privateKey.fill(0)
+  return { signedCsv, publicKey }
 }

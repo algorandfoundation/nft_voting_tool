@@ -1,21 +1,24 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
 
 type ConfirmationDialogProps = {
+  title: string | JSX.Element
   open: boolean
-  handleOpen: () => void
   onConfirm: () => void
+  onCancel: () => void
+  showCancel: boolean
+  children: JSX.Element[]
 }
-export const ConfirmationDialog = ({ open, handleOpen, onConfirm }: ConfirmationDialogProps) => (
-  <Dialog open={open} onClose={handleOpen}>
-    <DialogTitle>Confirm voting round creation</DialogTitle>
-    <DialogContent>
-      <div>You will be asked to sign a transaction to create this voting round. No changes are possible once you sign.</div>
-      <div className="mt-6">It can take up to 30 seconds to create the voting round once you sign the transaction.</div>
-    </DialogContent>
+export const ConfirmationDialog = ({ open, title, showCancel, children, onCancel, onConfirm }: ConfirmationDialogProps) => (
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  <Dialog open={open} onClose={showCancel ? onCancel : () => {}}>
+    <DialogTitle>{title}</DialogTitle>
+    <DialogContent>{children}</DialogContent>
     <DialogActions>
-      <Button variant="outlined" onClick={handleOpen} className="mr-1">
-        Cancel
-      </Button>
+      {showCancel && (
+        <Button variant="outlined" onClick={onCancel} className="mr-1">
+          Cancel
+        </Button>
+      )}
       <Button variant="contained" onClick={onConfirm}>
         Confirm
       </Button>
