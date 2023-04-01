@@ -16,7 +16,6 @@ type VoteCreationState = {
       label: string
     }[]
   }
-  publicKey: Uint8Array
 }
 
 const defaultRoundInfo: RoundInfo = {
@@ -53,7 +52,6 @@ export const voteCreationAtom = atom<VoteCreationState>({
     reviewStep: VoteCreationReviewSteps.Auth,
     auth: defaultAuth,
     appReference: defaultAppReference,
-    publicKey: Uint8Array.from([]),
   },
 })
 
@@ -111,15 +109,6 @@ const appReferenceSelector = selector({
   },
 })
 
-const publicKeySelector = selector({
-  key: 'publicKeySelector',
-  get: ({ get }) => get(voteCreationAtom).publicKey,
-  set: ({ set, get }, newValue) => {
-    const current = get(voteCreationAtom)
-    set(voteCreationAtom, { ...current, publicKey: newValue instanceof DefaultValue ? Uint8Array.from([]) : newValue })
-  },
-})
-
 export const useRoundInfo = () => useRecoilValue(roundInfoSelector)
 export const useSetRoundInfo = () => useSetRecoilState(roundInfoSelector)
 export const useQuestions = () => useRecoilValue(questionsSelector)
@@ -130,8 +119,6 @@ export const useReviewStep = () => useRecoilValue(reviewStepSelector)
 export const useSetReviewStep = () => useSetRecoilState(reviewStepSelector)
 export const useAuth = () => useRecoilValue(authSelector)
 export const useSetAuth = () => useSetRecoilState(authSelector)
-export const usePublicKey = () => useRecoilValue(publicKeySelector)
-export const useSetPublicKey = () => useSetRecoilState(publicKeySelector)
 export const useAppReference = () => useRecoilValue(appReferenceSelector)
 export const useSetAppReference = () => useSetRecoilState(appReferenceSelector)
 export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom)

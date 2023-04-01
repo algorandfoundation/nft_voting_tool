@@ -29,7 +29,6 @@ import { Steps } from '../Steps'
 export default function Review() {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const { activeAddress, signer: transactionSigner } = useWallet()
-  const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen)
   const roundInfo = useRoundInfo()
   const questions = useQuestions()
   const [authData, setAuth] = [useAuth(), useSetAuth()]
@@ -176,7 +175,7 @@ export default function Review() {
               : 'Finalise voting round setup (3/3)'
           }
           onCancel={() => {
-            toggleConfirmationDialog()
+            setConfirmationDialogOpen(false)
             setReviewStep(VoteCreationReviewSteps.Auth)
           }}
           open={confirmationDialogOpen}
