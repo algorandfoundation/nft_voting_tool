@@ -30,7 +30,7 @@ const dns = appDomainName
         parameterRegions: [deployer.defaultRegion],
         certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
       },
-      'us-east-1'
+      'us-east-1',
     )
   : undefined
 
@@ -47,6 +47,7 @@ const api = deployer.deploy(ApiStack, 'api', {
   envVars: {
     WEB3_STORAGE_API_TOKEN: getRequiredEnv('WEB3_STORAGE_API_TOKEN'),
     NODE_ENV: getRequiredEnv('NODE_ENV'),
+    ALLOWED_ADDRESSES: getRequiredEnv('API_ALLOWED_ADDRESSES'),
   },
 })
 

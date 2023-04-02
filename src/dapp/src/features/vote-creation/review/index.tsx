@@ -4,9 +4,19 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../shared/api'
 import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
-import { useQuestions, useResetCreateRound, useRoundInfo } from '../state'
+import {
+  useAppReference,
+  useAuth,
+  useQuestions,
+  useResetCreateRound,
+  useReviewStep,
+  useRoundInfo,
+  useSetAppReference,
+  useSetAuth,
+  useSetReviewStep,
+} from '../state'
 import { useStepRedirect } from '../useStepRedirect'
-import { VoteCreationSteps } from '../VoteCreationSteps'
+import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { Row } from './Row'
 
@@ -18,29 +28,57 @@ import { Steps } from '../Steps'
 
 export default function Review() {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-  const { activeAddress, signer } = useWallet()
-  const toggleConfirmationDialog = () => setConfirmationDialogOpen(!confirmationDialogOpen)
+  const { activeAddress, signer: transactionSigner } = useWallet()
   const roundInfo = useRoundInfo()
   const questions = useQuestions()
+  const [authData, setAuth] = [useAuth(), useSetAuth()]
+  const [appData, setApp] = [useAppReference(), useSetAppReference()]
   const navigate = useNavigate()
+  const reviewStep = useReviewStep()
+  const setReviewStep = useSetReviewStep()
   useStepRedirect(VoteCreationSteps.Review)
   const resetCreateState = useResetCreateRound()
-  const { loading: creatingVotingRound, execute: createVotingRoundApi, error } = api.useCreateVotingRound()
-  const createVotingRound = async () => {
-    try {
-      if (!activeAddress) {
-        throw new Error('User does not have an active address')
-      }
-      await createVotingRoundApi({
-        newRound: { ...roundInfo, ...questions },
-        activeAddress,
-        signer,
-      })
+  const { auth, create, bootstrap } = api.useCreateVotingRound()
+  const loading = auth.loading || create.loading || bootstrap.loading
+  const error = `${auth.error !== null ? auth.error : ''}${create.error !== null ? create.error : ''}${
+    bootstrap.error !== null ? bootstrap.error : ''
+  }`
+  const signer = { addr: activeAddress!, signer: transactionSigner }
+  const confirm = async () => {
+    setConfirmationDialogOpen(false)
+    if (!activeAddress) {
+      throw new Error('User does not have an active address')
+    }
+    switch (reviewStep) {
+      case VoteCreationReviewSteps.Auth:
+        setAuth(await auth.execute({ signer }))
+        break
+      case VoteCreationReviewSteps.Create:
+        // eslint-disable-next-line no-case-declarations
+        setApp(
+          await create.execute({
+            auth: authData,
+            newRound: { ...roundInfo, ...questions },
+            signer,
+          }),
+        )
+
+        break
+      case VoteCreationReviewSteps.Bootstrap:
+        await bootstrap.execute({
+          app: appData,
+          signer,
+        })
+        break
+    }
+    if (reviewStep === VoteCreationReviewSteps.Bootstrap) {
       resetCreateState()
       navigate('/', {})
-    } catch (e) {
-      // TODO: handle failure
+      return
     }
+
+    setReviewStep(reviewStep + 1)
+    setConfirmationDialogOpen(true)
   }
   return (
     <>
@@ -128,17 +166,36 @@ export default function Review() {
           </Alert>
         )}
         <ConfirmationDialog
-          handleOpen={toggleConfirmationDialog}
-          open={confirmationDialogOpen}
-          onConfirm={() => {
-            toggleConfirmationDialog()
-            createVotingRound()
+          showCancel={reviewStep < VoteCreationReviewSteps.Bootstrap}
+          title={
+            reviewStep === VoteCreationReviewSteps.Auth
+              ? 'Authorise creation of voting metadata in IPFS (1/3)'
+              : reviewStep === VoteCreationReviewSteps.Create
+              ? 'Confirm voting round creation (2/3)'
+              : 'Finalise voting round setup (3/3)'
+          }
+          onCancel={() => {
+            setConfirmationDialogOpen(false)
+            setReviewStep(VoteCreationReviewSteps.Auth)
           }}
-        />
+          open={confirmationDialogOpen}
+          onConfirm={confirm}
+        >
+          <div>
+            You will be asked to sign a transaction to{' '}
+            {reviewStep === VoteCreationReviewSteps.Auth
+              ? 'authorise metadata upload to IPFS'
+              : reviewStep === VoteCreationReviewSteps.Create
+              ? 'create this voting round. Note: No further changes are possible once you sign'
+              : 'fund the voting round smart contract and initialise the round'}
+            .
+          </div>
+          <div className="mt-6">It can take up to 30 seconds to process once you sign the transaction.</div>
+        </ConfirmationDialog>
         <LoadingDialog
-          loading={creatingVotingRound}
-          title="Creating voting round..."
-          note="It can take up to 30 seconds to create the voting round once you sign the transaction."
+          loading={loading}
+          title="Processing..."
+          note="It can take up to 30 seconds to progress once you sign each transaction."
         />
       </div>
     </>

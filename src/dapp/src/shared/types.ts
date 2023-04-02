@@ -1,3 +1,5 @@
+import { VoteGatingSnapshot } from './IPFSGateway'
+
 export type VoteId = {
   id: number
 }
@@ -23,4 +25,4 @@ export type Question = {
   answers: string[]
 }
 
-export type VotingRound = RoundInfo & Question & VoteId & { votes: Vote[] }
+export type VotingRound = RoundInfo & Question & VoteId & { votes: Vote[]; snapshot?: VoteGatingSnapshot }

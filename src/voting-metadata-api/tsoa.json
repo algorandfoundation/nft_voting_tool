@@ -4,12 +4,21 @@
   "controllerPathGlobs": ["src/**/*Controller.ts"],
   "spec": {
     "outputDirectory": "build",
-    "specVersion": 3
+    "specVersion": 3,
+    "securityDefinitions": {
+      "AlgorandSignature": {
+        "type": "http",
+        "scheme": "apiKey",
+        "name": "X-ALGORAND-SIGNED-TRANSACTION",
+        "in": "header"
+      }
+    }
   },
   "routes": {
     "routesDir": "routes",
     "iocModule": "src/ioc",
-    "middleware": "express"
+    "middleware": "express",
+    "authenticationModule": "src/authentication"
   },
   "basePath": "/"
 }

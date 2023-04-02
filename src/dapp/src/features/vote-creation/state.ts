@@ -1,11 +1,21 @@
+import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
 import { Question, RoundInfo } from '../../shared/types'
-import { VoteCreationSteps } from './VoteCreationSteps'
+import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'
 
 type VoteCreationState = {
   roundInfo: RoundInfo
   questions: Question
   step: VoteCreationSteps
+  reviewStep: VoteCreationReviewSteps
+  auth: { address: string; signedTransaction: Uint8Array }
+  appReference: {
+    app: AppReference
+    options: {
+      id: string
+      label: string
+    }[]
+  }
 }
 
 const defaultRoundInfo: RoundInfo = {
@@ -26,12 +36,22 @@ const defaultQuestions: Question = {
   answers: [' ', ' '],
 }
 
+const defaultAuth = {
+  address: '',
+  signedTransaction: Uint8Array.from([]),
+}
+
+const defaultAppReference = { app: { appId: 0, appAddress: '' }, options: [] }
+
 export const voteCreationAtom = atom<VoteCreationState>({
   key: 'voteCreationState',
   default: {
     roundInfo: defaultRoundInfo,
     questions: defaultQuestions,
     step: VoteCreationSteps.RoundInfo,
+    reviewStep: VoteCreationReviewSteps.Auth,
+    auth: defaultAuth,
+    appReference: defaultAppReference,
   },
 })
 
@@ -62,10 +82,43 @@ const stepSelector = selector({
   },
 })
 
+const reviewStepSelector = selector({
+  key: 'reviewStepSelector',
+  get: ({ get }) => get(voteCreationAtom).reviewStep,
+  set: ({ set, get }, newValue) => {
+    const current = get(voteCreationAtom)
+    set(voteCreationAtom, { ...current, reviewStep: newValue instanceof DefaultValue ? VoteCreationReviewSteps.Auth : newValue })
+  },
+})
+
+const authSelector = selector({
+  key: 'authSelector',
+  get: ({ get }) => get(voteCreationAtom).auth,
+  set: ({ set, get }, newValue) => {
+    const current = get(voteCreationAtom)
+    set(voteCreationAtom, { ...current, auth: newValue instanceof DefaultValue ? defaultAuth : newValue })
+  },
+})
+
+const appReferenceSelector = selector({
+  key: 'appReferenceSelector',
+  get: ({ get }) => get(voteCreationAtom).appReference,
+  set: ({ set, get }, newValue) => {
+    const current = get(voteCreationAtom)
+    set(voteCreationAtom, { ...current, appReference: newValue instanceof DefaultValue ? defaultAppReference : newValue })
+  },
+})
+
 export const useRoundInfo = () => useRecoilValue(roundInfoSelector)
 export const useSetRoundInfo = () => useSetRecoilState(roundInfoSelector)
 export const useQuestions = () => useRecoilValue(questionsSelector)
 export const useSetQuestions = () => useSetRecoilState(questionsSelector)
 export const useStep = () => useRecoilValue(stepSelector)
 export const useSetStep = () => useSetRecoilState(stepSelector)
+export const useReviewStep = () => useRecoilValue(reviewStepSelector)
+export const useSetReviewStep = () => useSetRecoilState(reviewStepSelector)
+export const useAuth = () => useRecoilValue(authSelector)
+export const useSetAuth = () => useSetRecoilState(authSelector)
+export const useAppReference = () => useRecoilValue(appReferenceSelector)
+export const useSetAppReference = () => useSetRecoilState(appReferenceSelector)
 export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom)
