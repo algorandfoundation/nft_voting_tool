@@ -1,17 +1,33 @@
-import { VoteGatingSnapshot } from './IPFSGateway'
+import { CreatedMetadata, Question, VoteGatingSnapshot } from './IPFSGateway'
 
 export type VoteId = {
   id: number
 }
 
 export type RoundInfo = {
-  end: string
-  minimumVotes?: number | undefined
-  snapshotFile?: string | undefined
-  start: string
-  voteDescription: string
-  voteInformationUrl: string
   voteTitle: string
+  voteDescription: string
+  start: string
+  end: string
+  snapshotFile?: string | undefined
+  minimumVotes?: number | undefined
+  voteInformationUrl?: string
+}
+
+export type VotingRoundPopulated = {
+  id: number
+  cid: string
+  title: string
+  description: string
+  start: string
+  end: string
+  quorum?: number
+  snapshot?: VoteGatingSnapshot
+  voteGatingSnapshotCid?: string
+  informationUrl?: string
+  questions: Question[]
+  created: CreatedMetadata
+  votes?: Vote[]
 }
 
 export type Vote = {
@@ -19,10 +35,10 @@ export type Vote = {
   selectedOption: string
 }
 
-export type Question = {
+export type QuestionModel = {
   questionTitle: string
   questionDescription?: string
   answers: string[]
 }
 
-export type VotingRound = RoundInfo & Question & VoteId & { votes: Vote[]; snapshot?: VoteGatingSnapshot }
+export type VotingRoundModel = RoundInfo & QuestionModel & VoteId & { snapshot?: VoteGatingSnapshot }

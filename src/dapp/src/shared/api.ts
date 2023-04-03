@@ -9,13 +9,13 @@ import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
+import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { VotingRoundContract, algod, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
-import { VotingRound } from './types'
-import { algod, indexer, VotingRoundContract } from './VotingRoundContract'
+import { QuestionModel, VotingRoundModel, VotingRoundPopulated } from './types'
 
 type AppState = {
-  rounds: VotingRound[]
+  rounds: VotingRoundPopulated[]
 }
 
 const useFetchVoteRounds = (address: string) => {
@@ -52,7 +52,7 @@ const useFetchVoteRounds = (address: string) => {
 
 const useFetchVoteRound = (appId: number) => {
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<VotingRound | undefined>(undefined)
+  const [data, setData] = useState<VotingRoundPopulated | undefined>(undefined)
 
   const refetch = useCallback(() => {
     ;(async () => {
@@ -76,7 +76,7 @@ const getRoundFromApp = async (
     key: string
     value: TealValue
   }[],
-): Promise<VotingRound | undefined> => {
+): Promise<VotingRoundPopulated | undefined> => {
   try {
     const decodedState = decodeGlobalState(globalState)
     if (!decodedState.is_bootstrapped || !decodedState.metadata_ipfs_cid) {
@@ -86,17 +86,23 @@ const getRoundFromApp = async (
     const snapshot = await getVotingSnapshot(round)
     return {
       id: appId,
-      voteTitle: round.title,
+      cid: decodedState.metadata_ipfs_cid,
+      title: round.title,
       start: round.start,
       end: round.end,
       // todo: We are losing data here
-      answers: round.questions[0].options.map((o) => o.label),
-      questionTitle: round.questions[0].prompt,
-      voteDescription: round.description,
+      // answers: round.questions[0].options,
+      questions: round.questions,
+      // questionTitle: round.questions[0].prompt,
+      description: round.description,
       // todo: This is optional
-      voteInformationUrl: round.informationUrl ?? '',
-      votes: [],
+      informationUrl: round.informationUrl ?? '',
       snapshot,
+      voteGatingSnapshotCid: round.voteGatingSnapshotCid,
+      created: {
+        at: round.created.at,
+        by: round.created.by,
+      },
     }
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -114,7 +120,7 @@ const fetchVotingRound = async (appId: number) => {
 }
 
 const fetchVotingRounds = async (address: string) => {
-  const voteRounds: VotingRound[] = []
+  const voteRounds: VotingRoundPopulated[] = []
   const applicationsByCreator = await indexer.lookupAccountCreatedApplications(address).do()
   await Promise.all(
     applicationsByCreator.applications.map(async (app: ApplicationResponse) => {
@@ -262,7 +268,7 @@ const api = {
           signer,
           auth,
         }: {
-          newRound: Omit<VotingRound, 'id' | 'votes' | 'snapshot'>
+          newRound: Omit<VotingRoundModel & QuestionModel, 'id' | 'votes' | 'snapshot'>
           signer: TransactionSignerAccount
           auth: { address: string; signedTransaction: Uint8Array }
         }) => {
@@ -323,8 +329,8 @@ const api = {
           const app = await VotingRoundContract(signer).create(
             publicKey,
             cid,
-            Date.parse(newRound.start),
-            Date.parse(newRound.end),
+            Math.floor(Date.parse(newRound.start) / 1000),
+            Math.floor(Date.parse(newRound.end) / 1000),
             newRound.minimumVotes ? newRound.minimumVotes : 0,
           )
 

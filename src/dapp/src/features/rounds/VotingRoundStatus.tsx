@@ -2,12 +2,12 @@ import { Chip, Typography } from '@mui/material'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { VotingRound } from '../../shared/types'
+import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { VotingRoundTileProps } from './VotingRoundTile'
 dayjs.extend(relativeTime)
 
-const getStatus = (round: VotingRound) => {
+const getStatus = (round: VotingRoundPopulated) => {
   const voteStarted = getVoteStarted(round)
   const voteEnded = getVoteEnded(round)
   if (voteStarted) {

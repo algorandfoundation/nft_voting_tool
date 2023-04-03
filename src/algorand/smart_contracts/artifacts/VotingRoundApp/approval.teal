@@ -1,6 +1,6 @@
 #pragma version 8
 intcblock 0 1 16 5
-bytecblock 0x565f 0x69735f626f6f747374726170706564 0x736e617073686f745f7075626c69635f6b6579 0x73746172745f74696d65 0x656e645f74696d65 0x 0x6d657461646174615f697066735f636964 0x71756f72756d 0x068101
+bytecblock 0x565f 0x69735f626f6f747374726170706564 0x73746172745f74696d65 0x656e645f74696d65 0x736e617073686f745f7075626c69635f6b6579 0x 0x6d657461646174615f697066735f636964 0x71756f72756d 0x068101
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -133,14 +133,14 @@ retsub
 create_1:
 proto 5 0
 intc_0 // 0
-bytec_2 // "snapshot_public_key"
+bytec 4 // "snapshot_public_key"
 app_global_get_ex
 store 9
 store 8
 load 9
 !
 assert
-bytec_2 // "snapshot_public_key"
+bytec 4 // "snapshot_public_key"
 frame_dig -5
 extract 2 0
 app_global_put
@@ -157,25 +157,25 @@ frame_dig -4
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec_3 // "start_time"
+bytec_2 // "start_time"
 app_global_get_ex
 store 13
 store 12
 load 13
 !
 assert
-bytec_3 // "start_time"
+bytec_2 // "start_time"
 frame_dig -3
 app_global_put
 intc_0 // 0
-bytec 4 // "end_time"
+bytec_3 // "end_time"
 app_global_get_ex
 store 15
 store 14
 load 15
 !
 assert
-bytec 4 // "end_time"
+bytec_3 // "end_time"
 frame_dig -2
 app_global_put
 intc_0 // 0
@@ -293,7 +293,7 @@ b allowedtovote_3_l1
 allowedtovote_3_l3:
 txn Sender
 frame_dig -1
-bytec_2 // "snapshot_public_key"
+bytec 4 // "snapshot_public_key"
 app_global_get
 ed25519verify_bare
 retsub
@@ -306,12 +306,12 @@ app_global_get
 intc_1 // 1
 ==
 global LatestTimestamp
-bytec_3 // "start_time"
+bytec_2 // "start_time"
 app_global_get
 >=
 &&
 global LatestTimestamp
-bytec 4 // "end_time"
+bytec_3 // "end_time"
 app_global_get
 <
 &&
@@ -320,9 +320,20 @@ retsub
 // already_voted
 alreadyvoted_5:
 proto 0 1
-txn Sender
-global CreatorAddress
-b==
+bytec_1 // "is_bootstrapped"
+app_global_get
+intc_1 // 1
+!=
+global LatestTimestamp
+bytec_2 // "start_time"
+app_global_get
+>=
+&&
+global LatestTimestamp
+bytec_3 // "end_time"
+app_global_get
+<
+&&
 retsub
 
 // get_preconditions

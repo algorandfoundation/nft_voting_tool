@@ -1,12 +1,12 @@
 import { Typography } from '@mui/material'
-import { VotingRound } from '../../shared/types'
-import { VotingRoundTileLoading } from './index'
+import { VotingRoundPopulated } from '../../shared/types'
 import { NoRounds } from './NoRounds'
 import { VotingRoundTile } from './VotingRoundTile'
+import { VotingRoundTileLoading } from './index'
 
 type VotingRoundSectionProps = {
   label: string
-  rounds: VotingRound[]
+  rounds: VotingRoundPopulated[]
   loading: boolean
 }
 

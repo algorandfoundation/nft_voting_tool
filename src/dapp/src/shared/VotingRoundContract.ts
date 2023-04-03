@@ -94,13 +94,12 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       algod,
     )
 
-    const signatureByArray = Buffer.from(signature, 'base64')
+    const signatureByteArray = Buffer.from(signature, 'base64')
     const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000)
-
     const transaction = await client.call({
       method: 'vote',
       methodArgs: {
-        args: [signatureByArray, encodeAnswerId(selectedOption)],
+        args: [signatureByteArray, encodeAnswerId(selectedOption)],
         boxes: [encodeAnswerIdBoxRef(selectedOption)],
       },
       sender,

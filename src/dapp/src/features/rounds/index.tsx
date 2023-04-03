@@ -2,7 +2,7 @@ import { Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { Link } from 'react-router-dom'
 import api from '../../shared/api'
-import { VotingRound } from '../../shared/types'
+import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { getWalletLabel } from '../../shared/wallet'
 import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
@@ -16,10 +16,10 @@ export const VotingRoundTileLoading = () => (
 )
 
 const getRounds = (
-  rounds: VotingRound[],
-  filterPredicate: (r: VotingRound) => boolean,
+  rounds: VotingRoundPopulated[],
+  filterPredicate: (r: VotingRoundPopulated) => boolean,
   sortPredicate: Parameters<typeof sortBy>[1],
-): VotingRound[] => {
+): VotingRoundPopulated[] => {
   const filtered = rounds.filter(filterPredicate)
   const sorted = sortBy(filtered, sortPredicate)
   return sorted
@@ -34,7 +34,7 @@ const VotingRounds = () => {
     ? getRounds(
         data.rounds,
         (r) => getVoteStarted(r) && !getVoteEnded(r),
-        (r: VotingRound) => r.end,
+        (r: VotingRoundPopulated) => r.end,
       )
     : []
 
@@ -42,7 +42,7 @@ const VotingRounds = () => {
     ? getRounds(
         data.rounds,
         (r) => !getVoteStarted(r),
-        (r: VotingRound) => r.start,
+        (r: VotingRoundPopulated) => r.start,
       )
     : []
 
@@ -50,7 +50,7 @@ const VotingRounds = () => {
     ? getRounds(
         data.rounds,
         (r) => getVoteEnded(r),
-        (r: VotingRound) => r.end,
+        (r: VotingRoundPopulated) => r.end,
       )
     : []
 

@@ -121,8 +121,12 @@ def voting_open() -> pt.Expr:
 
 @pt.Subroutine(pt.TealType.uint64)
 def already_voted() -> pt.Expr:
-    # Todo: actually implement this
-    return pt.BytesEq(pt.Txn.sender(), pt.Global.creator_address())
+    # Todo: actually implement this - currently this will return false if the above is open so anyone can vote
+    return pt.And(
+        pt.Neq(app.state.is_bootstrapped.get(), pt.Int(1)),
+        pt.Ge(pt.Global.latest_timestamp(), app.state.start_time.get()),
+        pt.Lt(pt.Global.latest_timestamp(), app.state.end_time.get()),
+    )
 
 
 # Readonly data methods
