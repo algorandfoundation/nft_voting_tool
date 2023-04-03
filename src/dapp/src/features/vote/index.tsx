@@ -1,12 +1,11 @@
-import { Box, Link, Skeleton, Stack, Typography } from '@mui/material'
+import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import * as uuid from 'uuid'
+import { SkeletonArray } from '../../shared/SkeletonArray'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { SkeletonArray } from '../../shared/SkeletonArray'
 import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
-import { getIsAllowedToVote, getWalletAddresses } from '../../shared/wallet'
 import { useConnectedWallet } from '../wallet/state'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
@@ -17,42 +16,54 @@ import { WalletVoteStatus } from './WalletVoteStatus'
 function Vote() {
   const { voteCid } = useParams()
   const { activeAddress, signer } = useWallet()
+  const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
+  const [allowedToVote, setAllowToVote] = useState<boolean>(false)
   const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
+  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteCid!))
   const walletAddress = useConnectedWallet()
-  const { loading: submittingVote, execute: submitVote } = api.useSubmitVote()
+  const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
   const voteStarted = !data ? false : getVoteStarted(data)
   const voteEnded = !data ? false : getVoteEnded(data)
-  const allowedToVote = !data ? false : getIsAllowedToVote(walletAddress, getWalletAddresses(data.snapshotFile))
   const alreadyVoted = !data ? true : getMyVote(data, walletAddress)
   const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted
 
   const handleSubmitVote = async (selectedOption: string) => {
-    if (!selectedOption || !activeAddress) return
-    try {
-      const result = await submitVote({
-        signature: 'XxbdiHICkPAtpyPwgvXoISjtODjWmVFRrQRddftW4OO36EPTwzZoxGknV+stq51+2XgUkd0HCxZhdonfcPJoBQ==',
-        selectedOption: uuid.v4(),
-        signer: { addr: activeAddress, signer },
-        appId: 65,
-      })
-      // await refetch(result.openRounds.find((p) => p.id === voteCid));
-    } catch (e) {
-      // TODO: handle failure
-    }
+    if (!selectedOption || !activeAddress || !allowlistSignature || !data) return
+    const result = await submitVote({
+      signature: allowlistSignature,
+      selectedOption: selectedOption,
+      signer: { addr: activeAddress, signer },
+      appId: data.id,
+    })
+    refetchResults()
   }
+
+  useEffect(() => {
+    setAllowlistSignature(null)
+    setAllowToVote(false)
+    if (data?.snapshot?.snapshot) {
+      const addressSnapshot = data?.snapshot?.snapshot.find((addressSnapshot) => {
+        return addressSnapshot.address === activeAddress
+      })
+      if (addressSnapshot) {
+        setAllowlistSignature(addressSnapshot.signature)
+        setAllowToVote(true)
+      }
+    }
+  }, [data, activeAddress])
 
   return (
     <div className="max-w-4xl">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="sm:col-span-2">
-          {loading ? <Skeleton className="h-12 w-1/2" variant="text" /> : <Typography variant="h3">{data?.voteTitle}</Typography>}
-          {loading ? <Skeleton variant="text" /> : <Typography>{data?.voteDescription}</Typography>}
+          {loading ? <Skeleton className="h-12 w-1/2" variant="text" /> : <Typography variant="h3">{data?.title}</Typography>}
+          {loading ? <Skeleton variant="text" /> : <Typography>{data?.description}</Typography>}
 
           <div className="mt-3">
             {loading ? (
               <Skeleton variant="text" className="w-56" />
             ) : (
-              <Link href={data?.voteInformationUrl ?? ''}>Learn about the vote and candidates</Link>
+              <Link href={data?.informationUrl ?? ''}>Learn about the vote and candidates</Link>
             )}
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
@@ -66,7 +77,7 @@ function Vote() {
               <Skeleton variant="rectangular" className="h-10" />
             </Stack>
           ) : (
-            <WalletVoteStatus round={data} />
+            <WalletVoteStatus round={data} allowedToVote={allowedToVote} />
           )}
 
           {!loading && voteEnded && (
@@ -79,22 +90,37 @@ function Vote() {
               </Box>
             </div>
           )}
+          {loading && (
+            <div className="mt-7">
+              <Skeleton className="h-8 w-1/2" variant="text" />
+              <Skeleton variant="text" className="w-1/2" />
+              <SkeletonArray className="max-w-xs" count={4} />
+            </div>
+          )}
+          {data?.questions.map((question) => (
+            <div className="mt-7" key={question.id}>
+              <Typography variant="h4">{question.prompt}</Typography>
 
-          <div className="mt-7">
-            {loading ? <Skeleton className="h-8 w-1/2" variant="text" /> : <Typography variant="h4">{data?.questionTitle}</Typography>}
+              <Typography>{question.description}</Typography>
 
-            {loading ? <Skeleton variant="text" className="w-1/2" /> : <Typography>{data?.questionDescription}</Typography>}
-
-            <div className="mt-4">
-              {loading || !data ? (
-                <SkeletonArray className="max-w-xs" count={4} />
-              ) : canVote || !voteStarted ? (
-                <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} />
-              ) : (
-                <VoteResults round={data} />
+              <div className="mt-4">
+                {canVote || !voteStarted ? <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} /> : null}
+              </div>
+              <div className="mt-4">
+                {loadingResults ? (
+                  <SkeletonArray className="max-w-xs" count={4} />
+                ) : (
+                  votingRoundResults && <VoteResults question={question} votingRoundResults={votingRoundResults} />
+                )}
+              </div>
+              {error && (
+                <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
+                  <Typography>Could not cast vote:</Typography>
+                  <Typography>{error}</Typography>
+                </Alert>
               )}
             </div>
-          </div>
+          ))}
         </div>
         <div>
           <VotingTime className="hidden sm:visible" loading={loading} round={data} />

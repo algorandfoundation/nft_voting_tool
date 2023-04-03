@@ -1,17 +1,16 @@
 import { Box, Button, Link, Typography } from '@mui/material'
-import { VotingRound } from '../../shared/types'
+import { VotingRoundPopulated } from '../../shared/types'
 import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
-import { getIsAllowedToVote, getWalletAddresses, getWalletLabel } from '../../shared/wallet'
+import { getWalletLabel } from '../../shared/wallet'
 import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
 
 type WalletVoteStatusProps = {
-  round: VotingRound
+  round: VotingRoundPopulated
+  allowedToVote: boolean
 }
 
-export const WalletVoteStatus = ({ round }: WalletVoteStatusProps) => {
+export const WalletVoteStatus = ({ round, allowedToVote }: WalletVoteStatusProps) => {
   const walletAddress = useConnectedWallet()
-  const allowList = getWalletAddresses(round.snapshotFile)
-  const allowedToVote = getIsAllowedToVote(walletAddress, allowList)
   const voteStarted = getVoteStarted(round)
   const voteEnded = getVoteEnded(round)
   const myVote = getMyVote(round, walletAddress)
@@ -19,7 +18,7 @@ export const WalletVoteStatus = ({ round }: WalletVoteStatusProps) => {
   const showConnectWalletModal = () => setShowConnectedWalletModal(true)
   return (
     <>
-      {allowList.length ? (
+      {round.snapshot?.snapshot.length ? (
         <div className="mb-4">
           <Typography>
             This voting round is restricted to wallets on the{' '}

@@ -1,6 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { ABIUintType } from 'algosdk'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
 
@@ -15,6 +16,18 @@ export const indexer = algokit.getAlgoIndexerClient({
   port: import.meta.env.VITE_INDEXER_PORT,
   token: import.meta.env.VITE_INDEXER_TOKEN,
 })
+
+export const fetchBoxes = async (appId: number) => {
+  const client = algokit.getApplicationClient(
+    {
+      app: JSON.stringify(appSpec),
+      id: appId,
+    },
+    algod,
+  )
+
+  return await client.getBoxValuesAsABIType(new ABIUintType(64))
+}
 
 export const VotingRoundContract = (sender: TransactionSignerAccount) => {
   const create = async (publicKey: Uint8Array, cid: string, start: number, end: number, quorum: number): Promise<AppReference> => {
@@ -94,13 +107,12 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       algod,
     )
 
-    const signatureByArray = Buffer.from(signature, 'base64')
+    const signatureByteArray = Buffer.from(signature, 'base64')
     const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000)
-
     const transaction = await client.call({
       method: 'vote',
       methodArgs: {
-        args: [signatureByArray, encodeAnswerId(selectedOption)],
+        args: [signatureByteArray, encodeAnswerId(selectedOption)],
         boxes: [encodeAnswerIdBoxRef(selectedOption)],
       },
       sender,
@@ -114,5 +126,6 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     create,
     bootstrap,
     castVote,
+    fetchBoxes,
   }
 }

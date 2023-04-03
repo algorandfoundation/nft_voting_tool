@@ -1,11 +1,11 @@
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
-import { Question, RoundInfo } from '../../shared/types'
+import { QuestionModel, RoundInfo } from '../../shared/types'
 import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'
 
-type VoteCreationState = {
+export type VoteCreationState = {
   roundInfo: RoundInfo
-  questions: Question
+  questions: QuestionModel
   step: VoteCreationSteps
   reviewStep: VoteCreationReviewSteps
   auth: { address: string; signedTransaction: Uint8Array }
@@ -29,7 +29,7 @@ const defaultRoundInfo: RoundInfo = {
   voteTitle: '',
 }
 
-const defaultQuestions: Question = {
+const defaultQuestions: QuestionModel = {
   questionTitle: '',
   questionDescription: '',
   // these need to be spaces because react-hook-form acts weird if they are empty strings
@@ -111,7 +111,7 @@ const appReferenceSelector = selector({
 
 export const useRoundInfo = () => useRecoilValue(roundInfoSelector)
 export const useSetRoundInfo = () => useSetRecoilState(roundInfoSelector)
-export const useQuestions = () => useRecoilValue(questionsSelector)
+export const useQuestions = () => useRecoilValue<QuestionModel>(questionsSelector)
 export const useSetQuestions = () => useSetRecoilState(questionsSelector)
 export const useStep = () => useRecoilValue(stepSelector)
 export const useSetStep = () => useSetRecoilState(stepSelector)

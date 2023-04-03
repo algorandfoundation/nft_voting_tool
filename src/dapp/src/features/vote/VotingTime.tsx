@@ -1,10 +1,10 @@
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { getTimezone } from '../../shared/getTimezone'
-import { VotingRound } from '../../shared/types'
+import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 
-const getVotingStateDescription = (round: VotingRound) => {
+const getVotingStateDescription = (round: VotingRoundPopulated) => {
   if (getVoteEnded(round)) return 'Voting round is closed!'
   if (!getVoteStarted(round)) return 'Voting opens soon!'
   return 'Voting round is open!'
@@ -12,7 +12,7 @@ const getVotingStateDescription = (round: VotingRound) => {
 
 type VotingTimeProps = {
   loading: boolean
-  round: VotingRound | undefined | null
+  round: VotingRoundPopulated | undefined | null
   className: string
 }
 
