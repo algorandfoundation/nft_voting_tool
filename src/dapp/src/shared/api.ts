@@ -10,9 +10,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
-import { VotingRoundContract, algod, indexer } from './VotingRoundContract'
+import { VotingRoundContract, algod, fetchBoxes, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { QuestionModel, VotingRoundModel, VotingRoundPopulated } from './types'
+import { QuestionModel, VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
 
 type AppState = {
   rounds: VotingRoundPopulated[]
@@ -59,6 +59,32 @@ const useFetchVoteRound = (appId: number) => {
       setLoading(true)
       const votingRound = await fetchVotingRound(appId)
       setData(votingRound)
+      setLoading(false)
+    })()
+  }, [data, setData])
+
+  useEffect(() => {
+    refetch()
+  }, [appId])
+
+  return { loading, data, refetch }
+}
+
+const useFetchVoteRoundResults = (appId: number) => {
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<VotingRoundResult[] | undefined>(undefined)
+
+  const refetch = useCallback(() => {
+    ;(async () => {
+      setLoading(true)
+      //TODO: properly decode the box names
+      const boxes = await fetchBoxes(appId)
+      const results = boxes.map((box) => ({
+        questionId: 'questionId',
+        optionId: 'optionId',
+        count: Number(box.value),
+      }))
+      setData(results)
       setLoading(false)
     })()
   }, [data, setData])
@@ -231,6 +257,9 @@ const api = {
   },
   useVotingRound: (id: number) => {
     return useFetchVoteRound(id)
+  },
+  useVotingRoundResults: (id: number) => {
+    return useFetchVoteRoundResults(id)
   },
   useCreateVotingRound: () => {
     return {

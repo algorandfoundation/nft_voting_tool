@@ -35,6 +35,12 @@ export type Vote = {
   selectedOption: string
 }
 
+export type VotingRoundResult = {
+  questionId: string
+  optionId: string
+  count: number
+}
+
 export type QuestionModel = {
   questionTitle: string
   questionDescription?: string

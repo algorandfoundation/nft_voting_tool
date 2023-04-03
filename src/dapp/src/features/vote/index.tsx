@@ -19,6 +19,7 @@ function Vote() {
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
   const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
+  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteCid!))
   const walletAddress = useConnectedWallet()
   const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
   const voteStarted = !data ? false : getVoteStarted(data)
@@ -34,6 +35,7 @@ function Vote() {
       signer: { addr: activeAddress, signer },
       appId: data.id,
     })
+    refetchResults()
   }
 
   useEffect(() => {
@@ -102,10 +104,13 @@ function Vote() {
               <Typography>{question.description}</Typography>
 
               <div className="mt-4">
-                {canVote || !voteStarted ? (
-                  <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} />
+                {canVote || !voteStarted ? <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} /> : null}
+              </div>
+              <div className="mt-4">
+                {loadingResults ? (
+                  <SkeletonArray className="max-w-xs" count={4} />
                 ) : (
-                  <VoteResults question={question} />
+                  votingRoundResults && <VoteResults question={question} votingRoundResults={votingRoundResults} />
                 )}
               </div>
               {error && (
