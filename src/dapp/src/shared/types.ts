@@ -36,7 +36,6 @@ export type Vote = {
 }
 
 export type VotingRoundResult = {
-  questionId: string
   optionId: string
   count: number
 }

@@ -7,6 +7,7 @@ import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/type
 import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useEffect, useState } from 'react'
+import * as uuid from 'uuid'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
@@ -77,11 +78,9 @@ const useFetchVoteRoundResults = (appId: number) => {
   const refetch = useCallback(() => {
     ;(async () => {
       setLoading(true)
-      //TODO: properly decode the box names
       const boxes = await fetchBoxes(appId)
       const results = boxes.map((box) => ({
-        questionId: 'questionId',
-        optionId: 'optionId',
+        optionId: uuid.stringify(box.name.nameRaw, 2),
         count: Number(box.value),
       }))
       setData(results)
