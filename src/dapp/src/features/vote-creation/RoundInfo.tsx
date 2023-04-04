@@ -9,10 +9,10 @@ import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
   voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
-  voteInformationUrl: zfd.text(z.string().trim().url()),
+  voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
-  snapshotFile: zfd.text(z.string().optional()),
+  snapshotFile: zfd.text(z.string()),
   minimumVotes: zfd.numeric(z.number({ invalid_type_error: 'Should be a number' }).optional()),
 })
 
