@@ -260,6 +260,11 @@ const api = {
   useVotingRoundResults: (id: number) => {
     return useFetchVoteRoundResults(id)
   },
+  useCloseVotingRound: () => {
+    return useSetter(async ({ signer, appId }: { signer: TransactionSignerAccount; appId: number }) => {
+      await VotingRoundContract(signer).closeVotingRound(appId)
+    })
+  },
   useCreateVotingRound: () => {
     return {
       auth: useSetter(async ({ signer }: { signer: TransactionSignerAccount }) => {
