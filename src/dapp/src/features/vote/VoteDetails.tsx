@@ -20,7 +20,7 @@ export const VoteDetails = ({ loading, round }: VoteDetailsProps) => (
         ) : (
           <Typography>
             Voting round created by{' '}
-            <Link href={`https://testnet.algoexplorer.io/address/${round.created.by}`} target="_blank" className="font-normal">
+            <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/address/${round.created.by}`} target="_blank" className="font-normal">
               {getWalletLabel(round.created.by)}
             </Link>
           </Typography>
@@ -28,7 +28,7 @@ export const VoteDetails = ({ loading, round }: VoteDetailsProps) => (
         {loading ? (
           <Skeleton variant="text" />
         ) : (
-          <Link href={`https://testnet.algoexplorer.io/application/${round.id}`} target="_blank">
+          <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/application/${round.id}`} target="_blank">
             Smart contract
           </Link>
         )}
