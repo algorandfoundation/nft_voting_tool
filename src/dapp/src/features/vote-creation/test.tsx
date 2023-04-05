@@ -56,6 +56,7 @@ describe('create vote', () => {
         await waitFor(() => expect(screen.getByRole('textbox', { name: 'Vote information URL' })).toBeInvalid())
       })
     })
+    //TODO: re-instate this test when the snapshot file becomes optional again
     // describe('when all required fields are filled in', () => {
     //   it('should validate', async () => {
     //     const recoil = jest.fn()
