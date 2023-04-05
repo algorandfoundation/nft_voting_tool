@@ -2,17 +2,17 @@ import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
+import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
   voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
-  voteInformationUrl: zfd.text(z.string().trim().url()),
+  voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
-  snapshotFile: zfd.text(z.string().optional()),
+  snapshotFile: zfd.text(z.string()),
   minimumVotes: zfd.numeric(z.number({ invalid_type_error: 'Should be a number' }).optional()),
 })
 
@@ -57,6 +57,7 @@ export default function RoundInfo() {
                   field: 'start',
                   toISO: (date) => dayjs(date).toISOString(),
                   fromISO: (date) => dayjs(date) as unknown as Date,
+                  longHint: 'Set the start and end time in your local timezone',
                 })}
                 {helper.dateTimeField({
                   label: 'End',
@@ -69,6 +70,7 @@ export default function RoundInfo() {
                 label: 'Snapshot file',
                 field: 'snapshotFile',
                 hint: 'Upload snapshot .csv file',
+                longHint: 'Upload a csv file with wallet address in column 1 and weighting in column 2. Do not include a header line.',
               })}
               {helper.textField({
                 label: 'Minimum number of votes (quorum)',
