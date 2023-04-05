@@ -7,6 +7,7 @@ import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
 import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { useConnectedWallet } from '../wallet/state'
+import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
 import { VoteSubmission } from './VoteSubmission'
@@ -18,13 +19,16 @@ function Vote() {
   const { activeAddress, signer } = useWallet()
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
   const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
   const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteCid!))
   const walletAddress = useConnectedWallet()
   const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
+  const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
   const voteStarted = !data ? false : getVoteStarted(data)
   const voteEnded = !data ? false : getVoteEnded(data)
   const alreadyVoted = !data ? true : getMyVote(data, walletAddress)
+  const isVoteCreator = data?.created.by === activeAddress ? true : false
   const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted
 
   const handleSubmitVote = async (selectedOption: string) => {
@@ -36,6 +40,15 @@ function Vote() {
       appId: data.id,
     })
     refetchResults()
+  }
+
+  const handleCloseVotingRound = async () => {
+    if (!isVoteCreator || !data || !activeAddress) return
+    const result = await closeVotingRound({
+      appId: data.id,
+      signer: { addr: activeAddress, signer },
+    })
+    refetch()
   }
 
   useEffect(() => {
@@ -67,6 +80,16 @@ function Vote() {
             )}
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
+
+          {isVoteCreator && (
+            <CloseVotingRound
+              closingVotingRoundError={closingVotingRoundError}
+              loading={closingVotingRound}
+              handleCloseVotingRound={handleCloseVotingRound}
+              voteEnded={voteEnded}
+            />
+          )}
+
           <Typography className="mt-5" variant="h4">
             How to vote
           </Typography>

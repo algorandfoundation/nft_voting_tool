@@ -122,10 +122,15 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     return transaction
   }
 
+  const closeVotingRound = async (appId: number) => {
+    //TODO: Implement closing the voting round smart contract call
+  }
+
   return {
     create,
     bootstrap,
     castVote,
     fetchBoxes,
+    closeVotingRound,
   }
 }
