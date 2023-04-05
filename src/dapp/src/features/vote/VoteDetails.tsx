@@ -1,6 +1,7 @@
 import { Link, Skeleton, Stack, Typography } from '@mui/material'
 import { VotingRoundPopulated } from '../../shared/types'
 import { getWalletLabel } from '../../shared/wallet'
+import { VotingTime } from './VotingTime'
 
 type VoteDetailsProps = {
   loading: boolean
@@ -13,6 +14,7 @@ export const VoteDetails = ({ loading, round }: VoteDetailsProps) => (
         <Typography className="mt-5 font-bold sm:font-normal" variant="h5">
           Vote details
         </Typography>
+        <VotingTime className="hidden sm:block mt-4" loading={loading} round={round} />
         {loading ? (
           <Skeleton variant="text" />
         ) : (
