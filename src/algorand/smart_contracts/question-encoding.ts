@@ -17,7 +17,7 @@ export function encodeAnswerIds(ids: string[]): Uint8Array[] {
   return ids.map(encodeAnswerId)
 }
 
-export function encodeAnswerIdBoxRef(id: string, ref?: AppReference): BoxReference {
+export function encodeAnswerIdBoxRef(id: string, ref?: AppReference) {
   const buffer = new Uint8Array(16 + 'V_'.length)
   const prefix = Buffer.from('V_')
   buffer.set(prefix, 0)
@@ -28,6 +28,6 @@ export function encodeAnswerIdBoxRef(id: string, ref?: AppReference): BoxReferen
   }
 }
 
-export function encodeAnswerIdBoxRefs(ids: string[], ref?: AppReference): BoxReference[] {
+export function encodeAnswerIdBoxRefs(ids: string[], ref?: AppReference) {
   return ids.map((id) => encodeAnswerIdBoxRef(id, ref))
 }

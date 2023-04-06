@@ -1,6 +1,6 @@
 import { Box, Button, Link, Typography } from '@mui/material'
 import { VotingRoundPopulated } from '../../shared/types'
-import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
+import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { getWalletLabel } from '../../shared/wallet'
 import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
 
@@ -13,7 +13,6 @@ export const WalletVoteStatus = ({ round, allowedToVote }: WalletVoteStatusProps
   const walletAddress = useConnectedWallet()
   const voteStarted = getVoteStarted(round)
   const voteEnded = getVoteEnded(round)
-  const myVote = getMyVote(round, walletAddress)
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
   const showConnectWalletModal = () => setShowConnectedWalletModal(true)
   return (
@@ -39,16 +38,16 @@ export const WalletVoteStatus = ({ round, allowedToVote }: WalletVoteStatusProps
           <Typography className="font-semibold text-grey-dark">Your wallet is not on the allow list for this voting round</Typography>
         </Box>
       )}
-      {walletAddress && allowedToVote && !myVote && (
+      {walletAddress && allowedToVote && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">Wallet connected: {getWalletLabel(walletAddress)}</Typography>
         </Box>
       )}
-      {myVote && (
+      {/*myVote && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">You voted, and chose [{myVote}]</Typography>
         </Box>
-      )}
+      )*/}
     </>
   )
 }

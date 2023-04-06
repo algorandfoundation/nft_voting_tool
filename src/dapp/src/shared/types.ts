@@ -27,7 +27,6 @@ export type VotingRoundPopulated = {
   informationUrl?: string
   questions: Question[]
   created: CreatedMetadata
-  votes?: Vote[]
 }
 
 export type Vote = {

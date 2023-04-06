@@ -59,10 +59,9 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         onUpdate: isLocal ? 'replace' : 'fail',
         createArgs: {
           method: 'create',
-          methodArgs: [publicKey, 'a', currentTime, currentTime + 50000, 1],
+          methodArgs: [publicKey, 'ipfs_cid', currentTime, currentTime + 50000, 1],
         },
       })
-      const appRef = await appClient.getAppReference()
 
       // Check if it's already been bootstrapped
       const appInfo = await algokit.getAppByIndex(app.appId, algod)
@@ -75,47 +74,27 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Bootstrap it if it hasn't
       if (!isBootstrapped) {
         const questionIds = ['a', uuid.v4()]
-        const payTxn = (
-          await algokit.transferAlgos(
-            {
-              from: deployer,
-              to: appRef.appAddress,
-              amount: algokit.microAlgos(
-                100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
+        await appClient.call({
+          method: 'bootstrap',
+          methodArgs: {
+            args: [
+              appClient.fundAppAccount(
+                algokit.microAlgos(
+                  100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
+                ),
               ),
-              skipSending: true,
-            },
-            algod,
-          )
-        ).transaction
-        const callTxn = (
-          await appClient.call({
-            method: 'bootstrap',
-            methodArgs: {
-              args: [/*payTxn, */ encodeAnswerIds(questionIds)],
-              boxes: encodeAnswerIdBoxRefs(questionIds),
-            },
-            sendParams: { skipSending: true },
-          })
-        ).transaction
-        try {
-          await algokit.sendGroupOfTransactions(
-            {
-              transactions: [payTxn, callTxn],
-              signer: deployer,
-            },
-            algod,
-          )
-        } catch (e) {
-          throw appClient.exposeLogicError(e as Error)
-        }
+              encodeAnswerIds(questionIds),
+            ],
+            boxes: encodeAnswerIdBoxRefs(questionIds),
+          },
+        })
       }
 
       // Create random voter
       const voter = algosdk.generateAccount()
       await algokit.transferAlgos(
         {
-          amount: algokit.microAlgos(100_000 + 4_000 * 2),
+          amount: algokit.microAlgos(200_000),
           from: deployer,
           to: voter.addr,
         },
@@ -127,7 +106,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Call get_preconditions to check it works
       const result = await appClient.call({
         method: 'get_preconditions',
-        methodArgs: [signature],
+        methodArgs: { args: [signature], boxes: [voter] },
         sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
@@ -136,15 +115,22 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       console.log({ isVotingOpen, isAllowedToVote, hasAlreadyVoted, time })
 
       // Show boxes before voting
-      const boxes = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64))
+      const boxes = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64), (b) => b.name.startsWith('V_'))
       console.log(boxes)
 
       // Cast vote
       await appClient.call({
         method: 'vote',
         methodArgs: {
-          args: [signature, encodeAnswerId('a')],
-          boxes: [encodeAnswerIdBoxRef('a')],
+          args: [
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+              sender: voter,
+            }),
+            signature,
+            encodeAnswerId('a'),
+          ],
+          boxes: [encodeAnswerIdBoxRef('a'), voter],
         },
         sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
@@ -152,7 +138,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       console.log('Voted successfully!')
 
       // Show boxes after voting
-      const boxes2 = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64))
+      const boxes2 = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64), (b) => b.name.startsWith('V_'))
       console.log(boxes2)
 
       break

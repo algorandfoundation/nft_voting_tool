@@ -2,10 +2,10 @@ import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { SkeletonArray } from '../../shared/SkeletonArray'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { getMyVote, getVoteEnded, getVoteStarted } from '../../shared/vote'
+import { SkeletonArray } from '../../shared/SkeletonArray'
+import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { useConnectedWallet } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
@@ -15,31 +15,31 @@ import { VotingTime } from './VotingTime'
 import { WalletVoteStatus } from './WalletVoteStatus'
 
 function Vote() {
-  const { voteCid } = useParams()
+  const { voteId } = useParams()
   const { activeAddress, signer } = useWallet()
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
-  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
-  const { data, loading, refetch } = api.useVotingRound(Number(voteCid!))
-  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteCid!))
+  const { data, loading, refetch } = api.useVotingRound(Number(voteId!))
+  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteId!))
   const walletAddress = useConnectedWallet()
+  const { data: voteResult, loading: loadingVote, refetch: refetchVote } = api.useVotingRoundVote(Number(voteId!), walletAddress)
   const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
   const voteStarted = !data ? false : getVoteStarted(data)
   const voteEnded = !data ? false : getVoteEnded(data)
-  const alreadyVoted = !data ? true : getMyVote(data, walletAddress)
   const isVoteCreator = data?.created.by === activeAddress ? true : false
-  const canVote = voteStarted && !voteEnded && allowedToVote && !alreadyVoted
+  const canVote = voteStarted && !voteEnded && allowedToVote
 
   const handleSubmitVote = async (selectedOption: string) => {
     if (!selectedOption || !activeAddress || !allowlistSignature || !data) return
-    const result = await submitVote({
+    await submitVote({
       signature: allowlistSignature,
       selectedOption: selectedOption,
       signer: { addr: activeAddress, signer },
       appId: data.id,
     })
     refetchResults()
+    refetchVote?.()
   }
 
   const handleCloseVotingRound = async () => {
@@ -127,7 +127,15 @@ function Vote() {
               <Typography>{question.description}</Typography>
 
               <div className="mt-4">
-                {canVote || !voteStarted ? <VoteSubmission round={data} handleSubmitVote={handleSubmitVote} /> : null}
+                {loadingVote ? (
+                  <SkeletonArray className="max-w-xs" count={1} />
+                ) : (
+                  <>
+                    {canVote || !voteStarted ? (
+                      <VoteSubmission round={data} existingAnswer={voteResult} handleSubmitVote={handleSubmitVote} />
+                    ) : null}
+                  </>
+                )}
               </div>
               <div className="mt-4">
                 {loadingResults ? (

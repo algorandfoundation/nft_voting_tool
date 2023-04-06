@@ -1,7 +1,8 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
-import { ABIUintType } from 'algosdk'
+import algosdk, { ABIUintType } from 'algosdk'
+import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
 
@@ -17,7 +18,7 @@ export const indexer = algokit.getAlgoIndexerClient({
   token: import.meta.env.VITE_INDEXER_TOKEN,
 })
 
-export const fetchBoxes = async (appId: number) => {
+export const fetchTallyBoxes = async (appId: number) => {
   const client = algokit.getApplicationClient(
     {
       app: JSON.stringify(appSpec),
@@ -26,7 +27,23 @@ export const fetchBoxes = async (appId: number) => {
     algod,
   )
 
-  return await client.getBoxValuesAsABIType(new ABIUintType(64))
+  return await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))
+}
+
+export const fetchVoteBox = async (appId: number, voterAddress: string) => {
+  const client = algokit.getApplicationClient(
+    {
+      app: JSON.stringify(appSpec),
+      id: appId,
+    },
+    algod,
+  )
+
+  const box = (
+    await client.getBoxValues((b) => b.nameBase64 === Buffer.from(algosdk.decodeAddress(voterAddress).publicKey).toString('base64'))
+  )[0]
+  console.log(box ? uuid.stringify(box.value) : undefined)
+  return box ? uuid.stringify(box.value) : undefined
 }
 
 export const VotingRoundContract = (sender: TransactionSignerAccount) => {
@@ -64,38 +81,18 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       boxRefs: encodeAnswerIdBoxRefs(optionIds, app),
     }
 
-    const payTxn = (
-      await algokit.transferAlgos(
-        {
-          from: sender,
-          to: app.appAddress,
-          amount: algokit.microAlgos(100_000 + option.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
-          skipSending: true,
-        },
-        algod,
-      )
-    ).transaction
-    const callTxn = (
-      await appClient.call({
-        method: 'bootstrap',
-        methodArgs: {
-          args: [option.encoded],
-          boxes: option.boxRefs,
-        },
-        sendParams: { skipSending: true },
-      })
-    ).transaction
-    try {
-      await algokit.sendGroupOfTransactions(
-        {
-          transactions: [payTxn, callTxn],
-          signer: sender,
-        },
-        algod,
-      )
-    } catch (e) {
-      throw appClient.exposeLogicError(e as Error)
-    }
+    await appClient.call({
+      method: 'bootstrap',
+      methodArgs: {
+        args: [
+          appClient.fundAppAccount(
+            algokit.microAlgos(100_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+          ),
+          option.encoded,
+        ],
+        boxes: option.boxRefs,
+      },
+    })
   }
 
   const castVote = async (signature: string, selectedOption: string, appId: number) => {
@@ -112,8 +109,15 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     const transaction = await client.call({
       method: 'vote',
       methodArgs: {
-        args: [signatureByteArray, encodeAnswerId(selectedOption)],
-        boxes: [encodeAnswerIdBoxRef(selectedOption)],
+        args: [
+          client.fundAppAccount({
+            amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+            sender,
+          }),
+          signatureByteArray,
+          encodeAnswerId(selectedOption),
+        ],
+        boxes: [encodeAnswerIdBoxRef(selectedOption), sender],
       },
       sender,
       sendParams: { fee: voteFee },
@@ -130,7 +134,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     create,
     bootstrap,
     castVote,
-    fetchBoxes,
+    fetchBoxes: fetchTallyBoxes,
     closeVotingRound,
   }
 }

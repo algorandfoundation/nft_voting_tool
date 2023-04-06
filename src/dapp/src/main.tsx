@@ -43,7 +43,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'vote/:voteCid',
+        path: 'vote/:voteId',
         element: <Vote />,
       },
       {

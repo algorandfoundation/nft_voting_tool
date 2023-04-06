@@ -5,10 +5,11 @@ import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 
 type VoteSubmissionProps = {
   round: VotingRoundPopulated
+  existingAnswer?: string
   handleSubmitVote: (selectedOption: string) => void
 }
 
-export const VoteSubmission = ({ round, handleSubmitVote }: VoteSubmissionProps) => {
+export const VoteSubmission = ({ round, existingAnswer, handleSubmitVote }: VoteSubmissionProps) => {
   const [vote, setVote] = useState<string | null>(null)
   const voteStarted = getVoteStarted(round)
   const voteEnded = getVoteEnded(round)
@@ -18,8 +19,8 @@ export const VoteSubmission = ({ round, handleSubmitVote }: VoteSubmissionProps)
         {round.questions.map((question) =>
           question.options.map((option) => (
             <Button
-              disabled={!voteStarted}
-              variant={vote === option.id ? 'contained' : 'outlined'}
+              disabled={!voteStarted || !!existingAnswer}
+              variant={vote === option.id || existingAnswer === option.id ? 'contained' : 'outlined'}
               key={option.id}
               onClick={() => setVote(option.id)}
               className="w-full uppercase"
@@ -29,7 +30,7 @@ export const VoteSubmission = ({ round, handleSubmitVote }: VoteSubmissionProps)
           )),
         )}
       </Stack>
-      {!voteEnded && voteStarted && (
+      {!voteEnded && voteStarted && !existingAnswer && (
         <Button
           disabled={vote === null}
           onClick={() => {
