@@ -106,7 +106,7 @@ const useFetchVoteRoundVote = (appId: number, voterAddress?: string) => {
       setData(answer)
       setLoading(false)
     })()
-  }, [data, setData])
+  }, [voterAddress, data, setData])
 
   useEffect(() => {
     refetch()
