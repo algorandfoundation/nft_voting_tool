@@ -25,7 +25,7 @@ export function execNpm(command: string) {
       throw new Error(
         `${command} [Status ${buildProcess.status || ''}] stdout: ${buildProcess.stdout
           ?.toString()
-          .trim()}\n\n\nstderr: ${buildProcess.stderr?.toString().trim()}`
+          .trim()}\n\n\nstderr: ${buildProcess.stderr?.toString().trim()}`,
       )
     }
     throw new Error(`${command} exited with status ${buildProcess.status || ''}`)

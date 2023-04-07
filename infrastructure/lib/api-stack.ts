@@ -129,7 +129,7 @@ export class ApiStack extends cdk.Stack {
       new PolicyStatement({
         actions: ['xray:PutTraceSegment', 'xray:PutTraceSegments', 'xray:PutTelemetryRecords'],
         resources: ['*'],
-      })
+      }),
     )
 
     // DNS & SSL
@@ -147,6 +147,7 @@ export class ApiStack extends cdk.Stack {
           domainName: customDomainConfig.config.domainName,
           endpointType: EndpointType.EDGE,
         },
+        binaryMediaTypes: ['*/*'],
       })
 
       new CustomDomain(this, `${id}-dns`, {
@@ -160,6 +161,7 @@ export class ApiStack extends cdk.Stack {
     } else {
       new apiGateway.LambdaRestApi(this, `${id}-api-gateway`, {
         handler: this.apiLambda,
+        binaryMediaTypes: ['*/*'],
       })
     }
 

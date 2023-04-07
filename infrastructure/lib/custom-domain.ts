@@ -76,7 +76,7 @@ export interface CustomDomainConfigViaDnsStackProps extends CustomDomainConfigBa
 }
 
 const dnsStackToSSMProps = (
-  props: CustomDomainConfigViaDnsStackProps | CustomDomainConfigViaDnsWithSSLStackProps
+  props: CustomDomainConfigViaDnsStackProps | CustomDomainConfigViaDnsWithSSLStackProps,
 ): CustomDomainConfigViaSSMParamsProps => {
   return {
     type: 'ssm-params',

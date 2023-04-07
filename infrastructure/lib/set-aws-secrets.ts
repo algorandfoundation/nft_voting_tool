@@ -66,6 +66,6 @@ void (async () => {
       } else {
         throw failures
       }
-    }
+    },
   )
 })()

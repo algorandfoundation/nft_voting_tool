@@ -101,7 +101,7 @@ export class DnsStack extends Stack {
   public getDefaultCustomDomainProps(
     region: string,
     domainName?: string,
-    certificateRequest?: CertificateRequest
+    certificateRequest?: CertificateRequest,
   ): CustomDomainConfigProps {
     return this.hasCertificate
       ? ({
