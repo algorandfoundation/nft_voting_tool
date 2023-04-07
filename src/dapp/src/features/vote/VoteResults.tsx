@@ -33,7 +33,7 @@ export const VoteResults = ({ question, votingRoundResults, myVote }: VoteResult
                   {option.label}
                   {myVote === option.id && (
                     <span title="You voted for this option" className="ml-2">
-                      🗳️
+                      ⭐
                     </span>
                   )}
                 </div>
