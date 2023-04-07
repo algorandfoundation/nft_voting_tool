@@ -119,7 +119,7 @@ function Vote() {
                     <div className="text-center">
                       <Typography>
                         <img
-                          src={data.nftImageUrl.replace('ipfs://', import.meta.env.VITE_IPFS_GATEWAY_URL)}
+                          src={data.nftImageUrl.replace('ipfs://', `/${import.meta.env.VITE_IPFS_GATEWAY_URL}`)}
                           alt="Voting round result NFT image"
                         />
                       </Typography>
