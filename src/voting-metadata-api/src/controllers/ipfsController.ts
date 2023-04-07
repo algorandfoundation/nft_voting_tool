@@ -19,7 +19,8 @@ export class IpfsController extends Controller {
     this.setHeader('Content-Type', mimeType)
     this.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
     const readable = new Readable()
-    readable._read = () => { }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    readable._read = () => {}
     readable.push(buffer)
     readable.push(null)
     return readable
