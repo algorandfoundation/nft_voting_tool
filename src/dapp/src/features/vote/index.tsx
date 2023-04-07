@@ -85,7 +85,7 @@ function Vote() {
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
 
-          {isVoteCreator && (
+          {isVoteCreator && !data?.closedTime && (
             <CloseVotingRound
               closingVotingRoundError={closingVotingRoundError}
               loading={closingVotingRound}
@@ -94,27 +94,44 @@ function Vote() {
             />
           )}
 
-          <Typography className="mt-5" variant="h4">
-            How to vote
-          </Typography>
+          {!voteEnded && (
+            <>
+              <Typography className="mt-5" variant="h4">
+                How to vote
+              </Typography>
 
-          {loading || !data ? (
-            <Stack spacing={1}>
-              <Skeleton variant="text" className="w-1/2" />
-              <Skeleton variant="rectangular" className="h-10" />
-            </Stack>
-          ) : (
-            <WalletVoteStatus round={data} allowedToVote={allowedToVote} myVote={voteResult} />
+              {loading || !data ? (
+                <Stack spacing={1}>
+                  <Skeleton variant="text" className="w-1/2" />
+                  <Skeleton variant="rectangular" className="h-10" />
+                </Stack>
+              ) : (
+                <WalletVoteStatus round={data} allowedToVote={allowedToVote} myVote={voteResult} />
+              )}
+            </>
           )}
-
           {!loading && voteEnded && (
             <div className="mt-5">
               <Typography variant="h4">Vote results</Typography>
-              <Box className="flex h-56 w-56 items-center justify-center border-solid border-black border-y border-x ">
-                <div className="text-center">
-                  <Typography>Image of NFT with vote results. Link to NFT source</Typography>
-                </div>
-              </Box>
+              {!!data?.nftAssetId && (
+                <>
+                  <Box className="flex h-56 w-56 items-center justify-center border-solid border-black border-y border-x ">
+                    <div className="text-center">
+                      <Typography>
+                        <img
+                          src={data.nftImageUrl.replace('ipfs://', import.meta.env.VITE_IPFS_GATEWAY_URL)}
+                          alt="Voting round result NFT image"
+                        />
+                      </Typography>
+                    </div>
+                  </Box>
+                  <Typography>
+                    <a href={`${import.meta.env.VITE_NFT_EXPLORER_URL}${data.nftAssetId}`} target="_blank">
+                      View voting result NFT details
+                    </a>
+                  </Typography>
+                </>
+              )}
             </div>
           )}
           {loading && (

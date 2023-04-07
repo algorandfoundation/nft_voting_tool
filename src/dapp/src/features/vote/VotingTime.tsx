@@ -46,6 +46,18 @@ export const VotingTime = ({ loading, round, className }: VotingTimeProps) => (
           </Typography>
         )}
       </Stack>
+      {!!round?.closedTime && (
+        <Stack className="mt-3">
+          <Typography variant="h6">Closed at</Typography>
+          {loading ? (
+            <Skeleton variant="text" />
+          ) : (
+            <Typography>
+              {dayjs(round.closedTime).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(round.closedTime))}
+            </Typography>
+          )}
+        </Stack>
+      )}
     </Box>
   </div>
 )

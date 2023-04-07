@@ -26,13 +26,15 @@ describe('voting', () => {
   })
 
   const setupApp = async (setup?: {
+    voteId?: string
     cid?: string
     start?: number
     end?: number
     quorum?: number
     questionIds?: string[]
+    nftImageUrl?: string
   }) => {
-    let { cid, start, end, quorum, questionIds } = setup ?? {}
+    let { voteId, cid, start, end, quorum, questionIds, nftImageUrl } = setup ?? {}
     const { algod, testAccount } = localnet.context
 
     const status = await algod.status().do()
@@ -45,11 +47,13 @@ describe('voting', () => {
     const privateKey = Buffer.from(ed.utils.randomPrivateKey())
     const publicKey = await ed.getPublicKey(privateKey)
 
+    voteId = voteId ?? `V${new Date().getTime().toString(32).toUpperCase()}`
     cid = cid ?? 'CID'
     start = start ?? currentTime
     end = end ?? currentTime + 1000
     quorum = quorum ?? Math.ceil(Math.random() * 1000)
     questionIds = questionIds ?? [uuid.v4(), uuid.v4(), uuid.v4(), uuid.v4()]
+    nftImageUrl = nftImageUrl ?? 'ipfs://cid'
     const questions = {
       unencoded: questionIds,
       encoded: encodeAnswerIds(questionIds),
@@ -67,7 +71,7 @@ describe('voting', () => {
 
     const app = await appClient.create({
       method: 'create',
-      methodArgs: [publicKey, cid, start, end, quorum],
+      methodArgs: [voteId, publicKey, cid, start, end, quorum, nftImageUrl],
       deletable: false,
     })
 
@@ -76,11 +80,12 @@ describe('voting', () => {
         method: 'bootstrap',
         methodArgs: {
           args: [
-            appClient.fundAppAccount(
-              algokit.microAlgos(
-                100_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(
+                200_000 + 1_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
               ),
-            ),
+              sendParams: { skipSending: true },
+            }),
             questions.encoded,
           ],
           boxes: questions.boxRefs,
@@ -114,6 +119,7 @@ describe('voting', () => {
             appClient.fundAppAccount({
               amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
               sender: voter.account,
+              sendParams: { skipSending: true },
             }),
             voter.signature,
             questions.encoded[questionIndex],
@@ -125,10 +131,18 @@ describe('voting', () => {
       })
     }
 
+    const close = async () => {
+      return await appClient.call({
+        method: 'close',
+        methodArgs: [],
+      })
+    }
+
     return {
       algod,
       testAccount,
       appClient,
+      voteId,
       publicKey,
       privateKey,
       currentTime,
@@ -142,6 +156,7 @@ describe('voting', () => {
       getVoter,
       voteFee,
       vote,
+      close,
     }
   }
 
@@ -189,15 +204,15 @@ describe('voting', () => {
     } catch (e: any) {
       expect(e.stack).toMatchInlineSnapshot(`
         "assert
-        bytec_2 // "is_bootstrapped"
+        bytec_3 // "is_bootstrapped"
         app_global_get
         !
         // Already bootstrapped
         assert <--- Error
-        bytec_2 // "is_bootstrapped"
+        bytec_3 // "is_bootstrapped"
         intc_1 // 1
         app_global_put
-        pushint 100000 // 100000"
+        pushint 201000 // 201000"
       `)
     }
   })
@@ -222,6 +237,45 @@ describe('voting', () => {
     expect(Number(isAllowedToVote)).toBe(1)
     expect(Number(hasAlreadyVoted)).toBe(0)
     expect(Number(time)).toBeGreaterThanOrEqual(currentTime)
+  })
+
+  describe('close', () => {
+    test('successful', async () => {
+      const { close, getVoter, vote, bootstrap, appClient, currentTime, quorum, voteId, cid } = await setupApp()
+      await bootstrap()
+      const voter = await getVoter()
+      await vote(voter, 0)
+
+      const result = await close()
+
+      const globalState = await appClient.getGlobalState()
+      invariant(result.confirmation)
+      invariant(result.confirmation?.['inner-txns']?.[0])
+      const inner = result.confirmation['inner-txns'][0]
+      expect(inner['asset-index']).not.toBe(0)
+      expect(inner['asset-index']).toBe(globalState.nft_asset_id.value)
+      expect(globalState.close_time.value).toBeGreaterThanOrEqual(currentTime)
+      const arc69Payload = JSON.parse(
+        Buffer.from(inner.txn.txn.note ?? new Uint8Array())
+          .toString('utf-8')
+          .replace(new RegExp(voteId, 'g'), '{VOTE_ID}')
+          .replace(new RegExp(quorum.toString(), 'g'), '"{QUORUM}"')
+          .replace(new RegExp(cid, 'g'), '{CID}'),
+      )
+      expect(arc69Payload).toBeTruthy()
+      expect(JSON.stringify(arc69Payload, undefined, 2)).toMatchInlineSnapshot(`
+        "{
+          "standard": "arc69",
+          "description": "This is a voting result NFT for voting round with ID {VOTE_ID}.",
+          "properties": {
+            "metadata": "ipfs://{CID}",
+            "id": "{VOTE_ID}",
+            "quorum": "{QUORUM}",
+            "voterCount": 1
+          }
+        }"
+      `)
+    })
   })
 
   describe('vote', () => {
@@ -257,11 +311,11 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "// Voting open
           assert
-          callsub alreadyvoted_5
+          callsub alreadyvoted_6
           !
           // Hasn't already voted
           assert <--- Error
-          bytec_0 // "V_"
+          bytec_1 // "V_"
           frame_dig -1
           concat
           box_len"
@@ -279,13 +333,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_3
+          "callsub allowedtovote_4
           // Allowed to vote
           assert
-          callsub votingopen_4
+          callsub votingopen_5
           // Voting open
           assert <--- Error
-          callsub alreadyvoted_5
+          callsub alreadyvoted_6
           !
           // Hasn't already voted
           assert"
@@ -304,16 +358,16 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "bytec_1 // ""
+          "bytec_0 // ""
           frame_dig -2
           extract 2 0
-          callsub allowedtovote_3
+          callsub allowedtovote_4
           // Allowed to vote
           assert <--- Error
-          callsub votingopen_4
+          callsub votingopen_5
           // Voting open
           assert
-          callsub alreadyvoted_5"
+          callsub alreadyvoted_6"
         `)
       }
     })
@@ -329,17 +383,17 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-                  "callsub allowedtovote_3
-                  // Allowed to vote
-                  assert
-                  callsub votingopen_4
-                  // Voting open
-                  assert <--- Error
-                  callsub alreadyvoted_5
-                  !
-                  // Hasn't already voted
-                  assert"
-              `)
+          "callsub allowedtovote_4
+          // Allowed to vote
+          assert
+          callsub votingopen_5
+          // Voting open
+          assert <--- Error
+          callsub alreadyvoted_6
+          !
+          // Hasn't already voted
+          assert"
+        `)
       }
     })
 
@@ -354,17 +408,17 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-                  "callsub allowedtovote_3
-                  // Allowed to vote
-                  assert
-                  callsub votingopen_4
-                  // Voting open
-                  assert <--- Error
-                  callsub alreadyvoted_5
-                  !
-                  // Hasn't already voted
-                  assert"
-              `)
+          "callsub allowedtovote_4
+          // Allowed to vote
+          assert
+          callsub votingopen_5
+          // Voting open
+          assert <--- Error
+          callsub alreadyvoted_6
+          !
+          // Hasn't already voted
+          assert"
+        `)
       }
     })
 
@@ -381,6 +435,7 @@ describe('voting', () => {
               appClient.fundAppAccount({
                 amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
                 sender: voter.account,
+                sendParams: { skipSending: true },
               }),
               voter.signature,
               encodeAnswerId('a'),
@@ -394,9 +449,9 @@ describe('voting', () => {
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
           "box_len
-          store 29
-          store 28
-          load 29
+          store 35
+          store 34
+          load 35
           // Answer ID valid
           assert <--- Error
           frame_dig -3

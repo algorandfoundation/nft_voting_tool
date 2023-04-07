@@ -1,5 +1,6 @@
 /** A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions */
 export interface VotingRound {
+  id: string
   title: string
   description: string
   /** Optional URL link to more information */

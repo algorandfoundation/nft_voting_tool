@@ -5,6 +5,10 @@
             "name": "create",
             "args": [
                 {
+                    "type": "string",
+                    "name": "vote_id"
+                },
+                {
                     "type": "byte[]",
                     "name": "snapshot_public_key"
                 },
@@ -23,6 +27,10 @@
                 {
                     "type": "uint64",
                     "name": "quorum"
+                },
+                {
+                    "type": "string",
+                    "name": "nft_image_url"
                 }
             ],
             "returns": {
@@ -41,6 +49,13 @@
                     "name": "answers"
                 }
             ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "close",
+            "args": [],
             "returns": {
                 "type": "void"
             }
