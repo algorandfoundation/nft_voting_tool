@@ -13,15 +13,18 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
   private cache: IObjectCacheService
   private storage: Web3Storage
   private cloudflareIpfsService: CloudFlareIPFSService
+  private cacheMissDuration: number | undefined
 
   constructor(
     @inject('Web3StorageClient') storage: Web3Storage,
     @inject('IObjectCacheService') cache: IObjectCacheService,
     @inject('CloudFlareIPFSService') cloudflareIpfsService: CloudFlareIPFSService,
+    @inject('CacheMissDuration') cacheMissDuration: number | undefined,
   ) {
     this.storage = storage
     this.cache = cache
     this.cloudflareIpfsService = cloudflareIpfsService
+    this.cacheMissDuration = cacheMissDuration
   }
 
   async get<T>(cid: string): Promise<T> {
@@ -30,7 +33,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
       async (_e) => {
         return await this.cloudflareIpfsService.get<T>(cid)
       },
-      undefined,
+      this.cacheMissDuration,
       true,
     )
   }
@@ -42,7 +45,7 @@ export class Web3StorageWithCacheIpfsService implements IIpfsService {
         return await this.cloudflareIpfsService.getBuffer(cid)
       },
       undefined,
-      undefined,
+      this.cacheMissDuration,
       true,
     )
   }

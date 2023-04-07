@@ -52,8 +52,10 @@ export class S3ObjectCacheService implements IObjectCacheService {
       )
       try {
         value = await generator(existing)
-        await this.put(cacheKey, value)
-        console.log(`Cached value '${cacheKey}.json' written`)
+        if (staleAfterSeconds !== 0) {
+          await this.put(cacheKey, value)
+          console.log(`Cached value '${cacheKey}.json' written`)
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
@@ -98,8 +100,11 @@ export class S3ObjectCacheService implements IObjectCacheService {
       try {
         const [genValue, type] = await generator(existing)
         value = genValue
-        await this.putBuffer(cacheKey, value, type)
-        console.log(`Cached value '${cacheKey}' written`)
+        mimeType = type
+        if (staleAfterSeconds !== 0) {
+          await this.putBuffer(cacheKey, value, type)
+          console.log(`Cached value '${cacheKey}' written`)
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {

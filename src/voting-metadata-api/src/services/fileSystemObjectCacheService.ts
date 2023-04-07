@@ -38,8 +38,12 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
         const existingJson = existingCache ? await fs.readFile(cachePath, { encoding: 'utf-8' }) : undefined
         const existing = existingJson ? (JSON.parse(existingJson) as T) : undefined
         const value = await generator(existing)
-        await this.put(cacheKey, value)
-        console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        if (staleAfterSeconds !== 0) {
+          await this.put(cacheKey, value)
+          console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        } else {
+          return value
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
@@ -75,8 +79,7 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
         mimeType = mime.getType(files[0]) ?? 'application/octet-stream'
       }
     }
-    const extension = mime.getExtension(mimeType)
-    const cachePath = path.join(this.cacheDirectory, `${cacheKey}.${extension}`)
+    let cachePath = path.join(this.cacheDirectory, `${cacheKey}.${mime.getExtension(mimeType)}`)
     const existingCache = await fs.stat(cachePath).catch((_) => false)
     const expired =
       staleAfterSeconds && typeof existingCache !== 'boolean' && (+new Date() - +existingCache.mtime) / 1000 > staleAfterSeconds
@@ -91,8 +94,14 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
         const existingStream = existingCache ? await fs.readFile(cachePath, { encoding: 'utf-8' }) : undefined
         const existingBuffer = existingStream ? Buffer.from(existingStream) : undefined
         const [value, type] = await generator(existingBuffer)
-        await this.putBuffer(cacheKey, value, type)
-        console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        mimeType = type
+        cachePath = path.join(this.cacheDirectory, `${cacheKey}.${mime.getExtension(mimeType)}`)
+        if (staleAfterSeconds !== 0) {
+          await this.putBuffer(cacheKey, value, type)
+          console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        } else {
+          return [value, type]
+        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {

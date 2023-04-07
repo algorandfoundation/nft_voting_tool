@@ -20,6 +20,11 @@ container.register<CloudFlareIPFSService>('CloudFlareIPFSService', {
   useClass: CloudFlareIPFSService,
 })
 
+container.register<number | undefined>('CacheMissDuration', {
+  // Don't cache misses
+  useValue: 0,
+})
+
 if (env === 'development') {
   const cacheDir = path.join(__dirname, '..', '.cache')
   container.register<string>('CacheDirectory', {
