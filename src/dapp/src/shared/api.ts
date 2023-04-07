@@ -10,10 +10,10 @@ import { useCallback, useEffect, useState } from 'react'
 import * as uuid from 'uuid'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
+import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { VotingRoundContract, algod, fetchTallyBoxes, fetchVoteBox, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
 import { QuestionModel, VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
-import { algod, fetchTallyBoxes, fetchVoteBox, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRoundPopulated[]
@@ -27,7 +27,7 @@ const useFetchVoteRounds = (address: string) => {
 
   const fetchData = () => {
     if (address) {
-      ;(async () => {
+      ; (async () => {
         setLoading(true)
         const votingRounds = await fetchVotingRounds(address)
         setData({
@@ -56,7 +56,7 @@ const useFetchVoteRound = (appId: number) => {
   const [data, setData] = useState<VotingRoundPopulated | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const votingRound = await fetchVotingRound(appId)
       setData(votingRound)
@@ -76,7 +76,7 @@ const useFetchVoteRoundResults = (appId: number) => {
   const [data, setData] = useState<VotingRoundResult[] | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const boxes = await fetchTallyBoxes(appId)
       const results = boxes.map((box) => ({
@@ -100,7 +100,7 @@ const useFetchVoteRoundVote = (appId: number, voterAddress?: string) => {
   const [data, setData] = useState<string | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const answer = voterAddress ? await fetchVoteBox(appId, voterAddress) : undefined
       setData(answer)
@@ -144,7 +144,7 @@ const getRoundFromApp = async (
       informationUrl: round.informationUrl ?? '',
       snapshot,
       closedTime: decodedState.close_time,
-      nftImageUrl: decodedState.nft_image_url,
+      nftImageUrl: decodedState.nft_image_url as string,
       nftAssetId: decodedState.nft_asset_id,
       voteGatingSnapshotCid: round.voteGatingSnapshotCid,
       created: {
