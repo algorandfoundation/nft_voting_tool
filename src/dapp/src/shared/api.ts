@@ -234,6 +234,8 @@ const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
           if (e instanceof Error) {
             setError(e.message)
           } else {
+            // eslint-disable-next-line no-console
+            console.error(e)
             setError('Unexpected error')
           }
         })

@@ -78,7 +78,9 @@ function Vote() {
             {loading ? (
               <Skeleton variant="text" className="w-56" />
             ) : (
-              <Link href={data?.informationUrl ?? ''}>Learn about the vote and candidates</Link>
+              <Link href={data?.informationUrl ?? ''} target="_blank">
+                Learn more about the vote.
+              </Link>
             )}
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
@@ -102,7 +104,7 @@ function Vote() {
               <Skeleton variant="rectangular" className="h-10" />
             </Stack>
           ) : (
-            <WalletVoteStatus round={data} allowedToVote={allowedToVote} />
+            <WalletVoteStatus round={data} allowedToVote={allowedToVote} myVote={voteResult} />
           )}
 
           {!loading && voteEnded && (
@@ -128,22 +130,24 @@ function Vote() {
 
               <Typography>{question.description}</Typography>
 
-              <div className="mt-4">
-                {loadingVote ? (
-                  <SkeletonArray className="max-w-xs" count={1} />
-                ) : (
-                  <>
-                    {canVote || !voteStarted ? (
-                      <VoteSubmission round={data} existingAnswer={voteResult} handleSubmitVote={handleSubmitVote} />
-                    ) : null}
-                  </>
-                )}
-              </div>
+              {!voteResult && (
+                <div className="mt-4">
+                  {loadingVote ? (
+                    <SkeletonArray className="max-w-xs" count={1} />
+                  ) : (
+                    <>
+                      {canVote || !voteStarted ? (
+                        <VoteSubmission round={data} existingAnswer={voteResult} handleSubmitVote={handleSubmitVote} />
+                      ) : null}
+                    </>
+                  )}
+                </div>
+              )}
               <div className="mt-4">
                 {loadingResults ? (
                   <SkeletonArray className="max-w-xs" count={4} />
                 ) : (
-                  votingRoundResults && <VoteResults question={question} votingRoundResults={votingRoundResults} />
+                  votingRoundResults && <VoteResults question={question} votingRoundResults={votingRoundResults} myVote={voteResult} />
                 )}
               </div>
               {error && (

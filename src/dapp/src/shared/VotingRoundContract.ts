@@ -84,9 +84,10 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       method: 'bootstrap',
       methodArgs: {
         args: [
-          appClient.fundAppAccount(
-            algokit.microAlgos(100_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
-          ),
+          appClient.fundAppAccount({
+            amount: algokit.microAlgos(100_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+            sendParams: { skipSending: true },
+          }),
           option.encoded,
         ],
         boxes: option.boxRefs,
@@ -112,6 +113,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
           client.fundAppAccount({
             amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
             sender,
+            sendParams: { skipSending: true },
           }),
           signatureByteArray,
           encodeAnswerId(selectedOption),

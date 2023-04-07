@@ -11,8 +11,5 @@ dayjs.extend(advanced)
 
 export const getTimezone = (date: ReturnType<typeof dayjs>) => {
   const utcOffset = dayjs(date).utcOffset() / 60
-
-  // TODO: find a library that supports an abbreviation for
-  // ${dayjs(date).format("zzz")}
-  return `(UTC ${utcOffset >= 0 ? '+' : ''}${utcOffset})`
+  return `(UTC${utcOffset > 0 ? '+' : utcOffset < 0 ? '-' : ''}${utcOffset !== 0 ? utcOffset : ''})`
 }

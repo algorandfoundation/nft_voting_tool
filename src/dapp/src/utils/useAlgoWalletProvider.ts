@@ -2,6 +2,7 @@ import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { PeraWalletConnect } from '@perawallet/connect'
 import {
   AlgodClientOptions,
+  algosigner,
   DEFAULT_NETWORK,
   DEFAULT_NODE_BASEURL,
   DEFAULT_NODE_PORT,
@@ -67,6 +68,11 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       network: network,
     })
     walletProviders[PROVIDER_ID.KMD] = kmd.init({
+      algosdkStatic: algosdk,
+      algodOptions: algodOptions,
+      network: network,
+    })
+    walletProviders[PROVIDER_ID.ALGOSIGNER] = algosigner.init({
       algosdkStatic: algosdk,
       algodOptions: algodOptions,
       network: network,
