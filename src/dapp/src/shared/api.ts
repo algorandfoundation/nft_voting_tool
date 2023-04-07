@@ -195,7 +195,7 @@ const decodeVotingRoundGlobalState = (
     close_time: undefined as string | undefined,
     metadata_ipfs_cid: '',
     is_bootstrapped: false,
-    nft_image_url: '',
+    nft_image_url: undefined as string | undefined,
     nft_asset_id: undefined as number | undefined,
   }
   globalState.map((state) => {

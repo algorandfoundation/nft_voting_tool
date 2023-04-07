@@ -85,7 +85,7 @@ function Vote() {
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
 
-          {isVoteCreator && !data?.closedTime && (
+          {isVoteCreator && !data?.closedTime && data?.nftImageUrl && (
             <CloseVotingRound
               closingVotingRoundError={closingVotingRoundError}
               loading={closingVotingRound}
@@ -119,7 +119,7 @@ function Vote() {
                     <div className="text-center">
                       <Typography>
                         <img
-                          src={data.nftImageUrl.replace('ipfs://', `${import.meta.env.VITE_IPFS_GATEWAY_URL}/`)}
+                          src={data.nftImageUrl?.replace('ipfs://', `${import.meta.env.VITE_IPFS_GATEWAY_URL}/`)}
                           alt="Voting round result NFT image"
                           className="max-h-full max-w-full"
                         />
