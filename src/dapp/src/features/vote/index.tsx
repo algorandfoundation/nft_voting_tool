@@ -78,7 +78,9 @@ function Vote() {
             {loading ? (
               <Skeleton variant="text" className="w-56" />
             ) : (
-              <Link href={data?.informationUrl ?? ''}>Learn about the vote and candidates</Link>
+              <Link href={data?.informationUrl ?? ''} target="_blank">
+                Learn more about the vote.
+              </Link>
             )}
           </div>
           <VotingTime className="visible sm:hidden mt-4" loading={loading} round={data} />
