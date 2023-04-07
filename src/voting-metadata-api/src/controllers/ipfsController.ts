@@ -18,7 +18,11 @@ export class IpfsController extends Controller {
     const [buffer, mimeType] = await this.ipfsService.getBuffer(cid)
     this.setHeader('Content-Type', mimeType)
     this.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
-    return Readable.from(buffer)
+    const readable = new Readable()
+    readable._read = () => { }
+    readable.push(buffer)
+    readable.push(null)
+    return readable
   }
 
   @Security('AlgorandSignature')
