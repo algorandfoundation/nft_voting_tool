@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_ENVIRONMENT: string
   readonly VITE_IPFS_GATEWAY_URL: string
   readonly VITE_ALGO_EXPLORER_URL: string
+  readonly VITE_NFT_EXPLORER_URL: string
 }
 
 interface ImportMeta {

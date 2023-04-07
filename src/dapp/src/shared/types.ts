@@ -23,6 +23,9 @@ export type VotingRoundPopulated = {
   end: string
   quorum?: number
   snapshot?: VoteGatingSnapshot
+  closedTime?: string
+  nftImageUrl: string
+  nftAssetId?: number
   voteGatingSnapshotCid?: string
   informationUrl?: string
   questions: Question[]

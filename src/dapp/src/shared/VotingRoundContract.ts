@@ -46,7 +46,15 @@ export const fetchVoteBox = async (appId: number, voterAddress: string) => {
 }
 
 export const VotingRoundContract = (sender: TransactionSignerAccount) => {
-  const create = async (publicKey: Uint8Array, cid: string, start: number, end: number, quorum: number): Promise<AppReference> => {
+  const create = async (
+    voteId: string,
+    publicKey: Uint8Array,
+    cid: string,
+    start: number,
+    end: number,
+    quorum: number,
+    nftImageUrl: string,
+  ): Promise<AppReference> => {
     const appClient = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -58,7 +66,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
 
     const app = await appClient.create({
       method: 'create',
-      methodArgs: [publicKey, cid, start, end, quorum],
+      methodArgs: [voteId, publicKey, cid, start, end, quorum, nftImageUrl],
       deletable: false,
     })
     return app
@@ -85,7 +93,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       methodArgs: {
         args: [
           appClient.fundAppAccount({
-            amount: algokit.microAlgos(100_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+            amount: algokit.microAlgos(200_000 + 1_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
             sendParams: { skipSending: true },
           }),
           option.encoded,
@@ -127,8 +135,19 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     return transaction
   }
 
-  const closeVotingRound = async (_appId: number) => {
-    //TODO: Implement closing the voting round smart contract call
+  const closeVotingRound = async (appId: number) => {
+    const client = algokit.getApplicationClient(
+      {
+        app: JSON.stringify(appSpec),
+        id: appId,
+      },
+      algod,
+    )
+    return await await client.call({
+      method: 'close',
+      methodArgs: [],
+      sender,
+    })
   }
 
   return {

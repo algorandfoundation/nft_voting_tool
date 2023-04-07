@@ -123,7 +123,7 @@ const getRoundFromApp = async (
   }[],
 ): Promise<VotingRoundPopulated | undefined> => {
   try {
-    const decodedState = decodeGlobalState(globalState)
+    const decodedState = decodeVotingRoundGlobalState(globalState)
     if (!decodedState.is_bootstrapped || !decodedState.metadata_ipfs_cid) {
       return undefined
     }
@@ -143,6 +143,9 @@ const getRoundFromApp = async (
       // todo: This is optional
       informationUrl: round.informationUrl ?? '',
       snapshot,
+      closedTime: decodedState.close_time,
+      nftImageUrl: decodedState.nft_image_url,
+      nftAssetId: decodedState.nft_asset_id,
       voteGatingSnapshotCid: round.voteGatingSnapshotCid,
       created: {
         at: round.created.at,
@@ -180,7 +183,7 @@ const fetchVotingRounds = async (address: string) => {
   return voteRounds
 }
 
-const decodeGlobalState = (
+const decodeVotingRoundGlobalState = (
   globalState: {
     key: string
     value: TealValue
@@ -189,27 +192,39 @@ const decodeGlobalState = (
   const decodedState = {
     start_time: '0',
     end_time: '0',
+    close_time: undefined as string | undefined,
     metadata_ipfs_cid: '',
     is_bootstrapped: false,
+    nft_image_url: '',
+    nft_asset_id: undefined as number | undefined,
   }
   globalState.map((state) => {
     const globalKey = Buffer.from(state.key, 'base64').toString()
     if (state.value.type === 2) {
       switch (globalKey) {
         case 'start_time':
-          decodedState.start_time = new Date(Number(state.value.uint)).toISOString()
+          decodedState.start_time = new Date(Number(state.value.uint) * 1000).toISOString()
           break
         case 'end_time':
-          decodedState.end_time = new Date(Number(state.value.uint)).toISOString()
+          decodedState.end_time = new Date(Number(state.value.uint) * 1000).toISOString()
           break
         case 'is_bootstrapped':
           decodedState.is_bootstrapped = !!state.value.uint
+          break
+        case 'close_time':
+          decodedState.close_time = state.value.uint > 0 ? new Date(Number(state.value.uint) * 1000).toISOString() : undefined
+          break
+        case 'nft_asset_id':
+          decodedState.nft_asset_id = state.value.uint > 0 ? Number(state.value.uint) : undefined
           break
       }
     } else {
       switch (globalKey) {
         case 'metadata_ipfs_cid':
           decodedState.metadata_ipfs_cid = Buffer.from(state.value.bytes, 'base64').toString('utf-8')
+          break
+        case 'nft_image_url':
+          decodedState.nft_image_url = Buffer.from(state.value.bytes, 'base64').toString('utf-8')
           break
       }
     }
@@ -358,8 +373,10 @@ const api = {
             }
           })
 
+          const voteId = `V${new Date().getTime().toString(32).toUpperCase()}`
           const { cid } = await uploadVotingRound(
             {
+              id: voteId,
               title: newRound.voteTitle,
               description: newRound.voteDescription,
               informationUrl: newRound.voteInformationUrl,
@@ -385,11 +402,13 @@ const api = {
           )
 
           const app = await VotingRoundContract(signer).create(
+            voteId,
             publicKey,
             cid,
             Math.floor(Date.parse(newRound.start) / 1000),
             Math.floor(Date.parse(newRound.end) / 1000),
             newRound.minimumVotes ? newRound.minimumVotes : 0,
+            'ipfs://bafkreif5grpze42yffwn5opgviju435zlshdhbjqivsu4vcr6jafkphldq',
           )
 
           return {

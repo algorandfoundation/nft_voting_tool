@@ -1,5 +1,6 @@
 /* eslint-disable no-case-declarations */
 import * as algokit from '@algorandfoundation/algokit-utils'
+import { getCreatorAppsByName } from '@algorandfoundation/algokit-utils'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import algosdk from 'algosdk'
@@ -52,16 +53,23 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const round = await algod.block(lastRound).do()
       const currentTime = Number(round.block.ts)
 
-      // Idempotently deploy (create/update/replace) the app
-      const app = await appClient.deploy({
-        allowDelete: isLocal,
-        onSchemaBreak: isLocal ? 'replace' : 'fail',
-        onUpdate: isLocal ? 'replace' : 'fail',
-        createArgs: {
-          method: 'create',
-          methodArgs: [publicKey, 'ipfs_cid', currentTime, currentTime + 50000, 1],
-        },
-      })
+      const createArgs = ['vote_id', publicKey, 'ipfs_cid', currentTime, currentTime + 50000, 1, 'ipfs://ipfs_cid2']
+      const app =
+        process.env.REDEPLOY_APP !== 'true'
+          ? await appClient.create({
+              method: 'create',
+              methodArgs: createArgs,
+              deletable: false,
+            })
+          : await appClient.deploy({
+              allowDelete: isLocal,
+              onSchemaBreak: isLocal ? 'replace' : 'fail',
+              onUpdate: isLocal ? 'replace' : 'fail',
+              createArgs: {
+                method: 'create',
+                methodArgs: createArgs,
+              },
+            })
 
       // Check if it's already been bootstrapped
       const appInfo = await algokit.getAppByIndex(app.appId, algod)
@@ -78,11 +86,12 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           method: 'bootstrap',
           methodArgs: {
             args: [
-              appClient.fundAppAccount(
-                algokit.microAlgos(
-                  100_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
+              appClient.fundAppAccount({
+                amount: algokit.microAlgos(
+                  200_000 + 1_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
                 ),
-              ),
+                sendParams: { skipSending: true },
+              }),
               encodeAnswerIds(questionIds),
             ],
             boxes: encodeAnswerIdBoxRefs(questionIds),
@@ -126,6 +135,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
             appClient.fundAppAccount({
               amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
               sender: voter,
+              sendParams: { skipSending: true },
             }),
             signature,
             encodeAnswerId('a'),
@@ -141,6 +151,15 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const boxes2 = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64), (b) => b.name.startsWith('V_'))
       console.log(boxes2)
 
+      // Close vote
+      await appClient.call({
+        method: 'close',
+        methodArgs: [],
+      })
+      console.log('Voting round closed')
+
+      const globalState = await appClient.getGlobalState()
+      console.log(globalState)
       break
     default:
       throw new Error(`Attempt to deploy unknown contract ${name}`)
