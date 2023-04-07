@@ -56,6 +56,7 @@ if (env === 'development') {
     },
   })
   container.register<string>('S3Bucket', {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     useValue: process.env.CACHE_BUCKET_NAME!,
   })
   container.register<IObjectCacheService>(
@@ -70,6 +71,7 @@ if (env === 'development') {
   container.register<Web3Storage>('Web3StorageClient', {
     useFactory: (_) => {
       return new Web3Storage({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         token: process.env.WEB3_STORAGE_API_TOKEN!,
       })
     },

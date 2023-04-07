@@ -10,10 +10,10 @@ import { useCallback, useEffect, useState } from 'react'
 import * as uuid from 'uuid'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
-import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
-import { VotingRoundContract, algod, fetchBoxes, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
+import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
 import { QuestionModel, VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
+import { algod, fetchTallyBoxes, fetchVoteBox, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRoundPopulated[]
@@ -78,7 +78,7 @@ const useFetchVoteRoundResults = (appId: number) => {
   const refetch = useCallback(() => {
     ;(async () => {
       setLoading(true)
-      const boxes = await fetchBoxes(appId)
+      const boxes = await fetchTallyBoxes(appId)
       const results = boxes.map((box) => ({
         optionId: uuid.stringify(box.name.nameRaw, 2),
         count: Number(box.value),
@@ -91,6 +91,26 @@ const useFetchVoteRoundResults = (appId: number) => {
   useEffect(() => {
     refetch()
   }, [appId])
+
+  return { loading, data, refetch }
+}
+
+const useFetchVoteRoundVote = (appId: number, voterAddress?: string) => {
+  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<string | undefined>(undefined)
+
+  const refetch = useCallback(() => {
+    ;(async () => {
+      setLoading(true)
+      const answer = voterAddress ? await fetchVoteBox(appId, voterAddress) : undefined
+      setData(answer)
+      setLoading(false)
+    })()
+  }, [voterAddress, data, setData])
+
+  useEffect(() => {
+    refetch()
+  }, [appId, voterAddress])
 
   return { loading, data, refetch }
 }
@@ -259,6 +279,9 @@ const api = {
   },
   useVotingRoundResults: (id: number) => {
     return useFetchVoteRoundResults(id)
+  },
+  useVotingRoundVote: (id: number, voterAddress?: string) => {
+    return useFetchVoteRoundVote(id, voterAddress)
   },
   useCloseVotingRound: () => {
     return useSetter(async ({ signer, appId }: { signer: TransactionSignerAccount; appId: number }) => {

@@ -34,7 +34,7 @@ class VotingState:
         static=True,
         descr="The minimum number of voters to reach quorum.",
     )
-    votes = storage.BoxMapping(
+    tallies = storage.BoxMapping(
         # 18 = 16 bytes question ID key (GUID value) + 2 bytes prefix ("V_")
         key_type=pt.abi.StaticBytes[Literal[18]],
         value_type=pt.abi.Uint64,
@@ -43,6 +43,7 @@ class VotingState:
     is_bootstrapped = beaker.GlobalStateValue(
         pt.TealType.uint64, descr="Whether or not the contract has been bootstrapped with answers"
     )
+    votes = storage.BoxMapping(key_type=pt.abi.Address, value_type=pt.abi.StaticBytes[Literal[16]])
 
 
 app = beaker.Application("VotingRoundApp", state=VotingState).apply(deploy_time_permanence_control)
@@ -68,7 +69,7 @@ def create(
 
 @app.external(authorize=beaker.Authorize.only_creator())
 def bootstrap(
-    # fund_min_bal_req: pt.abi.PaymentTransaction,
+    fund_min_bal_req: pt.abi.PaymentTransaction,
     answers: pt.abi.DynamicArray[pt.abi.StaticBytes[Literal[16]]],
 ) -> pt.Expr:
     i = pt.ScratchVar(pt.TealType.uint64)
@@ -77,19 +78,25 @@ def bootstrap(
         pt.Assert(pt.Not(app.state.is_bootstrapped.get()), comment="Already bootstrapped"),
         app.state.is_bootstrapped.set(pt.Int(1)),
         min_bal_req.store(
+            pt.Int(beaker.consts.ASSET_MIN_BALANCE)
+            + (
+                answers.length()
+                * (
             pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
-            + (answers.length() * pt.Int(16) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE))
+                    + pt.Int(18 + 8) * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE)
+                )
+            )
         ),
-        # pt.Assert(
-        #     fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
-        #     comment="Payment must be to app address",
-        # ),
-        # pt.Assert(
-        #     fund_min_bal_req.get().amount() >= min_bal_req.load(),
-        #     comment="Payment must be for >= min balance requirement",
-        # ),
+        pt.Assert(
+            fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
+            comment="Payment must be to app address",
+        ),
+        pt.Assert(
+            fund_min_bal_req.get().amount() >= min_bal_req.load(),
+            comment="Payment must be for >= min balance requirement",
+        ),
         pt.For(i.store(pt.Int(0)), i.load() < answers.length(), i.store(i.load() + pt.Int(1))).Do(
-            answers[i.load()].use(lambda answer: app.state.votes[answer.get()].set(pt.Itob(pt.Int(0))))
+            answers[i.load()].use(lambda answer: app.state.tallies[answer.get()].set(pt.Itob(pt.Int(0))))
         ),
     )
 
@@ -121,12 +128,7 @@ def voting_open() -> pt.Expr:
 
 @pt.Subroutine(pt.TealType.uint64)
 def already_voted() -> pt.Expr:
-    # Todo: actually implement this - currently this will return false if the above is open so anyone can vote
-    return pt.And(
-        pt.Neq(app.state.is_bootstrapped.get(), pt.Int(1)),
-        pt.Ge(pt.Global.latest_timestamp(), app.state.start_time.get()),
-        pt.Lt(pt.Global.latest_timestamp(), app.state.end_time.get()),
-    )
+    return pt.Seq((voter := pt.abi.Address()).set(pt.Txn.sender()), app.state.votes[voter].exists())
 
 
 # Readonly data methods
@@ -154,19 +156,34 @@ def get_preconditions(signature: pt.abi.DynamicBytes, *, output: VotingPrecondit
 
 
 @app.external(read_only=True)
-def vote(signature: pt.abi.DynamicBytes, answer_id: pt.abi.StaticBytes[Literal[16]]) -> pt.Expr:
-    tally_box = app.state.votes[answer_id.get()]
+def vote(
+    fund_min_bal_req: pt.abi.PaymentTransaction,
+    signature: pt.abi.DynamicBytes,
+    answer_id: pt.abi.StaticBytes[Literal[16]],
+) -> pt.Expr:
+    tally_box = app.state.tallies[answer_id.get()]
     currentVoteTally = pt.ScratchVar(pt.TealType.uint64)
     newVoteTally = pt.ScratchVar(pt.TealType.uint64)
+    min_bal_req = pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE + (16 + 32) * beaker.consts.BOX_BYTE_MIN_BALANCE)
 
     return pt.Seq(
         pt.Assert(allowed_to_vote(signature.get()), comment="Allowed to vote"),
         pt.Assert(voting_open(), comment="Voting open"),
         pt.Assert(pt.Not(already_voted()), comment="Hasn't already voted"),
         pt.Assert(tally_box.exists(), comment="Answer ID valid"),
+        pt.Assert(
+            fund_min_bal_req.get().receiver() == pt.Global.current_application_address(),
+            comment="Payment must be to app address",
+        ),
+        pt.Assert(
+            fund_min_bal_req.get().amount() >= min_bal_req,
+            comment="Payment must be for >= min balance requirement",
+        ),
         currentVoteTally.store(pt.Btoi(tally_box.get())),
         newVoteTally.store(pt.Add(currentVoteTally.load(), pt.Int(1))),
         pt.Assert(pt.Ge(currentVoteTally.load(), pt.Int(0)), comment="currentVoteTally >= 0"),
         pt.Assert(pt.Gt(newVoteTally.load(), currentVoteTally.load()), comment="newVoteTally > currentVoteTally"),
         tally_box.set(pt.Itob(newVoteTally.load())),
+        (voter := pt.abi.Address()).set(pt.Txn.sender()),
+        app.state.votes[voter].set(answer_id.get()),
     )

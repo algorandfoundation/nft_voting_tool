@@ -15,6 +15,7 @@ export function verifyAlgorandTransaction(address: string, signedTransaction: st
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const signatureValid = nacl.sign.detached.verify(
       transaction.txn.bytesToSign(),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       transaction.sig!,
       algosdk.decodeAddress(address).publicKey,
     )

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { S3 } from '@aws-sdk/client-s3'
 import { inject, singleton } from 'tsyringe'
 import { IObjectCacheService } from './objectCacheService'
@@ -53,6 +54,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
         value = await generator(existing)
         await this.put(cacheKey, value)
         console.log(`Cached value '${cacheKey}.json' written`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
           console.error(e)
@@ -98,6 +100,7 @@ export class S3ObjectCacheService implements IObjectCacheService {
         value = genValue
         await this.putBuffer(cacheKey, value, type)
         console.log(`Cached value '${cacheKey}' written`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
           console.error(e)
