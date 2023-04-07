@@ -23,6 +23,7 @@ export class AwsSecretsService {
           if ('SecretString' in data) {
             resolve(data.SecretString as string)
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             resolve(Buffer.from(data.SecretBinary as any, 'base64').toString('ascii'))
           }
         }

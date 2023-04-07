@@ -3,7 +3,7 @@ import * as express from 'express'
 import { ForbiddenException } from './models/errors/httpResponseException'
 import { verifyAlgorandTransaction } from './services/algorandSignatureService'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {
   const allowedAddresses = process.env.ALLOWED_ADDRESSES?.split(',') || []
 

@@ -40,6 +40,7 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
         const value = await generator(existing)
         await this.put(cacheKey, value)
         console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
           console.error(e)
@@ -92,6 +93,7 @@ export class FileSystemObjectCacheService implements IObjectCacheService {
         const [value, type] = await generator(existingBuffer)
         await this.putBuffer(cacheKey, value, type)
         console.log(`Cached value '${cacheKey}' written to ${cachePath}`)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (existingCache && returnStaleResult) {
           console.error(e)

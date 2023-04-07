@@ -15,14 +15,16 @@ import { VotingTime } from './VotingTime'
 import { WalletVoteStatus } from './WalletVoteStatus'
 
 function Vote() {
-  const { voteId } = useParams()
+  const { voteId: voteIdParam } = useParams()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const voteId = Number(voteIdParam!)
   const { activeAddress, signer } = useWallet()
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
-  const { data, loading, refetch } = api.useVotingRound(Number(voteId!))
-  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(Number(voteId!))
+  const { data, loading, refetch } = api.useVotingRound(voteId)
+  const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(voteId)
   const walletAddress = useConnectedWallet()
-  const { data: voteResult, loading: loadingVote, refetch: refetchVote } = api.useVotingRoundVote(Number(voteId!), walletAddress)
+  const { data: voteResult, loading: loadingVote, refetch: refetchVote } = api.useVotingRoundVote(voteId, walletAddress)
   const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
   const voteStarted = !data ? false : getVoteStarted(data)
@@ -44,7 +46,7 @@ function Vote() {
 
   const handleCloseVotingRound = async () => {
     if (!isVoteCreator || !data || !activeAddress) return
-    const result = await closeVotingRound({
+    await closeVotingRound({
       appId: data.id,
       signer: { addr: activeAddress, signer },
     })

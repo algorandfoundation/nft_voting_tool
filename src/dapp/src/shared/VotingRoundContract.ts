@@ -42,7 +42,6 @@ export const fetchVoteBox = async (appId: number, voterAddress: string) => {
   const box = (
     await client.getBoxValues((b) => b.nameBase64 === Buffer.from(algosdk.decodeAddress(voterAddress).publicKey).toString('base64'))
   )[0]
-  console.log(box ? uuid.stringify(box.value) : undefined)
   return box ? uuid.stringify(box.value) : undefined
 }
 
@@ -126,7 +125,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     return transaction
   }
 
-  const closeVotingRound = async (appId: number) => {
+  const closeVotingRound = async (_appId: number) => {
     //TODO: Implement closing the voting round smart contract call
   }
 

@@ -1,8 +1,8 @@
 import { Typography } from '@mui/material'
 import { VotingRoundPopulated } from '../../shared/types'
+import { VotingRoundTileLoading } from './index'
 import { NoRounds } from './NoRounds'
 import { VotingRoundTile } from './VotingRoundTile'
-import { VotingRoundTileLoading } from './index'
 
 type VotingRoundSectionProps = {
   label: string

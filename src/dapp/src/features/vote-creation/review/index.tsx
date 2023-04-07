@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../shared/api'
 import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
-import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import {
   useAppReference,
   useAuth,
@@ -17,6 +16,7 @@ import {
   useSetReviewStep,
 } from '../state'
 import { useStepRedirect } from '../useStepRedirect'
+import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { Row } from './Row'
 
@@ -43,7 +43,7 @@ export default function Review() {
   const error = `${auth.error !== null ? auth.error : ''}${create.error !== null ? create.error : ''}${
     bootstrap.error !== null ? bootstrap.error : ''
   }`
-  const signer = { addr: activeAddress!, signer: transactionSigner }
+  const signer = { addr: activeAddress ?? '', signer: transactionSigner }
   const confirm = async () => {
     setConfirmationDialogOpen(false)
     if (!activeAddress) {
