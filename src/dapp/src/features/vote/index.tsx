@@ -121,6 +121,7 @@ function Vote() {
                         <img
                           src={data.nftImageUrl.replace('ipfs://', `${import.meta.env.VITE_IPFS_GATEWAY_URL}/`)}
                           alt="Voting round result NFT image"
+                          className="max-h-full max-w-full"
                         />
                       </Typography>
                     </div>
