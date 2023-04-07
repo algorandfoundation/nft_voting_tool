@@ -18,12 +18,7 @@ export class IpfsController extends Controller {
     const [buffer, mimeType] = await this.ipfsService.getBuffer(cid)
     this.setHeader('Content-Type', mimeType)
     this.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
-    const readable = new Readable()
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    readable._read = () => {}
-    readable.push(buffer)
-    readable.push(null)
-    return readable
+    return Readable.from(buffer)
   }
 
   @Security('AlgorandSignature')
