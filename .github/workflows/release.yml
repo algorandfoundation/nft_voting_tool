@@ -81,60 +81,68 @@ jobs:
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
           DEPLOYMENT_ENVIRONMENT: testnet
-          CDK_DEFAULT_ACCOUNT: ${{ secrets.DEV_CDK_DEFAULT_ACCOUNT }}
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
           BASE_DOMAIN: voting.algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: ${{ secrets.DEV_WEB3_STORAGE_API_TOKEN }}
+          WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
-          API_ALLOWED_ADDRESSES: ${{ vars.DEV_API_ALLOWED_ADDRESSES }}
+          API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
             api:api/build
-          aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEV_AWS_ACCESS_KEY_SECRET }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: us-west-2
           static-site-transforms: |-
-            VITE_ALGOD_NODE_CONFIG_TOKEN:${{ secrets.DEV_ALGOD_NODE_CONFIG_TOKEN }}
-            VITE_ALGOD_NODE_CONFIG_SERVER:${{ vars.DEV_ALGOD_NODE_CONFIG_SERVER }}
-            VITE_ALGOD_NODE_CONFIG_PORT:${{ vars.DEV_ALGOD_NODE_CONFIG_PORT }}
-            VITE_ALGOD_NETWORK:${{ vars.DEV_ALGOD_NETWORK }}
-            VITE_INDEXER_SERVER:${{ vars.DEV_INDEXER_SERVER }}
-            VITE_INDEXER_PORT:${{ vars.DEV_INDEXER_PORT }}
-            VITE_INDEXER_TOKEN:${{ secrets.DEV_INDEXER_TOKEN }}
-            VITE_ENVIRONMENT:${{ vars.DEV_ENVIRONMENT}}
-            VITE_IPFS_GATEWAY_URL:${{ vars.DEV_IPFS_GATEWAY_URL }}
-            VITE_ALGO_EXPLORER_URL: ${{ vars.DEV_ALGO_EXPLORER_URL }}
+            VITE_ALGOD_NODE_CONFIG_TOKEN:${{ secrets.ALGOD_NODE_CONFIG_TOKEN }}
+            VITE_ALGOD_NODE_CONFIG_SERVER:${{ vars.ALGOD_NODE_CONFIG_SERVER }}
+            VITE_ALGOD_NODE_CONFIG_PORT:${{ vars.ALGOD_NODE_CONFIG_PORT }}
+            VITE_ALGOD_NETWORK:${{ vars.ALGOD_NETWORK }}
+            VITE_INDEXER_SERVER:${{ vars.INDEXER_SERVER }}
+            VITE_INDEXER_PORT:${{ vars.INDEXER_PORT }}
+            VITE_INDEXER_TOKEN:${{ secrets.INDEXER_TOKEN }}
+            VITE_ENVIRONMENT:${{ vars.ENVIRONMENT}}
+            VITE_IPFS_GATEWAY_URL:${{ vars.IPFS_GATEWAY_URL }}
+            VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
 
-  # deploy-to-prod:
-  #   runs-on: ubuntu-latest
-  #   name: Deploy to Prod
-  #   environment: Prod
-  #   concurrency: "${{ github.workflow }}-prod"
-  #   needs:
-  #     - deploy-to-dev
-  #   steps:
-  #     - name: Deploy
-  #       uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
-  #       env:
-  #         DEPLOYMENT_ENVIRONMENT: prod
-  #         CDK_DEFAULT_ACCOUNT: ${{ secrets.PROD_CDK_DEFAULT_ACCOUNT }}
-  #         AWS_DEFAULT_REGION: us-west-2
-  #         BASE_DOMAIN: voting.algorand.foundation
-  #         WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
-  #         API_BUILD_PATH: ${{ github.workspace }}/api/build
-  #         WEB3_STORAGE_API_TOKEN: "Test"
-  #       with:
-  #         app-artifact-unzips: |-
-  #           dapp:dapp/dist
-  #           api:api/build
-  #         aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.PROD_AWS_ACCESS_KEY_SECRET }}
-  #         aws-region: us-west-2
-  #         static-site-transforms: |-
-  #           VITE_ALGOD_NODE_CONFIG_TOKEN=${{ secrets.ALGOD_NODE_CONFIG_TOKEN }}
-  #           VITE_ALGOD_NODE_CONFIG_SERVER=${{ secrets.ALGOD_NODE_CONFIG_SERVER }}
-  #           VITE_ALGOD_NODE_CONFIG_PORT=${{ secrets.ALGOD_NODE_CONFIG_PORT }}
-  #           VITE_ALGOD_NETWORK=${{ secrets.ALGOD_NETWORK }}
+  deploy-to-prod:
+    runs-on: ubuntu-latest
+    name: Deploy to Prod
+    environment: Prod
+    concurrency: "${{ github.workflow }}-prod"
+    needs:
+      - deploy-to-dev
+    steps:
+      - name: Deploy
+        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
+        env:
+          DEPLOYMENT_ENVIRONMENT: prod
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
+          AWS_DEFAULT_REGION: us-west-2
+          BASE_DOMAIN: voting.algorand.foundation
+          WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
+          API_BUILD_PATH: ${{ github.workspace }}/api/build
+          WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
+          NODE_ENV: production
+          API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
+        with:
+          app-artifact-unzips: |-
+            dapp:dapp/dist
+            api:api/build
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
+          aws-region: us-west-2
+          static-site-transforms: |-
+            VITE_ALGOD_NODE_CONFIG_TOKEN:${{ secrets.ALGOD_NODE_CONFIG_TOKEN }}
+            VITE_ALGOD_NODE_CONFIG_SERVER:${{ vars.ALGOD_NODE_CONFIG_SERVER }}
+            VITE_ALGOD_NODE_CONFIG_PORT:${{ vars.ALGOD_NODE_CONFIG_PORT }}
+            VITE_ALGOD_NETWORK:${{ vars.ALGOD_NETWORK }}
+            VITE_INDEXER_SERVER:${{ vars.INDEXER_SERVER }}
+            VITE_INDEXER_PORT:${{ vars.INDEXER_PORT }}
+            VITE_INDEXER_TOKEN:${{ secrets.INDEXER_TOKEN }}
+            VITE_ENVIRONMENT:${{ vars.ENVIRONMENT}}
+            VITE_IPFS_GATEWAY_URL:${{ vars.IPFS_GATEWAY_URL }}
+            VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
