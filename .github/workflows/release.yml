@@ -89,6 +89,7 @@ jobs:
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
           API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
+          API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
@@ -129,6 +130,7 @@ jobs:
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
           API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
+          API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
