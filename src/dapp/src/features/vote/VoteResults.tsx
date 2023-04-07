@@ -6,9 +6,10 @@ import { VotingRoundResult } from '../../shared/types'
 type VoteResultsProps = {
   question: Question
   votingRoundResults: VotingRoundResult[]
+  myVote?: string
 }
 
-export const VoteResults = ({ question, votingRoundResults }: VoteResultsProps) => {
+export const VoteResults = ({ question, votingRoundResults, myVote }: VoteResultsProps) => {
   const counts = votingRoundResults.map((v) => v.count)
   const max = Math.max(...counts)
   const sum = counts.reduce((a, b) => a + b, 0)
@@ -28,7 +29,14 @@ export const VoteResults = ({ question, votingRoundResults }: VoteResultsProps) 
                   ></div>
                   <div className="p-2 pr-6">{result.count}</div>
                 </div>
-                <div className="flex  items-center">{option.label}</div>
+                <div className="flex  items-center">
+                  {option.label}
+                  {myVote === option.id && (
+                    <span title="You voted for this option" className="ml-2">
+                      🗳️
+                    </span>
+                  )}
+                </div>
               </Fragment>
             )
           )
