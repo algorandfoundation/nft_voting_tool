@@ -22,8 +22,8 @@ export const WalletVoteStatus = ({ round, allowedToVote, myVote }: WalletVoteSta
         <div className="mb-4">
           <Typography>
             This voting round is restricted to wallets on the{' '}
-            <Link className="font-normal" href="/">
-              allow list
+            <Link className="font-normal" target="_blank" href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${round.voteGatingSnapshotCid}`}>
+              allowlist
             </Link>
             .
           </Typography>
@@ -36,7 +36,7 @@ export const WalletVoteStatus = ({ round, allowedToVote, myVote }: WalletVoteSta
       )}
       {walletAddress && !allowedToVote && (
         <Box className="bg-algorand-warning text-center p-3 rounded-xl">
-          <Typography className="font-semibold text-grey-dark">Your wallet is not on the allow list for this voting round</Typography>
+          <Typography className="font-semibold text-grey-dark">Your wallet is not on the allowlist for this voting round</Typography>
         </Box>
       )}
       {walletAddress && allowedToVote && !myVote && (

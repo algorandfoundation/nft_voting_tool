@@ -75,8 +75,8 @@ export default function SiteHeader() {
                         <NavLink
                           key={index}
                           link={link}
-                          defaultClasses="inline-flex items-center font-[600] text-l"
-                          currentClasses="inline-flex items-center font-[600] text-l decoration-orange-600 underline-offset-[6px]"
+                          defaultClasses="inline-flex items-center font-[600] text-l hover:underline"
+                          currentClasses="inline-flex items-center font-[600] text-l decoration-orange-600 hover:underline underline-offset-[6px]"
                         />
                       )
                       const pipe = (
@@ -89,7 +89,11 @@ export default function SiteHeader() {
                     })}
                 </Popover.Group>
 
-                <Link className="justify-self-end inline-flex items-center no-underline text-black" to="#" onClick={showConnectWalletModal}>
+                <Link
+                  className="justify-self-end inline-flex items-center no-underline hover:underline text-black"
+                  to="#"
+                  onClick={showConnectWalletModal}
+                >
                   <Typography>{walletLabel}</Typography>
                 </Link>
               </div>

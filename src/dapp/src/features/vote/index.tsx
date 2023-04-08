@@ -183,7 +183,7 @@ function Vote() {
           <VoteDetails loading={loading} round={data} />
         </div>
       </div>
-      <LoadingDialog loading={submittingVote} title="Submitting vote" />
+      <LoadingDialog loading={submittingVote} title="Submitting vote" note="Please check your wallet for any pending transactions" />
     </div>
   )
 }

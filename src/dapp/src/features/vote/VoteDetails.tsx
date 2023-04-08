@@ -41,7 +41,7 @@ export const VoteDetails = ({ loading, round }: VoteDetailsProps) => {
             <Skeleton variant="text" />
           ) : round.snapshot?.snapshot.length ? (
             <Link href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${round.voteGatingSnapshotCid}`} target="_blank">
-              Allow list
+              Allowlist
             </Link>
           ) : null}
         </Stack>

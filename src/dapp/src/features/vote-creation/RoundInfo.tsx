@@ -2,9 +2,9 @@ import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
-import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
+import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
@@ -67,10 +67,11 @@ export default function RoundInfo() {
                 })}
               </div>
               {helper.textFileFormField({
-                label: 'Snapshot file',
+                label: 'Allowlist snapshot file',
                 field: 'snapshotFile',
                 hint: 'Upload snapshot .csv file',
-                longHint: 'Upload a csv file with wallet address in column 1 and weighting in column 2. Do not include a header line.',
+                longHint:
+                  'Upload a CSV file with a single column containing the addresses for the allowlist. Do not include a header line.',
               })}
               {helper.textField({
                 label: 'Minimum number of votes (quorum)',
