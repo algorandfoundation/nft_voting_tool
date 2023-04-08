@@ -109,6 +109,7 @@ jobs:
             VITE_IPFS_GATEWAY_URL:${{ vars.IPFS_GATEWAY_URL }}
             VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
+            VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
 
   deploy-to-prod:
     runs-on: ubuntu-latest
@@ -150,3 +151,4 @@ jobs:
             VITE_IPFS_GATEWAY_URL:${{ vars.IPFS_GATEWAY_URL }}
             VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
+            VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}

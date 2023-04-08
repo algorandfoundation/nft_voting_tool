@@ -2,9 +2,9 @@ import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { SkeletonArray } from '../../shared/SkeletonArray'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { SkeletonArray } from '../../shared/SkeletonArray'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { useConnectedWallet } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
@@ -96,17 +96,18 @@ function Vote() {
 
           {!voteEnded && (
             <>
-              <Typography className="mt-5" variant="h4">
-                How to vote
-              </Typography>
-
               {loading || !data ? (
                 <Stack spacing={1}>
                   <Skeleton variant="text" className="w-1/2" />
                   <Skeleton variant="rectangular" className="h-10" />
                 </Stack>
               ) : (
-                <WalletVoteStatus round={data} allowedToVote={allowedToVote} myVote={voteResult} />
+                <>
+                  <Typography className="mt-5" variant="h4">
+                    How to vote
+                  </Typography>
+                  <WalletVoteStatus round={data} allowedToVote={allowedToVote} myVote={voteResult} />
+                </>
               )}
             </>
           )}
