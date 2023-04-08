@@ -27,6 +27,7 @@ jobs:
       node-version: 18.x
       working-directory: ./src/voting-metadata-api
       run-build: true
+      audit-script: npm run audit
   build-algorand:
     name: Algorand build
     uses: ./.github/workflows/smart-contract-ci.yml

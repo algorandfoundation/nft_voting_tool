@@ -27,6 +27,7 @@ jobs:
     with:
       working-directory: ./src/voting-metadata-api
       compile-script: npm run typecheck
+      audit-script: npm run audit
   ci-infrastructure:
     name: CI Infrastructure
     uses: ./.github/workflows/node-ci.yml
