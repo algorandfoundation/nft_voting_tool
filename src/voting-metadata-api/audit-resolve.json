@@ -1,0 +1,10 @@
+{
+  "decisions": {
+    "1091647|aws-lambda>aws-sdk>xml2js": {
+      "decision": "postpone",
+      "madeAt": 1680928204102
+    }
+  },
+  "rules": {},
+  "version": 1
+}
