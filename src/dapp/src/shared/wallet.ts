@@ -13,16 +13,16 @@ export const getWalletLabel = (address: string) => `${address.substring(0, 5)}..
 export const getIsAllowedToVote = (address: string, allowList: string[]) => !allowList.length || allowList.includes(address)
 
 export const fetchNFDomain = async (address: string): Promise<NFDomain | undefined> => {
-  const nfdInfos = await fetchNFDomains([address])
-  if (nfdInfos && nfdInfos[0] && nfdInfos[0].address === address) {
-    return nfdInfos[0]
+  const nfds = await fetchNFDomains([address])
+  if (nfds && nfds[0] && nfds[0].address === address) {
+    return nfds[0]
   }
   return undefined
 }
 
 export const fetchNFDomains = async (addresses: string[]): Promise<NFDomain[] | undefined> => {
   const response = await fetch(
-    `https://api${import.meta.env.VITE_IS_TESTNET ? '.testnet' : ''}.nf.domains/nfd/address?address=${addresses.join(
+    `https://api${import.meta.env.VITE_IS_TESTNET ? '.testnet' : ''}.nf.domains/nfd/v2/address?address=${addresses.join(
       '&address=',
     )}&view=thumbnail`,
   )
@@ -31,14 +31,16 @@ export const fetchNFDomains = async (addresses: string[]): Promise<NFDomain[] | 
   }
 
   const nfdResponse = (await response.json()) as {
-    name: string
-    caAlgo: string[]
-    properties?: { userDefined?: { avatar?: string }; verified?: { avatar?: string } }
-  }[]
+    [key: string]: {
+      name: string
+      caAlgo: string[]
+      properties?: { userDefined?: { avatar?: string }; verified?: { avatar?: string } }
+    }[]
+  }
 
   return await Promise.all(
-    addresses.map(async (address) => {
-      const nfd = nfdResponse.find((n) => n.caAlgo.includes(address))
+    Object.keys(nfdResponse).map(async (address) => {
+      const nfd = nfdResponse[address].find((n) => n.caAlgo.includes(address))
       if (nfd) {
         let verifiedAvatar: string | undefined = undefined
         const verifiedAvatarAsHttpUrl = nfd.properties?.verified?.avatar?.replace('ipfs://', 'https://cf-ipfs.com/ipfs/')
