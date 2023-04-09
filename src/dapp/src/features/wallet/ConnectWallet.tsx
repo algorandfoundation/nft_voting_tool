@@ -42,10 +42,7 @@ const ConnectWallet = () => {
         ) : (
           <Stack spacing={2}>
             <div>
-              <Typography>
-                Select the wallet that you will use to create and sign the voting round. You can't change wallets once you have started to
-                set up the voting round.
-              </Typography>
+              <Typography>Select the wallet that you will use to sign your transactions.</Typography>
             </div>
             {(activeAddress || providers?.find((p) => p.isActive)) && (
               <>

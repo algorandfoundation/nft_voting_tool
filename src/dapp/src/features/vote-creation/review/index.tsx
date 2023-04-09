@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../shared/api'
 import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
+import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import {
   useAppReference,
   useAuth,
@@ -16,7 +17,6 @@ import {
   useSetReviewStep,
 } from '../state'
 import { useStepRedirect } from '../useStepRedirect'
-import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { Row } from './Row'
 
@@ -99,15 +99,15 @@ export default function Review() {
           <Row label="End date" value={dayjs(roundInfo.end).format('LLL')} />
           <Row label="Timezone" value={getTimezone(dayjs(roundInfo.start))} />
           <Row
-            label="Snapshot file"
-            value={roundInfo.snapshotFile ? `${getWalletAddresses(roundInfo.snapshotFile).length.toLocaleString()} wallets` : '-'}
+            label="Allowlist snapshot file"
+            value={roundInfo.snapshotFile ? `${getWalletAddresses(roundInfo.snapshotFile).length.toLocaleString()} addresses` : '-'}
           />
           {roundInfo.snapshotFile && (
             <div className="col-span-6 col-start-3 max-w-xs">
               <TextField rows={6} fullWidth multiline className="max-w-md" disabled value={roundInfo.snapshotFile} />
             </div>
           )}
-          <Row label="Min votes" value={roundInfo.minimumVotes?.toString() ?? '-'} />
+          <Row label="Min votes (quorum)" value={roundInfo.minimumVotes?.toString() ?? '-'} />
           <div className="col-span-2">
             <Link
               onClick={(e) => {
@@ -194,7 +194,7 @@ export default function Review() {
         </ConfirmationDialog>
         <LoadingDialog
           loading={loading}
-          title="Processing..."
+          title="Processing - please check your wallet for any pending transactions"
           note="It can take up to 30 seconds to progress once you sign each transaction."
         />
       </div>
