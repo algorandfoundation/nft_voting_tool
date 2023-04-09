@@ -31,6 +31,7 @@ const useFetchVoteRounds = (address: string[]) => {
         setLoading(true)
         const votingRounds: VotingRoundPopulated[] = []
         for (const addr of address) {
+          if (!addr) continue
           const votingRound = await fetchVotingRounds(addr)
           votingRounds.push(...votingRound)
         }
