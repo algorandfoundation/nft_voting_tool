@@ -31,7 +31,7 @@ const VotingRounds = () => {
   const creatorAddresses = useCreatorAddresses()
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
   const isCreator = myWalletAddress && (creatorAddresses.includes(myWalletAddress) || creatorAddresses.includes('any'))
-  const { data, loading } = showMyRounds && myWalletAddress ? api.useVotingRounds(myWalletAddress) : api.useVotingRounds(creatorAddresses)
+  const { data, loading } = showMyRounds && myWalletAddress ? api.useVotingRounds([myWalletAddress]) : api.useVotingRounds(creatorAddresses)
   const walletLabel = showMyRounds ? (
     <DisplayAddress address={myWalletAddress} />
   ) : (
