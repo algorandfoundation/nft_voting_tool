@@ -89,7 +89,7 @@ jobs:
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
-          API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
+          API_ALLOWED_ADDRESSES: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
           API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
@@ -111,6 +111,7 @@ jobs:
             VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
+            VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
 
   deploy-to-prod:
     runs-on: ubuntu-latest
@@ -131,7 +132,7 @@ jobs:
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
-          API_ALLOWED_ADDRESSES: ${{ vars.API_ALLOWED_ADDRESSES }}
+          API_ALLOWED_ADDRESSES: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
           API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
@@ -153,3 +154,4 @@ jobs:
             VITE_ALGO_EXPLORER_URL: ${{ vars.ALGO_EXPLORER_URL }}
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
+            VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}

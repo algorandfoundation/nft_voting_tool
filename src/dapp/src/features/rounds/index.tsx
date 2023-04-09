@@ -5,7 +5,7 @@ import api from '../../shared/api'
 import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { getWalletLabel } from '../../shared/wallet'
-import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
+import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 
 export const VotingRoundTileLoading = () => (
@@ -28,7 +28,11 @@ const getRounds = (
 const VotingRounds = () => {
   const setShowConnectWalletModal = useSetShowConnectWalletModal()
   const myWalletAddress = useConnectedWallet()
-  const { data, loading } = api.useVotingRounds(myWalletAddress)
+  const creatorAddresses = useCreatorAddresses()
+  const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
+  const isCreator = myWalletAddress && (creatorAddresses.includes(myWalletAddress) || creatorAddresses.includes('any'))
+  const { data, loading } = showMyRounds && myWalletAddress ? api.useVotingRounds(myWalletAddress) : api.useVotingRounds(creatorAddresses)
+  const walletLabel = showMyRounds ? getWalletLabel(myWalletAddress) : creatorAddresses.map(getWalletLabel).join(', ')
 
   const openRounds = data
     ? getRounds(
@@ -66,10 +70,12 @@ const VotingRounds = () => {
           </Button>
         </div>
       ) : (
-        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(myWalletAddress)}</Typography>
+        <Typography variant="body1">
+          Voting rounds created by {/[,]/.test(walletLabel) ? 'wallet' : 'wallets'} {walletLabel}
+        </Typography>
       )}
 
-      {myWalletAddress && (
+      {isCreator && (
         <Button component={Link} to="/create" className="my-8" variant="contained">
           Create new voting round
         </Button>

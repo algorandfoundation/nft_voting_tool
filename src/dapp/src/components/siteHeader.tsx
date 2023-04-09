@@ -3,7 +3,7 @@ import { Typography } from '@mui/material'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
-import { useConnectedWallet, useSetShowConnectWalletModal } from '../features/wallet/state'
+import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../features/wallet/state'
 import { getWalletLabel } from '../shared/wallet'
 import { MenuIcon, XIcon } from './icons'
 
@@ -13,13 +13,14 @@ interface Link {
   target?: string
   subItems?: Link[]
   logo?: string
+  protect?: boolean
   onClick?: () => void
 }
 
 const createNavigation = () =>
   [
-    { name: 'Home', href: '/' },
-    { name: 'Create', href: '/create' },
+    { name: 'Home', href: '/', protect: false },
+    { name: 'Create', href: '/create', protect: true },
   ] as Link[]
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
@@ -49,6 +50,7 @@ export default function SiteHeader() {
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
   const showConnectWalletModal = () => setShowConnectedWalletModal(true)
   const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : 'Connect wallet'
+  const creatorAddresses = useCreatorAddresses()
   return (
     <Disclosure as="nav" className="border-l-0 border-t-0 border-r-0 border-b border-solid border-grey-light shadow-sm shadow-grey-light">
       {({ open }) => (
@@ -70,6 +72,7 @@ export default function SiteHeader() {
                 <Popover.Group as="nav" className="hidden lg:flex gap-[14px] cursor-pointer">
                   {navigation
                     .filter((nl) => nl.name)
+                    .filter((nl) => !nl.protect || creatorAddresses.includes(connectedWallet) || creatorAddresses.includes('any'))
                     .flatMap((link, index) => {
                       const navLink = (
                         <NavLink
@@ -115,15 +118,17 @@ export default function SiteHeader() {
           {/*Mobile Site Links*/}
           <Disclosure.Panel className="lg:hidden">
             <div className="ml-10 mb-5 pt-2">
-              {[...navigation, { name: walletLabel, href: '#', onClick: showConnectWalletModal }].map((link, index) => (
-                <Disclosure.Button as="span" key={index}>
-                  <NavLink
-                    link={link}
-                    defaultClasses="hover:bg-grey-light hover:border-grey hover:text-black block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                    currentClasses="bg-primary-light border-primary block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-                  />
-                </Disclosure.Button>
-              ))}
+              {[...navigation, { name: walletLabel, href: '#', onClick: showConnectWalletModal, protect: false }]
+                .filter((nl) => !nl.protect || creatorAddresses.includes(connectedWallet) || creatorAddresses.includes('any'))
+                .map((link, index) => (
+                  <Disclosure.Button as="span" key={index}>
+                    <NavLink
+                      link={link}
+                      defaultClasses="hover:bg-grey-light hover:border-grey hover:text-black block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                      currentClasses="bg-primary-light border-primary block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
+                    />
+                  </Disclosure.Button>
+                ))}
             </div>
           </Disclosure.Panel>
         </div>
