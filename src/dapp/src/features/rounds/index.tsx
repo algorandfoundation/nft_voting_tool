@@ -1,11 +1,11 @@
 import { Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { Link } from 'react-router-dom'
+import { DisplayAddress } from '../../shared/DisplayAddress'
 import api from '../../shared/api'
 import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
-import { getWalletLabel } from '../../shared/wallet'
-import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/state'
+import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 
 export const VotingRoundTileLoading = () => (
@@ -28,7 +28,19 @@ const getRounds = (
 const VotingRounds = () => {
   const setShowConnectWalletModal = useSetShowConnectWalletModal()
   const myWalletAddress = useConnectedWallet()
-  const { data, loading } = api.useVotingRounds(myWalletAddress)
+  const creatorAddresses = useCreatorAddresses()
+  const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
+  const isCreator = myWalletAddress && (creatorAddresses.includes(myWalletAddress) || creatorAddresses.includes('any'))
+  const { data, loading } = showMyRounds && myWalletAddress ? api.useVotingRounds([myWalletAddress]) : api.useVotingRounds(creatorAddresses)
+  const walletLabel = showMyRounds ? (
+    <DisplayAddress address={myWalletAddress} />
+  ) : (
+    <>
+      {creatorAddresses.map((address) => (
+        <DisplayAddress address={address} />
+      ))}
+    </>
+  )
 
   const openRounds = data
     ? getRounds(
@@ -56,7 +68,7 @@ const VotingRounds = () => {
 
   return (
     <div className="container">
-      <Typography variant="h3">My voting rounds</Typography>
+      <Typography variant="h3">Voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
       ) : !myWalletAddress ? (
@@ -66,10 +78,12 @@ const VotingRounds = () => {
           </Button>
         </div>
       ) : (
-        <Typography variant="body1">Voting rounds created by wallet {getWalletLabel(myWalletAddress)}</Typography>
+        <>
+          <Typography variant="body1">Voting rounds created by {walletLabel}</Typography>
+        </>
       )}
 
-      {myWalletAddress && (
+      {isCreator && (
         <Button component={Link} to="/create" className="my-8" variant="contained">
           Create new voting round
         </Button>
