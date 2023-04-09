@@ -1,10 +1,10 @@
 import { Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { Link } from 'react-router-dom'
+import { DisplayAddress } from '../../shared/DisplayAddress'
 import api from '../../shared/api'
 import { VotingRoundPopulated } from '../../shared/types'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
-import { getWalletLabel } from '../../shared/wallet'
 import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 
@@ -32,7 +32,15 @@ const VotingRounds = () => {
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
   const isCreator = myWalletAddress && (creatorAddresses.includes(myWalletAddress) || creatorAddresses.includes('any'))
   const { data, loading } = showMyRounds && myWalletAddress ? api.useVotingRounds(myWalletAddress) : api.useVotingRounds(creatorAddresses)
-  const walletLabel = showMyRounds ? getWalletLabel(myWalletAddress) : creatorAddresses.map(getWalletLabel).join(', ')
+  const walletLabel = showMyRounds ? (
+    <DisplayAddress address={myWalletAddress} />
+  ) : (
+    <>
+      {creatorAddresses.map((address) => (
+        <DisplayAddress address={address} />
+      ))}
+    </>
+  )
 
   const openRounds = data
     ? getRounds(
@@ -60,7 +68,7 @@ const VotingRounds = () => {
 
   return (
     <div className="container">
-      <Typography variant="h3">My voting rounds</Typography>
+      <Typography variant="h3">Voting rounds</Typography>
       {loading ? (
         <Skeleton variant="text" />
       ) : !myWalletAddress ? (
@@ -70,9 +78,9 @@ const VotingRounds = () => {
           </Button>
         </div>
       ) : (
-        <Typography variant="body1">
-          Voting rounds created by {/[,]/.test(walletLabel) ? 'wallet' : 'wallets'} {walletLabel}
-        </Typography>
+        <>
+          <Typography variant="body1">Voting rounds created by {walletLabel}</Typography>
+        </>
       )}
 
       {isCreator && (

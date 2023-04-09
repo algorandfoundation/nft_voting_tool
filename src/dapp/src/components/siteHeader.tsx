@@ -72,7 +72,11 @@ export default function SiteHeader() {
                 <Popover.Group as="nav" className="hidden lg:flex gap-[14px] cursor-pointer">
                   {navigation
                     .filter((nl) => nl.name)
-                    .filter((nl) => !nl.protect || creatorAddresses.includes(connectedWallet) || creatorAddresses.includes('any'))
+                    .filter(
+                      (nl) =>
+                        !nl.protect ||
+                        (connectedWallet && (creatorAddresses.includes(connectedWallet) || creatorAddresses.includes('any'))),
+                    )
                     .flatMap((link, index) => {
                       const navLink = (
                         <NavLink

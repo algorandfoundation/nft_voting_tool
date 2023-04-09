@@ -27,20 +27,20 @@ const useFetchVoteRounds = (address: string | string[]) => {
 
   const fetchData = () => {
     if (Array.isArray(address) && address.length > 0) {
-      ;(async () => {
+      ; (async () => {
         setLoading(true)
         const votingRounds: VotingRoundPopulated[] = []
-        address.forEach(async (addr) => {
+        for (const addr of address) {
           const votingRound = await fetchVotingRounds(addr)
           votingRounds.push(...votingRound)
-        })
+        }
         setData({
           rounds: votingRounds,
         })
         setLoading(false)
       })()
     } else if (typeof address === 'string' && address.length > 0) {
-      ;(async () => {
+      ; (async () => {
         setLoading(true)
         const votingRounds = await fetchVotingRounds(address)
         setData({
@@ -69,7 +69,7 @@ const useFetchVoteRound = (appId: number) => {
   const [data, setData] = useState<VotingRoundPopulated | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const votingRound = await fetchVotingRound(appId)
       setData(votingRound)
@@ -89,7 +89,7 @@ const useFetchVoteRoundResults = (appId: number) => {
   const [data, setData] = useState<VotingRoundResult[] | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const boxes = await fetchTallyBoxes(appId)
       const results = boxes.map((box) => ({
@@ -113,7 +113,7 @@ const useFetchVoteRoundVote = (appId: number, voterAddress?: string) => {
   const [data, setData] = useState<string | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ;(async () => {
+    ; (async () => {
       setLoading(true)
       const answer = voterAddress ? await fetchVoteBox(appId, voterAddress) : undefined
       setData(answer)
