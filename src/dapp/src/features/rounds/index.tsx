@@ -37,7 +37,7 @@ const VotingRounds = () => {
   ) : (
     <>
       {creatorAddresses.map((address) => (
-        <DisplayAddress address={address} />
+        <DisplayAddress key={address} address={address} />
       ))}
     </>
   )

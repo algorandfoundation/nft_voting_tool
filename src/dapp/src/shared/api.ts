@@ -19,18 +19,18 @@ type AppState = {
   rounds: VotingRoundPopulated[]
 }
 
-const useFetchVoteRounds = (address: string[]) => {
+const useFetchVoteRounds = (addresses: string[]) => {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<AppState>({
     rounds: [],
   })
 
   const fetchData = () => {
-    if (Array.isArray(address) && address.length > 0) {
+    if (Array.isArray(addresses) && addresses.length > 0) {
       ; (async () => {
         setLoading(true)
         const votingRounds: VotingRoundPopulated[] = []
-        for (const addr of address) {
+        for (const addr of addresses) {
           if (!addr) continue
           const votingRound = await fetchVotingRounds(addr)
           votingRounds.push(...votingRound)
@@ -49,7 +49,7 @@ const useFetchVoteRounds = (address: string[]) => {
 
   useEffect(() => {
     fetchData()
-  }, [address])
+  }, [...addresses])
 
   const refetch = useCallback(fetchData, [data, setData])
 
@@ -293,8 +293,8 @@ const api = {
       },
     )
   },
-  useVotingRounds: (address: string[]) => {
-    return useFetchVoteRounds(address)
+  useVotingRounds: (addresses: string[]) => {
+    return useFetchVoteRounds(addresses)
   },
   useVotingRound: (id: number) => {
     return useFetchVoteRound(id)
