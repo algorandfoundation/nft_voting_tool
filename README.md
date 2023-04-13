@@ -52,7 +52,8 @@ To use it you need to configure the following with a `DEV_` prefix for TestNet a
     * `IPFS_GATEWAY_URL`: The URL to the IPFS gateway that is deployed as part of this solution including the `/ipfs` e.g. `https://api.testnet.voting.algorand.foundation/ipfs`
     * `ALGO_EXPLORER_URL`: The URL to AlgoExplorer e.g. `ALGO_EXPLORER_URL`
     * `NFT_EXPLORER_URL`: The URL to NFT Explorer for an asset, minus the asset ID e.g. `https://nftexplorer.app/asset/`
-    
+    * `IS_TESTNET`: `true` or `false`
+    * `CREATOR_ALLOW_LIST_ADDRESSES`: The allowlist for voting round cretors. To keep it open for everyone set it to `any`. Alternatively you can give limited access to an allowist of addresses e.g. `MOIL6NTBHUFAWV5TYY6YYRJ2N3LOAPOBEV4ZPFZAJKZX3OHGQVMYLEHEUU,ODTX32FQL44D5GIJ2CMCEZ4G3FGUU3WUYDHJZDRNSSLHDO54ESGKXC25UQ`
 
 ### DNS
 
