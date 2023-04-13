@@ -13,6 +13,6 @@ It's implemented using:
 
 ## Initial setup
 
-- Copy `.env.template` to `.env`
-- `npm install`
-- `npm run dev`
+1. Copy `.env.template` to `.env`
+2. `npm install`
+3. `npm run dev`

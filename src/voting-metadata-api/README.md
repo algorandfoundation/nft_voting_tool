@@ -15,5 +15,6 @@ This component allows for easy deployment of a high performance IPFS gateway tha
 
 # Initial setup
 
-1. `npm run install`
-2. `npm run dev`, or, in VS Code run the `Run api` Run and Debug configuration
+1. Copy `.env.template` to `.env`
+2. `npm run install`
+3. `npm run dev`, or, in VS Code run the `Run api` Run and Debug configuration
