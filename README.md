@@ -18,15 +18,27 @@ This project contains a number of components:
 * [AWS CDK Infrastructure as Code](./infrastructure/README.md)
 * [GitHub Actions CI/CD pipeline](./.github)
 
-## Development setup
+## Running Locally
+To run the application locally you need 3 components running.
+* An Algorand LocalNet
+* The [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
+* The [Voting dApp](./src/dapp/README.md)
 
+Here are the steps you can follow to run the application locally:
 1. Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install): Ensure you can execute `algokit --version`.
 2. Run `algokit localnet start` to start a LocalNet network
-3. Run `algokit bootstrap all` in `src` to install dependencies and set up `.env` files
-4. Run `algokit bootstrap all` in `src/algorand/smart_contracts` to set-up the smart contract deployment dependencies
-5. Open in VS Code and Hit F5 after selecting the `Run All` Run and Debug configuration to run all components, or run the following:
-    * `npm run dev` in `src/dapp`
-    * `npm run dev` in `src/voting-metadata-api`
+3. Setup and run the [Voting dApp](./src/dapp/README.md) 
+    * Do the following in `src/dapp`:
+        * Copy `.env.template` to `.env`
+        * `npm install`
+        * `npm run dev`
+4. Setup and run the [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
+    * Do the following in `src/voting-metadata-api`:
+        * Copy `.env.template` to `.env`
+        * `npm install`
+        * `npm run dev`
+
+After completing these steps, you should have all three components running locally, and you can test the application.
 
 ## Deployment
 
@@ -53,7 +65,7 @@ To use it you need to configure the following with a `DEV_` prefix for TestNet a
     * `ALGO_EXPLORER_URL`: The URL to AlgoExplorer e.g. `ALGO_EXPLORER_URL`
     * `NFT_EXPLORER_URL`: The URL to NFT Explorer for an asset, minus the asset ID e.g. `https://nftexplorer.app/asset/`
     * `IS_TESTNET`: `true` or `false`
-    * `CREATOR_ALLOW_LIST_ADDRESSES`: The allowlist for voting round cretors. To keep it open for everyone set it to `any`. Alternatively you can give limited access to an allowist of addresses e.g. `MOIL6NTBHUFAWV5TYY6YYRJ2N3LOAPOBEV4ZPFZAJKZX3OHGQVMYLEHEUU,ODTX32FQL44D5GIJ2CMCEZ4G3FGUU3WUYDHJZDRNSSLHDO54ESGKXC25UQ`
+    * `CREATOR_ALLOW_LIST_ADDRESSES`: The allowlist for voting round creators. To keep it open for anyone set it to `any`. Alternatively you can limit access to an allowist of addresses e.g. `MOIL6NTBHUFAWV5TYY6YYRJ2N3LOAPOBEV4ZPFZAJKZX3OHGQVMYLEHEUU,ODTX32FQL44D5GIJ2CMCEZ4G3FGUU3WUYDHJZDRNSSLHDO54ESGKXC25UQ`
 
 ### DNS
 
