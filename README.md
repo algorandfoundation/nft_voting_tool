@@ -21,27 +21,42 @@ This project contains a number of components:
 ![Architecture](docs/architecture.png)
 
 ## Development setup
-## Running Locally
-To run the application locally you need 3 components running.
-* An Algorand LocalNet
+To run the application locally you need 3 components running:
+
+* An [Algorand LocalNet](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/localnet.md)
 * The [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
 * The [Voting dApp](./src/dapp/README.md)
 
-Here are the steps you can follow to run the application locally:
-1. Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install): Ensure you can execute `algokit --version`.
-2. Run `algokit localnet start` to start a LocalNet network
-3. Setup and run the [Voting dApp](./src/dapp/README.md) 
-    * Do the following in `src/dapp`:
-        * Copy `.env.template` to `.env`
-        * `npm install`
-        * `npm run dev`
-4. Setup and run the [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
-    * Do the following in `src/voting-metadata-api`:
-        * Copy `.env.template` to `.env`
-        * `npm install`
-        * `npm run dev`
+### Pre-requisites
+
+1. Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install); ensure you can execute `algokit --version`.
+2. Install Node.js / npm
+
+### First-time setup
+
+1. Initialise the projects, which you can do by either:
+    * `algokit bootstrap all` in `src/`, or:
+    * Manually do it by running `npm install` and then copying `.env.template` to `.env` in `src/dapp` and `src/voting-metadata-api`
+2. Run the projects, which you can do by either:
+    * Opening the project in VS Code and running the `Run All` Run and Debug configuration
+    * Run `algokit localnet start` to start a LocalNet network and run `npm run dev` in `src/dapp` and `src/voting-metadata-api`
+3. Visit the dApp at <http://localhost:5173/>
 
 After completing these steps, you should have all three components running locally, and you can test the application.
+
+### Subsequent setup
+
+You can follow step 2 above.
+
+### Editing the smart contract
+
+If you want to change the smart contract then you can set up the smart contract development environment by:
+
+1. Executing `algokit bootstrap all` in `src/algorand`
+2. Editing `src/algorand/smart_contracts/voting.py` to change the smart contract and `src/algorand/smart_contracts/deploy-config.ts` to change the local test deployment harness and `src/algorand/smart_contracts/tests/voting.spec.ts` to change the automated tests
+3. Build the smart contract by either executing `python -m smart_contracts build` in the `src/algorand` folder or running the VS Code `Build Beaker application` task
+4. Ensure the smart contract can be deployed and executed in its happy path by either executing `npm run deploy` in the `src/algorand/smart_contracts` folder or running the VS Code `Deploy built beaker application` Run and Debug configuration
+4. Run the automated tests by either executing `npm run test` in the `src/algorand/smart_contracts` folder or running tests using the VS Code Testing pane
 
 ## Deployment
 

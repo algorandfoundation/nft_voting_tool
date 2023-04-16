@@ -40,6 +40,17 @@
       {
         "name": "Run All",
         "configurations": [
+          { "name": "Run dApp (+ LocalNet)", "folder": "dapp" },
+          { "name": "Run api", "folder": "voting-metadata-api" }
+        ],
+        "presentation": {
+          "hidden": false,
+          "group": "0. Run workspace"
+        }
+      },
+      {
+        "name": "Run All (+ smart contract)",
+        "configurations": [
           { "name": "Run dApp", "folder": "dapp" },
           { "name": "Build & Deploy Beaker application", "folder": "algorand" },
           { "name": "Run api", "folder": "voting-metadata-api" }
