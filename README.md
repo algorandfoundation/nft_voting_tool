@@ -18,15 +18,45 @@ This project contains a number of components:
 * [AWS CDK Infrastructure as Code](./infrastructure/README.md)
 * [GitHub Actions CI/CD pipeline](./.github)
 
-## Development setup
+![Architecture](docs/architecture.png)
 
-1. Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install): Ensure you can execute `algokit --version`.
-2. Run `algokit localnet start` to start a LocalNet network
-3. Run `algokit bootstrap all` in `src` to install dependencies and set up `.env` files
-4. Run `algokit bootstrap all` in `src/algorand/smart_contracts` to set-up the smart contract deployment dependencies
-5. Open in VS Code and Hit F5 after selecting the `Run All` Run and Debug configuration to run all components, or run the following:
-    * `npm run dev` in `src/dapp`
-    * `npm run dev` in `src/voting-metadata-api`
+## Development setup
+To run the application locally you need 3 components running:
+
+* An [Algorand LocalNet](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/localnet.md)
+* The [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
+* The [Voting dApp](./src/dapp/README.md)
+
+### Pre-requisites
+
+1. Install `AlgoKit` - [Link](https://github.com/algorandfoundation/algokit-cli#install); ensure you can execute `algokit --version`.
+2. Install Node.js / npm
+
+### First-time setup
+
+1. Initialise the projects, which you can do by either:
+    * `algokit bootstrap all` in `src/`, or:
+    * Manually do it by running `npm install` and then copying `.env.template` to `.env` in `src/dapp` and `src/voting-metadata-api`
+2. Run the projects, which you can do by either:
+    * Opening the project in VS Code and running the `Run All` Run and Debug configuration
+    * Run `algokit localnet start` to start a LocalNet network and run `npm run dev` in `src/dapp` and `src/voting-metadata-api`
+3. Visit the dApp at <http://localhost:5173/>
+
+After completing these steps, you should have all three components running locally, and you can test the application.
+
+### Subsequent setup
+
+You can follow step 2 above.
+
+### Editing the smart contract
+
+If you want to change the smart contract then you can set up the smart contract development environment by:
+
+1. Executing `algokit bootstrap all` in `src/algorand`
+2. Editing `src/algorand/smart_contracts/voting.py` to change the smart contract and `src/algorand/smart_contracts/deploy-config.ts` to change the local test deployment harness and `src/algorand/smart_contracts/tests/voting.spec.ts` to change the automated tests
+3. Build the smart contract by either executing `python -m smart_contracts build` in the `src/algorand` folder or running the VS Code `Build Beaker application` task
+4. Ensure the smart contract can be deployed and executed in its happy path by either executing `npm run deploy` in the `src/algorand/smart_contracts` folder or running the VS Code `Deploy built beaker application` Run and Debug configuration
+4. Run the automated tests by either executing `npm run test` in the `src/algorand/smart_contracts` folder or running tests using the VS Code Testing pane
 
 ## Deployment
 
@@ -52,7 +82,8 @@ To use it you need to configure the following with a `DEV_` prefix for TestNet a
     * `IPFS_GATEWAY_URL`: The URL to the IPFS gateway that is deployed as part of this solution including the `/ipfs` e.g. `https://api.testnet.voting.algorand.foundation/ipfs`
     * `ALGO_EXPLORER_URL`: The URL to AlgoExplorer e.g. `ALGO_EXPLORER_URL`
     * `NFT_EXPLORER_URL`: The URL to NFT Explorer for an asset, minus the asset ID e.g. `https://nftexplorer.app/asset/`
-    
+    * `IS_TESTNET`: `true` or `false`
+    * `CREATOR_ALLOW_LIST_ADDRESSES`: The allowlist for voting round creators. To keep it open for anyone set it to `any`. Alternatively you can limit access to an allowist of addresses e.g. `MOIL6NTBHUFAWV5TYY6YYRJ2N3LOAPOBEV4ZPFZAJKZX3OHGQVMYLEHEUU,ODTX32FQL44D5GIJ2CMCEZ4G3FGUU3WUYDHJZDRNSSLHDO54ESGKXC25UQ`
 
 ### DNS
 

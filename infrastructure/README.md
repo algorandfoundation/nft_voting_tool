@@ -24,13 +24,13 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ## Generating physical architecture diagram
 
-Ensure the "Run and Debug" configuration in VS Code is set to "Generate AWS Diagram" and hit F5
+Ensure the "Run and Debug" configuration in VS Code is set to "Generate AWS Diagram" and hit F5, or execute `npm run graph:local`.
 
 ## Useful commands
 
-- `npm run build` compile typescript to js
-- `npm run watch` watch for changes and compile
-- `npm run test` perform the jest unit tests
-- `cdk deploy` deploy this stack to your default AWS account/region
-- `cdk diff` compare deployed stack with current state
-- `cdk synth` emits the synthesized CloudFormation template
+- `npm run build` - Compile TypeScript to JavaScript and prepare for standalone deployment artifact in `build` folder
+- `npm run deploy:local` - Deploy this stack using the values in `.env`
+- `npm run deploy` - Deploy this stack on a CI server, pulling values from the environment
+- `npm run diff:local` - Compare deployed stack with current state using the values in `.env`
+- `npm run diff` - Compare deployed stack with current state on a CI server, pulling values from the environment
+- `npm run destroy:local` - Deletes all deployed stacks using the values in `.env`

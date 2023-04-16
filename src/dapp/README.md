@@ -1,8 +1,12 @@
 # On-chain voting tool dApp
 
-This dApp provides a user interface for the Algorand on-chain voting tool.
+This dApp serves as the user interface for deploying, managing and interacting with voting rounds on the Algorand blockchain. To run the dApp, you need to connect it to an Algorand network and an https gateway to the IPFS, which can both be configured in the `.env` file. The Algorand network is necessary for deploying the voting round smart contracts and managing voting transactions, while the IPFS gateway is needed for storing and accessing metadata related to voting rounds.
 
-It's implemented using:
+This project contains a [write-through cache Algorand IPFS gateway](../voting-metadata-api/README.md) which can serve as the IPFS gateway.
+
+[AlgoKit](https://github.com/algorandfoundation/algokit-cli#install) can be use to easily start an Algorand LocalNet network.
+
+The dApp is implemented using:
 
 - [Vite](https://vitejs.dev/)
 - [React](https://react.dev/)
@@ -13,6 +17,7 @@ It's implemented using:
 
 ## Initial setup
 
-- Copy `.env.template` to `.env`
-- `npm install`
-- `npm run dev`
+1. Copy `.env.template` to `.env`
+2. `npm install`
+3. `npm run dev`, or, in VS Code run the `Run dApp` Run and Debug configuration
+4. Visit <http://localhost:5173/>
