@@ -1,16 +1,16 @@
 #pragma version 8
-intcblock 0 1 10 5
-bytecblock 0x 0x565f 0x766f74655f6964 0x69735f626f6f747374726170706564 0x766f7465725f636f756e74 0x636c6f73655f74696d65 0x736e617073686f745f7075626c69635f6b6579 0x6d657461646174615f697066735f636964 0x73746172745f74696d65 0x656e645f74696d65 0x71756f72756d 0x6e66745f696d6167655f75726c 0x6e66745f61737365745f6964 0x7d 0x068101
+intcblock 0 1 2 8 400 2500
+bytecblock 0x 0x6f7074696f6e5f636f756e7473 0x766f74655f6964 0x69735f626f6f747374726170706564 0x766f7465725f636f756e74 0x636c6f73655f74696d65 0x56 0x068101 0x736e617073686f745f7075626c69635f6b6579 0x6d657461646174615f697066735f636964 0x73746172745f74696d65 0x656e645f74696d65 0x71756f72756d 0x6e66745f696d6167655f75726c 0x6e66745f61737365745f6964
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l12
 txna ApplicationArgs 0
-pushbytes 0x97f332dd // "create(string,byte[],string,uint64,uint64,uint64,string)void"
+pushbytes 0xae897f6b // "create(string,byte[],string,uint64,uint64,uint8[],uint64,string)void"
 ==
 bnz main_l11
 txna ApplicationArgs 0
-pushbytes 0xb5f951bf // "bootstrap(pay,byte[16][])void"
+pushbytes 0xa4e8d164 // "bootstrap(pay)void"
 ==
 bnz main_l10
 txna ApplicationArgs 0
@@ -22,7 +22,7 @@ pushbytes 0xbcb15896 // "get_preconditions(byte[])(uint64,uint64,uint64,uint64)"
 ==
 bnz main_l8
 txna ApplicationArgs 0
-pushbytes 0xbea742fa // "vote(pay,byte[],byte[16])void"
+pushbytes 0x84a53c6e // "vote(pay,byte[],uint8[])void"
 ==
 bnz main_l7
 err
@@ -93,18 +93,15 @@ intc_0 // 0
 !=
 &&
 assert
-txna ApplicationArgs 1
-store 8
 txn GroupIndex
 intc_1 // 1
 -
-store 7
-load 7
+store 8
+load 8
 gtxns TypeEnum
 intc_1 // pay
 ==
 assert
-load 7
 load 8
 callsub bootstrap_2
 intc_1 // 1
@@ -131,10 +128,12 @@ txna ApplicationArgs 5
 btoi
 store 4
 txna ApplicationArgs 6
-btoi
 store 5
 txna ApplicationArgs 7
+btoi
 store 6
+txna ApplicationArgs 8
+store 7
 load 0
 load 1
 load 2
@@ -142,12 +141,13 @@ load 3
 load 4
 load 5
 load 6
+load 7
 callsub create_1
 intc_1 // 1
 return
 main_l12:
 txn OnCompletion
-intc_3 // DeleteApplication
+pushint 5 // DeleteApplication
 ==
 bnz main_l14
 err
@@ -175,7 +175,21 @@ retsub
 
 // create
 create_1:
-proto 7 0
+proto 8 0
+intc_0 // 0
+bytec_0 // ""
+intc_0 // 0
+dupn 2
+frame_dig -5
+frame_dig -4
+<
+// End time should be after start time
+assert
+frame_dig -4
+global LatestTimestamp
+>
+// End time should be in the future
+assert
 intc_0 // 0
 bytec_2 // "vote_id"
 app_global_get_ex
@@ -185,64 +199,64 @@ load 14
 !
 assert
 bytec_2 // "vote_id"
-frame_dig -7
+frame_dig -8
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec 6 // "snapshot_public_key"
+bytec 8 // "snapshot_public_key"
 app_global_get_ex
 store 16
 store 15
 load 16
 !
 assert
-bytec 6 // "snapshot_public_key"
-frame_dig -6
+bytec 8 // "snapshot_public_key"
+frame_dig -7
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec 7 // "metadata_ipfs_cid"
+bytec 9 // "metadata_ipfs_cid"
 app_global_get_ex
 store 18
 store 17
 load 18
 !
 assert
-bytec 7 // "metadata_ipfs_cid"
-frame_dig -5
+bytec 9 // "metadata_ipfs_cid"
+frame_dig -6
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec 8 // "start_time"
+bytec 10 // "start_time"
 app_global_get_ex
 store 20
 store 19
 load 20
 !
 assert
-bytec 8 // "start_time"
-frame_dig -4
+bytec 10 // "start_time"
+frame_dig -5
 app_global_put
 intc_0 // 0
-bytec 9 // "end_time"
+bytec 11 // "end_time"
 app_global_get_ex
 store 22
 store 21
 load 22
 !
 assert
-bytec 9 // "end_time"
-frame_dig -3
+bytec 11 // "end_time"
+frame_dig -4
 app_global_put
 intc_0 // 0
-bytec 10 // "quorum"
+bytec 12 // "quorum"
 app_global_get_ex
 store 24
 store 23
 load 24
 !
 assert
-bytec 10 // "quorum"
+bytec 12 // "quorum"
 frame_dig -2
 app_global_put
 bytec_3 // "is_bootstrapped"
@@ -255,29 +269,90 @@ bytec 5 // "close_time"
 intc_0 // 0
 app_global_put
 intc_0 // 0
-bytec 11 // "nft_image_url"
+bytec 13 // "nft_image_url"
 app_global_get_ex
 store 26
 store 25
 load 26
 !
 assert
-bytec 11 // "nft_image_url"
+bytec 13 // "nft_image_url"
 frame_dig -1
 extract 2 0
 app_global_put
-bytec 12 // "nft_asset_id"
+bytec 14 // "nft_asset_id"
 intc_0 // 0
 app_global_put
+frame_dig -3
+intc_0 // 0
+extract_uint16
+frame_bury 0
+frame_dig 0
+// option_counts should be non-empty
+assert
+intc_0 // 0
+bytec_1 // "option_counts"
+app_global_get_ex
+store 28
+store 27
+load 28
+!
+assert
+bytec_1 // "option_counts"
+frame_dig -3
+app_global_put
+bytec_1 // "option_counts"
+app_global_get
+frame_bury 1
+intc_0 // 0
+store 29
+frame_dig 1
+intc_0 // 0
+extract_uint16
+frame_bury 2
+frame_dig 2
+store 30
+intc_0 // 0
+store 31
+create_1_l1:
+load 31
+load 30
+<
+bz create_1_l3
+frame_dig 1
+intc_1 // 1
+load 31
+*
+intc_2 // 2
++
+getbyte
+frame_bury 3
+load 29
+frame_dig 3
++
+store 29
+load 31
+intc_1 // 1
++
+store 31
+b create_1_l1
+create_1_l3:
+load 29
+pushint 256 // 256
+<=
+// Can't have more than 256 vote options
+assert
 retsub
 
 // bootstrap
 bootstrap_2:
-proto 2 0
-intc_0 // 0
-dup
+proto 1 0
 bytec_0 // ""
 intc_0 // 0
+dupn 3
+bytec_0 // ""
+intc_0 // 0
+dupn 2
 txn Sender
 global CreatorAddress
 ==
@@ -292,78 +367,129 @@ bytec_3 // "is_bootstrapped"
 intc_1 // 1
 app_global_put
 pushint 201000 // 201000
-frame_dig -1
+intc 5 // 2500
+intc 4 // 400
++
+bytec_1 // "option_counts"
+app_global_get
+frame_bury 0
+intc_0 // 0
+store 33
+frame_dig 0
 intc_0 // 0
 extract_uint16
-frame_bury 0
-frame_dig 0
-pushint 2500 // 2500
-pushint 26 // 26
-pushint 400 // 400
+frame_bury 1
+frame_dig 1
+store 34
+intc_0 // 0
+store 35
+bootstrap_2_l1:
+load 35
+load 34
+<
+bnz bootstrap_2_l5
+load 33
+intc_3 // 8
+intc 4 // 400
+*
 *
 +
-*
 +
-store 28
-frame_dig -2
+store 32
+frame_dig -1
 gtxns Receiver
 global CurrentApplicationAddress
 ==
 // Payment must be to app address
 assert
-frame_dig -2
+frame_dig -1
 gtxns Amount
-load 28
+load 32
 >=
 // Payment must be for >= min balance requirement
 assert
+bytec 6 // "V"
+bytec_1 // "option_counts"
+app_global_get
+frame_bury 5
 intc_0 // 0
-store 27
-bootstrap_2_l1:
-load 27
-frame_dig -1
+store 36
+frame_dig 5
 intc_0 // 0
 extract_uint16
-frame_bury 1
-frame_dig 1
-<
-bz bootstrap_2_l3
-frame_dig -1
-pushint 16 // 16
-load 27
-*
-pushint 2 // 2
-+
-pushint 16 // 16
-extract3
-frame_bury 2
-bytec_1 // "V_"
-frame_dig 2
-concat
-box_del
-pop
-bytec_1 // "V_"
-frame_dig 2
-concat
+frame_bury 6
+frame_dig 6
+store 37
 intc_0 // 0
-itob
-box_put
-load 27
+store 38
+bootstrap_2_l3:
+load 38
+load 37
+<
+bz bootstrap_2_l6
+frame_dig 5
+intc_1 // 1
+load 38
+*
+intc_2 // 2
++
+getbyte
+frame_bury 7
+load 36
+frame_dig 7
++
+store 36
+load 38
 intc_1 // 1
 +
-store 27
+store 38
+b bootstrap_2_l3
+bootstrap_2_l5:
+frame_dig 0
+intc_1 // 1
+load 35
+*
+intc_2 // 2
++
+getbyte
+frame_bury 2
+load 33
+frame_dig 2
++
+store 33
+load 35
+intc_1 // 1
++
+store 35
 b bootstrap_2_l1
-bootstrap_2_l3:
+bootstrap_2_l6:
+load 36
+intc_3 // 8
+*
+box_create
+pop
 retsub
 
 // close
 close_3:
 proto 0 0
+bytec_0 // ""
+intc_0 // 0
+dupn 2
 txn Sender
 global CreatorAddress
 ==
 // unauthorized
 assert
+pushint 1000 // 1000
+pushint 10 // 10
++
+store 39
+close_3_l1:
+load 39
+global OpcodeBudget
+>
+bnz close_3_l14
 bytec 5 // "close_time"
 app_global_get
 intc_0 // 0
@@ -373,6 +499,139 @@ assert
 bytec 5 // "close_time"
 global LatestTimestamp
 app_global_put
+pushbytes 0x7b227374616e64617264223a226172633639222c226465736372697074696f6e223a2254686973206973206120766f74696e6720726573756c74204e465420666f7220766f74696e6720726f756e64207769746820494420 // "{\"standard\":\"arc69\",\"description\":\"This is a voting result NFT for voting round with ID "
+bytec_2 // "vote_id"
+app_global_get
+concat
+pushbytes 0x2e222c2270726f70657274696573223a7b226d65746164617461223a22697066733a2f2f // ".\",\"properties\":{\"metadata\":\"ipfs://"
+concat
+bytec 9 // "metadata_ipfs_cid"
+app_global_get
+concat
+pushbytes 0x222c226964223a22 // "\",\"id\":\""
+concat
+bytec_2 // "vote_id"
+app_global_get
+concat
+pushbytes 0x222c2271756f72756d223a // "\",\"quorum\":"
+concat
+bytec 12 // "quorum"
+app_global_get
+callsub itoa_7
+concat
+pushbytes 0x2c22766f746572436f756e74223a // ",\"voterCount\":"
+concat
+bytec 4 // "voter_count"
+app_global_get
+callsub itoa_7
+concat
+pushbytes 0x2c2274616c6c696573223a5b // ",\"tallies\":["
+concat
+store 40
+bytec_1 // "option_counts"
+app_global_get
+frame_bury 0
+frame_dig 0
+intc_0 // 0
+extract_uint16
+frame_bury 1
+frame_dig 1
+store 41
+intc_0 // 0
+store 42
+intc_0 // 0
+store 43
+intc_0 // 0
+store 44
+close_3_l3:
+load 44
+load 41
+<
+bz close_3_l15
+frame_dig 0
+intc_1 // 1
+load 44
+*
+intc_2 // 2
++
+getbyte
+frame_bury 2
+frame_dig 2
+store 45
+intc_0 // 0
+store 46
+close_3_l5:
+load 46
+load 45
+<
+bnz close_3_l7
+load 44
+intc_1 // 1
++
+store 44
+b close_3_l3
+close_3_l7:
+intc_3 // 8
+load 43
+*
+store 47
+bytec 6 // "V"
+load 47
+intc_3 // 8
+box_extract
+btoi
+store 42
+load 40
+load 46
+intc_0 // 0
+==
+bnz close_3_l13
+bytec_0 // ""
+close_3_l9:
+concat
+load 42
+callsub itoa_7
+concat
+load 46
+load 45
+intc_1 // 1
+-
+==
+bnz close_3_l12
+pushbytes 0x2c // ","
+close_3_l11:
+concat
+store 40
+load 43
+intc_1 // 1
++
+store 43
+load 46
+intc_1 // 1
++
+store 46
+b close_3_l5
+close_3_l12:
+pushbytes 0x5d // "]"
+b close_3_l11
+close_3_l13:
+pushbytes 0x5b // "["
+b close_3_l9
+close_3_l14:
+itxn_begin
+pushint 6 // appl
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field Fee
+pushint 5 // DeleteApplication
+itxn_field OnCompletion
+bytec 7 // 0x068101
+itxn_field ApprovalProgram
+bytec 7 // 0x068101
+itxn_field ClearStateProgram
+itxn_submit
+b close_3_l1
+close_3_l15:
 itxn_begin
 pushint 3 // acfg
 itxn_field TypeEnum
@@ -389,42 +648,15 @@ concat
 itxn_field ConfigAssetName
 pushbytes 0x564f544552534c54 // "VOTERSLT"
 itxn_field ConfigAssetUnitName
-bytec 11 // "nft_image_url"
+bytec 13 // "nft_image_url"
 app_global_get
 itxn_field ConfigAssetURL
-pushbytes 0x7b227374616e64617264223a226172633639222c226465736372697074696f6e223a2254686973206973206120766f74696e6720726573756c74204e465420666f7220766f74696e6720726f756e64207769746820494420 // "{\"standard\":\"arc69\",\"description\":\"This is a voting result NFT for voting round with ID "
-bytec_2 // "vote_id"
-app_global_get
-concat
-pushbytes 0x2e222c2270726f70657274696573223a7b226d65746164617461223a22697066733a2f2f // ".\",\"properties\":{\"metadata\":\"ipfs://"
-concat
-bytec 7 // "metadata_ipfs_cid"
-app_global_get
-concat
-pushbytes 0x222c226964223a22 // "\",\"id\":\""
-concat
-bytec_2 // "vote_id"
-app_global_get
-concat
-pushbytes 0x222c2271756f72756d223a // "\",\"quorum\":"
-concat
-bytec 10 // "quorum"
-app_global_get
-callsub itoa_7
-concat
-pushbytes 0x2c22766f746572436f756e74223a // ",\"voterCount\":"
-concat
-bytec 4 // "voter_count"
-app_global_get
-callsub itoa_7
-concat
-bytec 13 // "}"
-concat
-bytec 13 // "}"
+load 40
+pushbytes 0x5d7d7d // "]}}"
 concat
 itxn_field Note
 itxn_submit
-bytec 12 // "nft_asset_id"
+bytec 14 // "nft_asset_id"
 itxn CreatedAssetID
 app_global_put
 retsub
@@ -433,11 +665,11 @@ retsub
 allowedtovote_4:
 proto 1 1
 pushint 2000 // 2000
-intc_2 // 10
+pushint 10 // 10
 +
-store 29
+store 48
 allowedtovote_4_l1:
-load 29
+load 48
 global OpcodeBudget
 >
 bz allowedtovote_4_l3
@@ -446,18 +678,18 @@ pushint 6 // appl
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field Fee
-intc_3 // DeleteApplication
+pushint 5 // DeleteApplication
 itxn_field OnCompletion
-bytec 14 // 0x068101
+bytec 7 // 0x068101
 itxn_field ApprovalProgram
-bytec 14 // 0x068101
+bytec 7 // 0x068101
 itxn_field ClearStateProgram
 itxn_submit
 b allowedtovote_4_l1
 allowedtovote_4_l3:
 txn Sender
 frame_dig -1
-bytec 6 // "snapshot_public_key"
+bytec 8 // "snapshot_public_key"
 app_global_get
 ed25519verify_bare
 retsub
@@ -475,12 +707,12 @@ intc_0 // 0
 ==
 &&
 global LatestTimestamp
-bytec 8 // "start_time"
+bytec 10 // "start_time"
 app_global_get
 >=
 &&
 global LatestTimestamp
-bytec 9 // "end_time"
+bytec 11 // "end_time"
 app_global_get
 <
 &&
@@ -499,9 +731,9 @@ pushint 32 // 32
 assert
 frame_dig 0
 box_len
-store 31
-store 30
-load 31
+store 50
+store 49
+load 50
 frame_bury 0
 retsub
 
@@ -513,7 +745,7 @@ intc_0 // 0
 ==
 bnz itoa_7_l5
 frame_dig -1
-intc_2 // 10
+pushint 10 // 10
 /
 intc_0 // 0
 >
@@ -522,7 +754,7 @@ bytec_0 // ""
 itoa_7_l3:
 pushbytes 0x30313233343536373839 // "0123456789"
 frame_dig -1
-intc_2 // 10
+pushint 10 // 10
 %
 intc_1 // 1
 extract3
@@ -530,7 +762,7 @@ concat
 b itoa_7_l6
 itoa_7_l4:
 frame_dig -1
-intc_2 // 10
+pushint 10 // 10
 /
 callsub itoa_7
 b itoa_7_l3
@@ -574,28 +806,38 @@ retsub
 // vote
 vote_9:
 proto 3 0
+intc_0 // 0
+dup
+bytec_0 // ""
+intc_0 // 0
+dupn 5
 bytec_0 // ""
 frame_dig -2
 extract 2 0
 callsub allowedtovote_4
-// Allowed to vote
+// Not allowed to vote
 assert
 callsub votingopen_5
-// Voting open
+// Voting not open
 assert
 callsub alreadyvoted_6
 !
-// Hasn't already voted
+// Already voted
 assert
-bytec_1 // "V_"
+intc 5 // 2500
+pushint 32 // 32
+intc_1 // 1
 frame_dig -1
-concat
-box_len
-store 35
-store 34
-load 35
-// Answer ID valid
-assert
+intc_0 // 0
+extract_uint16
+frame_bury 1
+frame_dig 1
+*
++
+intc 4 // 400
+*
++
+store 51
 frame_dig -3
 gtxns Receiver
 global CurrentApplicationAddress
@@ -604,57 +846,98 @@ global CurrentApplicationAddress
 assert
 frame_dig -3
 gtxns Amount
-pushint 21700 // 21700
+load 51
 >=
 // Payment must be for >= min balance requirement
 assert
-bytec_1 // "V_"
+bytec_1 // "option_counts"
+app_global_get
+frame_bury 2
+frame_dig 2
+intc_0 // 0
+extract_uint16
+frame_bury 3
+frame_dig 3
+store 52
 frame_dig -1
-concat
-box_get
-store 37
-store 36
-load 37
+intc_0 // 0
+extract_uint16
+frame_bury 4
+frame_dig 4
+load 52
+==
+// Number of answers incorrect
 assert
-load 36
+intc_0 // 0
+store 53
+intc_0 // 0
+store 54
+vote_9_l1:
+load 54
+load 52
+<
+bz vote_9_l3
+frame_dig -1
+intc_1 // 1
+load 54
+*
+intc_2 // 2
++
+getbyte
+frame_bury 5
+frame_dig 2
+intc_1 // 1
+load 54
+*
+intc_2 // 2
++
+getbyte
+frame_bury 7
+frame_dig 5
+frame_dig 7
+<
+// Answer option index invalid
+assert
+intc_3 // 8
+load 53
+frame_dig 5
++
+*
+store 55
+bytec 6 // "V"
+load 55
+intc_3 // 8
+box_extract
 btoi
-store 32
-load 32
+store 56
+bytec 6 // "V"
+load 55
+load 56
 intc_1 // 1
 +
-store 33
-load 32
-intc_0 // 0
->=
-// currentVoteTally >= 0
-assert
-load 33
-load 32
->
-// newVoteTally > currentVoteTally
-assert
-bytec_1 // "V_"
-frame_dig -1
-concat
-box_del
-pop
-bytec_1 // "V_"
-frame_dig -1
-concat
-load 33
 itob
-box_put
+box_replace
+load 53
+frame_dig 7
++
+store 53
+load 54
+intc_1 // 1
++
+store 54
+b vote_9_l1
+vote_9_l3:
 txn Sender
-frame_bury 0
-frame_dig 0
+frame_bury 9
+frame_dig 9
 len
 pushint 32 // 32
 ==
 assert
-frame_dig 0
+frame_dig 9
 box_del
 pop
-frame_dig 0
+frame_dig 9
 frame_dig -1
 box_put
 bytec 4 // "voter_count"
