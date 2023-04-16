@@ -11,3 +11,5 @@ cdk-outputs.json
 .env
 
 build
+
+diagram.dot

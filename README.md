@@ -18,6 +18,9 @@ This project contains a number of components:
 * [AWS CDK Infrastructure as Code](./infrastructure/README.md)
 * [GitHub Actions CI/CD pipeline](./.github)
 
+![Architecture](docs/architecture.png)
+
+## Development setup
 ## Running Locally
 To run the application locally you need 3 components running.
 * An Algorand LocalNet
