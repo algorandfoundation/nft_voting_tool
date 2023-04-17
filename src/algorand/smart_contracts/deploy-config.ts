@@ -130,12 +130,10 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
 
       // Show boxes before voting
       const getRawTally = async () => {
-        return (
-          await appClient.getBoxValuesAsABIType(
-            new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
-            (bn) => bn.name == 'V',
-          )
-        )[0].value
+        return await appClient.getBoxValueAsABIType(
+          'V',
+          new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
+        )
       }
       console.log(await getRawTally())
 
@@ -169,7 +167,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           args: [],
           boxes: ['V'],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 4 to get 3000 */ * 1_000) },
       })
       console.log('Voting round closed')
 

@@ -5,8 +5,7 @@ import beaker.lib.storage as storage
 import pyteal as pt
 from pyteal.types import require_type
 
-from smart_contracts.helpers.deployment_standard import \
-    deploy_time_permanence_control
+from smart_contracts.helpers.deployment_standard import deploy_time_permanence_control
 
 VoteIndexBytes: TypeAlias = Literal[8]
 VoteIndex: TypeAlias = pt.abi.Uint8
@@ -150,6 +149,9 @@ class VotingState:
         pt.TealType.uint64,
         descr="The asset ID of a result NFT if one has been created",
     )
+    total_options = beaker.GlobalStateValue(
+        pt.TealType.uint64, static=True, descr="The total number of options"
+    )
     option_counts = beaker.GlobalStateValue(
         pt.TealType.bytes, static=True, descr="The number of options for each question"
     )
@@ -168,17 +170,26 @@ class VotingState:
                 data.length(),
                 comment="option_counts should be non-empty",
             ),
-            self.option_counts.set(data.encode()),
-            # Need to have a reasonable limit, plus this ensures the results should fit
-            # into the 1000 byte limit for the transaction note of the result NFT
+            # option_counts won't fit with ABI encoding if length is > 112
             pt.Assert(
-                self.total_options_count <= pt.Int(256),
-                comment="Can't have more than 256 vote options",
+                data.length() <= pt.Int(112),
+                comment="Can't have more than 112 questions",
             ),
+            self.option_counts.set(data.encode()),
+            (total_options := UInt64ScratchVar()).store(
+                self.calculate_total_options_count()
+            ),
+            # Need to have a reasonable limit, plus this ensures the results should fit
+            # into the 1000 byte limit for the transaction note of the result NFT and
+            # the 128 byte limit for global storage
+            pt.Assert(
+                total_options.load() <= pt.Int(128),
+                comment="Can't have more than 128 vote options",
+            ),
+            self.total_options.set(total_options.load()),
         )
 
-    @property
-    def total_options_count(self) -> pt.Expr:
+    def calculate_total_options_count(self) -> pt.Expr:
         return pt.Seq(
             self.load_option_counts(
                 into=(option_counts := pt.abi.make(VoteIndexArray))
@@ -214,13 +225,18 @@ def create(
     quorum: pt.abi.Uint64,
     nft_image_url: pt.abi.String,
 ) -> pt.Expr:
+    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
+        # store_option_counts when there is a max # of options needs ~2600 budget
+        opup.ensure_budget(pt.Int(2800), fee_source=pt.OpUpFeeSource.GroupCredit),
         pt.Assert(
-            start_time.get() < end_time.get(),
+            # Technically this should be < but having <= makes automated testing easier
+            # since it's not possible to control time yet
+            start_time.get() <= end_time.get(),
             comment="End time should be after start time",
         ),
         pt.Assert(
-            end_time.get() > pt.Global.latest_timestamp(),
+            end_time.get() >= pt.Global.latest_timestamp(),
             comment="End time should be in the future",
         ),
         app.state.vote_id.set(vote_id.get()),
@@ -251,17 +267,23 @@ def bootstrap(
         app.state.is_bootstrapped.set(pt.Int(1)),
         min_bal_req.store(
             pt.Int(
-                beaker.consts.ASSET_MIN_BALANCE * 2 + 1000
-            )  # minimum balance req for: ALGOs + Vote result NFT asset + create NFT fee
+                # minimum balance req for: ALGOs + Vote result NFT asset
+                beaker.consts.ASSET_MIN_BALANCE * 2
+                #  Create NFT fee
+                + 1000
+                # Tally box
+                + beaker.consts.BOX_FLAT_MIN_BALANCE
+                # Tally box key "V"
+                + beaker.consts.BOX_BYTE_MIN_BALANCE
+            )
             + (
-                pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
-                # Box key "V"
-                + pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE)
-                # Box value (tallies)
-                + app.state.total_options_count
+                # Tally box value
+                app.state.total_options.get()
                 * (
-                    pt.Int(pt.abi.make(VoteCount).type_spec().byte_length_static())
-                    * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE)
+                    pt.Int(
+                        pt.abi.make(VoteCount).type_spec().byte_length_static()
+                        * beaker.consts.BOX_BYTE_MIN_BALANCE
+                    )
                 )
             )
         ),
@@ -274,7 +296,7 @@ def bootstrap(
             fund_min_bal_req.get().amount() >= min_bal_req.load(),
             comment="Payment must be for >= min balance requirement",
         ),
-        app.state.tallies.create(app.state.total_options_count),
+        app.state.tallies.create(app.state.total_options.get()),
     )
 
 
@@ -282,7 +304,7 @@ def bootstrap(
 def close() -> pt.Expr:
     opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        opup.ensure_budget(pt.Int(1000), fee_source=pt.OpUpFeeSource.GroupCredit),
+        opup.ensure_budget(pt.Int(20000), fee_source=pt.OpUpFeeSource.GroupCredit),
         pt.Assert(app.state.close_time == pt.Int(0), comment="Already closed"),
         app.state.close_time.set(pt.Global.latest_timestamp()),
         (note := StringScratchVar()).store(
@@ -324,7 +346,15 @@ def close() -> pt.Expr:
                         itoa(current_tally.load()),
                         pt.If(
                             option_index.load() == (options_count.load() - ONE),
-                            pt.Bytes("]"),
+                            pt.Concat(
+                                pt.Bytes("]"),
+                                pt.If(
+                                    question_index.load()
+                                    == (questions_count.load() - ONE),
+                                    pt.Bytes(""),
+                                    pt.Bytes(","),
+                                ),
+                            ),
                             pt.Bytes(","),
                         ),
                     )
@@ -430,11 +460,23 @@ def vote(
     signature: pt.abi.DynamicBytes,
     answer_ids: VoteIndexArray,
 ) -> pt.Expr:
+    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
+        opup.ensure_budget(pt.Int(7700), fee_source=pt.OpUpFeeSource.GroupCredit),
         # Check voting preconditions
         pt.Assert(allowed_to_vote(signature.get()), comment="Not allowed to vote"),
         pt.Assert(voting_open(), comment="Voting not open"),
         pt.Assert(pt.Not(already_voted()), comment="Already voted"),
+        # Check vote array looks valid
+        app.state.load_option_counts(
+            into=(option_counts := pt.abi.make(VoteIndexArray))
+        ),
+        (questions_count := UInt64ScratchVar()).store(option_counts.length()),
+        pt.Assert(
+            answer_ids.length() == questions_count.load(),
+            comment="Number of answers incorrect",
+        ),
+        # Check voter box is funded
         (min_bal_req := UInt64ScratchVar()).store(
             pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
             + (
@@ -444,7 +486,6 @@ def vote(
             )
             * pt.Int(beaker.consts.BOX_BYTE_MIN_BALANCE)
         ),
-        # Check voter box is funded
         pt.Assert(
             fund_min_bal_req.get().receiver()
             == pt.Global.current_application_address(),
@@ -453,15 +494,6 @@ def vote(
         pt.Assert(
             fund_min_bal_req.get().amount() >= min_bal_req.load(),
             comment="Payment must be for >= min balance requirement",
-        ),
-        # Check vote array looks valid
-        app.state.load_option_counts(
-            into=(option_counts := pt.abi.make(VoteIndexArray))
-        ),
-        (questions_count := UInt64ScratchVar()).store(option_counts.length()),
-        pt.Assert(
-            answer_ids.length() == questions_count.load(),
-            comment="Number of answers incorrect",
         ),
         # Record the vote for each question
         (cumulative_offset := UInt64ScratchVar()).store(ZERO),

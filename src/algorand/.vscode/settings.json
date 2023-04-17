@@ -1,10 +1,7 @@
 {
   // General - see also /.editorconfig
   "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    // Don't want to use isort because it conflicts with Ruff - see run on save below
-    "source.organizeImports": false
-  },
+
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
@@ -31,7 +28,8 @@
   "[python]": {
     "editor.codeActionsOnSave": {
       "source.fixAll": true,
-      "source.organizeImports": true
+      // Prevent default import sorting from running; Ruff will sort imports for us anyway
+      "source.organizeImports": false
     },
     "editor.defaultFormatter": null
   },
