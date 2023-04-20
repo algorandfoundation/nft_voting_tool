@@ -5,5 +5,9 @@
     "source.fixAll.eslint": true,
     "source.organizeImports": true
   },
-  "dotenv.enableAutocloaking": false
+  "dotenv.enableAutocloaking": false,
+  "jest.autoRun": {
+    "watch": false,
+    "onSave": "test-file"
+  }
 }

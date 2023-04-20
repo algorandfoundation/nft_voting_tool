@@ -7,13 +7,12 @@ import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/type
 import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useEffect, useState } from 'react'
-import * as uuid from 'uuid'
 import { v4 as uuidv4 } from 'uuid'
 import { useSetConnectedWallet } from '../features/wallet/state'
-import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
-import { VotingRoundContract, algod, fetchTallyBoxes, fetchVoteBox, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { QuestionModel, VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
+import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
+import { VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
+import { algod, fetchTallyCounts, fetchVoterVotes, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRoundPopulated[]
@@ -27,7 +26,7 @@ const useFetchVoteRounds = (addresses: string[]) => {
 
   const fetchData = () => {
     if (Array.isArray(addresses) && addresses.length > 0) {
-      ; (async () => {
+      ;(async () => {
         setLoading(true)
         const votingRounds: VotingRoundPopulated[] = []
         for (const addr of addresses) {
@@ -61,7 +60,7 @@ const useFetchVoteRound = (appId: number) => {
   const [data, setData] = useState<VotingRoundPopulated | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ; (async () => {
+    ;(async () => {
       setLoading(true)
       const votingRound = await fetchVotingRound(appId)
       setData(votingRound)
@@ -76,22 +75,21 @@ const useFetchVoteRound = (appId: number) => {
   return { loading, data, refetch }
 }
 
-const useFetchVoteRoundResults = (appId: number) => {
+const useFetchVoteRoundResults = (appId: number, round?: VotingRoundPopulated) => {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<VotingRoundResult[] | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ; (async () => {
+    ;(async () => {
+      if (!round) {
+        return
+      }
       setLoading(true)
-      const boxes = await fetchTallyBoxes(appId)
-      const results = boxes.map((box) => ({
-        optionId: uuid.stringify(box.name.nameRaw, 2),
-        count: Number(box.value),
-      }))
+      const results = await fetchTallyCounts(appId, round.optionIds)
       setData(results)
       setLoading(false)
     })()
-  }, [data, setData])
+  }, [data, setData, round])
 
   useEffect(() => {
     refetch()
@@ -100,18 +98,18 @@ const useFetchVoteRoundResults = (appId: number) => {
   return { loading, data, refetch }
 }
 
-const useFetchVoteRoundVote = (appId: number, voterAddress?: string) => {
+const useFetchVoteRoundVote = (appId: number, voterAddress?: string, round?: VotingRoundPopulated) => {
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState<string | undefined>(undefined)
+  const [data, setData] = useState<string[] | undefined>(undefined)
 
   const refetch = useCallback(() => {
-    ; (async () => {
+    ;(async () => {
       setLoading(true)
-      const answer = voterAddress ? await fetchVoteBox(appId, voterAddress) : undefined
+      const answer = voterAddress && round ? await fetchVoterVotes(appId, voterAddress, round) : undefined
       setData(answer)
       setLoading(false)
     })()
-  }, [voterAddress, data, setData])
+  }, [voterAddress, round, data, setData])
 
   useEffect(() => {
     refetch()
@@ -143,6 +141,7 @@ const getRoundFromApp = async (
       // todo: We are losing data here
       // answers: round.questions[0].options,
       questions: round.questions,
+      optionIds: round.questions.flatMap((q) => q.options.map((o) => o.id)),
       // questionTitle: round.questions[0].prompt,
       description: round.description,
       // todo: This is optional
@@ -156,6 +155,7 @@ const getRoundFromApp = async (
         at: round.created.at,
         by: round.created.by,
       },
+      hasVoteTallyBox: 'total_options' in decodedState,
     }
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -280,16 +280,16 @@ const api = {
     return useSetter(
       async ({
         signature,
-        selectedOption,
+        selectedOptionIndexes,
         signer,
         appId,
       }: {
         signature: string
-        selectedOption: string
+        selectedOptionIndexes: number[]
         signer: TransactionSignerAccount
         appId: number
       }) => {
-        await VotingRoundContract(signer).castVote(signature, selectedOption, appId)
+        await VotingRoundContract(signer).castVote(signature, selectedOptionIndexes, appId)
       },
     )
   },
@@ -299,8 +299,8 @@ const api = {
   useVotingRound: (id: number) => {
     return useFetchVoteRound(id)
   },
-  useVotingRoundResults: (id: number) => {
-    return useFetchVoteRoundResults(id)
+  useVotingRoundResults: (id: number, round?: VotingRoundPopulated) => {
+    return useFetchVoteRoundResults(id, round)
   },
   useVotingRoundVote: (id: number, voterAddress?: string) => {
     return useFetchVoteRoundVote(id, voterAddress)
@@ -346,7 +346,7 @@ const api = {
           signer,
           auth,
         }: {
-          newRound: Omit<VotingRoundModel & QuestionModel, 'id' | 'votes' | 'snapshot'>
+          newRound: Omit<VotingRoundModel, 'id' | 'votes' | 'snapshot'>
           signer: TransactionSignerAccount
           auth: { address: string; signedTransaction: Uint8Array }
         }) => {
@@ -371,10 +371,17 @@ const api = {
             voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
           }
 
-          const options = newRound.answers.map((answer) => {
+          const questions = newRound.questions.map((question) => {
             return {
               id: uuidv4(),
-              label: answer,
+              prompt: question.questionTitle,
+              description: question.questionDescription,
+              options: question.answers.map((answer) => {
+                return {
+                  id: uuidv4(),
+                  label: answer,
+                }
+              }),
             }
           })
 
@@ -389,14 +396,7 @@ const api = {
               end: newRound.end,
               quorum: newRound.minimumVotes,
               voteGatingSnapshotCid: voteGatingSnapshotCid,
-              questions: [
-                {
-                  id: uuidv4(),
-                  prompt: newRound.questionTitle,
-                  description: newRound.questionDescription,
-                  options: options,
-                },
-              ],
+              questions,
               created: {
                 at: new Date().toISOString(),
                 by: signer.addr,
@@ -406,6 +406,8 @@ const api = {
             auth,
           )
 
+          const questionCounts = questions.map((q) => q.options.length)
+
           const app = await VotingRoundContract(signer).create(
             voteId,
             publicKey,
@@ -414,26 +416,23 @@ const api = {
             Math.floor(Date.parse(newRound.end) / 1000),
             newRound.minimumVotes ? newRound.minimumVotes : 0,
             'ipfs://bafkreif5grpze42yffwn5opgviju435zlshdhbjqivsu4vcr6jafkphldq',
+            questionCounts,
           )
 
-          return {
-            app,
-            options,
-          }
+          return app
         },
       ),
       bootstrap: useSetter(
         async ({
           signer,
           app,
+          totalQuestionOptions,
         }: {
           signer: TransactionSignerAccount
-          app: { app: AppReference; options: { id: string; label: string }[] }
+          app: AppReference
+          totalQuestionOptions: number
         }) => {
-          await VotingRoundContract(signer).bootstrap(
-            app.app,
-            app.options.map((option) => option.id),
-          )
+          await VotingRoundContract(signer).bootstrap(app, totalQuestionOptions)
         },
       ),
     }

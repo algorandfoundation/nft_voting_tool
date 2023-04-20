@@ -87,8 +87,7 @@ describe('voting', () => {
               sendParams: { skipSending: true },
             }),
           ],
-          // 2 * 1KB write budget (256 options * uint64 = 2 KB)
-          boxes: ['V', ''],
+          boxes: ['V'],
         },
       })
     }
@@ -125,8 +124,7 @@ describe('voting', () => {
             voter.signature,
             questionIndexes,
           ],
-          // 2 * 1KB write budget (256 options * uint64 = 2 KB)
-          boxes: ['V', '', voter.account],
+          boxes: ['V', voter.account],
         },
         sendParams: { fee: voteFee },
         sender: voter.account,
@@ -138,8 +136,7 @@ describe('voting', () => {
         method: 'close',
         methodArgs: {
           args: [],
-          // 2 * 1KB write budget (256 options * uint64 = 2 KB)
-          boxes: ['V', ''],
+          boxes: ['V'],
         },
         sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       })

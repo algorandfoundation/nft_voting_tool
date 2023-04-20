@@ -29,7 +29,9 @@ export type VotingRoundPopulated = {
   voteGatingSnapshotCid?: string
   informationUrl?: string
   questions: Question[]
+  optionIds: string[]
   created: CreatedMetadata
+  hasVoteTallyBox: boolean
 }
 
 export type Vote = {
@@ -48,4 +50,4 @@ export type QuestionModel = {
   answers: string[]
 }
 
-export type VotingRoundModel = RoundInfo & QuestionModel & VoteId & { snapshot?: VoteGatingSnapshot }
+export type VotingRoundModel = RoundInfo & { questions: QuestionModel[] } & VoteId & { snapshot?: VoteGatingSnapshot }

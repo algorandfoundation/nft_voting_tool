@@ -6,10 +6,10 @@ import { VotingRoundResult } from '../../shared/types'
 type VoteResultsProps = {
   question: Question
   votingRoundResults: VotingRoundResult[]
-  myVote?: string
+  myVotes?: string[]
 }
 
-export const VoteResults = ({ question, votingRoundResults, myVote }: VoteResultsProps) => {
+export const VoteResults = ({ question, votingRoundResults, myVotes }: VoteResultsProps) => {
   const counts = votingRoundResults.map((v) => v.count)
   const max = Math.max(...counts)
   const sum = counts.reduce((a, b) => a + b, 0)
@@ -31,7 +31,7 @@ export const VoteResults = ({ question, votingRoundResults, myVote }: VoteResult
                 </div>
                 <div className="flex  items-center">
                   {option.label}
-                  {myVote === option.id && (
+                  {myVotes?.includes(option.id) && (
                     <span title="You voted for this option" className="ml-2">
                       ⭐
                     </span>
