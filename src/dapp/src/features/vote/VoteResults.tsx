@@ -22,7 +22,7 @@ export const VoteResults = ({ question, votingRoundResults, myVotes }: VoteResul
               <div className="col-span-2 h-10 flex items-center">
                 <div
                   className="bg-algorand-orange-coral h-10 rounded-tr-xl rounded-br-xl"
-                  style={{ flexBasis: `${(result.count / max) * 150 + 5}px` }}
+                  style={{ flexBasis: `${(max ? result.count / max : 0) * 150 + 5}px` }}
                 ></div>
                 <div className="p-2 pr-6">
                   {result.count}
