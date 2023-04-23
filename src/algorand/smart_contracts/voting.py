@@ -158,7 +158,8 @@ class VotingState:
     tallies = TallyBox(key=pt.Bytes("V"), vote_type=VoteCount())
 
     votes = storage.BoxMapping(
-        key_type=pt.abi.Address, value_type=pt.abi.StaticBytes[VoteIndexBytes]
+        key_type=pt.abi.Address,
+        value_type=pt.abi.DynamicArray[pt.abi.StaticBytes[VoteIndexBytes]],
     )
 
     def load_option_counts(self, into: VoteIndexArray) -> pt.Expr:
@@ -292,9 +293,10 @@ def bootstrap(
             == pt.Global.current_application_address(),
             comment="Payment must be to app address",
         ),
+        pt.Log(pt.Itob(min_bal_req.load())),
         pt.Assert(
-            fund_min_bal_req.get().amount() >= min_bal_req.load(),
-            comment="Payment must be for >= min balance requirement",
+            fund_min_bal_req.get().amount() == min_bal_req.load(),
+            comment="Payment must be for the exact min balance requirement",
         ),
         app.state.tallies.create(app.state.total_options.get()),
     )
@@ -480,7 +482,7 @@ def vote(
         (min_bal_req := UInt64ScratchVar()).store(
             pt.Int(beaker.consts.BOX_FLAT_MIN_BALANCE)
             + (
-                pt.Int(32)
+                pt.Int(32 + 2)
                 + pt.Int(VoteIndex().type_spec().byte_length_static())
                 * answer_ids.length()
             )
@@ -491,9 +493,10 @@ def vote(
             == pt.Global.current_application_address(),
             comment="Payment must be to app address",
         ),
+        pt.Log(pt.Itob(min_bal_req.load())),
         pt.Assert(
-            fund_min_bal_req.get().amount() >= min_bal_req.load(),
-            comment="Payment must be for >= min balance requirement",
+            fund_min_bal_req.get().amount() == min_bal_req.load(),
+            comment="Payment must be the exact min balance requirement",
         ),
         # Record the vote for each question
         (cumulative_offset := UInt64ScratchVar()).store(ZERO),

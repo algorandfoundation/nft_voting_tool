@@ -47,7 +47,7 @@ export const WalletVoteStatus = ({ round, allowedToVote, myVotes }: WalletVoteSt
       {myVotes && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">
-            You voted, and chose {myVotes?.map((v) => round.questions[0].options.find((o) => o.id === v)?.label).join(', ')}
+            You voted, and chose: {myVotes?.map((v, i) => round.questions[i].options.find((o) => o.id === v)?.label).join(', ')}
           </Typography>
         </Box>
       )}

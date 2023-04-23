@@ -420,11 +420,14 @@ global CurrentApplicationAddress
 ==
 // Payment must be to app address
 assert
+load 36
+itob
+log
 frame_dig -1
 gtxns Amount
 load 36
->=
-// Payment must be for >= min balance requirement
+==
+// Payment must be for the exact min balance requirement
 assert
 bytec 8 // "V"
 bytec 7 // "total_options"
@@ -827,7 +830,7 @@ load 50
 // Number of answers incorrect
 assert
 pushint 2500 // 2500
-pushint 32 // 32
+pushint 34 // 34
 intc_1 // 1
 frame_dig -1
 intc_0 // 0
@@ -846,11 +849,14 @@ global CurrentApplicationAddress
 ==
 // Payment must be to app address
 assert
+load 51
+itob
+log
 frame_dig -3
 gtxns Amount
 load 51
->=
-// Payment must be for >= min balance requirement
+==
+// Payment must be the exact min balance requirement
 assert
 intc_0 // 0
 store 52

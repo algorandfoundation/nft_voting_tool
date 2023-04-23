@@ -1,4 +1,4 @@
-import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
+import { Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -9,7 +9,6 @@ import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { useConnectedWallet } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
-import { VoteResults } from './VoteResults'
 import { VoteSubmission } from './VoteSubmission'
 import { VotingTime } from './VotingTime'
 import { WalletVoteStatus } from './WalletVoteStatus'
@@ -24,7 +23,7 @@ function Vote() {
   const { data, loading, refetch } = api.useVotingRound(voteId)
   const { data: votingRoundResults, loading: loadingResults, refetch: refetchResults } = api.useVotingRoundResults(voteId, data)
   const walletAddress = useConnectedWallet()
-  const { data: voteResults, loading: loadingVote, refetch: refetchVote } = api.useVotingRoundVote(voteId, walletAddress)
+  const { data: voteResults, loading: loadingVote, refetch: refetchVote } = api.useVotingRoundVote(voteId, walletAddress, data)
   const { loading: submittingVote, execute: submitVote, error } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
   const voteStarted = !data ? false : getVoteStarted(data)
@@ -143,40 +142,16 @@ function Vote() {
               <SkeletonArray className="max-w-xs" count={4} />
             </div>
           )}
-          {data?.questions.map((question) => (
-            <div className="mt-7" key={question.id}>
-              <Typography variant="h4">{question.prompt}</Typography>
-
-              <Typography>{question.description}</Typography>
-
-              {!voteResults && (
-                <div className="mt-4">
-                  {loadingVote ? (
-                    <SkeletonArray className="max-w-xs" count={1} />
-                  ) : (
-                    <>
-                      {canVote || !voteStarted ? (
-                        <VoteSubmission round={data} existingAnswers={voteResults} handleSubmitVote={handleSubmitVote} />
-                      ) : null}
-                    </>
-                  )}
-                </div>
-              )}
-              <div className="mt-4">
-                {loadingResults ? (
-                  <SkeletonArray className="max-w-xs" count={4} />
-                ) : (
-                  votingRoundResults && <VoteResults question={question} votingRoundResults={votingRoundResults} myVotes={voteResults} />
-                )}
-              </div>
-              {error && (
-                <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
-                  <Typography>Could not cast vote:</Typography>
-                  <Typography>{error}</Typography>
-                </Alert>
-              )}
-            </div>
-          ))}
+          <VoteSubmission
+            round={data}
+            voteResults={votingRoundResults}
+            canVote={canVote}
+            loadingResults={loadingResults}
+            loadingVote={loadingVote}
+            votingError={error}
+            existingAnswers={voteResults}
+            handleSubmitVote={handleSubmitVote}
+          />
         </div>
         <div>
           <VotingTime className="hidden sm:visible" loading={loading} round={data} />

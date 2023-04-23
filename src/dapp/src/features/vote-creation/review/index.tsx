@@ -12,6 +12,7 @@ import {
   useReviewStep,
   useRoundInfo,
   useSetAppReference,
+  useSetAppSourceMaps,
   useSetAuth,
   useSetReviewStep,
 } from '../state'
@@ -33,6 +34,7 @@ export default function Review() {
   const questions = useQuestions()
   const [authData, setAuth] = [useAuth(), useSetAuth()]
   const [appRef, setApp] = [useAppReference(), useSetAppReference()]
+  const setAppSourceMaps = useSetAppSourceMaps()
   const navigate = useNavigate()
   const reviewStep = useReviewStep()
   const setReviewStep = useSetReviewStep()
@@ -55,13 +57,20 @@ export default function Review() {
         break
       case VoteCreationReviewSteps.Create:
         // eslint-disable-next-line no-case-declarations
-        setApp(
-          await create.execute({
-            auth: authData,
-            newRound: { ...roundInfo, questions },
-            signer,
-          }),
-        )
+
+        // eslint-disable-next-line no-case-declarations
+        const app = await create.execute({
+          auth: authData,
+          newRound: { ...roundInfo, questions },
+          signer,
+        })
+        setApp(app)
+        if (app.compiledApproval && app.compiledClear) {
+          setAppSourceMaps({
+            approvalSourceMap: app.compiledApproval.sourceMap,
+            clearSourceMap: app.compiledClear.sourceMap,
+          })
+        }
 
         break
       case VoteCreationReviewSteps.Bootstrap:
@@ -124,9 +133,9 @@ export default function Review() {
         <Typography variant="h4" className="mt-6 mb-2">
           Question or category
         </Typography>
-        <div className="container grid grid-cols-8 gap-4 ">
+        <div className="container">
           {questions.map((question, index) => (
-            <div key={`q${index}`}>
+            <div key={`q${index}`} className="grid grid-cols-8 gap-4">
               <Row label={`Question ${index + 1}`} value="" />
               <Row label="Question or category" value={question.questionTitle} />
               <Row label="Description" value={question.questionDescription ?? '-'} />

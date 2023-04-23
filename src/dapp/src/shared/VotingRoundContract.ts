@@ -1,6 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
-import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppCompilationResult, AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
 import algosdk, { ABIUintType } from 'algosdk'
 import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
@@ -32,7 +33,7 @@ export const fetchTallyCounts = async (appId: number, optionIds: string[]) => {
     const type = new algosdk.ABIArrayStaticType(new ABIUintType(64), optionIds.length)
     return (type.decode(box) as number[]).map((count, index) => ({
       optionId: optionIds[index],
-      count: count,
+      count: Number(count),
     }))
   } else {
     return (await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))).map((box) => ({
@@ -51,15 +52,25 @@ export const fetchVoterVotes = async (appId: number, voterAddress: string, round
     algod,
   )
 
-  const box = await client.getBoxValue(algosdk.decodeAddress(voterAddress).publicKey)
+  try {
+    const box = await client.getBoxValue(algosdk.decodeAddress(voterAddress).publicKey)
 
-  const type = new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), round.questions.length)
-
-  return box
-    ? round.hasVoteTallyBox
-      ? (type.decode(box) as number[]).map((optionIndex, questionIndex) => round.questions[questionIndex].options[optionIndex].id)
-      : [uuid.stringify(box)]
-    : undefined
+    const type = new algosdk.ABIArrayDynamicType(new algosdk.ABIUintType(8))
+    return box
+      ? round.hasVoteTallyBox
+        ? type
+            .decode(box)
+            .map(Number)
+            .map((optionIndex, questionIndex) => round.questions[questionIndex].options[optionIndex].id)
+        : [uuid.stringify(box)]
+      : undefined
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    if (e?.message?.includes('404')) {
+      return undefined
+    }
+    throw e
+  }
 }
 
 export const VotingRoundContract = (sender: TransactionSignerAccount) => {
@@ -72,7 +83,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     quorum: number,
     nftImageUrl: string,
     questionCounts: number[],
-  ): Promise<AppReference> => {
+  ): Promise<AppReference & Partial<AppCompilationResult>> => {
     const appClient = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -116,7 +127,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     })
   }
 
-  const castVote = async (signature: string, questionIndexes: number[], appId: number) => {
+  const castVote = async (signature: string, questionIndexes: number[], appId: number, sourceMaps: AppSourceMaps | undefined) => {
     const client = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -125,14 +136,18 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       algod,
     )
 
+    if (sourceMaps) {
+      client.importSourceMaps(sourceMaps)
+    }
+
     const signatureByteArray = Buffer.from(signature, 'base64')
-    const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000)
+    const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
     const transaction = await client.call({
       method: 'vote',
       methodArgs: {
         args: [
           client.fundAppAccount({
-            amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ questionIndexes.length * 1) + 2500),
+            amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500),
             sender,
             sendParams: { skipSending: true },
           }),
@@ -163,6 +178,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
         boxes: ['V'],
       },
       sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
+      sender,
     })
   }
 

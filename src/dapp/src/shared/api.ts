@@ -6,8 +6,10 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import * as algosdk from 'algosdk'
 import { useCallback, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { useAppSourceMaps } from '../features/vote-creation/state'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { signCsv } from './csvSigner'
 import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
@@ -93,7 +95,7 @@ const useFetchVoteRoundResults = (appId: number, round?: VotingRoundPopulated) =
 
   useEffect(() => {
     refetch()
-  }, [appId])
+  }, [appId, round])
 
   return { loading, data, refetch }
 }
@@ -113,7 +115,7 @@ const useFetchVoteRoundVote = (appId: number, voterAddress?: string, round?: Vot
 
   useEffect(() => {
     refetch()
-  }, [appId, voterAddress])
+  }, [appId, voterAddress, round])
 
   return { loading, data, refetch }
 }
@@ -155,7 +157,8 @@ const getRoundFromApp = async (
         at: round.created.at,
         by: round.created.by,
       },
-      hasVoteTallyBox: 'total_options' in decodedState,
+      hasVoteTallyBox: decodedState.total_options !== undefined,
+      votedWallets: decodedState.voter_count,
     }
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -197,14 +200,19 @@ const decodeVotingRoundGlobalState = (
   const decodedState = {
     start_time: '0',
     end_time: '0',
+    quorum: 0,
     close_time: undefined as string | undefined,
     metadata_ipfs_cid: '',
     is_bootstrapped: false,
     nft_image_url: undefined as string | undefined,
     nft_asset_id: undefined as number | undefined,
+    voter_count: 0,
+    total_options: undefined as number | undefined,
+    option_counts: undefined as number[] | undefined,
   }
   globalState.map((state) => {
     const globalKey = Buffer.from(state.key, 'base64').toString()
+    const optionCountsType = new algosdk.ABIArrayDynamicType(new algosdk.ABIUintType(8))
     if (state.value.type === 2) {
       switch (globalKey) {
         case 'start_time':
@@ -222,6 +230,12 @@ const decodeVotingRoundGlobalState = (
         case 'nft_asset_id':
           decodedState.nft_asset_id = state.value.uint > 0 ? Number(state.value.uint) : undefined
           break
+        case 'voter_count':
+          decodedState.voter_count = Number(state.value.uint)
+          break
+        case 'total_options':
+          decodedState.total_options = Number(state.value.uint)
+          break
       }
     } else {
       switch (globalKey) {
@@ -231,6 +245,8 @@ const decodeVotingRoundGlobalState = (
         case 'nft_image_url':
           decodedState.nft_image_url = Buffer.from(state.value.bytes, 'base64').toString('utf-8')
           break
+        case 'option_counts':
+          decodedState.option_counts = optionCountsType.decode(Buffer.from(state.value.bytes, 'base64')).map(Number)
       }
     }
   })
@@ -277,6 +293,7 @@ const api = {
     })
   },
   useSubmitVote: () => {
+    const sourceMaps = useAppSourceMaps()
     return useSetter(
       async ({
         signature,
@@ -289,7 +306,7 @@ const api = {
         signer: TransactionSignerAccount
         appId: number
       }) => {
-        await VotingRoundContract(signer).castVote(signature, selectedOptionIndexes, appId)
+        await VotingRoundContract(signer).castVote(signature, selectedOptionIndexes, appId, sourceMaps)
       },
     )
   },
@@ -302,8 +319,8 @@ const api = {
   useVotingRoundResults: (id: number, round?: VotingRoundPopulated) => {
     return useFetchVoteRoundResults(id, round)
   },
-  useVotingRoundVote: (id: number, voterAddress?: string) => {
-    return useFetchVoteRoundVote(id, voterAddress)
+  useVotingRoundVote: (id: number, voterAddress?: string, round?: VotingRoundPopulated) => {
+    return useFetchVoteRoundVote(id, voterAddress, round)
   },
   useCloseVotingRound: () => {
     return useSetter(async ({ signer, appId }: { signer: TransactionSignerAccount; appId: number }) => {

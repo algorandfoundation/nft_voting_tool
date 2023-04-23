@@ -32,6 +32,7 @@ export type VotingRoundPopulated = {
   optionIds: string[]
   created: CreatedMetadata
   hasVoteTallyBox: boolean
+  votedWallets: number
 }
 
 export type Vote = {

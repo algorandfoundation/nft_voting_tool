@@ -117,7 +117,9 @@ describe('voting', () => {
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ totalQuestionOptions * 1) + 2500),
+              amount: algokit.microAlgos(
+                400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500,
+              ),
               sender: voter.account,
               sendParams: { skipSending: true },
             }),
@@ -154,6 +156,7 @@ describe('voting', () => {
       start,
       end,
       quorum,
+      nftImageUrl,
       app,
       questions: questionCounts,
       totalQuestionOptions,
@@ -167,7 +170,8 @@ describe('voting', () => {
   }
 
   test('create', async () => {
-    const { appClient, publicKey, cid, start, end, quorum } = await setupApp()
+    const { appClient, publicKey, cid, start, end, quorum, nftImageUrl, questions, totalQuestionOptions } =
+      await setupApp()
 
     const globalState = await appClient.getGlobalState()
     invariant('valueRaw' in globalState.snapshot_public_key)
@@ -176,8 +180,16 @@ describe('voting', () => {
     expect(globalState.metadata_ipfs_cid.value).toBe(cid)
     expect(globalState.start_time.value).toBe(start)
     expect(globalState.end_time.value).toBe(end)
+    expect(globalState.close_time.value).toBe(0)
     expect(globalState.quorum.value).toBe(quorum)
     expect(globalState.is_bootstrapped.value).toBe(0)
+    expect(globalState.voter_count.value).toBe(0)
+    expect(globalState.nft_image_url.value).toBe(nftImageUrl)
+    expect(globalState.nft_asset_id.value).toBe(0)
+    expect(globalState.total_options.value).toBe(totalQuestionOptions)
+    invariant('valueRaw' in globalState.option_counts)
+    const optionCountsType = new algosdk.ABIArrayDynamicType(new algosdk.ABIUintType(8))
+    expect(optionCountsType.decode(globalState.option_counts.valueRaw).map(Number)).toEqual(questions)
 
     const boxes = await appClient.getBoxNames()
     expect(boxes.length).toBe(0)
@@ -251,6 +263,8 @@ describe('voting', () => {
       await bootstrap()
       const voter = await getVoter()
       await vote(voter)
+      const voter2 = await getVoter()
+      await vote(voter2)
 
       const result = await close()
 
@@ -261,13 +275,21 @@ describe('voting', () => {
       expect(inner['asset-index']).not.toBe(0)
       expect(inner['asset-index']).toBe(globalState.nft_asset_id.value)
       expect(globalState.close_time.value).toBeGreaterThanOrEqual(currentTime)
-      const arc69Payload = JSON.parse(
-        Buffer.from(inner.txn.txn.note ?? new Uint8Array())
-          .toString('utf-8')
-          .replace(new RegExp(voteId, 'g'), '{VOTE_ID}')
-          .replace(new RegExp(quorum.toString(), 'g'), '"{QUORUM}"')
-          .replace(new RegExp(cid, 'g'), '{CID}'),
-      )
+      let arc69Payload: any = {}
+      try {
+        arc69Payload = JSON.parse(
+          Buffer.from(inner.txn.txn.note ?? new Uint8Array())
+            .toString('utf-8')
+            .replace(new RegExp(voteId, 'g'), '{VOTE_ID}')
+            .replace(new RegExp(quorum.toString(), 'g'), '"{QUORUM}"')
+            .replace(new RegExp(cid, 'g'), '{CID}'),
+        )
+      } catch (e) {
+        console.error(e)
+        console.log('Received this payload', Buffer.from(inner.txn.txn.note ?? new Uint8Array()).toString('utf-8'))
+        throw e
+      }
+
       expect(arc69Payload).toBeTruthy()
       expect(JSON.stringify(arc69Payload, undefined, 2)).toMatchInlineSnapshot(`
         "{
@@ -277,26 +299,26 @@ describe('voting', () => {
             "metadata": "ipfs://{CID}",
             "id": "{VOTE_ID}",
             "quorum": "{QUORUM}",
-            "voterCount": 1,
+            "voterCount": 2,
             "tallies": [
               [
                 0,
                 0,
-                1
+                2
               ],
               [
-                1
+                2
               ],
               [
-                1
+                2
               ],
               [
-                1
+                2
               ],
               [
                 0,
                 0,
-                1
+                2
               ]
             ]
           }
@@ -314,6 +336,8 @@ describe('voting', () => {
         await bootstrap()
         const voter = await getVoter()
         await vote(voter)
+        const voter2 = await getVoter()
+        await vote(voter2)
 
         await close()
       } catch (e: any) {
@@ -330,6 +354,8 @@ describe('voting', () => {
         await bootstrap()
         const voter = await getVoter()
         await vote(voter)
+        const voter2 = await getVoter()
+        await vote(voter2)
 
         await close()
       } catch (e: any) {
@@ -345,6 +371,8 @@ describe('voting', () => {
       await bootstrap()
       const voter = await getVoter()
       await vote(voter)
+      const voter2 = await getVoter()
+      await vote(voter2)
 
       await close()
     })
@@ -495,11 +523,12 @@ describe('voting', () => {
     })
 
     test('late vote', async () => {
-      const { getVoter, vote, bootstrap } = await setupApp({ end: 0, questionCounts: [1] })
+      const { getVoter, vote, bootstrap, algod } = await setupApp({ end: 0, questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
       try {
+        //todo: const response = await algod.c.post('v2/blocks/offset/2000', null)
         await vote(voter, [0])
         invariant(false)
       } catch (e: any) {
@@ -519,7 +548,7 @@ describe('voting', () => {
     })
 
     test('invalid option', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, totalQuestionOptions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -530,7 +559,7 @@ describe('voting', () => {
             args: [
               appClient.fundAppAccount({
                 amount: algokit.microAlgos(
-                  400 * /* key size */ (32 + /* value size */ totalQuestionOptions * 1) + 2500,
+                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
                 ),
                 sender: voter.account,
                 sendParams: { skipSending: true },
@@ -561,7 +590,7 @@ describe('voting', () => {
     })
 
     test('invalid question', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, totalQuestionOptions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -572,7 +601,7 @@ describe('voting', () => {
             args: [
               appClient.fundAppAccount({
                 amount: algokit.microAlgos(
-                  400 * /* key size */ (32 + /* value size */ totalQuestionOptions * 1) + 2500,
+                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
                 ),
                 sender: voter.account,
                 sendParams: { skipSending: true },
@@ -595,7 +624,7 @@ describe('voting', () => {
           // Number of answers incorrect
           assert <--- Error
           pushint 2500 // 2500
-          pushint 32 // 32
+          pushint 34 // 34
           intc_1 // 1
           frame_dig -1"
         `)

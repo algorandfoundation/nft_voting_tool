@@ -51,7 +51,7 @@ export class CacheOnlyIPFSService implements IIpfsService {
       (_e) => {
         return Promise.resolve(data)
       },
-      0,
+      undefined,
       false,
     )
     return { cid: cid.toString() }
@@ -65,7 +65,7 @@ export class CacheOnlyIPFSService implements IIpfsService {
         return Promise.resolve([data, mimeType])
       },
       mimeType,
-      0,
+      undefined,
       false,
     )
     return { cid: cid.toString() }

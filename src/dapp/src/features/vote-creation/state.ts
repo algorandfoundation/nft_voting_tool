@@ -1,4 +1,5 @@
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
 import { QuestionModel, RoundInfo } from '../../shared/types'
 import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'
@@ -47,6 +48,11 @@ export const voteCreationAtom = atom<VoteCreationState>({
     auth: defaultAuth,
     appReference: defaultAppReference,
   },
+})
+
+export const appSourceMaps = atom<AppSourceMaps | undefined>({
+  key: 'appSourceMapsState',
+  default: undefined,
 })
 
 const roundInfoSelector = selector({
@@ -116,3 +122,5 @@ export const useSetAuth = () => useSetRecoilState(authSelector)
 export const useAppReference = () => useRecoilValue(appReferenceSelector)
 export const useSetAppReference = () => useSetRecoilState(appReferenceSelector)
 export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom)
+export const useAppSourceMaps = () => useRecoilValue(appSourceMaps)
+export const useSetAppSourceMaps = () => useSetRecoilState(appSourceMaps)
