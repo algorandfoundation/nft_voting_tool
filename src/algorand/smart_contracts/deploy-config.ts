@@ -69,6 +69,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
               method: 'create',
               methodArgs: createArgs,
               deletable: false,
+              sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
             })
           : await appClient.deploy({
               allowDelete: isLocal,
@@ -78,6 +79,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
                 method: 'create',
                 methodArgs: createArgs,
               },
+              sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
             })
 
       // Check if it's already been bootstrapped
@@ -143,7 +145,9 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ totalQuestionOptions * 1) + 2500),
+              amount: algokit.microAlgos(
+                400 * /* key size */ (32 + /* value size */ 2 + questionOptions.length * 1) + 2500,
+              ),
               sender: voter,
               sendParams: { skipSending: true },
             }),
@@ -152,7 +156,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           ],
           boxes: ['V', voter],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 11 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
       console.log('Voted successfully!')
