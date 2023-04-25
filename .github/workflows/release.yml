@@ -33,6 +33,7 @@ jobs:
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./infrastructure
+      audit-script: npm run audit
   ci-algorand:
     name: Algorand build
     uses: ./.github/workflows/smart-contract-ci.yml
