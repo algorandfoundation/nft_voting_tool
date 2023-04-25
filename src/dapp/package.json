@@ -74,6 +74,12 @@
   "overrides": {
     "@blockshake/defly-connect": {
       "algosdk": "^2.1.0"
+    },
+    "postcss-load-config": {
+      "yaml": "2.2.2"
+    },
+    "cosmiconfig": {
+      "yaml": "2.2.2"
     }
   }
 }
