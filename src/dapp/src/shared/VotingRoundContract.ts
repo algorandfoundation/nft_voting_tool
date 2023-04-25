@@ -28,14 +28,14 @@ export const fetchTallyCounts = async (appId: number, optionIds: string[]) => {
     algod,
   )
 
-  const box = await client.getBoxValue('V')
-  if (box) {
+  try {
+    const box = await client.getBoxValue('V')
     const type = new algosdk.ABIArrayStaticType(new ABIUintType(64), optionIds.length)
     return (type.decode(box) as number[]).map((count, index) => ({
       optionId: optionIds[index],
       count: Number(count),
     }))
-  } else {
+  } catch {
     return (await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))).map((box) => ({
       optionId: uuid.stringify(box.name.nameRaw, 2),
       count: Number(box.value),
