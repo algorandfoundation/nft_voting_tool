@@ -8,10 +8,7 @@ import path from 'path'
 import { Account } from 'algosdk'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
-import * as uuid from 'uuid'
 import invariant from 'tiny-invariant'
-import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from '../question-encoding'
-import { ABIUintType } from 'algosdk'
 import algosdk from 'algosdk'
 
 describe('voting', () => {
@@ -31,10 +28,10 @@ describe('voting', () => {
     start?: number
     end?: number
     quorum?: number
-    questionIds?: string[]
+    questionCounts?: number[]
     nftImageUrl?: string
   }) => {
-    let { voteId, cid, start, end, quorum, questionIds, nftImageUrl } = setup ?? {}
+    let { voteId, cid, start, end, quorum, questionCounts, nftImageUrl } = setup ?? {}
     const { algod, testAccount } = localnet.context
 
     const status = await algod.status().do()
@@ -42,7 +39,7 @@ describe('voting', () => {
     const round = await algod.block(lastRound).do()
     const currentTime = Number(round.block.ts)
 
-    const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000)
+    const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
 
     const privateKey = Buffer.from(ed.utils.randomPrivateKey())
     const publicKey = await ed.getPublicKey(privateKey)
@@ -50,15 +47,12 @@ describe('voting', () => {
     voteId = voteId ?? `V${new Date().getTime().toString(32).toUpperCase()}`
     cid = cid ?? 'CID'
     start = start ?? currentTime
-    end = end ?? currentTime + 1000
+    end = end !== undefined ? start + end : currentTime + 1000
     quorum = quorum ?? Math.ceil(Math.random() * 1000)
-    questionIds = questionIds ?? [uuid.v4(), uuid.v4(), uuid.v4(), uuid.v4()]
+    const questionCount = questionCounts ? questionCounts.length : Math.ceil(Math.random() * 10)
+    questionCounts = questionCounts ?? new Array(questionCount).fill(0).map((_) => Math.ceil(Math.random() * 10))
     nftImageUrl = nftImageUrl ?? 'ipfs://cid'
-    const questions = {
-      unencoded: questionIds,
-      encoded: encodeAnswerIds(questionIds),
-      boxRefs: encodeAnswerIdBoxRefs(questionIds),
-    }
+    const totalQuestionOptions = questionCounts.reduce((a, b) => a + b, 0)
 
     const appClient = algokit.getApplicationClient(
       {
@@ -71,9 +65,17 @@ describe('voting', () => {
 
     const app = await appClient.create({
       method: 'create',
-      methodArgs: [voteId, publicKey, cid, start, end, quorum, nftImageUrl],
+      methodArgs: [voteId, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
       deletable: false,
+      sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
     })
+
+    const getTallies = async () => {
+      return await appClient.getBoxValueAsABIType(
+        'V',
+        new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
+      )
+    }
 
     const bootstrap = async () => {
       return await appClient.call({
@@ -81,14 +83,11 @@ describe('voting', () => {
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(
-                200_000 + 1_000 + questions.unencoded.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
-              ),
+              amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
               sendParams: { skipSending: true },
             }),
-            questions.encoded,
           ],
-          boxes: questions.boxRefs,
+          boxes: ['V'],
         },
       })
     }
@@ -111,20 +110,23 @@ describe('voting', () => {
       }
     }
 
-    const vote = async (voter: { account: Account; signature: Uint8Array }, questionIndex: number) => {
+    const vote = async (voter: { account: Account; signature: Uint8Array }, questionIndexes?: number[]) => {
+      questionIndexes = questionIndexes ?? questionCounts!.map((x) => x - 1)
       return await appClient.call({
         method: 'vote',
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+              amount: algokit.microAlgos(
+                400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500,
+              ),
               sender: voter.account,
               sendParams: { skipSending: true },
             }),
             voter.signature,
-            questions.encoded[questionIndex],
+            questionIndexes,
           ],
-          boxes: [questions.boxRefs[questionIndex], voter.account],
+          boxes: ['V', voter.account],
         },
         sendParams: { fee: voteFee },
         sender: voter.account,
@@ -134,7 +136,11 @@ describe('voting', () => {
     const close = async () => {
       return await appClient.call({
         method: 'close',
-        methodArgs: [],
+        methodArgs: {
+          args: [],
+          boxes: ['V'],
+        },
+        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       })
     }
 
@@ -150,18 +156,22 @@ describe('voting', () => {
       start,
       end,
       quorum,
+      nftImageUrl,
       app,
-      questions,
+      questions: questionCounts,
+      totalQuestionOptions,
       bootstrap,
       getVoter,
       voteFee,
       vote,
       close,
+      getTallies,
     }
   }
 
   test('create', async () => {
-    const { appClient, publicKey, cid, start, end, quorum } = await setupApp()
+    const { appClient, publicKey, cid, start, end, quorum, nftImageUrl, questions, totalQuestionOptions } =
+      await setupApp()
 
     const globalState = await appClient.getGlobalState()
     invariant('valueRaw' in globalState.snapshot_public_key)
@@ -170,15 +180,23 @@ describe('voting', () => {
     expect(globalState.metadata_ipfs_cid.value).toBe(cid)
     expect(globalState.start_time.value).toBe(start)
     expect(globalState.end_time.value).toBe(end)
+    expect(globalState.close_time.value).toBe(0)
     expect(globalState.quorum.value).toBe(quorum)
     expect(globalState.is_bootstrapped.value).toBe(0)
+    expect(globalState.voter_count.value).toBe(0)
+    expect(globalState.nft_image_url.value).toBe(nftImageUrl)
+    expect(globalState.nft_asset_id.value).toBe(0)
+    expect(globalState.total_options.value).toBe(totalQuestionOptions)
+    invariant('valueRaw' in globalState.option_counts)
+    const optionCountsType = new algosdk.ABIArrayDynamicType(new algosdk.ABIUintType(8))
+    expect(optionCountsType.decode(globalState.option_counts.valueRaw).map(Number)).toEqual(questions)
 
     const boxes = await appClient.getBoxNames()
     expect(boxes.length).toBe(0)
   })
 
   test('bootstrap', async () => {
-    const { appClient, bootstrap, questions } = await setupApp()
+    const { appClient, bootstrap, getTallies } = await setupApp({ questionCounts: [4] })
 
     await bootstrap()
 
@@ -186,12 +204,10 @@ describe('voting', () => {
     expect(globalState.is_bootstrapped.value).toBe(1)
 
     const boxes = await appClient.getBoxNames()
-    expect(boxes.map((b) => b.nameBase64).sort()).toEqual(
-      questions.boxRefs.map((b) => Buffer.from(b.name).toString('base64')).sort(),
-    )
+    expect(boxes.map((b) => b.name)).toEqual(['V'])
 
-    const boxValues = await appClient.getBoxValuesAsABIType(new ABIUintType(64))
-    expect(boxValues.map((v) => v.value)).toEqual([0n, 0n, 0n, 0n])
+    const boxValues = await getTallies()
+    expect(boxValues).toEqual([0n, 0n, 0n, 0n])
   })
 
   test('double bootstrap', async () => {
@@ -204,15 +220,15 @@ describe('voting', () => {
     } catch (e: any) {
       expect(e.stack).toMatchInlineSnapshot(`
         "assert
-        bytec_3 // "is_bootstrapped"
+        bytec 4 // "is_bootstrapped"
         app_global_get
         !
         // Already bootstrapped
         assert <--- Error
-        bytec_3 // "is_bootstrapped"
+        bytec 4 // "is_bootstrapped"
         intc_1 // 1
         app_global_put
-        pushint 201000 // 201000"
+        pushint 203900 // 203900"
       `)
     }
   })
@@ -241,27 +257,39 @@ describe('voting', () => {
 
   describe('close', () => {
     test('successful', async () => {
-      const { close, getVoter, vote, bootstrap, appClient, currentTime, quorum, voteId, cid } = await setupApp()
+      const { close, getVoter, vote, bootstrap, appClient, currentTime, quorum, voteId, cid } = await setupApp({
+        questionCounts: [3, 1, 1, 1, 3],
+      })
       await bootstrap()
       const voter = await getVoter()
-      await vote(voter, 0)
+      await vote(voter)
+      const voter2 = await getVoter()
+      await vote(voter2)
 
       const result = await close()
 
       const globalState = await appClient.getGlobalState()
       invariant(result.confirmation)
-      invariant(result.confirmation?.['inner-txns']?.[0])
-      const inner = result.confirmation['inner-txns'][0]
+      invariant(result.confirmation?.['inner-txns'])
+      const inner = result.confirmation['inner-txns'][result.confirmation['inner-txns'].length - 1]
       expect(inner['asset-index']).not.toBe(0)
       expect(inner['asset-index']).toBe(globalState.nft_asset_id.value)
       expect(globalState.close_time.value).toBeGreaterThanOrEqual(currentTime)
-      const arc69Payload = JSON.parse(
-        Buffer.from(inner.txn.txn.note ?? new Uint8Array())
-          .toString('utf-8')
-          .replace(new RegExp(voteId, 'g'), '{VOTE_ID}')
-          .replace(new RegExp(quorum.toString(), 'g'), '"{QUORUM}"')
-          .replace(new RegExp(cid, 'g'), '{CID}'),
-      )
+      let arc69Payload: any = {}
+      try {
+        arc69Payload = JSON.parse(
+          Buffer.from(inner.txn.txn.note ?? new Uint8Array())
+            .toString('utf-8')
+            .replace(new RegExp(voteId, 'g'), '{VOTE_ID}')
+            .replace(new RegExp(quorum.toString(), 'g'), '"{QUORUM}"')
+            .replace(new RegExp(cid, 'g'), '{CID}'),
+        )
+      } catch (e) {
+        console.error(e)
+        console.log('Received this payload', Buffer.from(inner.txn.txn.note ?? new Uint8Array()).toString('utf-8'))
+        throw e
+      }
+
       expect(arc69Payload).toBeTruthy()
       expect(JSON.stringify(arc69Payload, undefined, 2)).toMatchInlineSnapshot(`
         "{
@@ -271,101 +299,198 @@ describe('voting', () => {
             "metadata": "ipfs://{CID}",
             "id": "{VOTE_ID}",
             "quorum": "{QUORUM}",
-            "voterCount": 1
+            "voterCount": 2,
+            "tallies": [
+              [
+                0,
+                0,
+                2
+              ],
+              [
+                2
+              ],
+              [
+                2
+              ],
+              [
+                2
+              ],
+              [
+                0,
+                0,
+                2
+              ]
+            ]
           }
         }"
       `)
     })
+
+    test('max budget 1', async () => {
+      try {
+        const questionCounts = new Array(112).fill(1)
+        questionCounts[0] = 128 - 112
+        const { close, getVoter, vote, bootstrap } = await setupApp({
+          questionCounts,
+        })
+        await bootstrap()
+        const voter = await getVoter()
+        await vote(voter)
+        const voter2 = await getVoter()
+        await vote(voter2)
+
+        await close()
+      } catch (e: any) {
+        console.error(e.led.traces[0])
+        throw e
+      }
+    })
+
+    test('max budget 2', async () => {
+      try {
+        const { close, getVoter, vote, bootstrap } = await setupApp({
+          questionCounts: new Array(64).fill(2),
+        })
+        await bootstrap()
+        const voter = await getVoter()
+        await vote(voter)
+        const voter2 = await getVoter()
+        await vote(voter2)
+
+        await close()
+      } catch (e: any) {
+        console.error(e.led.traces[0])
+        throw e
+      }
+    })
+
+    test('max budget 3', async () => {
+      const { close, getVoter, vote, bootstrap } = await setupApp({
+        questionCounts: [128],
+      })
+      await bootstrap()
+      const voter = await getVoter()
+      await vote(voter)
+      const voter2 = await getVoter()
+      await vote(voter2)
+
+      await close()
+    })
   })
 
   describe('vote', () => {
-    test('successful', async () => {
-      const { appClient, questions, getVoter, vote, bootstrap } = await setupApp()
+    test('successful single question (first index)', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({ questionCounts: [4] })
       await bootstrap()
       const voter = await getVoter()
 
-      await vote(voter, 0)
+      await vote(voter, [0])
 
-      const boxValue = await appClient.getBoxValuesAsABIType(
-        new ABIUintType(64),
-        (b) => b.nameBase64 === Buffer.from(questions.boxRefs[0].name).toString('base64'),
-      )
-      expect(boxValue[0].value).toBe(1n)
-      const otherBoxValues = await appClient.getBoxValuesAsABIType(
-        new ABIUintType(64),
-        (b) => b.name.startsWith('V_') && b.nameBase64 !== Buffer.from(questions.boxRefs[0].name).toString('base64'),
-      )
-      expect(otherBoxValues.map((v) => v.value)).toEqual([0n, 0n, 0n])
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([1n, 0n, 0n, 0n])
+    })
+
+    test('successful single question (last index)', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({ questionCounts: [4] })
+      await bootstrap()
+      const voter = await getVoter()
+
+      await vote(voter, [3])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([0n, 0n, 0n, 1n])
+    })
+
+    test('successful multiple questions (first index)', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({ questionCounts: [4, 4] })
+      await bootstrap()
+      const voter = await getVoter()
+
+      await vote(voter, [0, 0])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([1n, 0n, 0n, 0n, 1n, 0n, 0n, 0n])
+    })
+
+    test('successful multiple questions (last index)', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({ questionCounts: [4, 4] })
+      await bootstrap()
+      const voter = await getVoter()
+
+      await vote(voter, [3, 3])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([0n, 0n, 0n, 1n, 0n, 0n, 0n, 1n])
     })
 
     test('double voting', async () => {
-      const { getVoter, bootstrap, vote } = await setupApp()
+      const { getVoter, bootstrap, vote } = await setupApp({ questionCounts: [2] })
       await bootstrap()
       const voter = await getVoter()
 
-      await vote(voter, 0)
+      await vote(voter, [0])
       try {
-        await vote(voter, 1)
+        await vote(voter, [1])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "// Voting open
+          "// Voting not open
           assert
           callsub alreadyvoted_6
           !
-          // Hasn't already voted
+          // Already voted
           assert <--- Error
-          bytec_1 // "V_"
-          frame_dig -1
-          concat
-          box_len"
+          bytec_3 // "option_counts"
+          app_global_get
+          frame_bury 0
+          frame_dig 0"
         `)
       }
     })
 
     test('not bootstrapped', async () => {
-      const { getVoter, vote, appClient } = await setupApp()
+      const { getVoter, vote, appClient } = await setupApp({ questionCounts: [1] })
       await appClient.fundAppAccount(algokit.microAlgos(100_000))
       const voter = await getVoter()
 
       try {
-        await vote(voter, 0)
+        await vote(voter, [0])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
           "callsub allowedtovote_4
-          // Allowed to vote
+          // Not allowed to vote
           assert
           callsub votingopen_5
-          // Voting open
+          // Voting not open
           assert <--- Error
           callsub alreadyvoted_6
           !
-          // Hasn't already voted
+          // Already voted
           assert"
         `)
       }
     })
 
     test('invalid signature', async () => {
-      const { getVoter, vote, bootstrap } = await setupApp()
+      const { getVoter, vote, bootstrap } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
       const voter2 = await getVoter()
 
       try {
-        await vote({ account: voter.account, signature: voter2.signature }, 0)
+        await vote({ account: voter.account, signature: voter2.signature }, [0])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "bytec_0 // ""
+          "bnz vote_9_l5
           frame_dig -2
           extract 2 0
           callsub allowedtovote_4
-          // Allowed to vote
+          // Not allowed to vote
           assert <--- Error
           callsub votingopen_5
-          // Voting open
+          // Voting not open
           assert
           callsub alreadyvoted_6"
         `)
@@ -374,56 +499,56 @@ describe('voting', () => {
 
     test('early vote', async () => {
       const start = +new Date('2099-12-31T11:59:59Z')
-      const { getVoter, vote, bootstrap } = await setupApp({ start, end: start + 1 })
+      const { getVoter, vote, bootstrap } = await setupApp({ start, end: 1, questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
       try {
-        await vote(voter, 0)
+        await vote(voter, [0])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
           "callsub allowedtovote_4
-          // Allowed to vote
+          // Not allowed to vote
           assert
           callsub votingopen_5
-          // Voting open
+          // Voting not open
           assert <--- Error
           callsub alreadyvoted_6
           !
-          // Hasn't already voted
+          // Already voted
           assert"
         `)
       }
     })
 
     test('late vote', async () => {
-      const end = 2
-      const { getVoter, vote, bootstrap } = await setupApp({ start: end - 1, end })
+      const { getVoter, vote, bootstrap, algod } = await setupApp({ end: 0, questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
       try {
-        await vote(voter, 0)
+        //todo: const response = await algod.c.post('v2/blocks/offset/2000', null)
+        await vote(voter, [0])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
           "callsub allowedtovote_4
-          // Allowed to vote
+          // Not allowed to vote
           assert
           callsub votingopen_5
-          // Voting open
+          // Voting not open
           assert <--- Error
           callsub alreadyvoted_6
           !
-          // Hasn't already voted
+          // Already voted
           assert"
         `)
       }
     })
 
-    test('invalid question', async () => {
-      const { appClient, getVoter, bootstrap, voteFee } = await setupApp()
+    test('invalid option', async () => {
+      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -433,14 +558,16 @@ describe('voting', () => {
           methodArgs: {
             args: [
               appClient.fundAppAccount({
-                amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+                amount: algokit.microAlgos(
+                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
+                ),
                 sender: voter.account,
                 sendParams: { skipSending: true },
               }),
               voter.signature,
-              encodeAnswerId('a'),
+              [1],
             ],
-            boxes: [encodeAnswerIdBoxRef('a'), voter.account],
+            boxes: ['V', voter.account],
           },
           sendParams: { fee: voteFee },
           sender: voter.account,
@@ -448,16 +575,58 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "box_len
-          store 35
-          store 34
-          load 35
-          // Answer ID valid
+          "frame_bury 7
+          frame_dig 5
+          frame_dig 7
+          <
+          // Answer option index invalid
           assert <--- Error
-          frame_dig -3
-          gtxns Receiver
-          global CurrentApplicationAddress
-          =="
+          pushint 8 // 8
+          load 52
+          frame_dig 5
+          +"
+        `)
+      }
+    })
+
+    test('invalid question', async () => {
+      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
+      await bootstrap()
+      const voter = await getVoter()
+
+      try {
+        await appClient.call({
+          method: 'vote',
+          methodArgs: {
+            args: [
+              appClient.fundAppAccount({
+                amount: algokit.microAlgos(
+                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
+                ),
+                sender: voter.account,
+                sendParams: { skipSending: true },
+              }),
+              voter.signature,
+              [0, 0],
+            ],
+            boxes: ['V', voter.account],
+          },
+          sendParams: { fee: voteFee },
+          sender: voter.account,
+        })
+        invariant(false)
+      } catch (e: any) {
+        expect(e.stack).toMatchInlineSnapshot(`
+          "frame_bury 2
+          frame_dig 2
+          load 50
+          ==
+          // Number of answers incorrect
+          assert <--- Error
+          pushint 2500 // 2500
+          pushint 34 // 34
+          intc_1 // 1
+          frame_dig -1"
         `)
       }
     })

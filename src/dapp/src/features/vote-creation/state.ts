@@ -1,21 +1,16 @@
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
 import { QuestionModel, RoundInfo } from '../../shared/types'
 import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'
 
 export type VoteCreationState = {
   roundInfo: RoundInfo
-  questions: QuestionModel
+  questions: QuestionModel[]
   step: VoteCreationSteps
   reviewStep: VoteCreationReviewSteps
   auth: { address: string; signedTransaction: Uint8Array }
-  appReference: {
-    app: AppReference
-    options: {
-      id: string
-      label: string
-    }[]
-  }
+  appReference: AppReference
 }
 
 const defaultRoundInfo: RoundInfo = {
@@ -29,7 +24,7 @@ const defaultRoundInfo: RoundInfo = {
   voteTitle: '',
 }
 
-const defaultQuestions: QuestionModel = {
+const defaultQuestion: QuestionModel = {
   questionTitle: '',
   questionDescription: '',
   // these need to be spaces because react-hook-form acts weird if they are empty strings
@@ -41,18 +36,23 @@ const defaultAuth = {
   signedTransaction: Uint8Array.from([]),
 }
 
-const defaultAppReference = { app: { appId: 0, appAddress: '' }, options: [] }
+const defaultAppReference = { appId: 0, appAddress: '' }
 
 export const voteCreationAtom = atom<VoteCreationState>({
   key: 'voteCreationState',
   default: {
     roundInfo: defaultRoundInfo,
-    questions: defaultQuestions,
+    questions: [defaultQuestion],
     step: VoteCreationSteps.RoundInfo,
     reviewStep: VoteCreationReviewSteps.Auth,
     auth: defaultAuth,
     appReference: defaultAppReference,
   },
+})
+
+export const appSourceMaps = atom<AppSourceMaps | undefined>({
+  key: 'appSourceMapsState',
+  default: undefined,
 })
 
 const roundInfoSelector = selector({
@@ -69,7 +69,7 @@ const questionsSelector = selector({
   get: ({ get }) => get(voteCreationAtom).questions,
   set: ({ set, get }, newValue) => {
     const current = get(voteCreationAtom)
-    set(voteCreationAtom, { ...current, questions: newValue instanceof DefaultValue ? defaultQuestions : newValue })
+    set(voteCreationAtom, { ...current, questions: newValue instanceof DefaultValue ? [defaultQuestion] : newValue })
   },
 })
 
@@ -111,7 +111,7 @@ const appReferenceSelector = selector({
 
 export const useRoundInfo = () => useRecoilValue(roundInfoSelector)
 export const useSetRoundInfo = () => useSetRecoilState(roundInfoSelector)
-export const useQuestions = () => useRecoilValue<QuestionModel>(questionsSelector)
+export const useQuestions = () => useRecoilValue<QuestionModel[]>(questionsSelector)
 export const useSetQuestions = () => useSetRecoilState(questionsSelector)
 export const useStep = () => useRecoilValue(stepSelector)
 export const useSetStep = () => useSetRecoilState(stepSelector)
@@ -122,3 +122,5 @@ export const useSetAuth = () => useSetRecoilState(authSelector)
 export const useAppReference = () => useRecoilValue(appReferenceSelector)
 export const useSetAppReference = () => useSetRecoilState(appReferenceSelector)
 export const useResetCreateRound = () => useResetRecoilState(voteCreationAtom)
+export const useAppSourceMaps = () => useRecoilValue(appSourceMaps)
+export const useSetAppSourceMaps = () => useSetRecoilState(appSourceMaps)

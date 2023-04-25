@@ -14,7 +14,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@algorandfoundation/algokit-utils": "^1.0.0-beta.33",
+    "@algorandfoundation/algokit-utils": "^1.0.0-beta.39",
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.16",
     "@makerx/forms-mui": "^1.1.0",
@@ -74,6 +74,12 @@
   "overrides": {
     "@blockshake/defly-connect": {
       "algosdk": "^2.1.0"
+    },
+    "postcss-load-config": {
+      "yaml": "2.2.2"
+    },
+    "cosmiconfig": {
+      "yaml": "2.2.2"
     }
   }
 }

@@ -24,7 +24,8 @@ algokit.Config.configure({
     }
     try {
       await deploy(app, appSpec)
-    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
       if ('led' in e) {
         console.error('Received logic error', e.led)
       }

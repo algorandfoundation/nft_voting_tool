@@ -1,10 +1,11 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
-import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppCompilationResult, AppReference } from '@algorandfoundation/algokit-utils/types/app'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
 import algosdk, { ABIUintType } from 'algosdk'
 import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
-import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
+import { VotingRoundPopulated } from './types'
 
 export const algod = algokit.getAlgoClient({
   server: import.meta.env.VITE_ALGOD_NODE_CONFIG_SERVER,
@@ -18,7 +19,7 @@ export const indexer = algokit.getAlgoIndexerClient({
   token: import.meta.env.VITE_INDEXER_TOKEN,
 })
 
-export const fetchTallyBoxes = async (appId: number) => {
+export const fetchTallyCounts = async (appId: number, optionIds: string[]) => {
   const client = algokit.getApplicationClient(
     {
       app: JSON.stringify(appSpec),
@@ -27,10 +28,22 @@ export const fetchTallyBoxes = async (appId: number) => {
     algod,
   )
 
-  return await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))
+  const box = await client.getBoxValue('V')
+  if (box) {
+    const type = new algosdk.ABIArrayStaticType(new ABIUintType(64), optionIds.length)
+    return (type.decode(box) as number[]).map((count, index) => ({
+      optionId: optionIds[index],
+      count: Number(count),
+    }))
+  } else {
+    return (await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))).map((box) => ({
+      optionId: uuid.stringify(box.name.nameRaw, 2),
+      count: Number(box.value),
+    }))
+  }
 }
 
-export const fetchVoteBox = async (appId: number, voterAddress: string) => {
+export const fetchVoterVotes = async (appId: number, voterAddress: string, round: VotingRoundPopulated) => {
   const client = algokit.getApplicationClient(
     {
       app: JSON.stringify(appSpec),
@@ -39,10 +52,25 @@ export const fetchVoteBox = async (appId: number, voterAddress: string) => {
     algod,
   )
 
-  const box = (
-    await client.getBoxValues((b) => b.nameBase64 === Buffer.from(algosdk.decodeAddress(voterAddress).publicKey).toString('base64'))
-  )[0]
-  return box ? uuid.stringify(box.value) : undefined
+  try {
+    const box = await client.getBoxValue(algosdk.decodeAddress(voterAddress).publicKey)
+
+    const type = new algosdk.ABIArrayDynamicType(new algosdk.ABIUintType(8))
+    return box
+      ? round.hasVoteTallyBox
+        ? type
+            .decode(box)
+            .map(Number)
+            .map((optionIndex, questionIndex) => round.questions[questionIndex].options[optionIndex].id)
+        : [uuid.stringify(box)]
+      : undefined
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    if (e?.message?.includes('404')) {
+      return undefined
+    }
+    throw e
+  }
 }
 
 export const VotingRoundContract = (sender: TransactionSignerAccount) => {
@@ -54,7 +82,8 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     end: number,
     quorum: number,
     nftImageUrl: string,
-  ): Promise<AppReference> => {
+    questionCounts: number[],
+  ): Promise<AppReference & Partial<AppCompilationResult>> => {
     const appClient = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -66,13 +95,15 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
 
     const app = await appClient.create({
       method: 'create',
-      methodArgs: [voteId, publicKey, cid, start, end, quorum, nftImageUrl],
+      methodArgs: [voteId, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
       deletable: false,
+      sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
     })
+
     return app
   }
 
-  const bootstrap = async (app: AppReference, optionIds: string[]) => {
+  const bootstrap = async (app: AppReference, totalQuestionOptions: number) => {
     const appClient = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -82,28 +113,21 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       algod,
     )
 
-    const option = {
-      unencoded: optionIds,
-      encoded: encodeAnswerIds(optionIds),
-      boxRefs: encodeAnswerIdBoxRefs(optionIds, app),
-    }
-
     await appClient.call({
       method: 'bootstrap',
       methodArgs: {
         args: [
           appClient.fundAppAccount({
-            amount: algokit.microAlgos(200_000 + 1_000 + optionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500)),
+            amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
             sendParams: { skipSending: true },
           }),
-          option.encoded,
         ],
-        boxes: option.boxRefs,
+        boxes: ['V'],
       },
     })
   }
 
-  const castVote = async (signature: string, selectedOption: string, appId: number) => {
+  const castVote = async (signature: string, questionIndexes: number[], appId: number, sourceMaps: AppSourceMaps | undefined) => {
     const client = algokit.getApplicationClient(
       {
         app: JSON.stringify(appSpec),
@@ -112,24 +136,28 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       algod,
     )
 
+    if (sourceMaps) {
+      client.importSourceMaps(sourceMaps)
+    }
+
     const signatureByteArray = Buffer.from(signature, 'base64')
-    const voteFee = algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000)
+    const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
     const transaction = await client.call({
       method: 'vote',
       methodArgs: {
         args: [
           client.fundAppAccount({
-            amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+            amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500),
             sender,
             sendParams: { skipSending: true },
           }),
           signatureByteArray,
-          encodeAnswerId(selectedOption),
+          questionIndexes,
         ],
-        boxes: [encodeAnswerIdBoxRef(selectedOption), sender],
+        boxes: ['V', sender],
       },
-      sender,
       sendParams: { fee: voteFee },
+      sender,
     })
 
     return transaction
@@ -143,9 +171,13 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
       },
       algod,
     )
-    return await await client.call({
+    return await client.call({
       method: 'close',
-      methodArgs: [],
+      methodArgs: {
+        args: [],
+        boxes: ['V'],
+      },
+      sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       sender,
     })
   }
@@ -154,7 +186,7 @@ export const VotingRoundContract = (sender: TransactionSignerAccount) => {
     create,
     bootstrap,
     castVote,
-    fetchBoxes: fetchTallyBoxes,
+    fetchBoxes: fetchTallyCounts,
     closeVotingRound,
   }
 }

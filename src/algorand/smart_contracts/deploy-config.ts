@@ -1,11 +1,8 @@
 /* eslint-disable no-case-declarations */
 import * as algokit from '@algorandfoundation/algokit-utils'
-import { getCreatorAppsByName } from '@algorandfoundation/algokit-utils'
 import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
 import * as ed from '@noble/ed25519'
 import algosdk from 'algosdk'
-import * as uuid from 'uuid'
-import { encodeAnswerId, encodeAnswerIdBoxRef, encodeAnswerIdBoxRefs, encodeAnswerIds } from './question-encoding'
 
 // Edit this to add in your contracts
 export const contracts = ['VotingRoundApp'] as const
@@ -53,13 +50,26 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const round = await algod.block(lastRound).do()
       const currentTime = Number(round.block.ts)
 
-      const createArgs = ['vote_id', publicKey, 'ipfs_cid', currentTime, currentTime + 50000, 1, 'ipfs://ipfs_cid2']
+      const quorum = 1
+      const questionOptions = [3, 4, 2]
+      const totalQuestionOptions = questionOptions.reduce((a, b) => a + b, 0)
+      const createArgs = [
+        'vote_id',
+        publicKey,
+        'ipfs_cid',
+        currentTime,
+        currentTime + 50000,
+        questionOptions,
+        quorum,
+        'ipfs://ipfs_cid2',
+      ]
       const app =
         process.env.REDEPLOY_APP !== 'true'
           ? await appClient.create({
               method: 'create',
               methodArgs: createArgs,
               deletable: false,
+              sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
             })
           : await appClient.deploy({
               allowDelete: isLocal,
@@ -69,6 +79,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
                 method: 'create',
                 methodArgs: createArgs,
               },
+              sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
             })
 
       // Check if it's already been bootstrapped
@@ -81,20 +92,16 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
 
       // Bootstrap it if it hasn't
       if (!isBootstrapped) {
-        const questionIds = ['a', uuid.v4()]
         await appClient.call({
           method: 'bootstrap',
           methodArgs: {
             args: [
               appClient.fundAppAccount({
-                amount: algokit.microAlgos(
-                  200_000 + 1_000 + questionIds.length * (400 * /* key size */ (18 + /* value size */ 8) + 2500),
-                ),
+                amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
                 sendParams: { skipSending: true },
               }),
-              encodeAnswerIds(questionIds),
             ],
-            boxes: encodeAnswerIdBoxRefs(questionIds),
+            boxes: ['V'],
           },
         })
       }
@@ -124,8 +131,13 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       console.log({ isVotingOpen, isAllowedToVote, hasAlreadyVoted, time })
 
       // Show boxes before voting
-      const boxes = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64), (b) => b.name.startsWith('V_'))
-      console.log(boxes)
+      const getRawTally = async () => {
+        return await appClient.getBoxValueAsABIType(
+          'V',
+          new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
+        )
+      }
+      console.log(await getRawTally())
 
       // Cast vote
       await appClient.call({
@@ -133,28 +145,33 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 16) + 2500),
+              amount: algokit.microAlgos(
+                400 * /* key size */ (32 + /* value size */ 2 + questionOptions.length * 1) + 2500,
+              ),
               sender: voter,
               sendParams: { skipSending: true },
             }),
             signature,
-            encodeAnswerId('a'),
+            questionOptions.map((x) => x - 1), // vote for the last option in each,
           ],
-          boxes: [encodeAnswerIdBoxRef('a'), voter],
+          boxes: ['V', voter],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 11 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
       console.log('Voted successfully!')
 
       // Show boxes after voting
-      const boxes2 = await appClient.getBoxValuesAsABIType(new algosdk.ABIUintType(64), (b) => b.name.startsWith('V_'))
-      console.log(boxes2)
+      console.log(await getRawTally())
 
       // Close vote
       await appClient.call({
         method: 'close',
-        methodArgs: [],
+        methodArgs: {
+          args: [],
+          boxes: ['V'],
+        },
+        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 4 to get 3000 */ * 1_000) },
       })
       console.log('Voting round closed')
 

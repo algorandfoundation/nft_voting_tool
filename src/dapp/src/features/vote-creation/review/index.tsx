@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../../shared/api'
 import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
-import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import {
   useAppReference,
   useAuth,
@@ -13,10 +12,12 @@ import {
   useReviewStep,
   useRoundInfo,
   useSetAppReference,
+  useSetAppSourceMaps,
   useSetAuth,
   useSetReviewStep,
 } from '../state'
 import { useStepRedirect } from '../useStepRedirect'
+import { VoteCreationReviewSteps, VoteCreationSteps } from '../VoteCreationSteps'
 import { ConfirmationDialog } from './ConfirmationDialog'
 import { Row } from './Row'
 
@@ -32,7 +33,8 @@ export default function Review() {
   const roundInfo = useRoundInfo()
   const questions = useQuestions()
   const [authData, setAuth] = [useAuth(), useSetAuth()]
-  const [appData, setApp] = [useAppReference(), useSetAppReference()]
+  const [appRef, setApp] = [useAppReference(), useSetAppReference()]
+  const setAppSourceMaps = useSetAppSourceMaps()
   const navigate = useNavigate()
   const reviewStep = useReviewStep()
   const setReviewStep = useSetReviewStep()
@@ -55,19 +57,27 @@ export default function Review() {
         break
       case VoteCreationReviewSteps.Create:
         // eslint-disable-next-line no-case-declarations
-        setApp(
-          await create.execute({
-            auth: authData,
-            newRound: { ...roundInfo, ...questions },
-            signer,
-          }),
-        )
+
+        // eslint-disable-next-line no-case-declarations
+        const app = await create.execute({
+          auth: authData,
+          newRound: { ...roundInfo, questions },
+          signer,
+        })
+        setApp(app)
+        if (app.compiledApproval && app.compiledClear) {
+          setAppSourceMaps({
+            approvalSourceMap: app.compiledApproval.sourceMap,
+            clearSourceMap: app.compiledClear.sourceMap,
+          })
+        }
 
         break
       case VoteCreationReviewSteps.Bootstrap:
         await bootstrap.execute({
-          app: appData,
+          app: appRef,
           signer,
+          totalQuestionOptions: questions.reduce((optionCount, question) => optionCount + question.answers.length, 0),
         })
         break
     }
@@ -123,21 +133,26 @@ export default function Review() {
         <Typography variant="h4" className="mt-6 mb-2">
           Question or category
         </Typography>
-        <div className="container grid grid-cols-8 gap-4 ">
-          <Row label="Question or category" value={questions.questionTitle} />
-          <Row label="Description" value={questions.questionDescription ?? '-'} />
-          <Row
-            label="Options"
-            value={
-              <Stack spacing={1}>
-                {questions.answers.map((option, index) => (
-                  <Button className="w-64 sm:w-72 uppercase" key={index} variant="outlined">
-                    {option}
-                  </Button>
-                ))}
-              </Stack>
-            }
-          />
+        <div className="container">
+          {questions.map((question, index) => (
+            <div key={`q${index}`} className="grid grid-cols-8 gap-4">
+              <Row label={`Question ${index + 1}`} value="" />
+              <Row label="Question or category" value={question.questionTitle} />
+              <Row label="Description" value={question.questionDescription ?? '-'} />
+              <Row
+                label="Options"
+                value={
+                  <Stack spacing={1}>
+                    {question.answers.map((option, index) => (
+                      <Button className="w-64 sm:w-72 uppercase" key={index} variant="outlined">
+                        {option}
+                      </Button>
+                    ))}
+                  </Stack>
+                }
+              />
+            </div>
+          ))}
 
           <div className="col-span-2">
             <Link

@@ -25,6 +25,10 @@
                     "name": "end_time"
                 },
                 {
+                    "type": "uint8[]",
+                    "name": "option_counts"
+                },
+                {
                     "type": "uint64",
                     "name": "quorum"
                 },
@@ -43,10 +47,6 @@
                 {
                     "type": "pay",
                     "name": "fund_min_bal_req"
-                },
-                {
-                    "type": "byte[16][]",
-                    "name": "answers"
                 }
             ],
             "returns": {
@@ -84,8 +84,8 @@
                     "name": "signature"
                 },
                 {
-                    "type": "byte[16]",
-                    "name": "answer_id"
+                    "type": "uint8[]",
+                    "name": "answer_ids"
                 }
             ],
             "returns": {

@@ -1,0 +1,14 @@
+{
+  "decisions": {
+    "1091814|@henrist/cdk-cross-region-params>aws-cdk-lib>yaml": {
+      "decision": "postpone",
+      "madeAt": 1682402396161
+    },
+    "1091814|aws-cdk-lib>yaml": {
+      "decision": "postpone",
+      "madeAt": 1682402396161
+    }
+  },
+  "rules": {},
+  "version": 1
+}

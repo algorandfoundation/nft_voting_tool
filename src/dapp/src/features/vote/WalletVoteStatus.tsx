@@ -7,10 +7,10 @@ import { useConnectedWallet, useSetShowConnectWalletModal } from '../wallet/stat
 type WalletVoteStatusProps = {
   round: VotingRoundPopulated
   allowedToVote: boolean
-  myVote?: string
+  myVotes?: string[]
 }
 
-export const WalletVoteStatus = ({ round, allowedToVote, myVote }: WalletVoteStatusProps) => {
+export const WalletVoteStatus = ({ round, allowedToVote, myVotes }: WalletVoteStatusProps) => {
   const walletAddress = useConnectedWallet()
   const voteStarted = getVoteStarted(round)
   const voteEnded = getVoteEnded(round)
@@ -39,15 +39,15 @@ export const WalletVoteStatus = ({ round, allowedToVote, myVote }: WalletVoteSta
           <Typography className="font-semibold text-grey-dark">Your wallet is not on the allowlist for this voting round</Typography>
         </Box>
       )}
-      {walletAddress && allowedToVote && !myVote && (
+      {walletAddress && allowedToVote && !myVotes && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">Wallet connected: {getWalletLabel(walletAddress)}</Typography>
         </Box>
       )}
-      {myVote && (
+      {myVotes && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">
-            You voted, and chose {round.questions[0].options.find((o) => o.id === myVote)?.label}
+            You voted, and chose: {myVotes?.map((v, i) => round.questions[i].options.find((o) => o.id === v)?.label).join(', ')}
           </Typography>
         </Box>
       )}
