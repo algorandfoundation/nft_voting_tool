@@ -432,7 +432,7 @@ const api = {
             Math.floor(Date.parse(newRound.start) / 1000),
             Math.floor(Date.parse(newRound.end) / 1000),
             newRound.minimumVotes ? newRound.minimumVotes : 0,
-            'ipfs://bafkreif5grpze42yffwn5opgviju435zlshdhbjqivsu4vcr6jafkphldq',
+            'ipfs://bafkreiguj3svliomqnqpy2bvrlz5ud24girftynx2ywsugy7sr73zqnujy',
             questionCounts,
           )
 
