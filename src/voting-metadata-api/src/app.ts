@@ -1,5 +1,6 @@
 import cors from 'cors'
-import express, { Application, json, NextFunction, Request as ExRequest, Response as ExResponse, urlencoded } from 'express'
+import express, { Application, Request as ExRequest, Response as ExResponse, NextFunction, json, urlencoded } from 'express'
+import helmet from 'helmet'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
 import { RegisterRoutes } from '../routes/routes'
@@ -12,6 +13,14 @@ export default function CreateApp(): Application {
   const env = process.env.NODE_ENV || 'development'
   if (env !== 'development') {
     container.resolve<AwsSecretsService>('AwsSecretsService').resolveSecrets()
+    app.use(
+      helmet({
+        contentSecurityPolicy: false,
+        crossOriginResourcePolicy: {
+          policy: 'same-site',
+        },
+      }),
+    )
   }
   // Use body parser to read sent json payloads
   app.use(
@@ -53,6 +62,8 @@ export default function CreateApp(): Application {
 
     next()
   })
+
+  app.disable('x-powered-by')
 
   return app
 }
