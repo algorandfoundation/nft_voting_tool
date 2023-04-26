@@ -182,11 +182,6 @@ export class StaticWebsiteStack extends cdk.Stack {
 
     const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, `${id}-response-headers-policy`, {
       securityHeadersBehavior: {
-        contentSecurityPolicy: {
-          contentSecurityPolicy:
-            "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; object-src 'none'; base-uri 'self';font-src 'self' https://fonts.gstatic.com; frame-src 'self'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; worker-src 'none';",
-          override: false,
-        },
         contentTypeOptions: {
           override: false,
         },
@@ -209,6 +204,16 @@ export class StaticWebsiteStack extends cdk.Stack {
           override: false,
           frameOption: cloudfront.HeadersFrameOption.DENY,
         },
+      },
+      customHeadersBehavior: {
+        customHeaders: [
+          {
+            header: 'Content-Security-Policy-Report-Only',
+            override: false,
+            value:
+              "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
+          },
+        ],
       },
     })
 
