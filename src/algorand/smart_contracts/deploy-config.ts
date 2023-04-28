@@ -132,7 +132,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
 
       // Show boxes before voting
       const getRawTally = async () => {
-        return await appClient.getBoxValueAsABIType(
+        return await appClient.getBoxValueFromABIType(
           'V',
           new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
         )

@@ -1,7 +1,7 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { AppCompilationResult, AppReference } from '@algorandfoundation/algokit-utils/types/app'
-import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/app-client'
 import algosdk, { ABIUintType } from 'algosdk'
 import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
@@ -36,7 +36,7 @@ export const fetchTallyCounts = async (appId: number, optionIds: string[]) => {
       count: Number(count),
     }))
   } catch {
-    return (await client.getBoxValuesAsABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))).map((box) => ({
+    return (await client.getBoxValuesFromABIType(new ABIUintType(64), (b) => b.name.startsWith('V_'))).map((box) => ({
       optionId: uuid.stringify(box.name.nameRaw, 2),
       count: Number(box.value),
     }))
@@ -44,7 +44,7 @@ export const fetchTallyCounts = async (appId: number, optionIds: string[]) => {
 }
 
 export const fetchVoterVotes = async (appId: number, voterAddress: string, round: VotingRoundPopulated) => {
-  const client = algokit.getApplicationClient(
+  const client = algokit.getAppClient(
     {
       app: JSON.stringify(appSpec),
       id: appId,
