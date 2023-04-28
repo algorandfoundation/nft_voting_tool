@@ -41,6 +41,9 @@ export interface StaticWebsiteProps extends cdk.StackProps {
   cachingDefault?: Duration
   /** What should the max caching duration be; default: 30 days */
   cachingMax?: Duration
+
+  // CSP Policy
+  responseHeaders?: cloudfront.ResponseHeadersPolicyProps
 }
 
 /** Deploys a static website using S3 and Cloudfront */
@@ -145,14 +148,14 @@ export class StaticWebsiteStack extends cdk.Stack {
         props.queryStringCache === 'all'
           ? cloudfront.CacheQueryStringBehavior.all()
           : props.queryStringCache === 'none'
-            ? cloudfront.CacheQueryStringBehavior.none()
-            : cloudfront.CacheQueryStringBehavior.allowList(...props.queryStringCache),
+          ? cloudfront.CacheQueryStringBehavior.none()
+          : cloudfront.CacheQueryStringBehavior.allowList(...props.queryStringCache),
       cookieBehavior:
         props.cookieCache === 'all'
           ? cloudfront.CacheCookieBehavior.all()
           : props.cookieCache === 'none'
-            ? cloudfront.CacheCookieBehavior.none()
-            : cloudfront.CacheCookieBehavior.allowList(...props.cookieCache),
+          ? cloudfront.CacheCookieBehavior.none()
+          : cloudfront.CacheCookieBehavior.allowList(...props.cookieCache),
     })
 
     const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, `${id}-request-handler-policy`, {
@@ -161,67 +164,26 @@ export class StaticWebsiteStack extends cdk.Stack {
         props.queryStringPassthrough === 'all'
           ? cloudfront.OriginRequestQueryStringBehavior.all()
           : props.queryStringPassthrough === 'none'
-            ? cloudfront.OriginRequestQueryStringBehavior.none()
-            : cloudfront.OriginRequestQueryStringBehavior.allowList(...props.queryStringPassthrough),
+          ? cloudfront.OriginRequestQueryStringBehavior.none()
+          : cloudfront.OriginRequestQueryStringBehavior.allowList(...props.queryStringPassthrough),
       cookieBehavior:
         props.cookiePassthrough === 'all'
           ? cloudfront.OriginRequestCookieBehavior.all()
           : props.cookiePassthrough === 'none'
-            ? cloudfront.OriginRequestCookieBehavior.none()
-            : cloudfront.OriginRequestCookieBehavior.allowList(...props.cookiePassthrough),
+          ? cloudfront.OriginRequestCookieBehavior.none()
+          : cloudfront.OriginRequestCookieBehavior.allowList(...props.cookiePassthrough),
       // https://stackoverflow.com/questions/65243953/pass-query-params-from-cloudfront-to-api-gateway
       headerBehavior:
         props.httpHeaderPassthrough === 'all'
           ? cloudfront.OriginRequestHeaderBehavior.all()
           : props.httpHeaderPassthrough === 'none'
-            ? cloudfront.OriginRequestHeaderBehavior.none()
-            : cloudfront.OriginRequestHeaderBehavior.allowList(...props.httpHeaderPassthrough),
+          ? cloudfront.OriginRequestHeaderBehavior.none()
+          : cloudfront.OriginRequestHeaderBehavior.allowList(...props.httpHeaderPassthrough),
     })
 
-    //default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; object-src 'none'; base-uri 'self';font-src 'self' https://fonts.gstatic.com; frame-src 'self'; img-src 'self' data:; manifest-src 'self'; media-src 'self'; worker-src 'none';
-
-    const responseHeadersPolicy = new cloudfront.ResponseHeadersPolicy(this, `${id}-response-headers-policy`, {
-      securityHeadersBehavior: {
-        contentTypeOptions: {
-          override: false,
-        },
-        strictTransportSecurity: {
-          accessControlMaxAge: Duration.days(365),
-          override: false,
-          includeSubdomains: true,
-          preload: true,
-        },
-        xssProtection: {
-          override: false,
-          modeBlock: true,
-          protection: true,
-        },
-        referrerPolicy: {
-          override: false,
-          referrerPolicy: cloudfront.HeadersReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN,
-        },
-        frameOptions: {
-          override: false,
-          frameOption: cloudfront.HeadersFrameOption.DENY,
-        },
-      },
-      customHeadersBehavior: {
-        customHeaders: [
-          {
-            header: 'Content-Security-Policy-Report-Only',
-            override: false,
-            value:
-              "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
-          },
-          {
-            header: 'Permissions-Policy',
-            override: false,
-            value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
-          },
-        ],
-      },
-      removeHeaders: ['server'],
-    })
+    const responseHeadersPolicy = props.responseHeaders
+      ? new cloudfront.ResponseHeadersPolicy(this, `${id}-response-headers-policy`, props.responseHeaders)
+      : cloudfront.ResponseHeadersPolicy.SECURITY_HEADERS
 
     const distribution = new cloudfront.Distribution(this, `${id}-cloudfront`, {
       certificate: customDomainConfig?.sslCertificate,
