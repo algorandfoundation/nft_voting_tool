@@ -63,7 +63,7 @@ const responseHeaders: ResponseHeadersPolicyProps = {
     contentSecurityPolicy: {
       override: false,
       contentSecurityPolicy:
-        "default-src 'self'; script-src 'self' 'sha256-cPdWzGKYILcy4bGovP5+fjyXvnaEwD6vM3Tvr3YGsjo='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
+        "default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
     },
   },
   customHeadersBehavior: {
