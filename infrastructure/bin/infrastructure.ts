@@ -36,7 +36,7 @@ const dns = appDomainName
     )
   : undefined
 
-const responseHeaders = {
+const responseHeaders: ResponseHeadersPolicyProps = {
   securityHeadersBehavior: {
     contentTypeOptions: {
       override: false,
@@ -60,15 +60,14 @@ const responseHeaders = {
       override: false,
       frameOption: HeadersFrameOption.DENY,
     },
+    contentSecurityPolicy: {
+      override: false,
+      contentSecurityPolicy:
+        "default-src 'self'; script-src 'self' 'sha256-Wgxes77BIEtCJ/4JOr9+KiFe2QGbbqLEEBv2+rbrnbk='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
+    },
   },
   customHeadersBehavior: {
     customHeaders: [
-      {
-        header: 'Content-Security-Policy-Report-Only',
-        override: false,
-        value:
-          "default-src 'self'; script-src 'self' 'sha256-Wgxes77BIEtCJ/4JOr9+KiFe2QGbbqLEEBv2+rbrnbk='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
-      },
       {
         header: 'Permissions-Policy',
         override: false,
@@ -77,7 +76,7 @@ const responseHeaders = {
     ],
   },
   removeHeaders: ['server'],
-} as ResponseHeadersPolicyProps
+}
 
 const app = deployer.deploy(StaticWebsiteStack, 'web', {
   websiteFolder: process.env.WEBSITE_BUILD_PATH ?? path.join(__dirname, '..', '..', 'src', 'dapp', 'dist'),
