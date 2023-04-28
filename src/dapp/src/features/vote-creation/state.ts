@@ -1,5 +1,5 @@
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
-import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/application-client'
+import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/app-client'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
 import { QuestionModel, RoundInfo } from '../../shared/types'
 import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'

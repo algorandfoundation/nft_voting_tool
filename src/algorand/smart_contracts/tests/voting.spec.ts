@@ -6,7 +6,7 @@ import { algorandFixture } from '@algorandfoundation/algokit-utils/testing'
 import fs from 'fs/promises'
 import path from 'path'
 import { Account } from 'algosdk'
-import { AppSpec } from '@algorandfoundation/algokit-utils/types/appspec'
+import { AppSpec } from '@algorandfoundation/algokit-utils/types/app-spec'
 import * as ed from '@noble/ed25519'
 import invariant from 'tiny-invariant'
 import algosdk from 'algosdk'
@@ -71,7 +71,7 @@ describe('voting', () => {
     })
 
     const getTallies = async () => {
-      return await appClient.getBoxValueAsABIType(
+      return await appClient.getBoxValueFromABIType(
         'V',
         new algosdk.ABIArrayStaticType(new algosdk.ABIUintType(64), totalQuestionOptions),
       )
