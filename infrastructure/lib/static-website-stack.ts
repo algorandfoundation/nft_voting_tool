@@ -204,14 +204,15 @@ export class StaticWebsiteStack extends cdk.Stack {
           override: false,
           frameOption: cloudfront.HeadersFrameOption.DENY,
         },
-        contentSecurityPolicy: {
-          override: false,
-          contentSecurityPolicy:
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
-        },
       },
       customHeadersBehavior: {
         customHeaders: [
+          {
+            header: 'Content-Security-Policy-Report-Only',
+            override: false,
+            value:
+              "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self'; object-src 'none'; frame-src 'self'; worker-src 'none'; upgrade-insecure-requests; base-uri 'self'; manifest-src 'self'",
+          },
           {
             header: 'Permissions-Policy',
             override: false,
