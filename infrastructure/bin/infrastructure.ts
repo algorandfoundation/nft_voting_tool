@@ -60,13 +60,14 @@ const responseHeaders: ResponseHeadersPolicyProps = {
       override: false,
       frameOption: HeadersFrameOption.DENY,
     },
-    contentSecurityPolicy: {
-      override: false,
-      contentSecurityPolicy: `default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' ${apiDomainName} data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self' ${apiDomainName}; object-src 'none'; frame-src 'self'; worker-src 'none'; base-uri 'self'; manifest-src 'self'; upgrade-insecure-requests`,
-    },
   },
   customHeadersBehavior: {
     customHeaders: [
+      {
+        header: 'Content-Security-Policy-Report-Only',
+        override: false,
+        value: `default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' ${apiDomainName} data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self' ${apiDomainName}; object-src 'none'; frame-src 'self'; worker-src 'none'; base-uri 'self'; manifest-src 'self'; upgrade-insecure-requests`,
+      },
       {
         header: 'Permissions-Policy',
         override: false,
