@@ -21,7 +21,7 @@ export const DisplayAddress = ({ address }: AccountProps) => {
     <>
       {nfDomain && nfDomain.name ? (
         <Link
-          href={`https://app${import.meta.env.VITE_IS_TESTNET ? '.testnet' : ''}.nf.domains/name/${nfDomain.name}`}
+          href={`https://app${import.meta.env.VITE_IS_TESTNET === 'true' ? '.testnet' : ''}.nf.domains/name/${nfDomain.name}`}
           target="_blank"
           className="font-normal"
         >
