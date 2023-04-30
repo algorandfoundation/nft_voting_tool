@@ -22,7 +22,7 @@ export const fetchNFDomain = async (address: string): Promise<NFDomain | undefin
 
 export const fetchNFDomains = async (addresses: string[]): Promise<NFDomain[] | undefined> => {
   const response = await fetch(
-    `https://api${import.meta.env.VITE_IS_TESTNET ? '.testnet' : ''}.nf.domains/nfd/v2/address?address=${addresses.join(
+    `https://api${import.meta.env.VITE_IS_TESTNET === 'true' ? '.testnet' : ''}.nf.domains/nfd/v2/address?address=${addresses.join(
       '&address=',
     )}&view=thumbnail`,
   )

@@ -12,7 +12,7 @@ interface ImportMetaEnv {
   readonly VITE_IPFS_GATEWAY_URL: string
   readonly VITE_ALGO_EXPLORER_URL: string
   readonly VITE_NFT_EXPLORER_URL: string
-  readonly VITE_IS_TESTNET: boolean
+  readonly VITE_IS_TESTNET: string
   readonly VITE_CREATOR_ALLOW_LIST: string
 }
 
