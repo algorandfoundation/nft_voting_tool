@@ -91,11 +91,11 @@ export const VoteSubmission = ({
           <Typography>{votingError}</Typography>
         </Alert>
       )}
-      {!voteEnded && voteStarted && !existingAnswers && (
+      {!voteEnded && voteStarted && !existingAnswers && canVote && round?.questions && (
         <Button
-          disabled={votes === null}
+          disabled={Object.keys(votes).length < round.questions.length}
           onClick={() => {
-            if (votes === null) return
+            if (Object.keys(votes).length < round.questions.length) return
             handleSubmitVote(votes)
           }}
           className="uppercase mt-4"
