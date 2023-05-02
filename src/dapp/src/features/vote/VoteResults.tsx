@@ -9,11 +9,13 @@ type VoteResultsProps = {
 }
 
 export const VoteResults = ({ question, votingRoundResults, myVotes }: VoteResultsProps) => {
-  const counts = votingRoundResults.map((v) => v.count)
+  const counts = question.options.map((option) => {
+    return votingRoundResults.find((item) => item.optionId === option.id)?.count || 0
+  })
   const max = Math.max(...counts)
 
   return (
-    <div className="grid grid-cols-3 w-80 gap-2">
+    <div className="grid grid-cols-3 w-160 gap-2">
       {question.options.map((option) => {
         const result = votingRoundResults.find((result) => result.optionId === option.id)
         return (
@@ -21,8 +23,8 @@ export const VoteResults = ({ question, votingRoundResults, myVotes }: VoteResul
             <Fragment key={option.id}>
               <div className="col-span-2 h-10 flex items-center">
                 <div
-                  className="bg-algorand-orange-coral h-10 rounded-tr-xl rounded-br-xl"
-                  style={{ flexBasis: `${(max ? result.count / max : 0) * 150 + 5}px` }}
+                  className="bg-algorand-orange-coral h-10 rounded-tr-xl rounded-br-xl min-w-[5px]"
+                  style={{ flexBasis: `${max ? (result.count / max) * 80 : 0}%` }}
                 ></div>
                 <div className="p-2 pr-6">
                   {result.count}

@@ -67,7 +67,7 @@ function Vote() {
   }, [data, activeAddress])
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-6xl">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="sm:col-span-2">
           {loading ? <Skeleton className="h-12 w-1/2" variant="text" /> : <Typography variant="h3">{data?.title}</Typography>}
