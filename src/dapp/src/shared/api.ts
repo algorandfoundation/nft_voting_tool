@@ -11,10 +11,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { useAppSourceMaps } from '../features/vote-creation/state'
 import { useSetConnectedWallet } from '../features/wallet/state'
+import { VoteGatingSnapshot, getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { VotingRoundContract, algod, fetchTallyCounts, fetchVoterVotes, indexer } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { getVotingRound, getVotingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from './IPFSGateway'
 import { VotingRoundModel, VotingRoundPopulated, VotingRoundResult } from './types'
-import { algod, fetchTallyCounts, fetchVoterVotes, indexer, VotingRoundContract } from './VotingRoundContract'
 
 type AppState = {
   rounds: VotingRoundPopulated[]
@@ -128,6 +128,11 @@ const getRoundFromApp = async (
   }[],
 ): Promise<VotingRoundPopulated | undefined> => {
   try {
+    // In emergency situations, we can quickly hide particular voting rounds by app ID
+    if (import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(appId.toString())) {
+      return undefined
+    }
+
     const decodedState = decodeVotingRoundGlobalState(globalState)
     if (!decodedState.is_bootstrapped || !decodedState.metadata_ipfs_cid) {
       return undefined
@@ -168,11 +173,19 @@ const getRoundFromApp = async (
 }
 
 const fetchVotingRound = async (appId: number) => {
-  const app = await algod.getApplicationByID(appId).do()
-  if (!app.params['global-state']) {
-    return undefined
+  try {
+    const app = await algod.getApplicationByID(appId).do()
+    if (!app.params['global-state']) {
+      return undefined
+    }
+    return getRoundFromApp(appId, app.params['global-state'])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    if (e?.status === 404) {
+      return undefined
+    }
+    throw e
   }
-  return getRoundFromApp(appId, app.params['global-state'])
 }
 
 const fetchVotingRounds = async (address: string) => {
