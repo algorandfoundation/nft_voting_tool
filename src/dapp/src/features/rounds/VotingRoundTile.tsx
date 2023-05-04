@@ -2,7 +2,7 @@ import { Card, CardContent, Skeleton, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../shared/votingRoundContract'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { VotingRoundStatus } from './VotingRoundStatus'
 
 export type VotingRoundTileProps = {

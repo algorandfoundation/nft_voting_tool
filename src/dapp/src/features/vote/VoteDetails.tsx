@@ -1,7 +1,7 @@
 import { Link, Skeleton, Stack, Typography } from '@mui/material'
 import { DisplayAddress } from '../../shared/DisplayAddress'
 import { VotingRoundMetadata } from '../../shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../shared/votingRoundContract'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { VotingTime } from './VotingTime'
 
 type VoteDetailsProps = {

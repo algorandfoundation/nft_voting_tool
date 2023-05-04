@@ -2,8 +2,8 @@ import { Chip, Typography } from '@mui/material'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { VotingRoundGlobalState } from '../../shared/votingRoundContract'
 dayjs.extend(relativeTime)
 
 const getStatus = (globalState: VotingRoundGlobalState) => {

@@ -1,8 +1,8 @@
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { getTimezone } from '../../shared/getTimezone'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { VotingRoundGlobalState } from '../../shared/votingRoundContract'
 
 const getVotingStateDescription = (round: VotingRoundGlobalState) => {
   if (getHasVoteEnded(round)) return 'Voting round is closed!'

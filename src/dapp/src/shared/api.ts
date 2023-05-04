@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { useAppSourceMaps } from '../features/vote-creation/state'
 import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
+import { algod, bootstrap, castVote, closeVotingRound, create } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
 import { VotingRoundModel } from './types'
-import { algod, bootstrap, castVote, closeVotingRound, create } from './votingRoundContract'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)

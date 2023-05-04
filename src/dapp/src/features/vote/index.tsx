@@ -4,16 +4,16 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '../../shared/IPFSGateway'
 import { SkeletonArray } from '../../shared/SkeletonArray'
-import api from '../../shared/api'
-import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import {
   TallyCounts,
   VotingRoundGlobalState,
   fetchTallyCounts,
   fetchVoterVotes,
   fetchVotingRoundGlobalState,
-} from '../../shared/votingRoundContract'
+} from '../../shared/VotingRoundContract'
+import api from '../../shared/api'
+import { LoadingDialog } from '../../shared/loading/LoadingDialog'
+import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
 import { VoteSubmission } from './VoteSubmission'

@@ -2,7 +2,7 @@ import { Alert, Button, Stack, Typography } from '@mui/material'
 import { useReducer } from 'react'
 import { VotingRoundMetadata } from '../../shared/IPFSGateway'
 import { SkeletonArray } from '../../shared/SkeletonArray'
-import { VotingRoundGlobalState } from '../../shared/votingRoundContract'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { VoteResults } from './VoteResults'
 
 type VoteSubmissionProps = {
