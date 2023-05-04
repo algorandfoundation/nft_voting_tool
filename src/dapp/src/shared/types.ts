@@ -1,4 +1,4 @@
-import { CreatedMetadata, Question, VoteGatingSnapshot } from './IPFSGateway'
+import { VoteGatingSnapshot } from './IPFSGateway'
 
 export type VoteId = {
   id: number
@@ -12,27 +12,6 @@ export type RoundInfo = {
   snapshotFile?: string | undefined
   minimumVotes?: number | undefined
   voteInformationUrl?: string
-}
-
-export type VotingRoundPopulated = {
-  id: number
-  cid: string
-  title: string
-  description: string
-  start: string
-  end: string
-  quorum?: number
-  snapshot?: VoteGatingSnapshot
-  closedTime?: string
-  nftImageUrl?: string
-  nftAssetId?: number
-  voteGatingSnapshotCid?: string
-  informationUrl?: string
-  questions: Question[]
-  optionIds: string[]
-  created: CreatedMetadata
-  hasVoteTallyBox: boolean
-  votedWallets: number
 }
 
 export type Vote = {

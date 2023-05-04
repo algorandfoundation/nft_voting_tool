@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { NFDomain, fetchNFDomain, getWalletLabel } from './wallet'
 
 type AccountProps = {
-  address: string
+  address: string | undefined
 }
 
 export const DisplayAddress = ({ address }: AccountProps) => {
@@ -28,9 +28,11 @@ export const DisplayAddress = ({ address }: AccountProps) => {
           {nfDomain.name}
         </Link>
       ) : (
-        <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/address/${address}`} target="_blank" className="font-normal">
-          {getWalletLabel(address)}
-        </Link>
+        address && (
+          <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/address/${address}`} target="_blank" className="font-normal">
+            {getWalletLabel(address)}
+          </Link>
+        )
       )}
     </>
   )

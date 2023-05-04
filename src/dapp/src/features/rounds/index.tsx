@@ -1,11 +1,12 @@
-import { Button, Skeleton, Typography } from '@mui/material'
+import { Alert, Button, Skeleton, Typography } from '@mui/material'
+import { useWallet } from '@txnlab/use-wallet'
 import sortBy from 'lodash.sortby'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DisplayAddress } from '../../shared/DisplayAddress'
-import api from '../../shared/api'
-import { VotingRoundPopulated } from '../../shared/types'
-import { getVoteEnded, getVoteStarted } from '../../shared/vote'
-import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
+import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../shared/votingRoundContract'
+import { useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 
 export const VotingRoundTileLoading = () => (
@@ -16,10 +17,10 @@ export const VotingRoundTileLoading = () => (
 )
 
 const getRounds = (
-  rounds: VotingRoundPopulated[],
-  filterPredicate: (r: VotingRoundPopulated) => boolean,
+  rounds: VotingRoundGlobalState[],
+  filterPredicate: (r: VotingRoundGlobalState) => boolean,
   sortPredicate: Parameters<typeof sortBy>[1],
-): VotingRoundPopulated[] => {
+): VotingRoundGlobalState[] => {
   const filtered = rounds.filter(filterPredicate)
   const sorted = sortBy(filtered, sortPredicate)
   return sorted
@@ -27,13 +28,49 @@ const getRounds = (
 
 const VotingRounds = () => {
   const setShowConnectWalletModal = useSetShowConnectWalletModal()
-  const myWalletAddress = useConnectedWallet()
+  const { activeAddress } = useWallet()
   const creatorAddresses = useCreatorAddresses()
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
-  const isCreator = myWalletAddress && (creatorAddresses.includes(myWalletAddress) || creatorAddresses.includes('any'))
-  const { data, loading } = showMyRounds ? api.useVotingRounds([myWalletAddress]) : api.useVotingRounds(creatorAddresses)
+  const isCreator = activeAddress && (creatorAddresses.includes(activeAddress) || creatorAddresses.includes('any'))
+
+  const [globalStates, setGlobalStates] = useState<VotingRoundGlobalState[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let addressesToFetch = [] as string[]
+    if (showMyRounds && activeAddress) {
+      addressesToFetch = [activeAddress]
+    } else if (!showMyRounds) {
+      addressesToFetch = creatorAddresses
+    }
+
+    if (addressesToFetch && addressesToFetch.length) {
+      ;(async () => {
+        setError(null)
+        setIsLoading(true)
+        try {
+          setGlobalStates(await fetchVotingRoundGlobalStatesByCreators(addressesToFetch))
+          setIsLoading(false)
+        } catch (e) {
+          setIsLoading(false)
+          if (e instanceof Error) {
+            setError(e.message)
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(e)
+            setError('Unexpected error')
+          }
+        }
+      })()
+    } else {
+      setIsLoading(false)
+      setGlobalStates([])
+    }
+  }, [activeAddress, creatorAddresses, showMyRounds])
+
   const walletLabel = showMyRounds ? (
-    <DisplayAddress address={myWalletAddress} />
+    <DisplayAddress address={activeAddress} />
   ) : (
     <>
       {creatorAddresses.map((address) => (
@@ -42,36 +79,36 @@ const VotingRounds = () => {
     </>
   )
 
-  const openRounds = data
+  const openRounds = globalStates
     ? getRounds(
-        data.rounds,
-        (r) => getVoteStarted(r) && !getVoteEnded(r),
-        (r: VotingRoundPopulated) => r.end,
+        globalStates,
+        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r: VotingRoundGlobalState) => r.end_time,
       )
     : []
 
-  const upcomingRounds = data
+  const upcomingRounds = globalStates
     ? getRounds(
-        data.rounds,
-        (r) => !getVoteStarted(r),
-        (r: VotingRoundPopulated) => r.start,
+        globalStates,
+        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r: VotingRoundGlobalState) => r.start_time,
       )
     : []
 
-  const closedRounds = data
+  const closedRounds = globalStates
     ? getRounds(
-        data.rounds,
-        (r) => getVoteEnded(r),
-        (r: VotingRoundPopulated) => r.end,
+        globalStates,
+        (r) => getHasVoteEnded(r),
+        (r: VotingRoundGlobalState) => r.end_time,
       )
     : []
 
   return (
     <div className="container">
       <Typography variant="h3">Voting rounds</Typography>
-      {loading ? (
+      {isLoading ? (
         <Skeleton variant="text" />
-      ) : !myWalletAddress ? (
+      ) : !activeAddress ? (
         <div className="my-8">
           <Button variant="contained" onClick={() => setShowConnectWalletModal(true)}>
             Connect wallet
@@ -89,9 +126,16 @@ const VotingRounds = () => {
         </Button>
       )}
 
-      <VotingRoundSection label="Open" rounds={openRounds} loading={loading} />
-      <VotingRoundSection label="Opening soon" rounds={upcomingRounds} loading={loading} />
-      <VotingRoundSection label="Closed" rounds={closedRounds} loading={loading} />
+      {error && (
+        <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
+          <Typography>Could not load voting rounds:</Typography>
+          <Typography>{error}</Typography>
+        </Alert>
+      )}
+
+      <VotingRoundSection label="Open" globalStates={openRounds} loading={isLoading} />
+      <VotingRoundSection label="Opening soon" globalStates={upcomingRounds} loading={isLoading} />
+      <VotingRoundSection label="Closed" globalStates={closedRounds} loading={isLoading} />
     </div>
   )
 }

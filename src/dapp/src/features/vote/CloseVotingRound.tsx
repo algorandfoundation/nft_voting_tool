@@ -52,7 +52,7 @@ export const CloseVotingRound = ({ voteEnded, loading, handleCloseVotingRound, c
           <Typography>When you close the round, an NFT of the voting results will be created.</Typography>
         </div>
       </ConfirmationDialog>
-      <LoadingDialog loading={loading} title="Closing voting round" />
+      <LoadingDialog loading={loading} title="Closing voting round" note={'Please check your wallet for any pending transactions'} />
       {closingVotingRoundError && (
         <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
           <Typography>Could not close the voting round:</Typography>
