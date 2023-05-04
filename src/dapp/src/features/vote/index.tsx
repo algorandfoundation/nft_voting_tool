@@ -1,10 +1,10 @@
 import { Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { SkeletonArray } from '../../shared/SkeletonArray'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { SkeletonArray } from '../../shared/SkeletonArray'
 import { getVoteEnded, getVoteStarted } from '../../shared/vote'
 import { useConnectedWallet } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
@@ -30,6 +30,12 @@ function Vote() {
   const voteEnded = !data ? false : getVoteEnded(data)
   const isVoteCreator = data?.created.by === activeAddress ? true : false
   const canVote = voteStarted && !voteEnded && allowedToVote
+  const navigate = useNavigate()
+
+  // We didn't get any valid voting round for this vote ID; redirect back to /
+  if (!loading && !data) {
+    navigate('/')
+  }
 
   const handleSubmitVote = async (selectedOptions: Record<string, string>) => {
     if (!selectedOptions || !activeAddress || !allowlistSignature || !data) return
