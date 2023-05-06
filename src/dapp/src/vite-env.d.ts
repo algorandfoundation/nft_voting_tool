@@ -14,6 +14,7 @@ interface ImportMetaEnv {
   readonly VITE_NFT_EXPLORER_URL: string
   readonly VITE_IS_TESTNET: string
   readonly VITE_CREATOR_ALLOW_LIST: string
+  readonly VITE_HIDDEN_VOTING_ROUND_IDS: string
 }
 
 interface ImportMeta {

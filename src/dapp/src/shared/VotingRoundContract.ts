@@ -41,6 +41,9 @@ const indexer = algokit.getAlgoIndexerClient({
 })
 
 export const fetchVotingRoundGlobalState = async (appId: number): Promise<VotingRoundGlobalState | undefined> => {
+  if (import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(appId.toString())) {
+    return undefined
+  }
   const app = await algod.getApplicationByID(appId).do()
   if (!app.params['global-state']) {
     return undefined
@@ -55,12 +58,13 @@ export const fetchVotingRoundGlobalStatesByCreators = async (creatorAddresses: s
 
 export const fetchVotingRoundGlobalStatesByCreator = async (creatorAddress: string): Promise<VotingRoundGlobalState[]> => {
   const applicationsByCreator = await indexer.lookupAccountCreatedApplications(creatorAddress).do()
-  return applicationsByCreator.applications.map((app: ApplicationResponse) => {
-    if (!app.params['global-state']) {
+  const globalStates = applicationsByCreator.applications.map((app: ApplicationResponse) => {
+    if (!app.params['global-state'] || import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(app.id.toString())) {
       return undefined
     }
     return decodeVotingRoundGlobalState(app.params['global-state'], app.id)
   })
+  return globalStates.filter(Boolean)
 }
 
 export const fetchTallyCounts = async (appId: number, roundMetadata: VotingRoundMetadata): Promise<TallyCounts> => {

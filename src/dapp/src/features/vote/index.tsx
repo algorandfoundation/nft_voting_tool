@@ -1,7 +1,7 @@
 import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '../../shared/IPFSGateway'
 import { SkeletonArray } from '../../shared/SkeletonArray'
 import {
@@ -25,6 +25,7 @@ function Vote() {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const voteId = Number(voteIdParam!)
   const { activeAddress, signer } = useWallet()
+  const navigate = useNavigate()
 
   const [votingRoundGlobalState, setVotingRoundGlobalState] = useState<VotingRoundGlobalState | undefined>(undefined)
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
@@ -49,6 +50,10 @@ function Vote() {
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
   const isVoteCreator = votingRoundMetadata?.created.by === activeAddress ? true : false
   const canVote = hasVoteStarted && !hasVoteEnded && allowedToVote
+
+  if (voteIdParam && import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(voteIdParam)) {
+    navigate('/')
+  }
 
   useEffect(() => {
     refetchVoteRoundData(voteId)
