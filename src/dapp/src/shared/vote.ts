@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
-import { VotingRoundPopulated } from './types'
+import { VotingRoundGlobalState } from './VotingRoundContract'
 
-export const getVoteStarted = (round: VotingRoundPopulated) => dayjs(round.start) <= dayjs()
+export const getHasVoteStarted = (round: VotingRoundGlobalState) => dayjs(round.start_time) <= dayjs()
 
-export const getVoteEnded = (round: VotingRoundPopulated) => dayjs(round.end) <= dayjs() || !!round.closedTime
+export const getHasVoteEnded = (round: VotingRoundGlobalState) => dayjs(round.end_time) <= dayjs() || !!round.close_time

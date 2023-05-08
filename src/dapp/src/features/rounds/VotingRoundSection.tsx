@@ -1,16 +1,16 @@
 import { Typography } from '@mui/material'
-import { VotingRoundPopulated } from '../../shared/types'
-import { VotingRoundTileLoading } from './index'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { NoRounds } from './NoRounds'
 import { VotingRoundTile } from './VotingRoundTile'
+import { VotingRoundTileLoading } from './index'
 
 type VotingRoundSectionProps = {
   label: string
-  rounds: VotingRoundPopulated[]
+  globalStates: VotingRoundGlobalState[]
   loading: boolean
 }
 
-export const VotingRoundSection = ({ label, rounds, loading }: VotingRoundSectionProps) => {
+export const VotingRoundSection = ({ label, globalStates, loading }: VotingRoundSectionProps) => {
   return (
     <>
       <Typography className="mb-3 mt-7" variant="h4">
@@ -19,10 +19,10 @@ export const VotingRoundSection = ({ label, rounds, loading }: VotingRoundSectio
       <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 md:gap-8">
         {loading ? (
           <VotingRoundTileLoading />
-        ) : !rounds.length ? (
+        ) : !globalStates.length ? (
           <NoRounds label={label.toLowerCase()} />
         ) : (
-          rounds.map((round) => <VotingRoundTile key={round.id} round={round} />)
+          globalStates.map((globalState) => <VotingRoundTile key={globalState.appId} globalState={globalState} />)
         )}
       </div>
     </>

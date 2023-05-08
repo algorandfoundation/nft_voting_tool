@@ -1,12 +1,13 @@
 import { Alert, Button, Stack, Typography } from '@mui/material'
 import { useReducer } from 'react'
+import { VotingRoundMetadata } from '../../shared/IPFSGateway'
 import { SkeletonArray } from '../../shared/SkeletonArray'
-import { VotingRoundPopulated } from '../../shared/types'
-import { getVoteEnded, getVoteStarted } from '../../shared/vote'
+import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
 import { VoteResults } from './VoteResults'
 
 type VoteSubmissionProps = {
-  round: VotingRoundPopulated | undefined
+  roundMetadata: VotingRoundMetadata | undefined
+  globalState: VotingRoundGlobalState | undefined
   voteResults:
     | {
         optionId: string
@@ -15,6 +16,8 @@ type VoteSubmissionProps = {
     | undefined
   loadingVote: boolean
   loadingResults: boolean
+  hasVoteStarted: boolean
+  hasVoteEnded: boolean
   canVote: boolean
   votingError: string | null
   existingAnswers?: string[]
@@ -22,10 +25,13 @@ type VoteSubmissionProps = {
 }
 
 export const VoteSubmission = ({
-  round,
+  roundMetadata,
+  globalState,
   voteResults,
   loadingVote,
   loadingResults,
+  hasVoteStarted,
+  hasVoteEnded,
   canVote,
   votingError,
   existingAnswers,
@@ -35,11 +41,10 @@ export const VoteSubmission = ({
     (options: Record<string, string>, newOption: Record<string, string>) => ({ ...options, ...newOption }),
     {} as Record<string, string>,
   )
-  const voteStarted = round ? getVoteStarted(round) : false
-  const voteEnded = round ? getVoteEnded(round) : false
+
   return (
     <>
-      {round?.questions.map((question) => (
+      {roundMetadata?.questions.map((question) => (
         <div className="mt-7" key={question.id}>
           <Typography variant="h4">{question.prompt}</Typography>
 
@@ -51,11 +56,11 @@ export const VoteSubmission = ({
                 <SkeletonArray className="max-w-xs" count={1} />
               ) : (
                 <>
-                  {canVote || !voteStarted ? (
+                  {canVote || !hasVoteStarted ? (
                     <Stack spacing={1} className="max-w-xs">
                       {question.options.map((option) => (
                         <Button
-                          disabled={!voteStarted || voteEnded}
+                          disabled={!hasVoteStarted || hasVoteEnded}
                           variant={Object.values(votes).includes(option.id) ? 'contained' : 'outlined'}
                           key={option.id}
                           onClick={() => selectOption({ [question.id]: option.id })}
@@ -79,10 +84,10 @@ export const VoteSubmission = ({
           </div>
         </div>
       ))}
-      {!!round?.votedWallets && (
+      {globalState && !!globalState.voter_count && (
         <div className="flex mt-4">
           <Typography className="text-grey">Number of wallets voted</Typography>
-          <Typography className="ml-4">{round.votedWallets.toLocaleString()}</Typography>
+          <Typography className="ml-4">{globalState.voter_count.toLocaleString()}</Typography>
         </div>
       )}
       {votingError && (
@@ -91,11 +96,11 @@ export const VoteSubmission = ({
           <Typography>{votingError}</Typography>
         </Alert>
       )}
-      {!voteEnded && voteStarted && !existingAnswers && canVote && round?.questions && (
+      {!hasVoteEnded && hasVoteStarted && !existingAnswers && canVote && roundMetadata?.questions && (
         <Button
-          disabled={Object.keys(votes).length < round.questions.length}
+          disabled={Object.keys(votes).length < roundMetadata.questions.length}
           onClick={() => {
-            if (Object.keys(votes).length < round.questions.length) return
+            if (Object.keys(votes).length < roundMetadata.questions.length) return
             handleSubmitVote(votes)
           }}
           className="uppercase mt-4"

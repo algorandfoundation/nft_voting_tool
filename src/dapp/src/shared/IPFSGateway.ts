@@ -1,5 +1,5 @@
 /** A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions */
-export interface VotingRound {
+export interface VotingRoundMetadata {
   id: string
   title: string
   description: string
@@ -84,7 +84,7 @@ async function uploadFile(file: File, authSignature: { address: string; signedTr
   return (await response.json()) as Response
 }
 
-export async function getData<T>(cid: string): Promise<T> {
+async function getData<T>(cid: string): Promise<T> {
   const response = await fetch(`${apiUrl}/${cid}`)
   if (!response.ok) {
     throw new Error(`Failed to get data: ${response.statusText}`)
@@ -93,18 +93,15 @@ export async function getData<T>(cid: string): Promise<T> {
   return data as T
 }
 
-export async function getVotingRound(cid: string): Promise<VotingRound> {
-  return await getData<VotingRound>(cid)
+export async function fetchVotingRoundMetadata(cid: string): Promise<VotingRoundMetadata> {
+  return await getData<VotingRoundMetadata>(cid)
 }
 
-export async function getVotingSnapshot(round: VotingRound): Promise<VoteGatingSnapshot | undefined> {
-  if (!round.voteGatingSnapshotCid) {
-    return undefined
-  }
-  return await getData<VoteGatingSnapshot>(round.voteGatingSnapshotCid)
+export async function fetchVotingSnapshot(snapshotCid: string): Promise<VoteGatingSnapshot | undefined> {
+  return await getData<VoteGatingSnapshot>(snapshotCid)
 }
 
-function generateFile(data: VotingRound | VoteGatingSnapshot, fileName: string): File {
+function generateFile(data: VotingRoundMetadata | VoteGatingSnapshot, fileName: string): File {
   const csvBlob = new Blob([JSON.stringify(data)], { type: 'application/json' })
   return new File([csvBlob], fileName, { type: 'application/json' })
 }
@@ -118,7 +115,7 @@ export async function uploadVoteGatingSnapshot(
 }
 
 export async function uploadVotingRound(
-  votingRound: VotingRound,
+  votingRound: VotingRoundMetadata,
   authSignature: { address: string; signedTransaction: Uint8Array },
 ): Promise<Response> {
   const votingRoundFile = generateFile(votingRound, 'votingRound.json')
