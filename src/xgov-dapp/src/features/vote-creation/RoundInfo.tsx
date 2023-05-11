@@ -158,7 +158,7 @@ export default function RoundInfo() {
                 field: 'proposalFile',
                 hint: 'Upload a .csv file',
                 longHint:
-                  'Upload a CSV file with 5 columns containing the snapshots. The headers should be "title", "description", "link", "category", "threshold"',
+                  'Upload a CSV file with 5 columns containing the proposals. The headers should be "title", "description", "link", "category", "threshold"',
               })}
               {helper.textFileFormField({
                 label: 'Allowlist snapshot file',
