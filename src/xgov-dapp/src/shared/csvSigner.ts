@@ -5,12 +5,12 @@ import Papa from 'papaparse'
 interface SignedCsv {
   address: string
   signature: string
-  weight: string
+  weight: number
 }
 
 export type SnapshotRow = {
   address: string
-  weight: string
+  weight: number
 }
 
 export async function signCsv(csv: string): Promise<{ signedCsv: SignedCsv[]; publicKey: Uint8Array }> {
