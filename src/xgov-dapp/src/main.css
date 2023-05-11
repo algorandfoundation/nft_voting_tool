@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Suise Intl';
+  src: url('/fonts/SuisseIntl-Regular.ttf') format('truetype');
+  font-display: 'swapping';
+}
+
+#root {
+  background-color: #F8F8F8;
+}
+
+nav {
+  background-color: #FFFFFF;
+}
