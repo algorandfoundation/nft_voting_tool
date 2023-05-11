@@ -11,6 +11,9 @@
       "path": "./src/dapp"
     },
     {
+      "path": "./src/xgov-dapp"
+    },
+    {
       "path": "./src/algorand"
     },
     {
@@ -21,6 +24,7 @@
     "files.exclude": {
       "/infrastructure/": true,
       "/src/dapp/": true,
+      "/src/xgov-dapp/": true,
       "/src/algorand/": true
     },
     "vite.port": 5173,
