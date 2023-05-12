@@ -176,8 +176,8 @@ export const bootstrap = async (sender: TransactionSignerAccount, app: AppRefere
     methodArgs: {
       args: [
         appClient.fundAppAccount({
-          amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
-          sendParams: { skipSending: true },
+          amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+          sendParams: { skipSending: true, fee: (2_000).microAlgos() },
         }),
       ],
       boxes: ['V'],
