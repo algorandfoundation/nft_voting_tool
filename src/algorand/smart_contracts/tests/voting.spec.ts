@@ -566,7 +566,7 @@ describe('voting', () => {
     })
 
     test('invalid option', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions, opupId } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -584,6 +584,7 @@ describe('voting', () => {
               }),
               voter.signature,
               [1],
+              opupId(),
             ],
             boxes: ['V', voter.account],
           },
@@ -593,14 +594,16 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "Error: Incorrect number of method arguments. Expected 4, got 3
-              at AtomicTransactionComposer.addMethodCall (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\composer.ts:324:13)
-              at callApp (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\app.ts:267:9)
-              at runMicrotasks (<anonymous>)
-              at processTicksAndRejections (node:internal/process/task_queues:96:5)
-              at async ApplicationClient._call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:516:14)
-              at async ApplicationClient.call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:484:12)
-              at async Object.<anonymous> (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:574:9)"
+          "frame_bury 7
+          frame_dig 5
+          frame_dig 7
+          <
+          // Answer option index invalid
+          assert <--- Error
+          pushint 8 // 8
+          load 58
+          frame_dig 5
+          +"
         `)
       }
     })
