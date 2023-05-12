@@ -220,7 +220,7 @@ export const castVote = async (
         }),
         signatureByteArray,
         questionIndexes,
-        ...(globalState['ouaid'] ? [globalState['ouaid'].value] : []),
+        globalState['ouaid']?.value || 0,
       ],
       boxes: ['V', sender],
     },
@@ -243,7 +243,7 @@ export const closeVotingRound = async (sender: TransactionSignerAccount, appId: 
   return await client.call({
     method: 'close',
     methodArgs: {
-      args: globalState['ouaid'] ? [globalState['ouaid'].value] : [],
+      args: [globalState['ouaid']?.value || 0],
       boxes: ['V'],
     },
     sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
