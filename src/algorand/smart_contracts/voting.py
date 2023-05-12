@@ -317,8 +317,13 @@ def bootstrap(
 
 
 @app.external(authorize=beaker.Authorize.only_creator())
-def close() -> pt.Expr:
+def close(opup_app: pt.abi.Application = app.state.opup_app_id) -> pt.Expr:  # type: ignore[assignment]
     return pt.Seq(
+        pt.Assert(
+            opup_app.application_id() == app.state.opup_app_id.get(),
+            comment="OpUp app ID not passed in",
+        ),
+        call_opup(20000),
         pt.Assert(app.state.close_time == pt.Int(0), comment="Already closed"),
         app.state.close_time.set(pt.Global.latest_timestamp()),
         (note := StringScratchVar()).store(
@@ -352,10 +357,6 @@ def close() -> pt.Expr:
             ),
             (options_count := UInt64ScratchVar()).store(options_count_temp.get()),
             ForRange(option_index := UInt64ScratchVar(), stop=options_count).Do(
-                pt.If(
-                    pt.Global.opcode_budget() < pt.Int(100),
-                    call_opup(),
-                ),
                 app.state.tallies.get_vote(current_index.load(), current_tally),
                 note.store(
                     pt.Concat(
@@ -402,10 +403,13 @@ def close() -> pt.Expr:
 
 
 @pt.Subroutine(pt.TealType.uint64)
-def allowed_to_vote(signature: pt.Expr) -> pt.Expr:
+def allowed_to_vote(signature: pt.Expr, opup_app: pt.abi.Application) -> pt.Expr:
     return pt.Seq(
-        call_opup(),
-        call_opup(),
+        pt.Assert(
+            opup_app.application_id() == app.state.opup_app_id.get(),
+            comment="OpUp app ID not passed in",
+        ),
+        call_opup(2000),
         pt.Ed25519Verify_Bare(
             pt.Txn.sender(),
             signature,
@@ -458,11 +462,16 @@ class VotingPreconditions(pt.abi.NamedTuple):
 
 @app.external(read_only=True)
 def get_preconditions(
-    signature: pt.abi.DynamicBytes, *, output: VotingPreconditions
+    signature: pt.abi.DynamicBytes,
+    opup_app: pt.abi.Application = app.state.opup_app_id,  # type: ignore[assignment]
+    *,
+    output: VotingPreconditions,
 ) -> pt.Expr:
     return pt.Seq(
         (is_voting_open := pt.abi.Uint64()).set(voting_open()),
-        (is_allowed_to_vote := pt.abi.Uint64()).set(allowed_to_vote(signature.get())),
+        (is_allowed_to_vote := pt.abi.Uint64()).set(
+            allowed_to_vote(signature.get(), opup_app)
+        ),
         (has_already_voted := pt.abi.Uint64()).set(already_voted()),
         (current_time := pt.abi.Uint64()).set(pt.Global.latest_timestamp()),
         output.set(is_voting_open, is_allowed_to_vote, has_already_voted, current_time),
@@ -477,13 +486,21 @@ def vote(
     fund_min_bal_req: pt.abi.PaymentTransaction,
     signature: pt.abi.DynamicBytes,
     answer_ids: VoteIndexArray,
+    opup_app: pt.abi.Application = app.state.opup_app_id,  # type: ignore[assignment]
 ) -> pt.Expr:
     return pt.Seq(
+        pt.Assert(
+            opup_app.application_id() == app.state.opup_app_id.get(),
+            comment="OpUp app ID not passed in",
+        ),
         # Check voting preconditions
-        pt.Assert(allowed_to_vote(signature.get()), comment="Not allowed to vote"),
+        pt.Assert(
+            allowed_to_vote(signature.get(), opup_app), comment="Not allowed to vote"
+        ),
         pt.Assert(voting_open(), comment="Voting not open"),
         pt.Assert(pt.Not(already_voted()), comment="Already voted"),
         # Check vote array looks valid
+        # call_opup(1000),
         app.state.load_option_counts(
             into=(option_counts := pt.abi.make(VoteIndexArray))
         ),
@@ -517,7 +534,7 @@ def vote(
         ForRange(question_index := UInt64ScratchVar(), stop=questions_count).Do(
             pt.If(
                 pt.Global.opcode_budget() < pt.Int(100),
-                call_opup(),
+                call_opup(1000),
             ),
             # Load the user's vote for this question
             answer_ids[question_index.load()].store_into(

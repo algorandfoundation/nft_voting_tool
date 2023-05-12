@@ -21,6 +21,7 @@ export type VotingRoundGlobalState = {
   voter_count: number
   total_options: number | undefined
   option_counts: number[] | undefined
+  opUpAppId: number | undefined
 }
 
 export type TallyCounts = {
@@ -69,7 +70,7 @@ export const fetchVotingRoundGlobalStatesByCreator = async (creatorAddress: stri
 
 export const fetchTallyCounts = async (appId: number, roundMetadata: VotingRoundMetadata): Promise<TallyCounts> => {
   const optionIds = roundMetadata.questions.flatMap((q) => q.options.map((o) => o.id))
-  const client = algokit.getApplicationClient(
+  const client = algokit.getAppClient(
     {
       app: JSON.stringify(appSpec),
       id: appId,
@@ -142,7 +143,7 @@ export const create = async (
   nftImageUrl: string,
   questionCounts: number[],
 ): Promise<AppReference & Partial<AppCompilationResult>> => {
-  const appClient = algokit.getApplicationClient(
+  const appClient = algokit.getAppClient(
     {
       app: JSON.stringify(appSpec),
       id: 0,
@@ -192,7 +193,7 @@ export const castVote = async (
   appId: number,
   sourceMaps: AppSourceMaps | undefined,
 ) => {
-  const client = algokit.getApplicationClient(
+  const client = algokit.getAppClient(
     {
       app: JSON.stringify(appSpec),
       id: appId,
@@ -204,8 +205,10 @@ export const castVote = async (
     client.importSourceMaps(sourceMaps)
   }
 
+  const globalState = await client.getGlobalState()
+
   const signatureByteArray = Buffer.from(signature, 'base64')
-  const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
+  const voteFee = algokit.microAlgos(1_000 + 13 /* opup - 700 x 11 to get 7700 */ * 1_000)
   const transaction = await client.call({
     method: 'vote',
     methodArgs: {
@@ -217,6 +220,7 @@ export const castVote = async (
         }),
         signatureByteArray,
         questionIndexes,
+        ...(globalState['ouaid'] ? [globalState['ouaid'].value] : []),
       ],
       boxes: ['V', sender],
     },
@@ -228,20 +232,21 @@ export const castVote = async (
 }
 
 export const closeVotingRound = async (sender: TransactionSignerAccount, appId: number) => {
-  const client = algokit.getApplicationClient(
+  const client = algokit.getAppClient(
     {
       app: JSON.stringify(appSpec),
       id: appId,
     },
     algod,
   )
+  const globalState = await client.getGlobalState()
   return await client.call({
     method: 'close',
     methodArgs: {
-      args: [],
+      args: globalState['ouaid'] ? [globalState['ouaid'].value] : [],
       boxes: ['V'],
     },
-    sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
+    sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
     sender,
   })
 }
@@ -266,6 +271,7 @@ export const decodeVotingRoundGlobalState = (
     voter_count: 0,
     total_options: undefined,
     option_counts: undefined,
+    opUpAppId: undefined,
   } as VotingRoundGlobalState
   globalState.map((state) => {
     const globalKey = Buffer.from(state.key, 'base64').toString()
@@ -293,6 +299,8 @@ export const decodeVotingRoundGlobalState = (
         case 'total_options':
           decodedState.total_options = Number(state.value.uint)
           break
+        case 'ouaid':
+          decodedState.opUpAppId = Number(state.value.uint)
       }
     } else {
       switch (globalKey) {

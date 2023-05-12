@@ -38,8 +38,9 @@ describe('voting', () => {
     const lastRound = Number(status['last-round'])
     const round = await algod.block(lastRound).do()
     const currentTime = Number(round.block.ts)
+    let opupId = 0
 
-    const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
+    const voteFee = algokit.microAlgos(1_000 + 13 /* opup x 13 (max possible) */ * 1_000)
 
     const privateKey = Buffer.from(ed.utils.randomPrivateKey())
     const publicKey = await ed.getPublicKey(privateKey)
@@ -54,7 +55,7 @@ describe('voting', () => {
     nftImageUrl = nftImageUrl ?? 'ipfs://cid'
     const totalQuestionOptions = questionCounts.reduce((a, b) => a + b, 0)
 
-    const appClient = algokit.getApplicationClient(
+    const appClient = algokit.getAppClient(
       {
         app: appSpec,
         id: 0,
@@ -78,7 +79,7 @@ describe('voting', () => {
     }
 
     const bootstrap = async () => {
-      return await appClient.call({
+      const result = await appClient.call({
         method: 'bootstrap',
         methodArgs: {
           args: [
@@ -91,6 +92,12 @@ describe('voting', () => {
         },
         sendParams: { fee: (2_000).microAlgos() },
       })
+
+      result.confirmation?.['inner-txns']?.forEach((t) => {
+        if (t['application-index']) opupId = t['application-index']
+      })
+
+      return result
     }
 
     const getVoter = async () => {
@@ -126,6 +133,7 @@ describe('voting', () => {
             }),
             voter.signature,
             questionIndexes,
+            opupId,
           ],
           boxes: ['V', voter.account],
         },
@@ -138,10 +146,10 @@ describe('voting', () => {
       return await appClient.call({
         method: 'close',
         methodArgs: {
-          args: [],
+          args: [opupId],
           boxes: ['V'],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       })
     }
 
@@ -167,6 +175,7 @@ describe('voting', () => {
       vote,
       close,
       getTallies,
+      opupId: () => opupId,
     }
   }
 
@@ -235,14 +244,14 @@ describe('voting', () => {
   })
 
   test('get_preconditions', async () => {
-    const { appClient, getVoter, voteFee, currentTime, bootstrap } = await setupApp()
+    const { appClient, getVoter, voteFee, currentTime, bootstrap, opupId } = await setupApp()
     await bootstrap()
     const voter = await getVoter()
 
     const result = await appClient.call({
       method: 'get_preconditions',
       methodArgs: {
-        args: [voter.signature],
+        args: [voter.signature, opupId()],
         boxes: [voter.account],
       },
       sendParams: { fee: voteFee },
@@ -459,16 +468,24 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_6
-          // Not allowed to vote
-          assert
-          callsub votingopen_7
-          // Voting not open
-          assert <--- Error
-          callsub alreadyvoted_8
-          !
-          // Already voted
-          assert"
+          "URLTokenBaseHTTPError: Network request error. Received status 404 (Not Found): application does not exist
+              at Function.checkHttpError (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\urlTokenBaseHTTPClient.ts:121:11)
+              at runMicrotasks (<anonymous>)
+              at processTicksAndRejections (node:internal/process/task_queues:96:5)
+              at async Function.formatFetchResponse (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\urlTokenBaseHTTPClient.ts:129:5)
+              at async AlgoHttpClientWithRetry.callWithRetry (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\algo-http-client-with-retry.ts:30:20)
+              at async AlgoHttpClientWithRetry.get (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\algo-http-client-with-retry.ts:55:12)
+              at async HTTPClient.get (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\client\\client.ts:239:19)
+              at async GetApplicationByID.do (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\client\\v2\\jsonrequest.ts:61:17)
+              at async Promise.all (index 0)
+              at async Object.createDryrun (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\dryrun.ts:149:3)
+              at async performAtomicTransactionComposerDryrun (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\transaction.ts:239:18)
+              at async sendAtomicTransactionComposer (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\transaction.ts:210:22)
+              at async callApp (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\app.ts:292:20)
+              at async ApplicationClient._call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:516:14)
+              at async ApplicationClient.call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:484:12)
+              at async vote (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:123:14)
+              at async Object.<anonymous> (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:467:9)"
         `)
       }
     })
@@ -484,9 +501,9 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "bnz vote_11_l5
-          frame_dig -2
+          "frame_dig -3
           extract 2 0
+          frame_dig -1
           callsub allowedtovote_6
           // Not allowed to vote
           assert <--- Error
@@ -576,22 +593,20 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "frame_bury 7
-          frame_dig 5
-          frame_dig 7
-          <
-          // Answer option index invalid
-          assert <--- Error
-          pushint 8 // 8
-          load 56
-          frame_dig 5
-          +"
+          "Error: Incorrect number of method arguments. Expected 4, got 3
+              at AtomicTransactionComposer.addMethodCall (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\composer.ts:324:13)
+              at callApp (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\app.ts:267:9)
+              at runMicrotasks (<anonymous>)
+              at processTicksAndRejections (node:internal/process/task_queues:96:5)
+              at async ApplicationClient._call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:516:14)
+              at async ApplicationClient.call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:484:12)
+              at async Object.<anonymous> (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:574:9)"
         `)
       }
     })
 
     test('invalid question', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions, opupId } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -609,6 +624,7 @@ describe('voting', () => {
               }),
               voter.signature,
               [0, 0],
+              opupId(),
             ],
             boxes: ['V', voter.account],
           },
@@ -620,14 +636,14 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "frame_bury 2
           frame_dig 2
-          load 54
+          load 56
           ==
           // Number of answers incorrect
           assert <--- Error
           pushint 2500 // 2500
           pushint 34 // 34
           intc_1 // 1
-          frame_dig -1"
+          frame_dig -2"
         `)
       }
     })

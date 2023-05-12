@@ -14,7 +14,7 @@ class OpUpState:
 
 def op_up_blueprint(
     app: beaker.Application[OpUpState],
-) -> tuple[Callable[[], pt.Expr], Callable[[], pt.Expr]]:
+) -> tuple[Callable[[], pt.Expr], Callable[[int], pt.Expr]]:
     target_app = beaker.Application(
         name="OpUpApp",
         descr="""Simple app that allows the creator to call `opup` in order to increase its opcode budget""",
@@ -57,13 +57,25 @@ def op_up_blueprint(
         )
 
     # No decorator, inline it
-    def call_opup() -> pt.Expr:
+    def call_opup(required_budget: int) -> pt.Expr:
         """internal method to just return the method call to our target app"""
-        return pt.InnerTxnBuilder.ExecuteMethodCall(
-            app_id=app.state.opup_app_id,
-            method_signature=opup.method_signature(),
-            args=[],
-            extra_fields={pt.TxnField.fee: pt.Int(0)},
+        # A budget buffer is necessary to deal with an edge case of ensure_budget():
+        #   if the current budget is equal to or only slightly higher than the
+        #   required budget then it's possible for ensure_budget() to return with a
+        #   current budget less than the required budget. The buffer prevents this
+        #   from being the case.
+        buffer = pt.Int(10)
+        buffered_budget = pt.ScratchVar(pt.TealType.uint64)
+        return pt.Seq(
+            buffered_budget.store(pt.Int(required_budget) + buffer),
+            pt.While(buffered_budget.load() > pt.Global.opcode_budget()).Do(
+                pt.InnerTxnBuilder.ExecuteMethodCall(
+                    app_id=app.state.opup_app_id,
+                    method_signature=opup.method_signature(),
+                    args=[],
+                    extra_fields={pt.TxnField.fee: pt.Int(0)},
+                )
+            ),
         )
 
     return (create_opup, call_opup)
