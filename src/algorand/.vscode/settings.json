@@ -19,7 +19,7 @@
   "jest.rootPath": "smart_contracts",
   "jest.autoRun": {
     "watch": false,
-    "onSave": "test-file"
+    "onSave": false
   },
 
   // Python
