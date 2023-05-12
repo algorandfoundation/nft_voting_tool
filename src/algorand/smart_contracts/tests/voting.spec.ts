@@ -78,6 +78,27 @@ describe('voting', () => {
       )
     }
 
+    const bootstrapOpUp = async () => {
+      const result = await appClient.call({
+        method: 'opup_bootstrap',
+        methodArgs: {
+          args: [
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(200_000),
+              sendParams: { skipSending: true },
+            }),
+          ],
+        },
+        sendParams: { fee: (2_000).microAlgos() },
+      })
+
+      result.confirmation?.['inner-txns']?.forEach((t) => {
+        if (t['application-index']) opupId = t['application-index']
+      })
+
+      return result
+    }
+
     const bootstrap = async () => {
       const result = await appClient.call({
         method: 'bootstrap',
@@ -170,6 +191,7 @@ describe('voting', () => {
       questions: questionCounts,
       totalQuestionOptions,
       bootstrap,
+      bootstrapOpUp,
       getVoter,
       voteFee,
       vote,
@@ -459,8 +481,8 @@ describe('voting', () => {
     })
 
     test('not bootstrapped', async () => {
-      const { getVoter, vote, appClient } = await setupApp({ questionCounts: [1] })
-      await appClient.fundAppAccount(algokit.microAlgos(100_000))
+      const { getVoter, vote, bootstrapOpUp } = await setupApp({ questionCounts: [1] })
+      await bootstrapOpUp()
       const voter = await getVoter()
 
       try {
@@ -468,24 +490,16 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "URLTokenBaseHTTPError: Network request error. Received status 404 (Not Found): application does not exist
-              at Function.checkHttpError (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\urlTokenBaseHTTPClient.ts:121:11)
-              at runMicrotasks (<anonymous>)
-              at processTicksAndRejections (node:internal/process/task_queues:96:5)
-              at async Function.formatFetchResponse (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\urlTokenBaseHTTPClient.ts:129:5)
-              at async AlgoHttpClientWithRetry.callWithRetry (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\algo-http-client-with-retry.ts:30:20)
-              at async AlgoHttpClientWithRetry.get (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\algo-http-client-with-retry.ts:55:12)
-              at async HTTPClient.get (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\client\\client.ts:239:19)
-              at async GetApplicationByID.do (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\client\\v2\\jsonrequest.ts:61:17)
-              at async Promise.all (index 0)
-              at async Object.createDryrun (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\algosdk\\src\\dryrun.ts:149:3)
-              at async performAtomicTransactionComposerDryrun (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\transaction.ts:239:18)
-              at async sendAtomicTransactionComposer (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\transaction.ts:210:22)
-              at async callApp (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\app.ts:292:20)
-              at async ApplicationClient._call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:516:14)
-              at async ApplicationClient.call (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\node_modules\\@algorandfoundation\\src\\types\\app-client.ts:484:12)
-              at async vote (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:123:14)
-              at async Object.<anonymous> (C:\\dev\\makerx\\nft_voting_tool\\src\\algorand\\smart_contracts\\tests\\voting.spec.ts:467:9)"
+          "callsub allowedtovote_6
+          // Not allowed to vote
+          assert
+          callsub votingopen_7
+          // Voting not open
+          assert <--- Error
+          callsub alreadyvoted_8
+          !
+          // Already voted
+          assert"
         `)
       }
     })
