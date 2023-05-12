@@ -2,6 +2,19 @@
     "name": "VotingRoundApp",
     "methods": [
         {
+            "name": "opup_bootstrap",
+            "args": [
+                {
+                    "type": "pay",
+                    "name": "ptxn"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            },
+            "desc": "initialize opup with bootstrap to create a target app"
+        },
+        {
             "name": "create",
             "args": [
                 {

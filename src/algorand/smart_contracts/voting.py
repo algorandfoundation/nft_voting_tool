@@ -5,6 +5,8 @@ import beaker.lib.storage as storage
 import pyteal as pt
 from pyteal.types import require_type
 
+from .op_up import OpUpState, op_up_blueprint
+
 from smart_contracts.helpers.deployment_standard import deploy_time_permanence_control
 
 VoteIndexBytes: TypeAlias = Literal[8]
@@ -96,7 +98,7 @@ class TallyBox:
         )
 
 
-class VotingState:
+class VotingState(OpUpState):
     vote_id = beaker.GlobalStateValue(
         pt.TealType.bytes,
         static=True,
@@ -199,9 +201,18 @@ class VotingState:
                 (total := UInt64ScratchVar()).store(ZERO),
                 (questions_count := UInt64ScratchVar()).store(option_counts.length()),
                 ForRange(question_idx := UInt64ScratchVar(), stop=questions_count).Do(
+                    pt.If(
+                        pt.Global.opcode_budget() < pt.Int(100),
+                        # This is called during create where the app has no MBR
+                        # so we need to use the in-built op_up that creates and deletes
+                        # the app in one go (no MBR needed)
+                        pt.OpUp(pt.OpUpMode.OnCall).ensure_budget(
+                            pt.Int(600), pt.OpUpFeeSource.GroupCredit
+                        ),
+                    ),
                     option_counts[question_idx.load()].use(
                         lambda count: total.store(total.load() + count.get())
-                    )
+                    ),
                 ),
                 total.load(),
             ),
@@ -211,8 +222,11 @@ class VotingState:
 app = beaker.Application("VotingRoundApp", state=VotingState()).apply(
     # Disallow a voting round app to be deleted in MainNet
     # but allow deletion during local development
-    deploy_time_permanence_control
+    deploy_time_permanence_control,
 )
+
+# Allow for opup while only needing to create an app once
+(create_opup, call_opup) = op_up_blueprint(app)
 
 
 @app.create()
@@ -226,10 +240,7 @@ def create(
     quorum: pt.abi.Uint64,
     nft_image_url: pt.abi.String,
 ) -> pt.Expr:
-    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        # store_option_counts when there is a max # of options needs ~2600 budget
-        opup.ensure_budget(pt.Int(2800), fee_source=pt.OpUpFeeSource.GroupCredit),
         pt.Assert(
             # Technically this should be < but having <= makes automated testing easier
             # since it's not possible to control time yet
@@ -270,6 +281,8 @@ def bootstrap(
             pt.Int(
                 # minimum balance req for: ALGOs + Vote result NFT asset
                 beaker.consts.ASSET_MIN_BALANCE * 2
+                # Opup app
+                + beaker.consts.ASSET_MIN_BALANCE
                 #  Create NFT fee
                 + 1000
                 # Tally box
@@ -299,14 +312,13 @@ def bootstrap(
             comment="Payment must be for the exact min balance requirement",
         ),
         app.state.tallies.create(app.state.total_options.get()),
+        create_opup(),
     )
 
 
 @app.external(authorize=beaker.Authorize.only_creator())
 def close() -> pt.Expr:
-    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        opup.ensure_budget(pt.Int(20000), fee_source=pt.OpUpFeeSource.GroupCredit),
         pt.Assert(app.state.close_time == pt.Int(0), comment="Already closed"),
         app.state.close_time.set(pt.Global.latest_timestamp()),
         (note := StringScratchVar()).store(
@@ -340,6 +352,10 @@ def close() -> pt.Expr:
             ),
             (options_count := UInt64ScratchVar()).store(options_count_temp.get()),
             ForRange(option_index := UInt64ScratchVar(), stop=options_count).Do(
+                pt.If(
+                    pt.Global.opcode_budget() < pt.Int(100),
+                    call_opup(),
+                ),
                 app.state.tallies.get_vote(current_index.load(), current_tally),
                 note.store(
                     pt.Concat(
@@ -387,9 +403,9 @@ def close() -> pt.Expr:
 
 @pt.Subroutine(pt.TealType.uint64)
 def allowed_to_vote(signature: pt.Expr) -> pt.Expr:
-    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        opup.ensure_budget(pt.Int(2000), fee_source=pt.OpUpFeeSource.GroupCredit),
+        call_opup(),
+        call_opup(),
         pt.Ed25519Verify_Bare(
             pt.Txn.sender(),
             signature,
@@ -462,9 +478,7 @@ def vote(
     signature: pt.abi.DynamicBytes,
     answer_ids: VoteIndexArray,
 ) -> pt.Expr:
-    opup = pt.OpUp(pt.OpUpMode.OnCall)
     return pt.Seq(
-        opup.ensure_budget(pt.Int(7700), fee_source=pt.OpUpFeeSource.GroupCredit),
         # Check voting preconditions
         pt.Assert(allowed_to_vote(signature.get()), comment="Not allowed to vote"),
         pt.Assert(voting_open(), comment="Voting not open"),
@@ -501,6 +515,10 @@ def vote(
         # Record the vote for each question
         (cumulative_offset := UInt64ScratchVar()).store(ZERO),
         ForRange(question_index := UInt64ScratchVar(), stop=questions_count).Do(
+            pt.If(
+                pt.Global.opcode_budget() < pt.Int(100),
+                call_opup(),
+            ),
             # Load the user's vote for this question
             answer_ids[question_index.load()].store_into(
                 answer_option_index := VoteIndex()

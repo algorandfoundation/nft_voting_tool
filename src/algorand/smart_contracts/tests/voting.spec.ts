@@ -83,12 +83,13 @@ describe('voting', () => {
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+              amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
               sendParams: { skipSending: true },
             }),
           ],
           boxes: ['V'],
         },
+        sendParams: { fee: (2_000).microAlgos() },
       })
     }
 
@@ -228,7 +229,7 @@ describe('voting', () => {
         bytec 4 // "is_bootstrapped"
         intc_1 // 1
         app_global_put
-        pushint 203900 // 203900"
+        pushint 303900 // 303900"
       `)
     }
   })
@@ -436,7 +437,7 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "// Voting not open
           assert
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert <--- Error
@@ -458,13 +459,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -483,16 +484,16 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "bnz vote_9_l5
+          "bnz vote_11_l5
           frame_dig -2
           extract 2 0
-          callsub allowedtovote_4
+          callsub allowedtovote_6
           // Not allowed to vote
           assert <--- Error
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert
-          callsub alreadyvoted_6"
+          callsub alreadyvoted_8"
         `)
       }
     })
@@ -508,13 +509,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -533,13 +534,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -582,7 +583,7 @@ describe('voting', () => {
           // Answer option index invalid
           assert <--- Error
           pushint 8 // 8
-          load 52
+          load 56
           frame_dig 5
           +"
         `)
@@ -619,7 +620,7 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "frame_bury 2
           frame_dig 2
-          load 50
+          load 54
           ==
           // Number of answers incorrect
           assert <--- Error
