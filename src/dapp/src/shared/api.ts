@@ -54,16 +54,20 @@ const api = {
     return useSetter(
       async ({
         signature,
+        weighting,
         selectedOptionIndexes,
+        weightings,
         signer,
         appId,
       }: {
         signature: string
+        weighting: number
         selectedOptionIndexes: number[]
+        weightings: number[]
         signer: TransactionSignerAccount
         appId: number
       }) => {
-        await castVote(signer, signature, selectedOptionIndexes, appId, sourceMaps)
+        await castVote(signer, weighting, signature, selectedOptionIndexes, weightings, appId, sourceMaps)
       },
     )
   },
@@ -151,6 +155,7 @@ const api = {
           const { cid } = await uploadVotingRound(
             {
               id: voteId,
+              type: newRound.voteType,
               title: newRound.voteTitle,
               description: newRound.voteDescription,
               informationUrl: newRound.voteInformationUrl,
@@ -173,6 +178,7 @@ const api = {
           const app = await create(
             signer,
             voteId,
+            newRound.voteType,
             publicKey,
             cid,
             Math.floor(Date.parse(newRound.start) / 1000),

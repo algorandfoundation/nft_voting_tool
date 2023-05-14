@@ -2,11 +2,13 @@ import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { useNavigate } from 'react-router-dom'
+import { VoteType } from '../../shared/types'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
 import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 
 const formSchema = zfd.formData({
+  voteType: zfd.numeric(z.nativeEnum(VoteType)),
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
   voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
@@ -39,6 +41,10 @@ export default function RoundInfo() {
               {helper.textField({
                 label: 'Vote title',
                 field: 'voteTitle',
+              })}
+              {helper.textField({
+                label: 'Vote type',
+                field: 'voteType',
               })}
               {helper.textareaField({
                 label: 'Vote description',

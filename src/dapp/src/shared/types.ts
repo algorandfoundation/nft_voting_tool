@@ -4,7 +4,15 @@ export type VoteId = {
   id: number
 }
 
+export enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
+}
+
 export type RoundInfo = {
+  voteType: VoteType
   voteTitle: string
   voteDescription: string
   start: string

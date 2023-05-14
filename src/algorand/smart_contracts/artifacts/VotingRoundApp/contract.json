@@ -22,6 +22,10 @@
                     "name": "vote_id"
                 },
                 {
+                    "type": "uint8",
+                    "name": "vote_type"
+                },
+                {
                     "type": "byte[]",
                     "name": "snapshot_public_key"
                 },
@@ -86,6 +90,10 @@
                     "name": "signature"
                 },
                 {
+                    "type": "uint64",
+                    "name": "weighting"
+                },
+                {
                     "type": "application",
                     "name": "opup_app"
                 }
@@ -106,8 +114,16 @@
                     "name": "signature"
                 },
                 {
+                    "type": "uint64",
+                    "name": "weighting"
+                },
+                {
                     "type": "uint8[]",
                     "name": "answer_ids"
+                },
+                {
+                    "type": "uint64[]",
+                    "name": "answer_weights"
                 },
                 {
                     "type": "application",

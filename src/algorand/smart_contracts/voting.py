@@ -2,6 +2,7 @@ from typing import Literal, TypeAlias
 
 import beaker
 import beaker.lib.storage as storage
+from beaker.lib.strings import Itoa
 import pyteal as pt
 from pyteal.types import require_type
 
@@ -13,6 +14,12 @@ VoteIndexBytes: TypeAlias = Literal[8]
 VoteIndex: TypeAlias = pt.abi.Uint8
 VoteCount: TypeAlias = pt.abi.Uint64
 VoteIndexArray: TypeAlias = pt.abi.DynamicArray[VoteIndex]
+VoteWeightArray: TypeAlias = pt.abi.DynamicArray[VoteCount]
+
+TYPE_NO_SNAPSHOT = pt.Int(0)
+TYPE_NO_WEIGHTING = pt.Int(1)
+TYPE_WEIGHTING = pt.Int(2)
+TYPE_PARTITIONED_WEIGHTING = pt.Int(3)
 
 
 class UInt64ScratchVar(pt.ScratchVar):
@@ -76,7 +83,7 @@ class TallyBox:
             ),
         )
 
-    def increment_vote(self, index: pt.Expr) -> pt.Expr:
+    def increment_vote(self, index: pt.Expr, increment_by: pt.Expr) -> pt.Expr:
         return pt.Seq(
             (offset := UInt64ScratchVar()).store(self.element_size * index),
             # load the current value from the tally box
@@ -93,7 +100,7 @@ class TallyBox:
             pt.BoxReplace(
                 self.key,
                 offset.load(),
-                pt.Itob(current_vote_tally.load() + ONE),
+                pt.Itob(current_vote_tally.load() + increment_by),
             ),
         )
 
@@ -103,6 +110,15 @@ class VotingState(OpUpState):
         pt.TealType.bytes,
         static=True,
         descr="The identifier of this voting round",
+    )
+    vote_type = beaker.GlobalStateValue(
+        pt.TealType.uint64,
+        static=True,
+        descr="The type of this voting round; "
+        "0 = no snapshot / weighting, "
+        "1 = snapshot & no weighting, "
+        "2 = snapshot & weighting per question, "
+        "3 = snapshot & weighting partitioned across the questions",
     )
     snapshot_public_key = beaker.GlobalStateValue(
         pt.TealType.bytes,
@@ -232,6 +248,7 @@ app = beaker.Application("VotingRoundApp", state=VotingState()).apply(
 @app.create()
 def create(
     vote_id: pt.abi.String,
+    vote_type: pt.abi.Uint8,
     snapshot_public_key: pt.abi.DynamicBytes,
     metadata_ipfs_cid: pt.abi.String,
     start_time: pt.abi.Uint64,
@@ -251,7 +268,9 @@ def create(
             end_time.get() >= pt.Global.latest_timestamp(),
             comment="End time should be in the future",
         ),
+        pt.Assert(vote_type.get() <= pt.Int(3), comment="Vote type should be <= 3"),
         app.state.vote_id.set(vote_id.get()),
+        app.state.vote_type.set(vote_type.get()),
         app.state.snapshot_public_key.set(snapshot_public_key.get()),
         app.state.metadata_ipfs_cid.set(metadata_ipfs_cid.get()),
         app.state.start_time.set(start_time.get()),
@@ -338,9 +357,9 @@ def close(opup_app: pt.abi.Application = app.state.opup_app_id) -> pt.Expr:  # t
                 pt.Bytes('","id":"'),
                 app.state.vote_id.get(),
                 pt.Bytes('","quorum":'),
-                itoa(app.state.quorum.get()),
+                Itoa(app.state.quorum.get()),
                 pt.Bytes(',"voterCount":'),
-                itoa(app.state.voter_count.get()),
+                Itoa(app.state.voter_count.get()),
                 pt.Bytes(',"tallies":['),
             )
         ),
@@ -362,7 +381,7 @@ def close(opup_app: pt.abi.Application = app.state.opup_app_id) -> pt.Expr:  # t
                     pt.Concat(
                         note.load(),
                         pt.If(option_index.load() == ZERO, pt.Bytes("["), pt.Bytes("")),
-                        itoa(current_tally.load()),
+                        Itoa(current_tally.load()),
                         pt.If(
                             option_index.load() == (options_count.load() - ONE),
                             pt.Concat(
@@ -403,18 +422,30 @@ def close(opup_app: pt.abi.Application = app.state.opup_app_id) -> pt.Expr:  # t
 
 
 @pt.Subroutine(pt.TealType.uint64)
-def allowed_to_vote(signature: pt.Expr, opup_app: pt.abi.Application) -> pt.Expr:
+def allowed_to_vote(
+    signature: pt.Expr, weighting: pt.Expr, opup_app: pt.abi.Application
+) -> pt.Expr:
     return pt.Seq(
-        pt.Assert(
-            opup_app.application_id() == app.state.opup_app_id.get(),
-            comment="OpUp app ID not passed in",
-        ),
-        call_opup(2000),
-        pt.Ed25519Verify_Bare(
-            pt.Txn.sender(),
-            signature,
-            app.state.snapshot_public_key.get(),
-        ),
+        pt.If(
+            app.state.vote_type == TYPE_NO_SNAPSHOT,
+            pt.Int(1),
+            pt.Seq(
+                pt.Assert(
+                    opup_app.application_id() == app.state.opup_app_id.get(),
+                    comment="OpUp app ID not passed in",
+                ),
+                call_opup(2000),
+                pt.Ed25519Verify_Bare(
+                    pt.If(
+                        app.state.vote_type == TYPE_NO_WEIGHTING,
+                        pt.Txn.sender(),
+                        pt.Concat(pt.Txn.sender(), pt.Itob(weighting)),
+                    ),
+                    signature,
+                    app.state.snapshot_public_key.get(),
+                ),
+            ),
+        )
     )
 
 
@@ -436,20 +467,6 @@ def already_voted() -> pt.Expr:
     )
 
 
-# https://github.com/algorand/pyteal-utils/blob/main/pytealutils/strings/string.py#L63
-@pt.Subroutine(pt.TealType.bytes)
-def itoa(i: pt.Expr) -> pt.Expr:
-    """itoa converts an integer to the ascii byte string it represents"""
-    return pt.If(
-        i == pt.Int(0),
-        pt.Bytes("0"),
-        pt.Concat(
-            pt.If(i / pt.Int(10) > pt.Int(0), itoa(i / pt.Int(10)), pt.Bytes("")),
-            pt.Extract(pt.Bytes("0123456789"), i % pt.Int(10), pt.Int(1)),
-        ),
-    )
-
-
 # Readonly data methods
 
 
@@ -463,6 +480,7 @@ class VotingPreconditions(pt.abi.NamedTuple):
 @app.external(read_only=True)
 def get_preconditions(
     signature: pt.abi.DynamicBytes,
+    weighting: pt.abi.Uint64,
     opup_app: pt.abi.Application = app.state.opup_app_id,  # type: ignore[assignment]
     *,
     output: VotingPreconditions,
@@ -470,7 +488,7 @@ def get_preconditions(
     return pt.Seq(
         (is_voting_open := pt.abi.Uint64()).set(voting_open()),
         (is_allowed_to_vote := pt.abi.Uint64()).set(
-            allowed_to_vote(signature.get(), opup_app)
+            allowed_to_vote(signature.get(), weighting.get(), opup_app)
         ),
         (has_already_voted := pt.abi.Uint64()).set(already_voted()),
         (current_time := pt.abi.Uint64()).set(pt.Global.latest_timestamp()),
@@ -485,7 +503,9 @@ def get_preconditions(
 def vote(
     fund_min_bal_req: pt.abi.PaymentTransaction,
     signature: pt.abi.DynamicBytes,
+    weighting: pt.abi.Uint64,
     answer_ids: VoteIndexArray,
+    answer_weights: VoteWeightArray,
     opup_app: pt.abi.Application = app.state.opup_app_id,  # type: ignore[assignment]
 ) -> pt.Expr:
     return pt.Seq(
@@ -495,12 +515,12 @@ def vote(
         ),
         # Check voting preconditions
         pt.Assert(
-            allowed_to_vote(signature.get(), opup_app), comment="Not allowed to vote"
+            allowed_to_vote(signature.get(), weighting.get(), opup_app),
+            comment="Not allowed to vote",
         ),
         pt.Assert(voting_open(), comment="Voting not open"),
         pt.Assert(pt.Not(already_voted()), comment="Already voted"),
         # Check vote array looks valid
-        # call_opup(1000),
         app.state.load_option_counts(
             into=(option_counts := pt.abi.make(VoteIndexArray))
         ),
@@ -508,6 +528,19 @@ def vote(
         pt.Assert(
             answer_ids.length() == questions_count.load(),
             comment="Number of answers incorrect",
+        ),
+        pt.If(
+            app.state.vote_type == TYPE_PARTITIONED_WEIGHTING,
+            pt.Assert(
+                answer_weights.length() == questions_count.load(),
+                comment="Number of answer weights incorrect, should match number "
+                "of questions since this vote uses partitioned weighting",
+            ),
+            pt.Assert(
+                answer_weights.length() == pt.Int(0),
+                comment="Number of answer weights should be 0 since this vote "
+                "doesn't use partitioned weighting",
+            ),
         ),
         # Check voter box is funded
         (min_bal_req := UInt64ScratchVar()).store(
@@ -531,19 +564,27 @@ def vote(
         ),
         # Record the vote for each question
         (cumulative_offset := UInt64ScratchVar()).store(ZERO),
+        (weight_total := UInt64ScratchVar()).store(ZERO),
         ForRange(question_index := UInt64ScratchVar(), stop=questions_count).Do(
             pt.If(
                 pt.Global.opcode_budget() < pt.Int(100),
-                call_opup(1000),
+                call_opup(680),
             ),
             # Load the user's vote for this question
             answer_ids[question_index.load()].store_into(
                 answer_option_index := VoteIndex()
             ),
+            # Load the user's weight for this question
+            (answer_weight := VoteCount()).set(pt.Int(0)),
+            pt.If(
+                app.state.vote_type == TYPE_PARTITIONED_WEIGHTING,
+                answer_weights[question_index.load()].store_into(answer_weight),
+            ),
             # Load the number of vote options for this question
             option_counts[question_index.load()].store_into(
                 options_count := VoteIndex()
             ),
+            # Validate option index
             pt.Assert(
                 answer_option_index.get() < options_count.get(),
                 comment="Answer option index invalid",
@@ -551,10 +592,35 @@ def vote(
             # Increment the tally: the index into the tally is the cumulative option
             # count from all the questions so far + the vote option for this question
             app.state.tallies.increment_vote(
-                index=cumulative_offset.load() + answer_option_index.get()
+                index=cumulative_offset.load() + answer_option_index.get(),
+                increment_by=pt.If(
+                    pt.Or(
+                        app.state.vote_type == TYPE_NO_SNAPSHOT,
+                        app.state.vote_type == TYPE_NO_WEIGHTING,
+                    ),
+                    ONE,
+                    pt.If(
+                        app.state.vote_type == TYPE_WEIGHTING,
+                        weighting.get(),
+                        # TYPE_PARTITIONED_WEIGHTING
+                        answer_weight.get(),
+                    ),
+                ),
             ),
             # compute offset for start of next question
             cumulative_offset.store(cumulative_offset.load() + options_count.get()),
+            # Increment weight total
+            pt.If(
+                app.state.vote_type == TYPE_PARTITIONED_WEIGHTING,
+                weight_total.store(weight_total.load() + answer_weight.get()),
+            ),
+        ),
+        pt.If(
+            app.state.vote_type == TYPE_PARTITIONED_WEIGHTING,
+            pt.Assert(
+                weight_total.load() == weighting.get(),
+                comment="Didn't partition exact voting weight across questions",
+            ),
         ),
         (voter := pt.abi.Address()).set(pt.Txn.sender()),
         app.state.votes[voter].set(answer_ids.encode()),

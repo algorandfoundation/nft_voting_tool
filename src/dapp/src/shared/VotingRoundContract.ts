@@ -8,6 +8,13 @@ import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { VotingRoundMetadata } from './IPFSGateway'
 
+enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
+}
+
 export type VotingRoundGlobalState = {
   appId: number
   start_time: string
@@ -135,6 +142,7 @@ export const fetchVoterVotes = async (
 export const create = async (
   sender: TransactionSignerAccount,
   voteId: string,
+  voteType: VoteType,
   publicKey: Uint8Array,
   cid: string,
   start: number,
@@ -154,7 +162,7 @@ export const create = async (
 
   const app = await appClient.create({
     method: 'create',
-    methodArgs: [voteId, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
+    methodArgs: [voteId, voteType, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
     deletable: false,
     sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
   })
@@ -188,8 +196,10 @@ export const bootstrap = async (sender: TransactionSignerAccount, app: AppRefere
 
 export const castVote = async (
   sender: TransactionSignerAccount,
+  weighting: number,
   signature: string,
   questionIndexes: number[],
+  weightings: number[],
   appId: number,
   sourceMaps: AppSourceMaps | undefined,
 ) => {
@@ -208,7 +218,7 @@ export const castVote = async (
   const globalState = await client.getGlobalState()
 
   const signatureByteArray = Buffer.from(signature, 'base64')
-  const voteFee = algokit.microAlgos(1_000 + 13 /* opup - 700 x 11 to get 7700 */ * 1_000)
+  const voteFee = algokit.microAlgos(1_000 + 16 /* opup - 16 (max possible) */ * 1_000)
   const transaction = await client.call({
     method: 'vote',
     methodArgs: {
@@ -219,7 +229,9 @@ export const castVote = async (
           sendParams: { skipSending: true },
         }),
         signatureByteArray,
+        weighting,
         questionIndexes,
+        weightings,
         globalState['ouaid']?.value || 0,
       ],
       boxes: ['V', sender],

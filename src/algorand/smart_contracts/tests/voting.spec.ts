@@ -11,6 +11,13 @@ import * as ed from '@noble/ed25519'
 import invariant from 'tiny-invariant'
 import algosdk from 'algosdk'
 
+enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
+}
+
 describe('voting', () => {
   const localnet = algorandFixture()
   beforeEach(localnet.beforeEach, 10_000)
@@ -24,6 +31,7 @@ describe('voting', () => {
 
   const setupApp = async (setup?: {
     voteId?: string
+    voteType?: VoteType
     cid?: string
     start?: number
     end?: number
@@ -31,7 +39,7 @@ describe('voting', () => {
     questionCounts?: number[]
     nftImageUrl?: string
   }) => {
-    let { voteId, cid, start, end, quorum, questionCounts, nftImageUrl } = setup ?? {}
+    let { voteId, voteType, cid, start, end, quorum, questionCounts, nftImageUrl } = setup ?? {}
     const { algod, testAccount } = localnet.context
 
     const status = await algod.status().do()
@@ -40,12 +48,11 @@ describe('voting', () => {
     const currentTime = Number(round.block.ts)
     let opupId = 0
 
-    const voteFee = algokit.microAlgos(1_000 + 13 /* opup x 13 (max possible) */ * 1_000)
-
     const privateKey = Buffer.from(ed.utils.randomPrivateKey())
     const publicKey = await ed.getPublicKey(privateKey)
 
     voteId = voteId ?? `V${new Date().getTime().toString(32).toUpperCase()}`
+    voteType = voteType ?? VoteType.NO_WEIGHTING
     cid = cid ?? 'CID'
     start = start ?? currentTime
     end = end !== undefined ? start + end : currentTime + 1000
@@ -66,7 +73,17 @@ describe('voting', () => {
 
     const app = await appClient.create({
       method: 'create',
-      methodArgs: [voteId, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
+      methodArgs: [
+        voteId,
+        voteType,
+        voteType === VoteType.NO_SNAPSHOT ? new Uint8Array() : publicKey,
+        cid,
+        start,
+        end,
+        questionCounts,
+        quorum,
+        nftImageUrl,
+      ],
       deletable: false,
       sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
     })
@@ -121,7 +138,7 @@ describe('voting', () => {
       return result
     }
 
-    const getVoter = async () => {
+    const getVoter = async (weighting?: number) => {
       const voter = algosdk.generateAccount()
       await algokit.transferAlgos(
         {
@@ -132,14 +149,39 @@ describe('voting', () => {
         algod,
       )
       const decoded = algosdk.decodeAddress(voter.addr)
-      const signature = await ed.sign(decoded.publicKey, privateKey)
+      const keyAndWeighting = new Uint8Array(decoded.publicKey.length + 8)
+      keyAndWeighting.set(decoded.publicKey, 0)
+      keyAndWeighting.set(new algosdk.ABIUintType(64).encode(weighting ?? 0), decoded.publicKey.length)
+      const signature = await ed.sign(
+        voteType === VoteType.WEIGHTING || voteType === VoteType.PARTITIONED_WEIGHTING
+          ? keyAndWeighting
+          : voteType === VoteType.NO_SNAPSHOT
+          ? new Uint8Array()
+          : decoded.publicKey,
+        privateKey,
+      )
       return {
         account: voter,
         signature,
+        weighting: weighting ?? 0,
+        getWeightings: () => {
+          const weightings = new Array(questionCount).fill(1)
+          weightings[weightings.length - 1] = (weighting ?? 0) - questionCount + 1
+          return voteType === VoteType.PARTITIONED_WEIGHTING ? weightings : []
+        },
       }
     }
 
-    const vote = async (voter: { account: Account; signature: Uint8Array }, questionIndexes?: number[]) => {
+    const voteFee = algokit.microAlgos(1_000 + 16 /* opup x 13 (max possible) */ * 1_000)
+    const vote = async (
+      voter: {
+        account: Account
+        signature: Uint8Array
+        weighting?: number
+        getWeightings: () => number[]
+      },
+      questionIndexes?: number[],
+    ) => {
       questionIndexes = questionIndexes ?? questionCounts!.map((x) => x - 1)
       return await appClient.call({
         method: 'vote',
@@ -153,7 +195,9 @@ describe('voting', () => {
               sendParams: { skipSending: true },
             }),
             voter.signature,
+            voter.weighting ?? 0,
             questionIndexes,
+            voter.getWeightings(),
             opupId,
           ],
           boxes: ['V', voter.account],
@@ -252,12 +296,12 @@ describe('voting', () => {
     } catch (e: any) {
       expect(e.stack).toMatchInlineSnapshot(`
         "assert
-        bytec 4 // "is_bootstrapped"
+        bytec 5 // "is_bootstrapped"
         app_global_get
         !
         // Already bootstrapped
         assert <--- Error
-        bytec 4 // "is_bootstrapped"
+        bytec 5 // "is_bootstrapped"
         intc_1 // 1
         app_global_put
         pushint 303900 // 303900"
@@ -273,7 +317,7 @@ describe('voting', () => {
     const result = await appClient.call({
       method: 'get_preconditions',
       methodArgs: {
-        args: [voter.signature, opupId()],
+        args: [voter.signature, voter.weighting, opupId()],
         boxes: [voter.account],
       },
       sendParams: { fee: voteFee },
@@ -410,6 +454,167 @@ describe('voting', () => {
     })
   })
 
+  describe('no snapshot', () => {
+    test('successful vote', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({
+        voteType: VoteType.NO_SNAPSHOT,
+        questionCounts: [3, 3, 3],
+      })
+      await bootstrap()
+      const voter = await getVoter()
+
+      await vote({ ...voter, signature: new Uint8Array() }, [0, 1, 2])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([1n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, 1n])
+    })
+  })
+
+  describe('weighted voting', () => {
+    test('successful vote', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({
+        voteType: VoteType.WEIGHTING,
+        questionCounts: [4],
+      })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+
+      await vote(voter, [0])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([BigInt(weighting), 0n, 0n, 0n])
+    })
+
+    test('invalid signature', async () => {
+      const { getVoter, vote, bootstrap } = await setupApp({ voteType: VoteType.WEIGHTING, questionCounts: [1] })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+      const voter2 = await getVoter(weighting)
+
+      try {
+        await vote({ ...voter, signature: voter2.signature }, [0])
+        invariant(false)
+      } catch (e: any) {
+        expect(e.stack).toMatchInlineSnapshot(`
+          "extract 2 0
+          frame_dig -4
+          frame_dig -1
+          callsub allowedtovote_8
+          // Not allowed to vote
+          assert <--- Error
+          callsub votingopen_9
+          // Voting not open
+          assert
+          callsub alreadyvoted_10"
+        `)
+      }
+    })
+  })
+
+  describe('partitioned weighted voting', () => {
+    test('successful vote', async () => {
+      const { getVoter, vote, bootstrap, getTallies } = await setupApp({
+        voteType: VoteType.PARTITIONED_WEIGHTING,
+        questionCounts: [3, 3, 3],
+      })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+
+      await vote(voter, [0, 1, 2])
+
+      const boxValues = await getTallies()
+      expect(boxValues).toEqual([1n, 0n, 0n, 0n, 1n, 0n, 0n, 0n, BigInt(weighting - 2)])
+    })
+
+    test('invalid partition weight', async () => {
+      const { getVoter, vote, bootstrap } = await setupApp({
+        voteType: VoteType.PARTITIONED_WEIGHTING,
+        questionCounts: [3, 3, 3],
+      })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+
+      try {
+        await vote({ ...voter, getWeightings: () => [20, 20, 20] }, [0, 1, 2])
+        invariant(false)
+      } catch (e: any) {
+        expect(e.stack).toMatchInlineSnapshot(`
+          "bz vote_12_l21
+          load 65
+          frame_dig -4
+          ==
+          // Didn't partition exact voting weight across questions
+          assert <--- Error
+          b vote_12_l21
+          vote_12_l6:
+          global OpcodeBudget
+          pushint 100 // 100"
+        `)
+      }
+    })
+
+    test('invalid partition weight off by 1', async () => {
+      const { getVoter, vote, bootstrap } = await setupApp({
+        voteType: VoteType.PARTITIONED_WEIGHTING,
+        questionCounts: [3, 3, 3],
+      })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+
+      try {
+        await vote({ ...voter, getWeightings: () => [18, 1, 2] }, [0, 1, 2])
+        invariant(false)
+      } catch (e: any) {
+        expect(e.stack).toMatchInlineSnapshot(`
+          "bz vote_12_l21
+          load 65
+          frame_dig -4
+          ==
+          // Didn't partition exact voting weight across questions
+          assert <--- Error
+          b vote_12_l21
+          vote_12_l6:
+          global OpcodeBudget
+          pushint 100 // 100"
+        `)
+      }
+    })
+
+    test('invalid signature', async () => {
+      const { getVoter, vote, bootstrap } = await setupApp({
+        voteType: VoteType.PARTITIONED_WEIGHTING,
+        questionCounts: [1],
+      })
+      await bootstrap()
+      const weighting = 20
+      const voter = await getVoter(weighting)
+      const voter2 = await getVoter(weighting)
+
+      try {
+        await vote({ ...voter, signature: voter2.signature }, [0])
+        invariant(false)
+      } catch (e: any) {
+        expect(e.stack).toMatchInlineSnapshot(`
+          "extract 2 0
+          frame_dig -4
+          frame_dig -1
+          callsub allowedtovote_8
+          // Not allowed to vote
+          assert <--- Error
+          callsub votingopen_9
+          // Voting not open
+          assert
+          callsub alreadyvoted_10"
+        `)
+      }
+    })
+  })
+
   describe('vote', () => {
     test('successful single question (first index)', async () => {
       const { getVoter, vote, bootstrap, getTallies } = await setupApp({ questionCounts: [4] })
@@ -468,11 +673,11 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "// Voting not open
           assert
-          callsub alreadyvoted_8
+          callsub alreadyvoted_10
           !
           // Already voted
           assert <--- Error
-          bytec_3 // "option_counts"
+          bytec 4 // "option_counts"
           app_global_get
           frame_bury 0
           frame_dig 0"
@@ -490,13 +695,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_6
+          "callsub allowedtovote_8
           // Not allowed to vote
           assert
-          callsub votingopen_7
+          callsub votingopen_9
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_8
+          callsub alreadyvoted_10
           !
           // Already voted
           assert"
@@ -511,20 +716,20 @@ describe('voting', () => {
       const voter2 = await getVoter()
 
       try {
-        await vote({ account: voter.account, signature: voter2.signature }, [0])
+        await vote({ ...voter, signature: voter2.signature }, [0])
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "frame_dig -3
-          extract 2 0
+          "extract 2 0
+          frame_dig -4
           frame_dig -1
-          callsub allowedtovote_6
+          callsub allowedtovote_8
           // Not allowed to vote
           assert <--- Error
-          callsub votingopen_7
+          callsub votingopen_9
           // Voting not open
           assert
-          callsub alreadyvoted_8"
+          callsub alreadyvoted_10"
         `)
       }
     })
@@ -540,13 +745,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_6
+          "callsub allowedtovote_8
           // Not allowed to vote
           assert
-          callsub votingopen_7
+          callsub votingopen_9
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_8
+          callsub alreadyvoted_10
           !
           // Already voted
           assert"
@@ -565,13 +770,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_6
+          "callsub allowedtovote_8
           // Not allowed to vote
           assert
-          callsub votingopen_7
+          callsub votingopen_9
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_8
+          callsub alreadyvoted_10
           !
           // Already voted
           assert"
@@ -597,7 +802,9 @@ describe('voting', () => {
                 sendParams: { skipSending: true },
               }),
               voter.signature,
+              voter.weighting,
               [1],
+              voter.getWeightings(),
               opupId(),
             ],
             boxes: ['V', voter.account],
@@ -608,15 +815,15 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "frame_bury 7
-          frame_dig 5
+          "frame_bury 11
           frame_dig 7
+          frame_dig 11
           <
           // Answer option index invalid
           assert <--- Error
           pushint 8 // 8
-          load 58
-          frame_dig 5
+          load 64
+          frame_dig 7
           +"
         `)
       }
@@ -640,7 +847,9 @@ describe('voting', () => {
                 sendParams: { skipSending: true },
               }),
               voter.signature,
+              voter.weighting,
               [0, 0],
+              voter.getWeightings(),
               opupId(),
             ],
             boxes: ['V', voter.account],
@@ -653,14 +862,14 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "frame_bury 2
           frame_dig 2
-          load 56
+          load 62
           ==
           // Number of answers incorrect
           assert <--- Error
-          pushint 2500 // 2500
-          pushint 34 // 34
-          intc_1 // 1
-          frame_dig -2"
+          bytec_0 // "vote_type"
+          app_global_get
+          intc_3 // 3
+          =="
         `)
       }
     })

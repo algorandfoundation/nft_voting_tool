@@ -50,11 +50,19 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       const round = await algod.block(lastRound).do()
       const currentTime = Number(round.block.ts)
 
+      enum VoteType {
+        NO_SNAPSHOT = 0,
+        NO_WEIGHTING = 1,
+        WEIGHTING = 2,
+        PARTITIONED_WEIGHTING = 3,
+      }
+
       const quorum = 1
       const questionOptions = [3, 4, 2]
       const totalQuestionOptions = questionOptions.reduce((a, b) => a + b, 0)
       const createArgs = [
         'vote_id',
+        VoteType.NO_WEIGHTING,
         publicKey,
         'ipfs_cid',
         currentTime,
@@ -83,7 +91,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
             })
 
       // Check if it's already been bootstrapped
-      const appInfo = await algokit.getAppByIndex(app.appId, algod)
+      const appInfo = await algokit.getAppById(app.appId, algod)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const isBootstrappedValue = appInfo.params['global-state']!.find(
         (s) => s.key === Buffer.from('is_bootstrapped').toString('base64'),
@@ -130,7 +138,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Call get_preconditions to check it works
       const result = await appClient.call({
         method: 'get_preconditions',
-        methodArgs: { args: [signature, opupId], boxes: [voter] },
+        methodArgs: { args: [signature, 0, opupId], boxes: [voter] },
         sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
@@ -160,7 +168,9 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
               sendParams: { skipSending: true },
             }),
             signature,
+            0,
             questionOptions.map((x) => x - 1), // vote for the last option in each,
+            [],
             opupId,
           ],
           boxes: ['V', voter],
