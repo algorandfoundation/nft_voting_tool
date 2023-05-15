@@ -10,7 +10,7 @@ import { useRoundInfo, useSetRoundInfo } from './state'
 
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
-  voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
+  voteDescription: zfd.text(z.string().trim().optional()),
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
@@ -20,7 +20,7 @@ const formSchema = zfd.formData({
 
 function validateProposalCsv(value: string, ctx: z.RefinementCtx) {
   const parsed = Papa.parse<Proposal>(value, { header: true })
-  const requiredFields = ['title', 'description', 'link', 'category', 'threshold']
+  const requiredFields = ['title', 'description', 'link', 'category', 'focus_area', 'threshold', 'ask']
   if (parsed.errors.length > 0) {
     parsed.errors.forEach((error) => {
       ctx.addIssue({

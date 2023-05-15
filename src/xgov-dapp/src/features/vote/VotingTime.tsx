@@ -1,3 +1,4 @@
+import WatchLaterIcon from '@mui/icons-material/WatchLater'
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
@@ -18,46 +19,55 @@ type VotingTimeProps = {
 
 export const VotingTime = ({ loading, globalState, className }: VotingTimeProps) => (
   <div className={className}>
-    <Box className="bg-algorand-diamond rounded-xl p-4 pb-6">
-      <div className="text-center">
-        {loading || !globalState ? (
-          <Skeleton variant="rectangular" className="h-5 w-3/4 mx-auto" />
-        ) : (
-          <Typography variant="h5">{getVotingStateDescription(globalState)}</Typography>
-        )}
+    <Box className="bg-blue-light flex rounded-xl px-4 py-6">
+      <div>
+        <WatchLaterIcon className="mr-2 text-blue" />
       </div>
-      <Stack className="mt-3">
-        <Typography variant="h6">From</Typography>
-        {loading ? (
-          <Skeleton variant="text" />
-        ) : (
+      <div className="w-full">
+        <Stack>
           <Typography>
-            {dayjs(globalState?.start_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.start_time))}
+            <strong>Session Period</strong>
           </Typography>
-        )}
-      </Stack>
-      <Stack className="mt-3">
-        <Typography variant="h6">To</Typography>
-        {loading ? (
-          <Skeleton variant="text" />
-        ) : (
-          <Typography>
-            {dayjs(globalState?.end_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.end_time))}
-          </Typography>
-        )}
-      </Stack>
-      {!!globalState?.close_time && (
+        </Stack>
         <Stack className="mt-3">
-          <Typography variant="h6">Closed at</Typography>
           {loading ? (
             <Skeleton variant="text" />
           ) : (
             <Typography>
-              {dayjs(globalState.close_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState.close_time))}
+              From{' '}
+              <strong>
+                {dayjs(globalState?.start_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.start_time))}
+              </strong>
             </Typography>
           )}
         </Stack>
-      )}
+        <Stack className="mt-3">
+          {loading ? (
+            <Skeleton variant="text" />
+          ) : (
+            <Typography>
+              To{' '}
+              <strong>
+                {dayjs(globalState?.end_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.end_time))}
+              </strong>
+            </Typography>
+          )}
+        </Stack>
+        {!!globalState?.close_time && (
+          <Stack className="mt-3">
+            {loading ? (
+              <Skeleton variant="text" />
+            ) : (
+              <Typography>
+                Closed at{' '}
+                <strong>
+                  {dayjs(globalState.close_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState.close_time))}
+                </strong>
+              </Typography>
+            )}
+          </Stack>
+        )}
+      </div>
     </Box>
   </div>
 )

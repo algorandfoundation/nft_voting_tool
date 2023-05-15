@@ -1,9 +1,13 @@
-import { Alert, Box, Link, Skeleton, Stack, Typography } from '@mui/material'
+import CancelIcon from '@mui/icons-material/Cancel'
+import FlashOnIcon from '@mui/icons-material/FlashOn'
+import ThumbUpIcon from '@mui/icons-material/ThumbUp'
+import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
+import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '../../shared/IPFSGateway'
-import { SkeletonArray } from '../../shared/SkeletonArray'
+import { ProposalCard } from '../../shared/ProposalCard'
 import {
   TallyCounts,
   VotingRoundGlobalState,
@@ -14,17 +18,17 @@ import {
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
-import { VoteSubmission } from './VoteSubmission'
 import { VotingTime } from './VotingTime'
-import { WalletVoteStatus } from './WalletVoteStatus'
 
 function Vote() {
   const { voteId: voteIdParam } = useParams()
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const voteId = Number(voteIdParam!)
   const { activeAddress, signer } = useWallet()
+  const setShowConnectedWalletModal = useSetShowConnectWalletModal()
   const navigate = useNavigate()
 
   const [votingRoundGlobalState, setVotingRoundGlobalState] = useState<VotingRoundGlobalState | undefined>(undefined)
@@ -42,18 +46,61 @@ function Vote() {
 
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
+  const [voteWeight, setVoteWeight] = useState<number>(0)
+  const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
+  const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
 
   const { loading: submittingVote, execute: submitVote, error: errorSubmittingVote } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
+
+  const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
+  const totalAllocated = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
   const isVoteCreator = votingRoundMetadata?.created.by === activeAddress ? true : false
   const canVote = hasVoteStarted && !hasVoteEnded && allowedToVote
+  const canSubmitVote =
+    canVote &&
+    totalAllocatedPercentage >= 100 &&
+    // totalAllocated === voteWeight &&
+    activeAddress &&
+    allowlistSignature &&
+    votingRoundMetadata
+
+  type VoteAllocation = {
+    [key: string]: number
+  }
 
   if (voteIdParam && import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(voteIdParam)) {
     navigate('/')
   }
+
+  const updateVoteAllocations = (proposalId: string, amount: number) => {
+    const newVoteAllocationsPercentage = { ...voteAllocationsPercentage }
+    if (!isFinite(amount)) {
+      amount = 0
+    }
+
+    if (amount > 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]) {
+      amount = 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]
+    }
+
+    newVoteAllocationsPercentage[proposalId] = amount
+    setVoteAllocations({ ...voteAllocations, [proposalId]: Math.round((amount / 100) * voteWeight) })
+    setVoteAllocationsPercentage(newVoteAllocationsPercentage)
+  }
+
+  useEffect(() => {
+    const newVoteAllocationsPercentage = {} as VoteAllocation
+    const newVoteAllocations = {} as VoteAllocation
+    votingRoundMetadata?.questions.forEach((question) => {
+      newVoteAllocationsPercentage[question.id as keyof VoteAllocation] = 0
+      newVoteAllocations[question.id as keyof VoteAllocation] = 0
+    })
+    setVoteAllocationsPercentage(newVoteAllocationsPercentage)
+    setVoteAllocations(newVoteAllocations)
+  }, [votingRoundMetadata])
 
   useEffect(() => {
     refetchVoteRoundData(voteId)
@@ -149,6 +196,11 @@ function Vote() {
       if (addressSnapshot) {
         setAllowlistSignature(addressSnapshot.signature)
         setAllowToVote(true)
+        if (addressSnapshot.weight && isFinite(parseInt(addressSnapshot.weight))) {
+          setVoteWeight(parseInt(addressSnapshot.weight))
+        } else {
+          setVoteWeight(1)
+        }
       }
     }
   }, [snapshot, activeAddress])
@@ -163,13 +215,38 @@ function Vote() {
     }
   }
 
-  const handleSubmitVote = async (selectedOptions: Record<string, string>) => {
-    if (!selectedOptions || !activeAddress || !allowlistSignature || !votingRoundMetadata) return
+  const handleSubmitVote = async () => {
+    if (!canSubmitVote) return
+
+    const sumOfVotes = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
+    const difference = voteWeight - sumOfVotes
+
+    const newVoteAllocations = { ...voteAllocations }
+
+    if (difference !== 0) {
+      let isAdjusted = false
+      if (difference < 0) {
+        Object.entries(newVoteAllocations).forEach(([key, value]) => {
+          if (value > Math.abs(difference) && !isAdjusted) {
+            newVoteAllocations[key] = value - Math.abs(difference)
+            isAdjusted = true
+          }
+        })
+      } else {
+        Object.entries(newVoteAllocations).forEach(([key, value]) => {
+          if (newVoteAllocations[key] > 0 && !isAdjusted) {
+            newVoteAllocations[key] = value + difference
+            isAdjusted = true
+          }
+        })
+      }
+    }
+
     await submitVote({
       signature: allowlistSignature,
-      selectedOptionIndexes: votingRoundMetadata.questions.map((question) =>
-        question.options.map((o) => o.id).indexOf(selectedOptions[question.id]),
-      ),
+      selectedOptionIndexes: votingRoundMetadata.questions.map(() => 0),
+      weighting: 0,
+      weightings: votingRoundMetadata.questions.map((question) => (newVoteAllocations[question.id] ? newVoteAllocations[question.id] : 0)),
       signer: { addr: activeAddress, signer },
       appId: voteId,
     })
@@ -187,126 +264,194 @@ function Vote() {
   }
 
   return (
-    <div className="max-w-6xl">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <div>
         {error && (
-          <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
+          <Alert className="max-w-xl mt-4 text-white bg-red-light font-semibold" icon={false}>
             <Typography>Could not load voting rounds details:</Typography>
             <Typography>{error}</Typography>
           </Alert>
         )}
-        <div className="sm:col-span-2">
-          {isLoadingVotingRoundData ? (
-            <Skeleton className="h-12 w-1/2" variant="text" />
-          ) : (
-            <Typography variant="h3">{votingRoundMetadata?.title}</Typography>
-          )}
-          {isLoadingVotingRoundData ? <Skeleton variant="text" /> : <Typography>{votingRoundMetadata?.description}</Typography>}
-
+        {isLoadingVotingRoundData ? (
+          <Skeleton className="h-12 w-1/2" variant="text" />
+        ) : (
+          <Typography variant="h3">{votingRoundMetadata?.title}</Typography>
+        )}
+        {votingRoundMetadata?.description && <Typography>{votingRoundMetadata.description}</Typography>}
+        {votingRoundMetadata?.informationUrl && (
           <div className="mt-3">
-            {isLoadingVotingRoundData ? (
-              <Skeleton variant="text" className="w-56" />
-            ) : (
-              votingRoundMetadata?.informationUrl && (
-                <Link href={votingRoundMetadata.informationUrl} target="_blank">
-                  Learn more about the vote.
-                </Link>
-              )
-            )}
+            <Link href={votingRoundMetadata.informationUrl} target="_blank">
+              Learn more about the vote.
+            </Link>
           </div>
-          <VotingTime className="visible sm:hidden mt-4" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-
-          {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
-            <CloseVotingRound
-              closingVotingRoundError={closingVotingRoundError}
-              loading={closingVotingRound}
-              handleCloseVotingRound={handleCloseVotingRound}
-              voteEnded={hasVoteEnded}
-            />
-          )}
-
-          {!hasVoteEnded && (
-            <>
+        )}
+        <VotingTime className="visible sm:hidden mt-4" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               {isLoadingVotingRoundData ? (
-                <Stack spacing={1}>
-                  <Skeleton variant="text" className="w-1/2" />
-                  <Skeleton variant="rectangular" className="h-10" />
-                </Stack>
+                <Skeleton className="h-12 w-1/2" variant="text" />
               ) : (
-                <>
-                  <Typography className="mt-5" variant="h4">
-                    How to vote
-                  </Typography>
-                  <WalletVoteStatus
-                    roundMetadata={votingRoundMetadata}
-                    activeAddress={activeAddress}
-                    hasVoteStarted={hasVoteStarted}
-                    hasVoteEnded={hasVoteEnded}
-                    allowedToVote={allowedToVote}
-                    myVotes={voterVotes}
-                  />
-                </>
+                <Typography variant="h4">Proposals</Typography>
               )}
-            </>
-          )}
-          {!isLoadingVotingRoundData && hasVoteEnded && (
-            <div className="mt-5">
-              <Typography variant="h4">Vote results</Typography>
-              {!!votingRoundGlobalState?.nft_asset_id && (
+            </div>
+            <div>
+              {canVote && (
                 <>
-                  <Box className="flex h-56 w-56 items-center justify-center border-solid border-black border-y border-x ">
-                    <div className="text-center">
-                      <Typography>
-                        <img
-                          src={votingRoundGlobalState.nft_image_url?.replace('ipfs://', `${import.meta.env.VITE_IPFS_GATEWAY_URL}/`)}
-                          alt="Voting round result NFT image"
-                          className="max-h-full max-w-full"
-                        />
-                      </Typography>
-                    </div>
-                  </Box>
+                  <Typography variant="h4">Your allocations</Typography>
                   <Typography>
-                    <Link
-                      className="font-normal"
-                      target="_blank"
-                      href={`${import.meta.env.VITE_NFT_EXPLORER_URL}${votingRoundGlobalState?.nft_asset_id}`}
-                    >
-                      View voting result NFT details
-                    </Link>
+                    {totalAllocatedPercentage}% total · {100 - totalAllocatedPercentage}% remaining to allocate
+                  </Typography>
+                  <Typography>
+                    {totalAllocated.toLocaleString()} total · {voteWeight.toLocaleString()} remaining to allocate
                   </Typography>
                 </>
               )}
             </div>
-          )}
-          {(isLoadingVotingRoundData || isLoadingResults) && (
-            <div className="mt-7">
-              <Skeleton className="h-8 w-1/2" variant="text" />
-              <Skeleton variant="text" className="w-1/2" />
-              <SkeletonArray className="max-w-xs" count={4} />
+            <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
+              {isLoadingVotingRoundData && (
+                <div>
+                  <Skeleton className="h-40 mb-4" variant="rectangular" />
+                  <Skeleton className="h-40 mb-4" variant="rectangular" />
+                  <Skeleton className="h-40" variant="rectangular" />
+                </div>
+              )}
+              {votingRoundMetadata?.questions.map((question, index) => (
+                <>
+                  <div>
+                    <ProposalCard
+                      title={question.prompt}
+                      description={question.description}
+                      category={question.metadata.category}
+                      focus_area={question.metadata.focus_area}
+                      link={question.metadata.link}
+                      threshold={question.metadata.threshold}
+                      ask={question.metadata.ask}
+                      votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                    />
+                  </div>
+                  <div className="flex items-center">
+                    {canVote && (
+                      <>
+                        <TextField
+                          type="number"
+                          className="w-32 bg-white"
+                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
+                          InputProps={{
+                            inputProps: {
+                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
+                              min: 0,
+                            },
+                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                          }}
+                          id={question.id}
+                          variant="outlined"
+                          onChange={(e) => {
+                            updateVoteAllocations(question.id, parseFloat(e.target.value))
+                          }}
+                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
+                        />
+                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
+                      </>
+                    )}
+                  </div>
+                </>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-span-2">
+          <div className="mb-2">
+            <VoteDetails
+              loading={isLoadingVotingRoundData}
+              appId={voteId}
+              globalState={votingRoundGlobalState}
+              roundMetadata={votingRoundMetadata}
+            />
+          </div>
+
+          {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
+            <div className="mb-4">
+              <Box className="bg-red-light flex rounded-xl px-4 py-6">
+                <div>
+                  <CancelIcon className="align-bottom mr-4 text-red" />
+                </div>
+                <div className="w-full">
+                  {!hasVoteStarted ? (
+                    <Typography>This voting session is not yet open. Please wait until the voting session opens to cast votes.</Typography>
+                  ) : !activeAddress ? (
+                    <div className="flex w-full justify-between">
+                      <div>
+                        <Typography>You haven’t connected your wallet.</Typography>
+                      </div>
+                      <div className="float-right">
+                        <Link className="no-underline hover:underline text-red" href="#" onClick={() => setShowConnectedWalletModal(true)}>
+                          Connect wallet
+                        </Link>
+                      </div>
+                    </div>
+                  ) : !allowedToVote ? (
+                    <Typography>Your wallet is not on the allow list for this voting round.</Typography>
+                  ) : (
+                    ''
+                  )}
+                </div>
+              </Box>
             </div>
           )}
-          <VoteSubmission
-            globalState={votingRoundGlobalState}
-            roundMetadata={votingRoundMetadata}
-            voteResults={votingRoundResults}
-            canVote={canVote}
-            loadingResults={isLoadingVotingRoundResults}
-            loadingVote={isLoadingVotersVote}
-            hasVoteStarted={hasVoteStarted}
-            hasVoteEnded={hasVoteEnded}
-            votingError={errorSubmittingVote}
-            existingAnswers={voterVotes}
-            handleSubmitVote={handleSubmitVote}
-          />
-        </div>
-        <div>
-          <VotingTime className="hidden sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-          <VoteDetails
-            loading={isLoadingVotingRoundData}
-            appId={voteId}
-            roundMetadata={votingRoundMetadata}
-            globalState={votingRoundGlobalState}
-          />
+          <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+          {canVote && (
+            <div className="mt-4">
+              <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
+                <div>
+                  <FlashOnIcon className="align-bottom mr-4 text-yellow" />
+                </div>
+                <div>
+                  <Typography className="mb-3">Your voting power is determined by your current ALGO balance committed to xGov.</Typography>
+                  <Typography className="mb-3">
+                    For this round, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
+                  </Typography>
+                  <Typography>
+                    Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
+                    <strong>100%</strong>.
+                  </Typography>
+                  <Typography>
+                    <strong>Once you cast your votes, you cannot change them.</strong>
+                  </Typography>
+                </div>
+              </Box>
+            </div>
+          )}
+          {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
+            <div className="mb-4">
+              <CloseVotingRound
+                closingVotingRoundError={closingVotingRoundError}
+                loading={closingVotingRound}
+                handleCloseVotingRound={handleCloseVotingRound}
+                voteEnded={hasVoteEnded}
+              />
+            </div>
+          )}
+
+          {canVote && (
+            <Box
+              className={clsx(
+                'flex items-center justify-between bottom-2 px-4 py-6 rounded-xl',
+                !canSubmitVote ? 'bg-algorand-vote-closed' : 'bg-green-light',
+              )}
+            >
+              <Typography>
+                <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
+                Once your allocations total to 100%, you’ll be able to cast your votes!
+              </Typography>
+              <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>
+                Submit
+              </Button>
+            </Box>
+          )}
         </div>
       </div>
       <LoadingDialog loading={submittingVote} title="Submitting vote" note="Please check your wallet for any pending transactions" />

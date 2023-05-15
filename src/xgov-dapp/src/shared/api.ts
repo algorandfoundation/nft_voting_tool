@@ -8,7 +8,7 @@ import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { algod, bootstrap, castVote, closeVotingRound, create } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { VotingRoundModel } from './types'
+import { VoteType, VotingRoundModel } from './types'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
@@ -54,16 +54,20 @@ const api = {
     return useSetter(
       async ({
         signature,
+        weighting,
         selectedOptionIndexes,
+        weightings,
         signer,
         appId,
       }: {
         signature: string
+        weighting: number
         selectedOptionIndexes: number[]
+        weightings: number[]
         signer: TransactionSignerAccount
         appId: number
       }) => {
-        await castVote(signer, signature, selectedOptionIndexes, appId, sourceMaps)
+        await castVote(signer, weighting, signature, selectedOptionIndexes, weightings, appId, sourceMaps)
       },
     )
   },
@@ -139,9 +143,11 @@ const api = {
               prompt: proposal.title,
               description: proposal.description,
               metadata: {
-                threshold: proposal.threshold,
-                category: proposal.category,
                 link: proposal.link,
+                category: proposal.category,
+                focus_area: proposal.focus_area,
+                threshold: proposal.threshold,
+                ask: proposal.ask,
               },
               options: [
                 {
@@ -156,6 +162,7 @@ const api = {
           const { cid } = await uploadVotingRound(
             {
               id: voteId,
+              type: VoteType.PARTITIONED_WEIGHTING,
               title: newRound.voteTitle,
               description: newRound.voteDescription,
               informationUrl: newRound.voteInformationUrl,
@@ -176,6 +183,7 @@ const api = {
           const app = await create(
             signer,
             voteId,
+            VoteType.PARTITIONED_WEIGHTING,
             publicKey,
             cid,
             Math.floor(Date.parse(newRound.start) / 1000),

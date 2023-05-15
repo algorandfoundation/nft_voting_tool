@@ -1,8 +1,11 @@
+import { VoteType } from './types'
+
 /** A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions */
 export interface VotingRoundMetadata {
   id: string
+  type: VoteType
   title: string
-  description: string
+  description?: string
   /** Optional URL link to more information */
   informationUrl?: string
   /** Start of voting round as an ISO8601 string */
@@ -25,6 +28,13 @@ export interface Question {
   prompt: string
   description?: string
   options: Option[]
+  metadata: {
+    link: string
+    category: string
+    focus_area: string
+    threshold: number
+    ask: number
+  }
 }
 
 export interface Option {
@@ -47,7 +57,7 @@ export interface Gate {
   /** Address of the account that is gated to vote */
   address: string
   /** The vote weighting of the account that is gated to vote */
-  weight?: number
+  weight?: string
   /** Base 64 encoded signature of `{address}{weight(uint64)|string}` with the private key of this using ED25519 */
   signature: string
 }

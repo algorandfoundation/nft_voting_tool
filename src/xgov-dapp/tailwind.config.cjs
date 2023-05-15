@@ -24,7 +24,23 @@ module.exports = {
         grey: {
           dark: '#333333',
           DEFAULT: '#878787',
-          light: '#CBCBCB',
+          light: '#CCCCCC',
+        },
+        blue: {
+          DEFAULT: '#6270F2',
+          light: '#EAECFF',
+        },
+        yellow: {
+          DEFAULT: '#F6C001',
+          light: '#FFF6D7',
+        },
+        red: {
+          DEFAULT: '#FF3A29',
+          light: '#FFE5D3',
+        },
+        green: {
+          DEFAULT: '#00C785',
+          light: '#E2FBD7',
         },
       },
       backgroundColor: {

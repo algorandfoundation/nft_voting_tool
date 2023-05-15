@@ -16,7 +16,7 @@ export const CloseVotingRound = ({ voteEnded, loading, handleCloseVotingRound, c
   return (
     <>
       <Typography className="mt-5" variant="h4">
-        Vote status
+        Vote administration
       </Typography>
       <div className="mt-3">
         <Typography>{voteEnded ? 'The end date for this vote has passed.' : 'The end date for this vote has not yet passed.'}</Typography>

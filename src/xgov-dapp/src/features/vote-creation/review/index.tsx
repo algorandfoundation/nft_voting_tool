@@ -90,6 +90,7 @@ export default function Review() {
 
   const previewGlobalState = {
     appId: 0,
+    opUpAppId: 0,
     start_time: roundInfo.start,
     end_time: roundInfo.end,
     is_bootstrapped: false,
@@ -131,9 +132,11 @@ export default function Review() {
                         link={proposal.link}
                         title={proposal.title}
                         description={proposal.description}
-                        threshold={proposal.threshold}
-                        votesTally={0}
                         category={proposal.category}
+                        focus_area={proposal.focus_area}
+                        threshold={proposal.threshold}
+                        ask={proposal.ask}
+                        votesTally={0}
                       />
                     </div>
                   ) : null
