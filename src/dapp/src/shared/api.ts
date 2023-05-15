@@ -8,7 +8,7 @@ import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { algod, bootstrap, castVote, closeVotingRound, create } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { VotingRoundModel } from './types'
+import { VoteType, VotingRoundModel } from './types'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
@@ -120,7 +120,10 @@ const api = {
           let publicKey = new Uint8Array([])
           let snapshot: VoteGatingSnapshot | undefined = undefined
           if (newRound.snapshotFile) {
-            const { signedCsv, publicKey: _publicKey } = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '')
+            const { signedCsv, publicKey: _publicKey } = await signCsv(
+              newRound.snapshotFile ? newRound.snapshotFile : '',
+              newRound.voteType === VoteType.WEIGHTING || newRound.voteType === VoteType.PARTITIONED_WEIGHTING,
+            )
             publicKey = _publicKey
 
             snapshot = {

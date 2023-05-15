@@ -1,7 +1,7 @@
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/app-client'
 import { atom, DefaultValue, selector, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil'
-import { QuestionModel, RoundInfo } from '../../shared/types'
+import { QuestionModel, RoundInfo, VoteType } from '../../shared/types'
 import { VoteCreationReviewSteps, VoteCreationSteps } from './VoteCreationSteps'
 
 export type VoteCreationState = {
@@ -22,6 +22,7 @@ const defaultRoundInfo: RoundInfo = {
   voteDescription: '',
   voteInformationUrl: '',
   voteTitle: '',
+  voteType: VoteType.NO_WEIGHTING,
 }
 
 const defaultQuestion: QuestionModel = {

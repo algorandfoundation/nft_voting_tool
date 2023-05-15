@@ -1,11 +1,11 @@
 import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Button, Typography } from '@mui/material'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuestions, useSetQuestions, useSetStep } from './state'
 import { Steps } from './Steps'
-import { useStepRedirect } from './useStepRedirect'
 import { VoteCreationSteps } from './VoteCreationSteps'
+import { ArrayFormItems } from './array-form-items/ArrayFormItems'
+import { useQuestions, useSetQuestions, useSetStep } from './state'
+import { useStepRedirect } from './useStepRedirect'
 
 export const formSchema = zfd.formData({
   questions: z.array(
@@ -18,11 +18,10 @@ export const formSchema = zfd.formData({
 })
 
 type Fields = z.infer<typeof formSchema>
+const FieldArray = ArrayFormItems<Fields>
 
 export default function Questions() {
   const questions = useQuestions()
-  const [questionCount, setQuestionCount] = useState<number>(questions.length)
-  const [optionCounts, setOptionCounts] = useState<number[]>(questions.map((q) => q.answers.length))
   const setQuestions = useSetQuestions()
   const navigate = useNavigate()
   const setStep = useSetStep()
@@ -40,47 +39,31 @@ export default function Questions() {
         <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} defaultValues={{ questions }}>
           {(helper) => (
             <>
-              {new Array(questionCount).fill(0).map((_, questionIndex) => (
-                <div key={`q${questionIndex}`}>
-                  {helper.textField({
-                    label: 'Question or Category',
-                    field: `questions.${questionIndex}.questionTitle`,
-                  })}
-                  {helper.textField({
-                    label: 'Question description',
-                    field: `questions.${questionIndex}.questionDescription`,
-                  })}
-                  {new Array(optionCounts[questionIndex]).fill(0).map((_, optionIndex) => (
-                    <div key={`q${questionIndex}o${optionIndex}`}>
-                      {helper.textField({
-                        label: `Response ${optionIndex + 1}`,
-                        field: `questions.${questionIndex}.answers.${optionIndex}`,
-                      })}
-                    </div>
-                  ))}
-                  <div className="text-right mt-4">
-                    <Button
-                      variant="outlined"
-                      onClick={() => {
-                        const counts = [...optionCounts]
-                        counts[questionIndex] += 1
-                        setOptionCounts(counts)
-                      }}
-                    >
-                      Add another response option
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setQuestionCount(questionCount + 1)
-                  setOptionCounts((counts) => [...counts, 2])
-                }}
+              <FieldArray
+                field="questions"
+                label="Questions"
+                minimumItemCount={1}
+                defaultAppendValue={{ answers: [' ', ' '] }}
+                itemLabel="question"
               >
-                Add another question
-              </Button>
+                {(questionIndex) => (
+                  <div key={`q${questionIndex}`}>
+                    {helper.textField({
+                      label: 'Question or Category',
+                      field: `questions.${questionIndex}.questionTitle`,
+                    })}
+                    {helper.textField({
+                      label: 'Question description',
+                      field: `questions.${questionIndex}.questionDescription`,
+                    })}
+                    {helper.textFields({
+                      label: 'Response options',
+                      field: `questions.${questionIndex}.answers`,
+                      minimumItemCount: 2,
+                    })}
+                  </div>
+                )}
+              </FieldArray>
 
               <div className="!mt-12">
                 <div className="flex gap-6 justify-end">

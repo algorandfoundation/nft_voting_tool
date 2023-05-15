@@ -13,6 +13,7 @@ import {
 } from '../../shared/VotingRoundContract'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
+import { VoteType } from '../../shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
@@ -249,6 +250,7 @@ function Vote() {
                     hasVoteEnded={hasVoteEnded}
                     allowedToVote={allowedToVote}
                     myVotes={voterVotes}
+                    weight={votingRoundMetadata?.type ?? 0 > VoteType.NO_WEIGHTING ? weighting : undefined}
                   />
                 </>
               )}

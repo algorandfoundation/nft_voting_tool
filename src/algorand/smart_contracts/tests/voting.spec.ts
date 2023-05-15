@@ -64,6 +64,7 @@ describe('voting', () => {
 
     const appClient = algokit.getAppClient(
       {
+        resolveBy: 'id',
         app: appSpec,
         id: 0,
         sender: testAccount,
@@ -98,14 +99,12 @@ describe('voting', () => {
     const bootstrapOpUp = async () => {
       const result = await appClient.call({
         method: 'opup_bootstrap',
-        methodArgs: {
-          args: [
-            appClient.fundAppAccount({
-              amount: algokit.microAlgos(200_000),
-              sendParams: { skipSending: true },
-            }),
-          ],
-        },
+        methodArgs: [
+          appClient.fundAppAccount({
+            amount: algokit.microAlgos(200_000),
+            sendParams: { skipSending: true },
+          }),
+        ],
         sendParams: { fee: (2_000).microAlgos() },
       })
 
@@ -119,15 +118,13 @@ describe('voting', () => {
     const bootstrap = async () => {
       const result = await appClient.call({
         method: 'bootstrap',
-        methodArgs: {
-          args: [
-            appClient.fundAppAccount({
-              amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
-              sendParams: { skipSending: true },
-            }),
-          ],
-          boxes: ['V'],
-        },
+        methodArgs: [
+          appClient.fundAppAccount({
+            amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+            sendParams: { skipSending: true },
+          }),
+        ],
+        boxes: ['V'],
         sendParams: { fee: (2_000).microAlgos() },
       })
 
@@ -185,23 +182,21 @@ describe('voting', () => {
       questionIndexes = questionIndexes ?? questionCounts!.map((x) => x - 1)
       return await appClient.call({
         method: 'vote',
-        methodArgs: {
-          args: [
-            appClient.fundAppAccount({
-              amount: algokit.microAlgos(
-                400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500,
-              ),
-              sender: voter.account,
-              sendParams: { skipSending: true },
-            }),
-            voter.signature,
-            voter.weighting ?? 0,
-            questionIndexes,
-            voter.getWeightings(),
-            opupId,
-          ],
-          boxes: ['V', voter.account],
-        },
+        methodArgs: [
+          appClient.fundAppAccount({
+            amount: algokit.microAlgos(
+              400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500,
+            ),
+            sender: voter.account,
+            sendParams: { skipSending: true },
+          }),
+          voter.signature,
+          voter.weighting ?? 0,
+          questionIndexes,
+          voter.getWeightings(),
+          opupId,
+        ],
+        boxes: ['V', voter.account],
         sendParams: { fee: voteFee },
         sender: voter.account,
       })
@@ -210,10 +205,8 @@ describe('voting', () => {
     const close = async () => {
       return await appClient.call({
         method: 'close',
-        methodArgs: {
-          args: [opupId],
-          boxes: ['V'],
-        },
+        methodArgs: [opupId],
+        boxes: ['V'],
         sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       })
     }
@@ -316,10 +309,8 @@ describe('voting', () => {
 
     const result = await appClient.call({
       method: 'get_preconditions',
-      methodArgs: {
-        args: [voter.signature, voter.weighting, opupId()],
-        boxes: [voter.account],
-      },
+      methodArgs: [voter.signature, voter.weighting, opupId()],
+      boxes: [voter.account],
       sendParams: { fee: voteFee },
       sender: voter.account,
     })
@@ -760,7 +751,7 @@ describe('voting', () => {
     })
 
     test('late vote', async () => {
-      const { getVoter, vote, bootstrap, algod } = await setupApp({ end: 0, questionCounts: [1] })
+      const { getVoter, vote, bootstrap } = await setupApp({ end: 0, questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -792,23 +783,19 @@ describe('voting', () => {
       try {
         await appClient.call({
           method: 'vote',
-          methodArgs: {
-            args: [
-              appClient.fundAppAccount({
-                amount: algokit.microAlgos(
-                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
-                ),
-                sender: voter.account,
-                sendParams: { skipSending: true },
-              }),
-              voter.signature,
-              voter.weighting,
-              [1],
-              voter.getWeightings(),
-              opupId(),
-            ],
-            boxes: ['V', voter.account],
-          },
+          methodArgs: [
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500),
+              sender: voter.account,
+              sendParams: { skipSending: true },
+            }),
+            voter.signature,
+            voter.weighting,
+            [1],
+            voter.getWeightings(),
+            opupId(),
+          ],
+          boxes: ['V', voter.account],
           sendParams: { fee: voteFee },
           sender: voter.account,
         })
@@ -837,23 +824,19 @@ describe('voting', () => {
       try {
         await appClient.call({
           method: 'vote',
-          methodArgs: {
-            args: [
-              appClient.fundAppAccount({
-                amount: algokit.microAlgos(
-                  400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500,
-                ),
-                sender: voter.account,
-                sendParams: { skipSending: true },
-              }),
-              voter.signature,
-              voter.weighting,
-              [0, 0],
-              voter.getWeightings(),
-              opupId(),
-            ],
-            boxes: ['V', voter.account],
-          },
+          methodArgs: [
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 2 + questions.length * 1) + 2500),
+              sender: voter.account,
+              sendParams: { skipSending: true },
+            }),
+            voter.signature,
+            voter.weighting,
+            [0, 0],
+            voter.getWeightings(),
+            opupId(),
+          ],
+          boxes: ['V', voter.account],
           sendParams: { fee: voteFee },
           sender: voter.account,
         })
