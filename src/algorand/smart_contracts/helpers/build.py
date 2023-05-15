@@ -1,6 +1,9 @@
 import logging
 from pathlib import Path
 from shutil import rmtree
+from algokit_utils import (
+    get_algod_client,
+)
 
 from beaker import Application
 
@@ -13,6 +16,6 @@ def build(output_dir: Path, app: Application) -> Path:
         rmtree(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
     logger.info(f"Exporting {app.name} to {output_dir}")
-    specification = app.build()
+    specification = app.build(get_algod_client())
     specification.export(output_dir)
     return output_dir / "application.json"

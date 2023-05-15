@@ -38,8 +38,9 @@ describe('voting', () => {
     const lastRound = Number(status['last-round'])
     const round = await algod.block(lastRound).do()
     const currentTime = Number(round.block.ts)
+    let opupId = 0
 
-    const voteFee = algokit.microAlgos(1_000 + 11 /* opup - 700 x 11 to get 7700 */ * 1_000)
+    const voteFee = algokit.microAlgos(1_000 + 13 /* opup x 13 (max possible) */ * 1_000)
 
     const privateKey = Buffer.from(ed.utils.randomPrivateKey())
     const publicKey = await ed.getPublicKey(privateKey)
@@ -54,7 +55,7 @@ describe('voting', () => {
     nftImageUrl = nftImageUrl ?? 'ipfs://cid'
     const totalQuestionOptions = questionCounts.reduce((a, b) => a + b, 0)
 
-    const appClient = algokit.getApplicationClient(
+    const appClient = algokit.getAppClient(
       {
         app: appSpec,
         id: 0,
@@ -77,19 +78,47 @@ describe('voting', () => {
       )
     }
 
+    const bootstrapOpUp = async () => {
+      const result = await appClient.call({
+        method: 'opup_bootstrap',
+        methodArgs: {
+          args: [
+            appClient.fundAppAccount({
+              amount: algokit.microAlgos(200_000),
+              sendParams: { skipSending: true },
+            }),
+          ],
+        },
+        sendParams: { fee: (2_000).microAlgos() },
+      })
+
+      result.confirmation?.['inner-txns']?.forEach((t) => {
+        if (t['application-index']) opupId = t['application-index']
+      })
+
+      return result
+    }
+
     const bootstrap = async () => {
-      return await appClient.call({
+      const result = await appClient.call({
         method: 'bootstrap',
         methodArgs: {
           args: [
             appClient.fundAppAccount({
-              amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+              amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
               sendParams: { skipSending: true },
             }),
           ],
           boxes: ['V'],
         },
+        sendParams: { fee: (2_000).microAlgos() },
       })
+
+      result.confirmation?.['inner-txns']?.forEach((t) => {
+        if (t['application-index']) opupId = t['application-index']
+      })
+
+      return result
     }
 
     const getVoter = async () => {
@@ -125,6 +154,7 @@ describe('voting', () => {
             }),
             voter.signature,
             questionIndexes,
+            opupId,
           ],
           boxes: ['V', voter.account],
         },
@@ -137,10 +167,10 @@ describe('voting', () => {
       return await appClient.call({
         method: 'close',
         methodArgs: {
-          args: [],
+          args: [opupId],
           boxes: ['V'],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 30 to get 20000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
       })
     }
 
@@ -161,11 +191,13 @@ describe('voting', () => {
       questions: questionCounts,
       totalQuestionOptions,
       bootstrap,
+      bootstrapOpUp,
       getVoter,
       voteFee,
       vote,
       close,
       getTallies,
+      opupId: () => opupId,
     }
   }
 
@@ -228,20 +260,20 @@ describe('voting', () => {
         bytec 4 // "is_bootstrapped"
         intc_1 // 1
         app_global_put
-        pushint 203900 // 203900"
+        pushint 303900 // 303900"
       `)
     }
   })
 
   test('get_preconditions', async () => {
-    const { appClient, getVoter, voteFee, currentTime, bootstrap } = await setupApp()
+    const { appClient, getVoter, voteFee, currentTime, bootstrap, opupId } = await setupApp()
     await bootstrap()
     const voter = await getVoter()
 
     const result = await appClient.call({
       method: 'get_preconditions',
       methodArgs: {
-        args: [voter.signature],
+        args: [voter.signature, opupId()],
         boxes: [voter.account],
       },
       sendParams: { fee: voteFee },
@@ -436,7 +468,7 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "// Voting not open
           assert
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert <--- Error
@@ -449,8 +481,8 @@ describe('voting', () => {
     })
 
     test('not bootstrapped', async () => {
-      const { getVoter, vote, appClient } = await setupApp({ questionCounts: [1] })
-      await appClient.fundAppAccount(algokit.microAlgos(100_000))
+      const { getVoter, vote, bootstrapOpUp } = await setupApp({ questionCounts: [1] })
+      await bootstrapOpUp()
       const voter = await getVoter()
 
       try {
@@ -458,13 +490,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -483,16 +515,16 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "bnz vote_9_l5
-          frame_dig -2
+          "frame_dig -3
           extract 2 0
-          callsub allowedtovote_4
+          frame_dig -1
+          callsub allowedtovote_6
           // Not allowed to vote
           assert <--- Error
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert
-          callsub alreadyvoted_6"
+          callsub alreadyvoted_8"
         `)
       }
     })
@@ -508,13 +540,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -533,13 +565,13 @@ describe('voting', () => {
         invariant(false)
       } catch (e: any) {
         expect(e.stack).toMatchInlineSnapshot(`
-          "callsub allowedtovote_4
+          "callsub allowedtovote_6
           // Not allowed to vote
           assert
-          callsub votingopen_5
+          callsub votingopen_7
           // Voting not open
           assert <--- Error
-          callsub alreadyvoted_6
+          callsub alreadyvoted_8
           !
           // Already voted
           assert"
@@ -548,7 +580,7 @@ describe('voting', () => {
     })
 
     test('invalid option', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions, opupId } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -566,6 +598,7 @@ describe('voting', () => {
               }),
               voter.signature,
               [1],
+              opupId(),
             ],
             boxes: ['V', voter.account],
           },
@@ -582,7 +615,7 @@ describe('voting', () => {
           // Answer option index invalid
           assert <--- Error
           pushint 8 // 8
-          load 52
+          load 58
           frame_dig 5
           +"
         `)
@@ -590,7 +623,7 @@ describe('voting', () => {
     })
 
     test('invalid question', async () => {
-      const { appClient, getVoter, bootstrap, voteFee, questions } = await setupApp({ questionCounts: [1] })
+      const { appClient, getVoter, bootstrap, voteFee, questions, opupId } = await setupApp({ questionCounts: [1] })
       await bootstrap()
       const voter = await getVoter()
 
@@ -608,6 +641,7 @@ describe('voting', () => {
               }),
               voter.signature,
               [0, 0],
+              opupId(),
             ],
             boxes: ['V', voter.account],
           },
@@ -619,14 +653,14 @@ describe('voting', () => {
         expect(e.stack).toMatchInlineSnapshot(`
           "frame_bury 2
           frame_dig 2
-          load 50
+          load 56
           ==
           // Number of answers incorrect
           assert <--- Error
           pushint 2500 // 2500
           pushint 34 // 34
           intc_1 // 1
-          frame_dig -1"
+          frame_dig -2"
         `)
       }
     })

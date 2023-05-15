@@ -21,7 +21,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
     algod,
   )
   const isLocal = await algokit.isLocalNet(algod)
-  const appClient = algokit.getApplicationClient(
+  const appClient = algokit.getAppClient(
     {
       app: appSpec,
       sender: deployer,
@@ -89,20 +89,28 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
         (s) => s.key === Buffer.from('is_bootstrapped').toString('base64'),
       )!.value
       const isBootstrapped = isBootstrappedValue.type == 2 && isBootstrappedValue.uint === 1
+      const opupIdValue = appInfo.params['global-state']!.find(
+        (s) => s.key === Buffer.from('ouaid').toString('base64'),
+      )?.value
+      let opupId = opupIdValue && opupIdValue.type === 2 ? opupIdValue.uint : 0
 
       // Bootstrap it if it hasn't
       if (!isBootstrapped) {
-        await appClient.call({
+        const result = await appClient.call({
           method: 'bootstrap',
           methodArgs: {
             args: [
               appClient.fundAppAccount({
-                amount: algokit.microAlgos(200_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
-                sendParams: { skipSending: true },
+                amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+                sendParams: { skipSending: true, fee: (2_000).microAlgos() },
               }),
             ],
             boxes: ['V'],
           },
+        })
+
+        result.confirmation?.['inner-txns']?.forEach((t) => {
+          if (t['application-index']) opupId = t['application-index']
         })
       }
 
@@ -122,7 +130,7 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Call get_preconditions to check it works
       const result = await appClient.call({
         method: 'get_preconditions',
-        methodArgs: { args: [signature], boxes: [voter] },
+        methodArgs: { args: [signature, opupId], boxes: [voter] },
         sendParams: { fee: algokit.microAlgos(1_000 + 3 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
@@ -153,10 +161,11 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
             }),
             signature,
             questionOptions.map((x) => x - 1), // vote for the last option in each,
+            opupId,
           ],
           boxes: ['V', voter],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 11 /* opup - 700 x 3 to get 2000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 13 /* opup - 700 x 3 to get 2000 */ * 1_000) },
         sender: voter,
       })
       console.log('Voted successfully!')
@@ -168,10 +177,10 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       await appClient.call({
         method: 'close',
         methodArgs: {
-          args: [],
+          args: [opupId],
           boxes: ['V'],
         },
-        sendParams: { fee: algokit.microAlgos(1_000 + 29 /* opup - 700 x 4 to get 3000 */ * 1_000) },
+        sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 4 to get 3000 */ * 1_000) },
       })
       console.log('Voting round closed')
 

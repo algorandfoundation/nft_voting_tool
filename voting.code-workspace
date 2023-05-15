@@ -22,10 +22,11 @@
   ],
   "settings": {
     "files.exclude": {
-      "/infrastructure/": true,
-      "/src/dapp/": true,
-      "/src/xgov-dapp/": true,
-      "/src/algorand/": true
+      "infrastructure/": true,
+      "src/dapp/": true,
+      "src/algorand/": true,
+      "src/voting-metadata-api/": true,
+      "src/xgov-dapp/": true,
     },
     "vite.port": 5173,
     "jest.disabledWorkspaceFolders": [

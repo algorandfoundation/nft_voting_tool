@@ -2,6 +2,19 @@
     "name": "VotingRoundApp",
     "methods": [
         {
+            "name": "opup_bootstrap",
+            "args": [
+                {
+                    "type": "pay",
+                    "name": "ptxn"
+                }
+            ],
+            "returns": {
+                "type": "uint64"
+            },
+            "desc": "initialize opup with bootstrap to create a target app"
+        },
+        {
             "name": "create",
             "args": [
                 {
@@ -55,7 +68,12 @@
         },
         {
             "name": "close",
-            "args": [],
+            "args": [
+                {
+                    "type": "application",
+                    "name": "opup_app"
+                }
+            ],
             "returns": {
                 "type": "void"
             }
@@ -66,6 +84,10 @@
                 {
                     "type": "byte[]",
                     "name": "signature"
+                },
+                {
+                    "type": "application",
+                    "name": "opup_app"
                 }
             ],
             "returns": {
@@ -86,6 +108,10 @@
                 {
                     "type": "uint8[]",
                     "name": "answer_ids"
+                },
+                {
+                    "type": "application",
+                    "name": "opup_app"
                 }
             ],
             "returns": {
