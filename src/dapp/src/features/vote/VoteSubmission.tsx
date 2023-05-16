@@ -21,7 +21,7 @@ type VoteSubmissionProps = {
   canVote: boolean
   votingError: string | null
   existingAnswers?: string[]
-  handleSubmitVote: (selectedOptions: Record<string, string>) => void
+  handleSubmitVote: (selectedOptions: Record<string, [string, number]>) => void
 }
 
 export const VoteSubmission = ({
@@ -38,8 +38,8 @@ export const VoteSubmission = ({
   handleSubmitVote,
 }: VoteSubmissionProps) => {
   const [votes, selectOption] = useReducer(
-    (options: Record<string, string>, newOption: Record<string, string>) => ({ ...options, ...newOption }),
-    {} as Record<string, string>,
+    (options: Record<string, [string, number]>, newOption: Record<string, [string, number]>) => ({ ...options, ...newOption }),
+    {} as Record<string, [string, number]>,
   )
 
   return (
@@ -61,9 +61,9 @@ export const VoteSubmission = ({
                       {question.options.map((option) => (
                         <Button
                           disabled={!hasVoteStarted || hasVoteEnded}
-                          variant={Object.values(votes).includes(option.id) ? 'contained' : 'outlined'}
+                          variant={Object.values(votes).find((v) => v[0] === option.id) ? 'contained' : 'outlined'}
                           key={option.id}
-                          onClick={() => selectOption({ [question.id]: option.id })}
+                          onClick={() => selectOption({ [question.id]: [option.id, /* weight: */ 1] })}
                           className="w-full uppercase"
                         >
                           {option.label}

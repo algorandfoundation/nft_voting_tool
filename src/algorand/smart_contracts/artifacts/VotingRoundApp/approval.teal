@@ -1,6 +1,6 @@
 #pragma version 8
-intcblock 0 1 10 6
-bytecblock 0x 0x6f75616964 0x766f74655f6964 0x6f7074696f6e5f636f756e7473 0x69735f626f6f747374726170706564 0x766f7465725f636f756e74 0x636c6f73655f74696d65 0x746f74616c5f6f7074696f6e73 0x56 0x736e617073686f745f7075626c69635f6b6579 0x6d657461646174615f697066735f636964 0x73746172745f74696d65 0x656e645f74696d65 0x71756f72756d 0x6e66745f696d6167655f75726c 0x4c6bea72 0x151f7c75 0x6e66745f61737365745f6964 0x068101 0x2c
+intcblock 0 1 10 3
+bytecblock 0x766f74655f74797065 0x 0x6f75616964 0x766f74655f6964 0x6f7074696f6e5f636f756e7473 0x69735f626f6f747374726170706564 0x766f7465725f636f756e74 0x636c6f73655f74696d65 0x746f74616c5f6f7074696f6e73 0x56 0x736e617073686f745f7075626c69635f6b6579 0x6d657461646174615f697066735f636964 0x73746172745f74696d65 0x656e645f74696d65 0x71756f72756d 0x6e66745f696d6167655f75726c 0x4c6bea72 0x151f7c75 0x6e66745f61737365745f6964 0x068101 0x2c
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -10,7 +10,7 @@ pushbytes 0x101cea00 // "opup_bootstrap(pay)uint64"
 ==
 bnz main_l13
 txna ApplicationArgs 0
-pushbytes 0xae897f6b // "create(string,byte[],string,uint64,uint64,uint8[],uint64,string)void"
+pushbytes 0x5d4cf066 // "create(string,uint8,byte[],string,uint64,uint64,uint8[],uint64,string)void"
 ==
 bnz main_l12
 txna ApplicationArgs 0
@@ -22,11 +22,11 @@ pushbytes 0x9546e10f // "close(application)void"
 ==
 bnz main_l10
 txna ApplicationArgs 0
-pushbytes 0x4bc29cae // "get_preconditions(byte[],application)(uint64,uint64,uint64,uint64)"
+pushbytes 0x36330824 // "get_preconditions(byte[],uint64,application)(uint64,uint64,uint64,uint64)"
 ==
 bnz main_l9
 txna ApplicationArgs 0
-pushbytes 0x03905b13 // "vote(pay,byte[],uint8[],application)void"
+pushbytes 0xc40ffdaa // "vote(pay,byte[],uint64,uint8[],uint64[],application)void"
 ==
 bnz main_l8
 err
@@ -40,27 +40,34 @@ intc_0 // 0
 &&
 assert
 txna ApplicationArgs 1
-store 15
+store 17
 txna ApplicationArgs 2
-store 16
+btoi
+store 18
 txna ApplicationArgs 3
+store 19
+txna ApplicationArgs 4
+store 20
+txna ApplicationArgs 5
 intc_0 // 0
 getbyte
-store 17
+store 21
 txn GroupIndex
 intc_1 // 1
 -
-store 14
-load 14
+store 16
+load 16
 gtxns TypeEnum
 intc_1 // pay
 ==
 assert
-load 14
-load 15
 load 16
 load 17
-callsub vote_11
+load 18
+load 19
+load 20
+load 21
+callsub vote_12
 intc_1 // 1
 return
 main_l9:
@@ -73,17 +80,21 @@ intc_0 // 0
 &&
 assert
 txna ApplicationArgs 1
-store 11
+store 12
 txna ApplicationArgs 2
+btoi
+store 13
+txna ApplicationArgs 3
 intc_0 // 0
 getbyte
-store 12
-load 11
+store 14
 load 12
-callsub getpreconditions_10
-store 13
-bytec 16 // 0x151f7c75
 load 13
+load 14
+callsub getpreconditions_11
+store 15
+bytec 17 // 0x151f7c75
+load 15
 concat
 log
 intc_1 // 1
@@ -100,7 +111,7 @@ assert
 txna ApplicationArgs 1
 intc_0 // 0
 getbyte
-callsub close_5
+callsub close_7
 intc_1 // 1
 return
 main_l11:
@@ -115,14 +126,14 @@ assert
 txn GroupIndex
 intc_1 // 1
 -
-store 10
-load 10
+store 11
+load 11
 gtxns TypeEnum
 intc_1 // pay
 ==
 assert
-load 10
-callsub bootstrap_4
+load 11
+callsub bootstrap_6
 intc_1 // 1
 return
 main_l12:
@@ -137,22 +148,26 @@ assert
 txna ApplicationArgs 1
 store 2
 txna ApplicationArgs 2
+intc_0 // 0
+getbyte
 store 3
 txna ApplicationArgs 3
 store 4
 txna ApplicationArgs 4
-btoi
 store 5
 txna ApplicationArgs 5
 btoi
 store 6
 txna ApplicationArgs 6
+btoi
 store 7
 txna ApplicationArgs 7
-btoi
 store 8
 txna ApplicationArgs 8
+btoi
 store 9
+txna ApplicationArgs 9
+store 10
 load 2
 load 3
 load 4
@@ -161,7 +176,8 @@ load 6
 load 7
 load 8
 load 9
-callsub create_3
+load 10
+callsub create_5
 intc_1 // 1
 return
 main_l13:
@@ -183,9 +199,9 @@ intc_1 // pay
 ==
 assert
 load 0
-callsub opupbootstrap_1
+callsub opupbootstrap_3
 store 1
-bytec 16 // 0x151f7c75
+bytec 17 // 0x151f7c75
 load 1
 itob
 concat
@@ -203,12 +219,53 @@ txn ApplicationID
 intc_0 // 0
 !=
 assert
-callsub delete_0
+callsub delete_2
 intc_1 // 1
 return
 
+// int_to_ascii
+inttoascii_0:
+proto 1 1
+pushbytes 0x30313233343536373839 // "0123456789"
+frame_dig -1
+intc_1 // 1
+extract3
+retsub
+
+// itoa
+itoa_1:
+proto 1 1
+frame_dig -1
+intc_0 // 0
+==
+bnz itoa_1_l5
+frame_dig -1
+intc_2 // 10
+/
+intc_0 // 0
+>
+bnz itoa_1_l4
+bytec_1 // ""
+itoa_1_l3:
+frame_dig -1
+intc_2 // 10
+%
+callsub inttoascii_0
+concat
+b itoa_1_l6
+itoa_1_l4:
+frame_dig -1
+intc_2 // 10
+/
+callsub itoa_1
+b itoa_1_l3
+itoa_1_l5:
+pushbytes 0x30 // "0"
+itoa_1_l6:
+retsub
+
 // delete
-delete_0:
+delete_2:
 proto 0 0
 txn Sender
 global CreatorAddress
@@ -221,7 +278,7 @@ assert
 retsub
 
 // opup_bootstrap
-opupbootstrap_1:
+opupbootstrap_3:
 proto 1 1
 intc_0 // 0
 frame_dig -1
@@ -229,17 +286,17 @@ gtxns Amount
 pushint 100000 // 100000
 >=
 assert
-callsub createopup_2
-bytec_1 // "ouaid"
+callsub createopup_4
+bytec_2 // "ouaid"
 app_global_get
 frame_bury 0
 retsub
 
 // create_opup
-createopup_2:
+createopup_4:
 proto 0 0
 itxn_begin
-intc_3 // appl
+pushint 6 // appl
 itxn_field TypeEnum
 pushbytes 0x0820020001311b221240001d361a0080044c6bea7212400001003119221231182213104488001123433119221240000100311822124423438a00003100320912442343 // 0x0820020001311b221240001d361a0080044c6bea7212400001003119221231182213104488001123433119221240000100311822124423438a00003100320912442343
 itxn_field ApprovalProgram
@@ -249,24 +306,24 @@ intc_0 // 0
 itxn_field Fee
 itxn_submit
 intc_0 // 0
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get_ex
-store 19
-store 18
-load 19
+store 23
+store 22
+load 23
 !
 assert
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 itxn CreatedApplicationID
 app_global_put
 retsub
 
 // create
-create_3:
-proto 8 0
+create_5:
+proto 9 0
 intc_0 // 0
 dup
-bytec_0 // ""
+bytec_1 // ""
 intc_0 // 0
 dupn 2
 frame_dig -5
@@ -279,97 +336,113 @@ global LatestTimestamp
 >=
 // End time should be in the future
 assert
-intc_0 // 0
-bytec_2 // "vote_id"
-app_global_get_ex
-store 21
-store 20
-load 21
-!
-assert
-bytec_2 // "vote_id"
 frame_dig -8
-extract 2 0
-app_global_put
-intc_0 // 0
-bytec 9 // "snapshot_public_key"
-app_global_get_ex
-store 23
-store 22
-load 23
-!
+intc_3 // 3
+<=
+// Vote type should be <= 3
 assert
-bytec 9 // "snapshot_public_key"
-frame_dig -7
-extract 2 0
-app_global_put
 intc_0 // 0
-bytec 10 // "metadata_ipfs_cid"
+bytec_3 // "vote_id"
 app_global_get_ex
 store 25
 store 24
 load 25
 !
 assert
-bytec 10 // "metadata_ipfs_cid"
-frame_dig -6
+bytec_3 // "vote_id"
+frame_dig -9
 extract 2 0
 app_global_put
 intc_0 // 0
-bytec 11 // "start_time"
+bytec_0 // "vote_type"
 app_global_get_ex
 store 27
 store 26
 load 27
 !
 assert
-bytec 11 // "start_time"
-frame_dig -5
+bytec_0 // "vote_type"
+frame_dig -8
 app_global_put
 intc_0 // 0
-bytec 12 // "end_time"
+bytec 10 // "snapshot_public_key"
 app_global_get_ex
 store 29
 store 28
 load 29
 !
 assert
-bytec 12 // "end_time"
-frame_dig -4
+bytec 10 // "snapshot_public_key"
+frame_dig -7
+extract 2 0
 app_global_put
 intc_0 // 0
-bytec 13 // "quorum"
+bytec 11 // "metadata_ipfs_cid"
 app_global_get_ex
 store 31
 store 30
 load 31
 !
 assert
-bytec 13 // "quorum"
-frame_dig -2
-app_global_put
-bytec 4 // "is_bootstrapped"
-intc_0 // 0
-app_global_put
-bytec 5 // "voter_count"
-intc_0 // 0
-app_global_put
-bytec 6 // "close_time"
-intc_0 // 0
+bytec 11 // "metadata_ipfs_cid"
+frame_dig -6
+extract 2 0
 app_global_put
 intc_0 // 0
-bytec 14 // "nft_image_url"
+bytec 12 // "start_time"
 app_global_get_ex
 store 33
 store 32
 load 33
 !
 assert
-bytec 14 // "nft_image_url"
+bytec 12 // "start_time"
+frame_dig -5
+app_global_put
+intc_0 // 0
+bytec 13 // "end_time"
+app_global_get_ex
+store 35
+store 34
+load 35
+!
+assert
+bytec 13 // "end_time"
+frame_dig -4
+app_global_put
+intc_0 // 0
+bytec 14 // "quorum"
+app_global_get_ex
+store 37
+store 36
+load 37
+!
+assert
+bytec 14 // "quorum"
+frame_dig -2
+app_global_put
+bytec 5 // "is_bootstrapped"
+intc_0 // 0
+app_global_put
+bytec 6 // "voter_count"
+intc_0 // 0
+app_global_put
+bytec 7 // "close_time"
+intc_0 // 0
+app_global_put
+intc_0 // 0
+bytec 15 // "nft_image_url"
+app_global_get_ex
+store 39
+store 38
+load 39
+!
+assert
+bytec 15 // "nft_image_url"
 frame_dig -1
 extract 2 0
 app_global_put
-bytec 17 // "nft_asset_id"
+bytec 18 // "nft_asset_id"
 intc_0 // 0
 app_global_put
 frame_dig -3
@@ -389,102 +462,102 @@ pushint 112 // 112
 // Can't have more than 112 questions
 assert
 intc_0 // 0
-bytec_3 // "option_counts"
+bytec 4 // "option_counts"
 app_global_get_ex
-store 35
-store 34
-load 35
+store 41
+store 40
+load 41
 !
 assert
-bytec_3 // "option_counts"
+bytec 4 // "option_counts"
 frame_dig -3
 app_global_put
-bytec_3 // "option_counts"
+bytec 4 // "option_counts"
 app_global_get
 frame_bury 2
 intc_0 // 0
-store 37
+store 43
 frame_dig 2
 intc_0 // 0
 extract_uint16
 frame_bury 3
 frame_dig 3
-store 38
+store 44
 intc_0 // 0
-store 39
-create_3_l1:
-load 39
-load 38
+store 45
+create_5_l1:
+load 45
+load 44
 <
-bz create_3_l7
+bz create_5_l7
 global OpcodeBudget
 pushint 100 // 100
 <
-bnz create_3_l4
-create_3_l3:
+bnz create_5_l4
+create_5_l3:
 frame_dig 2
 intc_1 // 1
-load 39
+load 45
 *
 pushint 2 // 2
 +
 getbyte
 frame_bury 4
-load 37
+load 43
 frame_dig 4
 +
-store 37
-load 39
+store 43
+load 45
 intc_1 // 1
 +
-store 39
-b create_3_l1
-create_3_l4:
+store 45
+b create_5_l1
+create_5_l4:
 pushint 600 // 600
 intc_2 // 10
 +
-store 40
-create_3_l5:
-load 40
+store 46
+create_5_l5:
+load 46
 global OpcodeBudget
 >
-bz create_3_l3
+bz create_5_l3
 itxn_begin
-intc_3 // appl
+pushint 6 // appl
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field Fee
 pushint 5 // DeleteApplication
 itxn_field OnCompletion
-bytec 18 // 0x068101
+bytec 19 // 0x068101
 itxn_field ApprovalProgram
-bytec 18 // 0x068101
+bytec 19 // 0x068101
 itxn_field ClearStateProgram
 itxn_submit
-b create_3_l5
-create_3_l7:
-load 37
-store 36
-load 36
+b create_5_l5
+create_5_l7:
+load 43
+store 42
+load 42
 pushint 128 // 128
 <=
 // Can't have more than 128 vote options
 assert
 intc_0 // 0
-bytec 7 // "total_options"
+bytec 8 // "total_options"
 app_global_get_ex
-store 42
-store 41
-load 42
+store 48
+store 47
+load 48
 !
 assert
-bytec 7 // "total_options"
-load 36
+bytec 8 // "total_options"
+load 42
 app_global_put
 retsub
 
 // bootstrap
-bootstrap_4:
+bootstrap_6:
 proto 1 0
 intc_0 // 0
 txn Sender
@@ -492,50 +565,50 @@ global CreatorAddress
 ==
 // unauthorized
 assert
-bytec 4 // "is_bootstrapped"
+bytec 5 // "is_bootstrapped"
 app_global_get
 !
 // Already bootstrapped
 assert
-bytec 4 // "is_bootstrapped"
+bytec 5 // "is_bootstrapped"
 intc_1 // 1
 app_global_put
 pushint 303900 // 303900
-bytec 7 // "total_options"
+bytec 8 // "total_options"
 app_global_get
 pushint 3200 // 3200
 *
 +
-store 43
+store 49
 frame_dig -1
 gtxns Receiver
 global CurrentApplicationAddress
 ==
 // Payment must be to app address
 assert
-load 43
+load 49
 itob
 log
 frame_dig -1
 gtxns Amount
-load 43
+load 49
 ==
 // Payment must be for the exact min balance requirement
 assert
-bytec 8 // "V"
-bytec 7 // "total_options"
+bytec 9 // "V"
+bytec 8 // "total_options"
 app_global_get
 pushint 8 // 8
 *
 box_create
 pop
-callsub createopup_2
+callsub createopup_4
 retsub
 
 // close
-close_5:
+close_7:
 proto 1 0
-bytec_0 // ""
+bytec_1 // ""
 intc_0 // 0
 dupn 2
 txn Sender
@@ -545,7 +618,7 @@ global CreatorAddress
 assert
 frame_dig -1
 txnas Applications
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 ==
 // OpUp app ID not passed in
@@ -553,51 +626,51 @@ assert
 pushint 20000 // 20000
 intc_2 // 10
 +
-store 44
-close_5_l1:
-load 44
+store 50
+close_7_l1:
+load 50
 global OpcodeBudget
 >
-bnz close_5_l17
-bytec 6 // "close_time"
+bnz close_7_l17
+bytec 7 // "close_time"
 app_global_get
 intc_0 // 0
 ==
 // Already closed
 assert
-bytec 6 // "close_time"
+bytec 7 // "close_time"
 global LatestTimestamp
 app_global_put
 pushbytes 0x7b227374616e64617264223a226172633639222c226465736372697074696f6e223a2254686973206973206120766f74696e6720726573756c74204e465420666f7220766f74696e6720726f756e64207769746820494420 // "{\"standard\":\"arc69\",\"description\":\"This is a voting result NFT for voting round with ID "
-bytec_2 // "vote_id"
+bytec_3 // "vote_id"
 app_global_get
 concat
 pushbytes 0x2e222c2270726f70657274696573223a7b226d65746164617461223a22697066733a2f2f // ".\",\"properties\":{\"metadata\":\"ipfs://"
 concat
-bytec 10 // "metadata_ipfs_cid"
+bytec 11 // "metadata_ipfs_cid"
 app_global_get
 concat
 pushbytes 0x222c226964223a22 // "\",\"id\":\""
 concat
-bytec_2 // "vote_id"
+bytec_3 // "vote_id"
 app_global_get
 concat
 pushbytes 0x222c2271756f72756d223a // "\",\"quorum\":"
 concat
-bytec 13 // "quorum"
+bytec 14 // "quorum"
 app_global_get
-callsub itoa_9
+callsub itoa_1
 concat
 pushbytes 0x2c22766f746572436f756e74223a // ",\"voterCount\":"
 concat
-bytec 5 // "voter_count"
+bytec 6 // "voter_count"
 app_global_get
-callsub itoa_9
+callsub itoa_1
 concat
 pushbytes 0x2c2274616c6c696573223a5b // ",\"tallies\":["
 concat
-store 45
-bytec_3 // "option_counts"
+store 51
+bytec 4 // "option_counts"
 app_global_get
 frame_bury 0
 frame_dig 0
@@ -605,115 +678,115 @@ intc_0 // 0
 extract_uint16
 frame_bury 1
 frame_dig 1
-store 46
+store 52
 intc_0 // 0
-store 47
+store 53
 intc_0 // 0
-store 48
+store 54
 intc_0 // 0
-store 49
-close_5_l3:
-load 49
-load 46
+store 55
+close_7_l3:
+load 55
+load 52
 <
-bz close_5_l18
+bz close_7_l18
 frame_dig 0
 intc_1 // 1
-load 49
+load 55
 *
 pushint 2 // 2
 +
 getbyte
 frame_bury 2
 frame_dig 2
-store 50
+store 56
 intc_0 // 0
-store 51
-close_5_l5:
-load 51
-load 50
+store 57
+close_7_l5:
+load 57
+load 56
 <
-bnz close_5_l7
-load 49
+bnz close_7_l7
+load 55
 intc_1 // 1
 +
-store 49
-b close_5_l3
-close_5_l7:
+store 55
+b close_7_l3
+close_7_l7:
 pushint 8 // 8
-load 48
+load 54
 *
-store 52
-bytec 8 // "V"
-load 52
+store 58
+bytec 9 // "V"
+load 58
 pushint 8 // 8
 box_extract
 btoi
-store 47
-load 45
+store 53
 load 51
+load 57
 intc_0 // 0
 ==
-bnz close_5_l16
-bytec_0 // ""
-close_5_l9:
+bnz close_7_l16
+bytec_1 // ""
+close_7_l9:
 concat
-load 47
-callsub itoa_9
+load 53
+callsub itoa_1
 concat
-load 51
-load 50
+load 57
+load 56
 intc_1 // 1
 -
 ==
-bnz close_5_l12
-bytec 19 // ","
-close_5_l11:
+bnz close_7_l12
+bytec 20 // ","
+close_7_l11:
 concat
-store 45
-load 48
-intc_1 // 1
-+
-store 48
-load 51
-intc_1 // 1
-+
 store 51
-b close_5_l5
-close_5_l12:
+load 54
+intc_1 // 1
++
+store 54
+load 57
+intc_1 // 1
++
+store 57
+b close_7_l5
+close_7_l12:
 pushbytes 0x5d // "]"
-load 49
-load 46
+load 55
+load 52
 intc_1 // 1
 -
 ==
-bnz close_5_l15
-bytec 19 // ","
-close_5_l14:
+bnz close_7_l15
+bytec 20 // ","
+close_7_l14:
 concat
-b close_5_l11
-close_5_l15:
-bytec_0 // ""
-b close_5_l14
-close_5_l16:
+b close_7_l11
+close_7_l15:
+bytec_1 // ""
+b close_7_l14
+close_7_l16:
 pushbytes 0x5b // "["
-b close_5_l9
-close_5_l17:
+b close_7_l9
+close_7_l17:
 itxn_begin
-intc_3 // appl
+pushint 6 // appl
 itxn_field TypeEnum
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 itxn_field ApplicationID
-bytec 15 // "opup()void"
+bytec 16 // "opup()void"
 itxn_field ApplicationArgs
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-b close_5_l1
-close_5_l18:
+b close_7_l1
+close_7_l18:
 itxn_begin
-pushint 3 // acfg
+intc_3 // acfg
 itxn_field TypeEnum
 intc_1 // 1
 itxn_field ConfigAssetTotal
@@ -722,31 +795,36 @@ itxn_field ConfigAssetDecimals
 intc_0 // 0
 itxn_field ConfigAssetDefaultFrozen
 pushbytes 0x5b564f544520524553554c545d20 // "[VOTE RESULT] "
-bytec_2 // "vote_id"
+bytec_3 // "vote_id"
 app_global_get
 concat
 itxn_field ConfigAssetName
 pushbytes 0x564f544552534c54 // "VOTERSLT"
 itxn_field ConfigAssetUnitName
-bytec 14 // "nft_image_url"
+bytec 15 // "nft_image_url"
 app_global_get
 itxn_field ConfigAssetURL
-load 45
+load 51
 pushbytes 0x5d7d7d // "]}}"
 concat
 itxn_field Note
 itxn_submit
-bytec 17 // "nft_asset_id"
+bytec 18 // "nft_asset_id"
 itxn CreatedAssetID
 app_global_put
 retsub
 
 // allowed_to_vote
-allowedtovote_6:
-proto 2 1
+allowedtovote_8:
+proto 3 1
+bytec_0 // "vote_type"
+app_global_get
+intc_0 // 0
+==
+bnz allowedtovote_8_l8
 frame_dig -1
 txnas Applications
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 ==
 // OpUp app ID not passed in
@@ -754,60 +832,76 @@ assert
 pushint 2000 // 2000
 intc_2 // 10
 +
-store 53
-allowedtovote_6_l1:
-load 53
+store 59
+allowedtovote_8_l2:
+load 59
 global OpcodeBudget
 >
-bz allowedtovote_6_l3
+bnz allowedtovote_8_l7
+bytec_0 // "vote_type"
+app_global_get
+intc_1 // 1
+==
+bnz allowedtovote_8_l6
+txn Sender
+frame_dig -2
+itob
+concat
+allowedtovote_8_l5:
+frame_dig -3
+bytec 10 // "snapshot_public_key"
+app_global_get
+ed25519verify_bare
+b allowedtovote_8_l9
+allowedtovote_8_l6:
+txn Sender
+b allowedtovote_8_l5
+allowedtovote_8_l7:
 itxn_begin
-intc_3 // appl
+pushint 6 // appl
 itxn_field TypeEnum
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 itxn_field ApplicationID
-bytec 15 // "opup()void"
+bytec 16 // "opup()void"
 itxn_field ApplicationArgs
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-b allowedtovote_6_l1
-allowedtovote_6_l3:
-txn Sender
-frame_dig -2
-bytec 9 // "snapshot_public_key"
-app_global_get
-ed25519verify_bare
+b allowedtovote_8_l2
+allowedtovote_8_l8:
+intc_1 // 1
+allowedtovote_8_l9:
 retsub
 
 // voting_open
-votingopen_7:
+votingopen_9:
 proto 0 1
-bytec 4 // "is_bootstrapped"
+bytec 5 // "is_bootstrapped"
 app_global_get
 intc_1 // 1
 ==
-bytec 6 // "close_time"
+bytec 7 // "close_time"
 app_global_get
 intc_0 // 0
 ==
 &&
 global LatestTimestamp
-bytec 11 // "start_time"
+bytec 12 // "start_time"
 app_global_get
 >=
 &&
 global LatestTimestamp
-bytec 12 // "end_time"
+bytec 13 // "end_time"
 app_global_get
 <
 &&
 retsub
 
 // already_voted
-alreadyvoted_8:
+alreadyvoted_10:
 proto 0 1
-bytec_0 // ""
+bytec_1 // ""
 txn Sender
 frame_bury 0
 frame_dig 0
@@ -817,62 +911,29 @@ pushint 32 // 32
 assert
 frame_dig 0
 box_len
-store 55
-store 54
-load 55
+store 61
+store 60
+load 61
 frame_bury 0
 retsub
 
-// itoa
-itoa_9:
-proto 1 1
-frame_dig -1
-intc_0 // 0
-==
-bnz itoa_9_l5
-frame_dig -1
-intc_2 // 10
-/
-intc_0 // 0
->
-bnz itoa_9_l4
-bytec_0 // ""
-itoa_9_l3:
-pushbytes 0x30313233343536373839 // "0123456789"
-frame_dig -1
-intc_2 // 10
-%
-intc_1 // 1
-extract3
-concat
-b itoa_9_l6
-itoa_9_l4:
-frame_dig -1
-intc_2 // 10
-/
-callsub itoa_9
-b itoa_9_l3
-itoa_9_l5:
-pushbytes 0x30 // "0"
-itoa_9_l6:
-retsub
-
 // get_preconditions
-getpreconditions_10:
-proto 2 1
-bytec_0 // ""
+getpreconditions_11:
+proto 3 1
+bytec_1 // ""
 intc_0 // 0
 dupn 5
-bytec_0 // ""
+bytec_1 // ""
 dup
-callsub votingopen_7
+callsub votingopen_9
 frame_bury 1
-frame_dig -2
+frame_dig -3
 extract 2 0
+frame_dig -2
 frame_dig -1
-callsub allowedtovote_6
+callsub allowedtovote_8
 frame_bury 2
-callsub alreadyvoted_8
+callsub alreadyvoted_10
 frame_bury 3
 global LatestTimestamp
 frame_bury 4
@@ -891,33 +952,34 @@ frame_bury 0
 retsub
 
 // vote
-vote_11:
-proto 4 0
-bytec_0 // ""
+vote_12:
+proto 6 0
+bytec_1 // ""
 intc_0 // 0
-dupn 7
-bytec_0 // ""
+dupn 11
+bytec_1 // ""
 frame_dig -1
 txnas Applications
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 ==
 // OpUp app ID not passed in
 assert
-frame_dig -3
+frame_dig -5
 extract 2 0
+frame_dig -4
 frame_dig -1
-callsub allowedtovote_6
+callsub allowedtovote_8
 // Not allowed to vote
 assert
-callsub votingopen_7
+callsub votingopen_9
 // Voting not open
 assert
-callsub alreadyvoted_8
+callsub alreadyvoted_10
 !
 // Already voted
 assert
-bytec_3 // "option_counts"
+bytec 4 // "option_counts"
 app_global_get
 frame_bury 0
 frame_dig 0
@@ -925,146 +987,238 @@ intc_0 // 0
 extract_uint16
 frame_bury 1
 frame_dig 1
-store 56
-frame_dig -2
+store 62
+frame_dig -3
 intc_0 // 0
 extract_uint16
 frame_bury 2
 frame_dig 2
-load 56
+load 62
 ==
 // Number of answers incorrect
 assert
-pushint 2500 // 2500
-pushint 34 // 34
-intc_1 // 1
+bytec_0 // "vote_type"
+app_global_get
+intc_3 // 3
+==
+bnz vote_12_l20
 frame_dig -2
 intc_0 // 0
 extract_uint16
 frame_bury 4
 frame_dig 4
+intc_0 // 0
+==
+// Number of answer weights should be 0 since this vote doesn't use partitioned weighting
+assert
+vote_12_l2:
+pushint 2500 // 2500
+pushint 34 // 34
+intc_1 // 1
+frame_dig -3
+intc_0 // 0
+extract_uint16
+frame_bury 6
+frame_dig 6
 *
 +
 pushint 400 // 400
 *
 +
-store 57
-frame_dig -4
+store 63
+frame_dig -6
 gtxns Receiver
 global CurrentApplicationAddress
 ==
 // Payment must be to app address
 assert
-load 57
+load 63
 itob
 log
-frame_dig -4
+frame_dig -6
 gtxns Amount
-load 57
+load 63
 ==
 // Payment must be the exact min balance requirement
 assert
 intc_0 // 0
-store 58
+store 64
 intc_0 // 0
-store 59
-vote_11_l1:
-load 59
-load 56
+store 65
+intc_0 // 0
+store 66
+vote_12_l3:
+load 66
+load 62
 <
-bz vote_11_l7
+bnz vote_12_l6
+bytec_0 // "vote_type"
+app_global_get
+intc_3 // 3
+==
+bz vote_12_l21
+load 65
+frame_dig -4
+==
+// Didn't partition exact voting weight across questions
+assert
+b vote_12_l21
+vote_12_l6:
 global OpcodeBudget
 pushint 100 // 100
 <
-bnz vote_11_l4
-vote_11_l3:
-frame_dig -2
+bnz vote_12_l17
+vote_12_l7:
+frame_dig -3
 intc_1 // 1
-load 59
-*
-pushint 2 // 2
-+
-getbyte
-frame_bury 5
-frame_dig 0
-intc_1 // 1
-load 59
+load 66
 *
 pushint 2 // 2
 +
 getbyte
 frame_bury 7
-frame_dig 5
+intc_0 // 0
+frame_bury 9
+bytec_0 // "vote_type"
+app_global_get
+intc_3 // 3
+==
+bnz vote_12_l16
+vote_12_l8:
+frame_dig 0
+intc_1 // 1
+load 66
+*
+pushint 2 // 2
++
+getbyte
+frame_bury 11
 frame_dig 7
+frame_dig 11
 <
 // Answer option index invalid
 assert
 pushint 8 // 8
-load 58
-frame_dig 5
+load 64
+frame_dig 7
 +
 *
-store 61
-bytec 8 // "V"
-load 61
+store 68
+bytec 9 // "V"
+load 68
 pushint 8 // 8
 box_extract
 btoi
-store 62
-bytec 8 // "V"
-load 61
-load 62
+store 69
+bytec 9 // "V"
+load 68
+load 69
+bytec_0 // "vote_type"
+app_global_get
+intc_0 // 0
+==
+bytec_0 // "vote_type"
+app_global_get
 intc_1 // 1
+==
+||
+bnz vote_12_l15
+bytec_0 // "vote_type"
+app_global_get
+pushint 2 // 2
+==
+bnz vote_12_l14
+frame_dig 9
+vote_12_l11:
 +
 itob
 box_replace
-load 58
-frame_dig 7
+load 64
+frame_dig 11
 +
-store 58
-load 59
+store 64
+bytec_0 // "vote_type"
+app_global_get
+intc_3 // 3
+==
+bnz vote_12_l13
+vote_12_l12:
+load 66
 intc_1 // 1
 +
-store 59
-b vote_11_l1
-vote_11_l4:
-pushint 1000 // 1000
+store 66
+b vote_12_l3
+vote_12_l13:
+load 65
+frame_dig 9
++
+store 65
+b vote_12_l12
+vote_12_l14:
+frame_dig -4
+b vote_12_l11
+vote_12_l15:
+intc_1 // 1
+b vote_12_l11
+vote_12_l16:
+frame_dig -2
+pushint 8 // 8
+load 66
+*
+pushint 2 // 2
++
+extract_uint64
+frame_bury 9
+b vote_12_l8
+vote_12_l17:
+pushint 680 // 680
 intc_2 // 10
 +
-store 60
-vote_11_l5:
-load 60
+store 67
+vote_12_l18:
+load 67
 global OpcodeBudget
 >
-bz vote_11_l3
+bz vote_12_l7
 itxn_begin
-intc_3 // appl
+pushint 6 // appl
 itxn_field TypeEnum
-bytec_1 // "ouaid"
+bytec_2 // "ouaid"
 app_global_get
 itxn_field ApplicationID
-bytec 15 // "opup()void"
+bytec 16 // "opup()void"
 itxn_field ApplicationArgs
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-b vote_11_l5
-vote_11_l7:
+b vote_12_l18
+vote_12_l20:
+frame_dig -2
+intc_0 // 0
+extract_uint16
+frame_bury 3
+frame_dig 3
+load 62
+==
+// Number of answer weights incorrect, should match number of questions since this vote uses partitioned weighting
+assert
+b vote_12_l2
+vote_12_l21:
 txn Sender
-frame_bury 9
-frame_dig 9
+frame_bury 13
+frame_dig 13
 len
 pushint 32 // 32
 ==
 assert
-frame_dig 9
+frame_dig 13
 box_del
 pop
-frame_dig 9
-frame_dig -2
+frame_dig 13
+frame_dig -3
 box_put
-bytec 5 // "voter_count"
-bytec 5 // "voter_count"
+bytec 6 // "voter_count"
+bytec 6 // "voter_count"
 app_global_get
 intc_1 // 1
 +

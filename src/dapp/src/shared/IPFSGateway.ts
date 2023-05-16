@@ -1,6 +1,15 @@
+// Keep in sync between voting.py, VotingRoundContract.ts and types.ts
+enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
+}
+
 /** A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions */
 export interface VotingRoundMetadata {
   id: string
+  type: VoteType
   title: string
   description: string
   /** Optional URL link to more information */

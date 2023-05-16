@@ -8,7 +8,7 @@ import { useSetConnectedWallet } from '../features/wallet/state'
 import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
 import { algod, bootstrap, castVote, closeVotingRound, create } from './VotingRoundContract'
 import { signCsv } from './csvSigner'
-import { VotingRoundModel } from './types'
+import { VoteType, VotingRoundModel } from './types'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
@@ -54,16 +54,20 @@ const api = {
     return useSetter(
       async ({
         signature,
+        weighting,
         selectedOptionIndexes,
+        weightings,
         signer,
         appId,
       }: {
         signature: string
+        weighting: number
         selectedOptionIndexes: number[]
+        weightings: number[]
         signer: TransactionSignerAccount
         appId: number
       }) => {
-        await castVote(signer, signature, selectedOptionIndexes, appId, sourceMaps)
+        await castVote(signer, weighting, signature, selectedOptionIndexes, weightings, appId, sourceMaps)
       },
     )
   },
@@ -116,7 +120,10 @@ const api = {
           let publicKey = new Uint8Array([])
           let snapshot: VoteGatingSnapshot | undefined = undefined
           if (newRound.snapshotFile) {
-            const { signedCsv, publicKey: _publicKey } = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '')
+            const { signedCsv, publicKey: _publicKey } = await signCsv(
+              newRound.snapshotFile ? newRound.snapshotFile : '',
+              newRound.voteType === VoteType.WEIGHTING || newRound.voteType === VoteType.PARTITIONED_WEIGHTING,
+            )
             publicKey = _publicKey
 
             snapshot = {
@@ -151,6 +158,7 @@ const api = {
           const { cid } = await uploadVotingRound(
             {
               id: voteId,
+              type: newRound.voteType,
               title: newRound.voteTitle,
               description: newRound.voteDescription,
               informationUrl: newRound.voteInformationUrl,
@@ -173,6 +181,7 @@ const api = {
           const app = await create(
             signer,
             voteId,
+            newRound.voteType,
             publicKey,
             cid,
             Math.floor(Date.parse(newRound.start) / 1000),
