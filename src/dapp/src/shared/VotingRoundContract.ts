@@ -8,6 +8,14 @@ import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { VotingRoundMetadata } from './IPFSGateway'
 
+// Keep in sync between voting.py, IPFSGateway.ts and types.ts
+enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
+}
+
 export type VotingRoundGlobalState = {
   appId: number
   start_time: string
@@ -72,6 +80,7 @@ export const fetchTallyCounts = async (appId: number, roundMetadata: VotingRound
   const optionIds = roundMetadata.questions.flatMap((q) => q.options.map((o) => o.id))
   const client = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: appId,
     },
@@ -101,6 +110,7 @@ export const fetchVoterVotes = async (
 ) => {
   const client = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: appId,
     },
@@ -135,6 +145,7 @@ export const fetchVoterVotes = async (
 export const create = async (
   sender: TransactionSignerAccount,
   voteId: string,
+  voteType: VoteType,
   publicKey: Uint8Array,
   cid: string,
   start: number,
@@ -145,6 +156,7 @@ export const create = async (
 ): Promise<AppReference & Partial<AppCompilationResult>> => {
   const appClient = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: 0,
       sender,
@@ -154,7 +166,7 @@ export const create = async (
 
   const app = await appClient.create({
     method: 'create',
-    methodArgs: [voteId, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
+    methodArgs: [voteId, voteType, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
     deletable: false,
     sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
   })
@@ -165,6 +177,7 @@ export const create = async (
 export const bootstrap = async (sender: TransactionSignerAccount, app: AppReference, totalQuestionOptions: number) => {
   const appClient = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: app.appId,
       sender,
@@ -174,27 +187,28 @@ export const bootstrap = async (sender: TransactionSignerAccount, app: AppRefere
 
   await appClient.call({
     method: 'bootstrap',
-    methodArgs: {
-      args: [
-        appClient.fundAppAccount({
-          amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
-          sendParams: { skipSending: true, fee: (2_000).microAlgos() },
-        }),
-      ],
-      boxes: ['V'],
-    },
+    methodArgs: [
+      appClient.fundAppAccount({
+        amount: algokit.microAlgos(200_000 + 100_000 + 1_000 + 2_500 + 400 * (1 + 8 * totalQuestionOptions)),
+        sendParams: { skipSending: true, fee: (2_000).microAlgos() },
+      }),
+    ],
+    boxes: ['V'],
   })
 }
 
 export const castVote = async (
   sender: TransactionSignerAccount,
+  weighting: number,
   signature: string,
   questionIndexes: number[],
+  weightings: number[],
   appId: number,
   sourceMaps: AppSourceMaps | undefined,
 ) => {
   const client = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: appId,
     },
@@ -208,32 +222,39 @@ export const castVote = async (
   const globalState = await client.getGlobalState()
 
   const signatureByteArray = Buffer.from(signature, 'base64')
-  const voteFee = algokit.microAlgos(1_000 + 13 /* opup - 700 x 11 to get 7700 */ * 1_000)
-  const transaction = await client.call({
-    method: 'vote',
-    methodArgs: {
-      args: [
+  const voteFee = algokit.microAlgos(1_000 + 16 /* opup - 16 (max possible) */ * 1_000)
+  try {
+    const transaction = await client.call({
+      method: 'vote',
+      methodArgs: [
         client.fundAppAccount({
           amount: algokit.microAlgos(400 * /* key size */ (32 + /* value size */ 2 + questionIndexes.length * 1) + 2500),
           sender,
           sendParams: { skipSending: true },
         }),
         signatureByteArray,
+        weighting,
         questionIndexes,
+        globalState['vote_type'].value === Number(VoteType.PARTITIONED_WEIGHTING) ? weightings : [],
         globalState['ouaid']?.value || 0,
       ],
       boxes: ['V', sender],
-    },
-    sendParams: { fee: voteFee },
-    sender,
-  })
 
-  return transaction
+      sendParams: { fee: voteFee },
+      sender,
+    })
+
+    return transaction
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
 }
 
 export const closeVotingRound = async (sender: TransactionSignerAccount, appId: number) => {
   const client = algokit.getAppClient(
     {
+      resolveBy: 'id',
       app: JSON.stringify(appSpec),
       id: appId,
     },
@@ -242,10 +263,9 @@ export const closeVotingRound = async (sender: TransactionSignerAccount, appId: 
   const globalState = await client.getGlobalState()
   return await client.call({
     method: 'close',
-    methodArgs: {
-      args: [globalState['ouaid']?.value || 0],
-      boxes: ['V'],
-    },
+    methodArgs: [globalState['ouaid']?.value || 0],
+    boxes: ['V'],
+
     sendParams: { fee: algokit.microAlgos(1_000 + 30 /* opup - 700 x 30 to get 20000 */ * 1_000) },
     sender,
   })

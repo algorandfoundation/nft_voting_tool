@@ -10,6 +10,7 @@ type WalletVoteStatusProps = {
   hasVoteStarted: boolean
   hasVoteEnded: boolean
   myVotes?: string[]
+  weight?: number
 }
 
 export const WalletVoteStatus = ({
@@ -19,6 +20,7 @@ export const WalletVoteStatus = ({
   hasVoteStarted,
   hasVoteEnded,
   myVotes,
+  weight,
 }: WalletVoteStatusProps) => {
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
   const showConnectWalletModal = () => setShowConnectedWalletModal(true)
@@ -51,13 +53,17 @@ export const WalletVoteStatus = ({
       )}
       {activeAddress && allowedToVote && !myVotes && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
-          <Typography className="font-semibold text-grey-dark">Wallet connected: {getWalletLabel(activeAddress)}</Typography>
+          <Typography className="font-semibold text-grey-dark">
+            Wallet connected: {getWalletLabel(activeAddress)}
+            {weight ? `. You have a voting weight of ${weight}.` : ''}
+          </Typography>
         </Box>
       )}
       {roundMetadata && myVotes && (
         <Box className="bg-algorand-green text-center p-3 rounded-xl">
           <Typography className="font-semibold text-grey-dark">
             You voted, and chose: {myVotes?.map((v, i) => roundMetadata.questions[i].options.find((o) => o.id === v)?.label).join(', ')}
+            {weight ? `. Your voting weight was ${weight}.` : ''}
           </Typography>
         </Box>
       )}

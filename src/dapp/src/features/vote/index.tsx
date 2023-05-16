@@ -13,6 +13,7 @@ import {
 } from '../../shared/VotingRoundContract'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
+import { VoteType } from '../../shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
@@ -41,6 +42,7 @@ function Vote() {
   const [error, setError] = useState<string | null>(null)
 
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
+  const [weighting, setWeighting] = useState<undefined | number>(undefined)
   const [allowedToVote, setAllowToVote] = useState<boolean>(false)
 
   const { loading: submittingVote, execute: submitVote, error: errorSubmittingVote } = api.useSubmitVote()
@@ -141,6 +143,7 @@ function Vote() {
 
   useEffect(() => {
     setAllowlistSignature(null)
+    setWeighting(undefined)
     setAllowToVote(false)
     if (snapshot?.snapshot) {
       const addressSnapshot = snapshot?.snapshot.find((addressSnapshot) => {
@@ -148,6 +151,7 @@ function Vote() {
       })
       if (addressSnapshot) {
         setAllowlistSignature(addressSnapshot.signature)
+        setWeighting(addressSnapshot.weight)
         setAllowToVote(true)
       }
     }
@@ -163,13 +167,15 @@ function Vote() {
     }
   }
 
-  const handleSubmitVote = async (selectedOptions: Record<string, string>) => {
+  const handleSubmitVote = async (selectedOptions: Record<string, [string, number]>) => {
     if (!selectedOptions || !activeAddress || !allowlistSignature || !votingRoundMetadata) return
     await submitVote({
       signature: allowlistSignature,
+      weighting: weighting ?? 0,
       selectedOptionIndexes: votingRoundMetadata.questions.map((question) =>
-        question.options.map((o) => o.id).indexOf(selectedOptions[question.id]),
+        question.options.map((o) => o.id).indexOf(selectedOptions[question.id][0]),
       ),
+      weightings: votingRoundMetadata.questions.map((question) => selectedOptions[question.id][1]),
       signer: { addr: activeAddress, signer },
       appId: voteId,
     })
@@ -244,6 +250,7 @@ function Vote() {
                     hasVoteEnded={hasVoteEnded}
                     allowedToVote={allowedToVote}
                     myVotes={voterVotes}
+                    weight={votingRoundMetadata?.type ?? 0 > VoteType.NO_WEIGHTING ? weighting : undefined}
                   />
                 </>
               )}
