@@ -4,9 +4,18 @@ import { decodeAddress } from 'algosdk'
 import dayjs from 'dayjs'
 import Papa from 'papaparse'
 import { useNavigate } from 'react-router-dom'
-import { SnapshotRow } from '../../shared/csvSigner'
-import { Proposal } from '../../shared/types'
+import { SnapshotRow } from '../../../../dapp/src/shared/csvSigner'
 import { useRoundInfo, useSetRoundInfo } from './state'
+
+export type Proposal = {
+  title: string
+  description: string
+  link: string
+  category: string
+  focus_area: string
+  threshold: number
+  ask: number
+}
 
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),

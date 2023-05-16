@@ -6,15 +6,20 @@ import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '../../shared/IPFSGateway'
-import { ProposalCard } from '../../shared/ProposalCard'
+import {
+  VoteGatingSnapshot,
+  VotingRoundMetadata,
+  fetchVotingRoundMetadata,
+  fetchVotingSnapshot,
+} from '../../../../dapp/src/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
   fetchTallyCounts,
   fetchVoterVotes,
   fetchVotingRoundGlobalState,
-} from '../../shared/VotingRoundContract'
+} from '../../../../dapp/src/shared/VotingRoundContract'
+import { ProposalCard } from '../../shared/ProposalCard'
 import api from '../../shared/api'
 import { LoadingDialog } from '../../shared/loading/LoadingDialog'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
@@ -196,8 +201,8 @@ function Vote() {
       if (addressSnapshot) {
         setAllowlistSignature(addressSnapshot.signature)
         setAllowToVote(true)
-        if (addressSnapshot.weight && isFinite(parseInt(addressSnapshot.weight))) {
-          setVoteWeight(parseInt(addressSnapshot.weight))
+        if (addressSnapshot.weight && isFinite(addressSnapshot.weight)) {
+          setVoteWeight(addressSnapshot.weight)
         } else {
           setVoteWeight(1)
         }
@@ -245,7 +250,7 @@ function Vote() {
     await submitVote({
       signature: allowlistSignature,
       selectedOptionIndexes: votingRoundMetadata.questions.map(() => 0),
-      weighting: 0,
+      weighting: voteWeight,
       weightings: votingRoundMetadata.questions.map((question) => (newVoteAllocations[question.id] ? newVoteAllocations[question.id] : 0)),
       signer: { addr: activeAddress, signer },
       appId: voteId,
@@ -321,16 +326,18 @@ function Vote() {
               {votingRoundMetadata?.questions.map((question, index) => (
                 <>
                   <div>
-                    <ProposalCard
-                      title={question.prompt}
-                      description={question.description}
-                      category={question.metadata.category}
-                      focus_area={question.metadata.focus_area}
-                      link={question.metadata.link}
-                      threshold={question.metadata.threshold}
-                      ask={question.metadata.ask}
-                      votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
-                    />
+                    {question.metadata && (
+                      <ProposalCard
+                        title={question.prompt}
+                        description={question.description}
+                        category={question.metadata.category}
+                        focus_area={question.metadata.focus_area}
+                        link={question.metadata.link}
+                        threshold={question.metadata.threshold}
+                        ask={question.metadata.ask}
+                        votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                      />
+                    )}
                   </div>
                   <div className="flex items-center">
                     {canVote && (

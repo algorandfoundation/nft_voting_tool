@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Question } from '../../shared/IPFSGateway'
+import { Question } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundResult } from '../../shared/types'
 
 type VoteResultsProps = {

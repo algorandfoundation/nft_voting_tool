@@ -1,7 +1,7 @@
 import WatchLaterIcon from '@mui/icons-material/WatchLater'
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
-import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { getTimezone } from '../../shared/getTimezone'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 

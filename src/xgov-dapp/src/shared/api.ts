@@ -3,12 +3,12 @@ import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/type
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from '../../../dapp/src/shared/IPFSGateway'
+import { algod, bootstrap, castVote, closeVotingRound, create } from '../../../dapp/src/shared/VotingRoundContract'
+import { signCsv } from '../../../dapp/src/shared/csvSigner'
+import { VoteType, VotingRoundModel } from '../../../dapp/src/shared/types'
 import { useAppSourceMaps } from '../features/vote-creation/state'
 import { useSetConnectedWallet } from '../features/wallet/state'
-import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from './IPFSGateway'
-import { algod, bootstrap, castVote, closeVotingRound, create } from './VotingRoundContract'
-import { signCsv } from './csvSigner'
-import { VoteType, VotingRoundModel } from './types'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
@@ -120,7 +120,10 @@ const api = {
           let publicKey = new Uint8Array([])
           let snapshot: VoteGatingSnapshot | undefined = undefined
           if (newRound.snapshotFile) {
-            const { signedCsv, publicKey: _publicKey } = await signCsv(newRound.snapshotFile ? newRound.snapshotFile : '')
+            const { signedCsv, publicKey: _publicKey } = await signCsv(
+              newRound.snapshotFile ? newRound.snapshotFile : '',
+              newRound.voteType === VoteType.WEIGHTING || newRound.voteType === VoteType.PARTITIONED_WEIGHTING,
+            )
             publicKey = _publicKey
 
             snapshot = {
@@ -137,24 +140,18 @@ const api = {
             voteGatingSnapshotCid = voteGatingSnapshotResponse.cid
           }
 
-          const questions = newRound.proposals.map((proposal) => {
+          const questions = newRound.questions.map((question) => {
             return {
               id: uuidv4(),
-              prompt: proposal.title,
-              description: proposal.description,
-              metadata: {
-                link: proposal.link,
-                category: proposal.category,
-                focus_area: proposal.focus_area,
-                threshold: proposal.threshold,
-                ask: proposal.ask,
-              },
-              options: [
-                {
+              prompt: question.questionTitle,
+              description: question.questionDescription,
+              options: question.answers.map((answer) => {
+                return {
                   id: uuidv4(),
-                  label: 'yes',
-                },
-              ],
+                  label: answer,
+                }
+              }),
+              ...(question.metadata ? { metadata: question.metadata } : {}),
             }
           })
 
@@ -162,12 +159,13 @@ const api = {
           const { cid } = await uploadVotingRound(
             {
               id: voteId,
-              type: VoteType.PARTITIONED_WEIGHTING,
+              type: newRound.voteType,
               title: newRound.voteTitle,
               description: newRound.voteDescription,
               informationUrl: newRound.voteInformationUrl,
               start: newRound.start,
               end: newRound.end,
+              quorum: newRound.minimumVotes,
               voteGatingSnapshotCid: voteGatingSnapshotCid,
               questions,
               created: {
@@ -178,17 +176,18 @@ const api = {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             auth,
           )
+
           const questionCounts = questions.map((q) => q.options.length)
 
           const app = await create(
             signer,
             voteId,
-            VoteType.PARTITIONED_WEIGHTING,
+            newRound.voteType,
             publicKey,
             cid,
             Math.floor(Date.parse(newRound.start) / 1000),
             Math.floor(Date.parse(newRound.end) / 1000),
-            0,
+            newRound.minimumVotes ? newRound.minimumVotes : 0,
             'ipfs://bafkreiguj3svliomqnqpy2bvrlz5ud24girftynx2ywsugy7sr73zqnujy',
             questionCounts,
           )

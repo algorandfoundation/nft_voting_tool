@@ -1,5 +1,5 @@
 import { Box, Button, Link, Typography } from '@mui/material'
-import { VotingRoundMetadata } from '../../shared/IPFSGateway'
+import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { getWalletLabel } from '../../shared/wallet'
 import { useSetShowConnectWalletModal } from '../wallet/state'
 

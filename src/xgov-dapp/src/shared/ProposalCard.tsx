@@ -4,18 +4,18 @@ import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { CategoryChip } from './CategoryChip'
 
 type ProposalCardProps = {
-  link: string
+  link: string | undefined
   title: string
   description?: string
-  category: string
-  focus_area: string
-  threshold: number
-  ask: number
-  votesTally: number
+  category: string | undefined
+  focus_area: string | undefined
+  threshold: number | undefined
+  ask: number | undefined
+  votesTally: number | undefined
 }
 
-export const ProposalCard = ({ link, title, description, category, focus_area, threshold, ask, votesTally }: ProposalCardProps) => {
-  const percentage = threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
+export const ProposalCard = ({ link, title, description, category, focus_area, threshold, ask, votesTally = 0 }: ProposalCardProps) => {
+  const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
   return (
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
@@ -35,8 +35,8 @@ export const ProposalCard = ({ link, title, description, category, focus_area, t
           )}
         </div>
         <div className="text-right">
-          <Chip className="rounded-lg mr-2" label={focus_area} />
-          <CategoryChip category={category} />
+          {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
+          {category && <CategoryChip category={category} />}
           <Link className="text-grey-light align-text-top ml-2" href={link} target="_blank">
             <LaunchIcon />
           </Link>
@@ -48,10 +48,10 @@ export const ProposalCard = ({ link, title, description, category, focus_area, t
       </Typography>
       <div className="flex justify-between">
         <Typography className="mb-2" variant="h6">
-          {votesTally.toLocaleString()} of {threshold.toLocaleString()} Votes
+          {threshold && `${votesTally.toLocaleString()} of ${threshold.toLocaleString()} Votes`}
         </Typography>
         <Typography className="mb-2" variant="h6">
-          <strong>{ask.toLocaleString()} ALGO asked</strong>
+          <strong>{ask && `${ask.toLocaleString()} ALGO asked`}</strong>
         </Typography>
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />

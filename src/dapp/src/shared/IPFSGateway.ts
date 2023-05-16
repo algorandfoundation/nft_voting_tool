@@ -11,7 +11,7 @@ export interface VotingRoundMetadata {
   id: string
   type: VoteType
   title: string
-  description: string
+  description?: string
   /** Optional URL link to more information */
   informationUrl?: string
   /** Start of voting round as an ISO8601 string */
@@ -33,6 +33,13 @@ export interface Question {
   /** The question prompt text */
   prompt: string
   description?: string
+  metadata?: {
+    link?: string
+    category?: string
+    focus_area?: string
+    threshold?: number
+    ask?: number
+  }
   options: Option[]
 }
 

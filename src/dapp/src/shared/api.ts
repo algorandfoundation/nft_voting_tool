@@ -151,6 +151,7 @@ const api = {
                   label: answer,
                 }
               }),
+              ...(question.metadata ? { metadata: question.metadata } : {}),
             }
           })
 
