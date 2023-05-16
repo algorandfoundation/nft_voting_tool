@@ -50,11 +50,11 @@ export function ArrayFormItems<TSchema extends Record<string, any>>({
           }}
         >
           {fields.map(({ id }, ix) => (
-            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2 }} key={id}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flex: 1 }} key={id}>
               <div style={{ flexShrink: 1 }}>
                 <PostAddIcon />
               </div>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }} key={id}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }} key={id}>
                 {children(ix)}
               </Box>
               {fields.length > minimumItemCount && (

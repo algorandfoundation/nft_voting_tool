@@ -8,6 +8,7 @@ import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { VotingRoundMetadata } from './IPFSGateway'
 
+// Keep in sync between voting.py, IPFSGateway.ts and types.ts
 enum VoteType {
   NO_SNAPSHOT = 0,
   NO_WEIGHTING = 1,

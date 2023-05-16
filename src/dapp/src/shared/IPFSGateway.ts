@@ -1,3 +1,4 @@
+// Keep in sync between voting.py, VotingRoundContract.ts and types.ts
 enum VoteType {
   NO_SNAPSHOT = 0,
   NO_WEIGHTING = 1,

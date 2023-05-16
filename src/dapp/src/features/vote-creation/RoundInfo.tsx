@@ -32,7 +32,9 @@ function optionsForEnum<O extends object>(enumeration: O, includeEmpty?: boolean
 }
 
 const formSchema = zfd.formData({
-  voteType: zfd.numeric(z.nativeEnum(VoteType)),
+  voteType: zfd.numeric(
+    z.nativeEnum(VoteType).refine((x) => x !== VoteType.PARTITIONED_WEIGHTING && x !== VoteType.NO_SNAPSHOT, 'Invalid vote type'),
+  ),
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
   voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
@@ -41,7 +43,7 @@ const formSchema = zfd.formData({
   snapshotFile: zfd.text(z.string()),
   minimumVotes: zfd.numeric(z.number({ invalid_type_error: 'Should be a number' }).optional()),
 })
-//.superRefine(validateSnapshotCsv)
+//todo: .superRefine(validateSnapshotCsv)
 
 function validateSnapshotCsv(value: { voteType: VoteType; snapshotFile?: string }, ctx: z.RefinementCtx) {
   if (value.voteType === VoteType.NO_SNAPSHOT) {
@@ -132,7 +134,13 @@ export default function RoundInfo() {
                 label: 'Vote title',
                 field: 'voteTitle',
               })}
-              <SelectFormItem<Fields> field="voteType" label="Vote type" options={optionsForEnum(VoteType)}></SelectFormItem>
+              <SelectFormItem<Fields>
+                field="voteType"
+                label="Vote type"
+                options={optionsForEnum(VoteType, false).filter(
+                  (o) => ![Number(VoteType.NO_SNAPSHOT).toString(), Number(VoteType.PARTITIONED_WEIGHTING).toString()].includes(o.value),
+                )}
+              ></SelectFormItem>
               {helper.textareaField({
                 label: 'Vote description',
                 field: 'voteDescription',
@@ -164,7 +172,9 @@ export default function RoundInfo() {
                 field: 'snapshotFile',
                 hint: 'Upload snapshot .csv file',
                 longHint:
-                  'Vote type = NO_SNAPSHOT: Upload empty file.\nVote type = NO_WEIGHTING: Upload a CSV file with a single column containing the addresses for the allowlist. Do not include a header line.\nOtherwise: Upload a CSV with 2 columns: address, weighting containing the addresses for the allowlist and their weighting. Do not include a header line.',
+                  //'Vote type = NO_SNAPSHOT: Upload empty file.\n' +
+                  "Vote type = NO_WEIGHTING: Upload a CSV file with a single column containing the addresses for the allowlist. Include a header line with a column called 'address'.\n" +
+                  "Vote type = WEIGHTING: Upload a CSV with 2 columns: address, weighting containing the addresses for the allowlist and their weighting. Include a header line with columns called 'address' and 'weight'.",
               })}
               {helper.textField({
                 label: 'Minimum number of votes (quorum)',
