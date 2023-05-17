@@ -27,6 +27,7 @@ jobs:
     with:
       working-directory: ./src/xgov-dapp
       compile-script: npm run typecheck
+      pre-run-script: cd src/dapp && npm run ci
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
@@ -69,7 +70,7 @@ jobs:
       static-site-env-prefix: VITE
     needs:
       - ci-xgov-dapp
-      - ci-dapp
+      - ci-algorand
   build-api:
     name: Build API
     uses: ./.github/workflows/node-build-zip.yml
