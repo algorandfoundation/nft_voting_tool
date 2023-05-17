@@ -61,6 +61,10 @@ jobs:
       - if: ${{ inputs.static-site }}
         run: sed -n 's/\(${{ inputs.static-site-env-prefix }}_[A-Z0-9_]\+\)=\(.*\)/\1="{{\1}}"/p' .env.template > .env && cat .env
 
+      - name: Pre-run
+        if: ${{ inputs.pre-run-script }}
+        run: ${{ inputs.pre-run-script }}
+
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts
         env:
@@ -86,7 +90,3 @@ jobs:
           name: ${{ inputs.artifact-name }}
           path: ${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip
           if-no-files-found: error
-
-      - name: Pre-run
-        if: ${{ inputs.pre-run-script }}
-        run: ${{ inputs.pre-run-script }}
