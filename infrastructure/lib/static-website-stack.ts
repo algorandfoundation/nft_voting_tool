@@ -129,7 +129,7 @@ export class StaticWebsiteStack extends cdk.Stack {
       code: cloudfront.FunctionCode.fromFile({
         filePath: path.join(__dirname, 'subfolder-index-rewrite-lambda/default-redirect-function.js'),
       }),
-      functionName: `${id}-default-redirect`,
+      functionName: `${id}-default-redirect`.substring(0, 64),
     })
 
     const cachePolicy = new CachePolicy(this, `${id}-cloudfront-cache`, {
