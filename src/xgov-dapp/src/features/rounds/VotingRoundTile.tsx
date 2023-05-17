@@ -1,8 +1,8 @@
 import { Card, CardContent, Skeleton, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
+import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { VotingRoundStatus } from './VotingRoundStatus'
 
 export type VotingRoundTileProps = {

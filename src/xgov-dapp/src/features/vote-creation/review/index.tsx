@@ -20,10 +20,11 @@ import { ConfirmationDialog } from './ConfirmationDialog'
 
 import { useWallet } from '@txnlab/use-wallet'
 import Papa from 'papaparse'
+import { VotingRoundGlobalState } from '../../../../../dapp/src/shared/VotingRoundContract'
+import { VoteType } from '../../../../../dapp/src/shared/types'
 import { ProposalCard } from '../../../shared/ProposalCard'
-import { VotingRoundGlobalState } from '../../../shared/VotingRoundContract'
-import { Proposal } from '../../../shared/types'
 import { VotingTime } from '../../vote/VotingTime'
+import { Proposal } from '../RoundInfo'
 
 export default function Review() {
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false)
@@ -58,7 +59,24 @@ export default function Review() {
         // eslint-disable-next-line no-case-declarations
         const app = await create.execute({
           auth: authData,
-          newRound: { ...roundInfo, proposals: proposals },
+          newRound: {
+            ...roundInfo,
+            voteType: VoteType.PARTITIONED_WEIGHTING,
+            questions: proposals.map((proposal) => {
+              return {
+                questionTitle: proposal.title,
+                questionDescription: proposal.description,
+                metadata: {
+                  link: proposal.link,
+                  category: proposal.category,
+                  focus_area: proposal.focus_area,
+                  threshold: Number(proposal.threshold),
+                  ask: Number(proposal.ask),
+                },
+                answers: ['yes'],
+              }
+            }),
+          },
           signer,
         })
         setApp(app)
@@ -90,6 +108,7 @@ export default function Review() {
 
   const previewGlobalState = {
     appId: 0,
+    opUpAppId: 0,
     start_time: roundInfo.start,
     end_time: roundInfo.end,
     is_bootstrapped: false,
@@ -131,9 +150,11 @@ export default function Review() {
                         link={proposal.link}
                         title={proposal.title}
                         description={proposal.description}
-                        threshold={proposal.threshold}
-                        votesTally={0}
                         category={proposal.category}
+                        focus_area={proposal.focus_area}
+                        threshold={Number(proposal.threshold)}
+                        ask={Number(proposal.ask)}
+                        votesTally={0}
                       />
                     </div>
                   ) : null

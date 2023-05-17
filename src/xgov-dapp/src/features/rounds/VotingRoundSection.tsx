@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material'
-import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { NoRounds } from './NoRounds'
 import { VotingRoundTile } from './VotingRoundTile'
 import { VotingRoundTileLoading } from './index'

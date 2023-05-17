@@ -1,4 +1,4 @@
-import { VoteGatingSnapshot } from './IPFSGateway'
+import { VoteGatingSnapshot } from '../../../dapp/src/shared/IPFSGateway'
 
 export type VoteId = {
   id: number
@@ -6,7 +6,7 @@ export type VoteId = {
 
 export type RoundInfo = {
   voteTitle: string
-  voteDescription: string
+  voteDescription?: string
   voteInformationUrl?: string
   start: string
   end: string
@@ -24,12 +24,11 @@ export type VotingRoundResult = {
   count: number
 }
 
-export type Proposal = {
-  title: string
-  description: string
-  link: string
-  threshold: number
-  category: string
+export enum VoteType {
+  NO_SNAPSHOT = 0,
+  NO_WEIGHTING = 1,
+  WEIGHTING = 2,
+  PARTITIONED_WEIGHTING = 3,
 }
 
-export type VotingRoundModel = RoundInfo & { proposals: Proposal[] } & VoteId & { snapshot?: VoteGatingSnapshot }
+export type VotingRoundModel = RoundInfo & VoteId & { snapshot?: VoteGatingSnapshot }

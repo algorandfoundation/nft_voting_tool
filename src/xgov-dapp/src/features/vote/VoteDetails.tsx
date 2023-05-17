@@ -1,8 +1,7 @@
-import { Link, Skeleton, Stack, Typography } from '@mui/material'
-import { DisplayAddress } from '../../shared/DisplayAddress'
-import { VotingRoundMetadata } from '../../shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../shared/VotingRoundContract'
-import { VotingTime } from './VotingTime'
+import LaunchIcon from '@mui/icons-material/Launch'
+import { Box, Link } from '@mui/material'
+import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 
 type VoteDetailsProps = {
   loading: boolean
@@ -14,40 +13,38 @@ export const VoteDetails = ({ loading, appId: voteId, globalState, roundMetadata
   return (
     <>
       {globalState && roundMetadata && (
-        <Stack spacing={1}>
-          <Typography className="mt-5 font-bold sm:font-normal" variant="h5">
-            Vote details
-          </Typography>
-          <VotingTime className="hidden sm:block mt-4" loading={loading} globalState={globalState} />
-          {loading ? (
-            <Skeleton variant="text" />
-          ) : (
-            <Typography>
-              Voting round created by <DisplayAddress address={roundMetadata.created.by} />
-            </Typography>
-          )}
-          {loading ? (
-            <Skeleton variant="text" />
-          ) : (
-            <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/application/${voteId}`} target="_blank">
+        <div className="flex">
+          <Box className="bg-white flex rounded-xl px-4 py-2 mr-4">
+            <Link
+              className="no-underline hover:underline"
+              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${globalState.metadata_ipfs_cid}`}
+              target="_blank"
+            >
+              IPFS
+              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
+            </Link>
+          </Box>
+          <Box className="bg-white flex rounded-xl px-4 py-2 mr-4">
+            <Link
+              className="no-underline hover:underline"
+              href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/application/${voteId}`}
+              target="_blank"
+            >
               Smart contract
+              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </Link>
-          )}
-          {loading ? (
-            <Skeleton variant="text" />
-          ) : (
-            <Link href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${globalState.metadata_ipfs_cid}`} target="_blank">
-              Voting round details in IPFS
+          </Box>
+          <Box className="bg-white flex rounded-xl px-4 py-2 mr-4">
+            <Link
+              className="no-underline hover:underline"
+              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${roundMetadata.voteGatingSnapshotCid}`}
+              target="_blank"
+            >
+              Allow list
+              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </Link>
-          )}
-          {loading ? (
-            <Skeleton variant="text" />
-          ) : roundMetadata.voteGatingSnapshotCid ? (
-            <Link href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${roundMetadata.voteGatingSnapshotCid}`} target="_blank">
-              Allowlist
-            </Link>
-          ) : null}
-        </Stack>
+          </Box>
+        </div>
       )}
     </>
   )

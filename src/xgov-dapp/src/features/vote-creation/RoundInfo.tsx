@@ -4,13 +4,22 @@ import { decodeAddress } from 'algosdk'
 import dayjs from 'dayjs'
 import Papa from 'papaparse'
 import { useNavigate } from 'react-router-dom'
-import { SnapshotRow } from '../../shared/csvSigner'
-import { Proposal } from '../../shared/types'
+import { SnapshotRow } from '../../../../dapp/src/shared/csvSigner'
 import { useRoundInfo, useSetRoundInfo } from './state'
+
+export type Proposal = {
+  title: string
+  description: string
+  link: string
+  category: string
+  focus_area: string
+  threshold: number
+  ask: number
+}
 
 const formSchema = zfd.formData({
   voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
-  voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
+  voteDescription: zfd.text(z.string().trim().optional()),
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
@@ -20,7 +29,7 @@ const formSchema = zfd.formData({
 
 function validateProposalCsv(value: string, ctx: z.RefinementCtx) {
   const parsed = Papa.parse<Proposal>(value, { header: true })
-  const requiredFields = ['title', 'description', 'link', 'category', 'threshold']
+  const requiredFields = ['title', 'description', 'link', 'category', 'focus_area', 'threshold', 'ask']
   if (parsed.errors.length > 0) {
     parsed.errors.forEach((error) => {
       ctx.addIssue({

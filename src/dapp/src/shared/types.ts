@@ -15,7 +15,7 @@ export enum VoteType {
 export type RoundInfo = {
   voteType: VoteType
   voteTitle: string
-  voteDescription: string
+  voteDescription?: string | undefined
   start: string
   end: string
   snapshotFile?: string | undefined
@@ -37,6 +37,13 @@ export type QuestionModel = {
   questionTitle: string
   questionDescription?: string
   answers: string[]
+  metadata?: {
+    link?: string
+    category?: string
+    focus_area?: string
+    threshold?: number
+    ask?: number
+  }
 }
 
 export type VotingRoundModel = RoundInfo & { questions: QuestionModel[] } & VoteId & { snapshot?: VoteGatingSnapshot }
