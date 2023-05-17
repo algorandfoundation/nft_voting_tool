@@ -115,7 +115,7 @@ const api = deployer.deploy(ApiStack, 'api', {
 const xGovApp = deployer.deploy(StaticWebsiteStack, 'xgovweb', {
   websiteFolder: process.env.WEBSITE_BUILD_PATH_XGOV ?? path.join(__dirname, '..', '..', 'src', 'xgov-dapp', 'dist'),
   websiteNpmBuildCommand: 'build-xgov-dapp',
-  customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, xGovAppDomainName),
+  customDomain: xGovDns?.getDefaultCustomDomainProps(deployer.defaultRegion, xGovAppDomainName),
   responseHeaders: responseHeaders,
 })
 
