@@ -151,8 +151,9 @@ jobs:
           DEPLOYMENT_ENVIRONMENT: prod
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
-          BASE_DOMAIN: voting.algorand.foundation
+          BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
+          WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
