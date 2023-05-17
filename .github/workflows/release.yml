@@ -27,7 +27,7 @@ jobs:
     with:
       working-directory: ./src/xgov-dapp
       compile-script: npm run typecheck
-      pre-run-script: cd ../dapp && npm install
+      pre-run-script: cd ../dapp && npm ci
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
