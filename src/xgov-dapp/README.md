@@ -1,6 +1,6 @@
-# On-chain voting tool dApp
+# On-chain voting tool for xGov
 
-This dApp serves as the user interface for deploying, managing and interacting with voting rounds on the Algorand blockchain. To run the dApp, you need to connect it to an Algorand network and an https gateway to the IPFS, which can both be configured in the `.env` file. The Algorand network is necessary for deploying the voting round smart contracts and managing voting transactions, while the IPFS gateway is needed for storing and accessing metadata related to voting rounds.
+This dApp serves as the user interface for deploying, managing and interacting with xGov voting rounds on the Algorand blockchain. To run the dApp, you need to connect it to an Algorand network and an https gateway to the IPFS, which can both be configured in the `.env` file. The Algorand network is necessary for deploying the voting round smart contracts and managing voting transactions, while the IPFS gateway is needed for storing and accessing metadata related to voting rounds.
 
 This project contains a [write-through cache Algorand IPFS gateway](../voting-metadata-api/README.md) which can serve as the IPFS gateway.
 

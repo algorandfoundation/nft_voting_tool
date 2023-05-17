@@ -13,8 +13,9 @@ const deployer = new CDKDeployer({
   appName: 'nft-voting-tool',
 })
 
-const appDomainName = deployer.getEnvPrefixedDomainName(process.env.BASE_DOMAIN)
+const appDomainName = deployer.getEnvPrefixedDomainName(`voting.${process.env.BASE_DOMAIN}`)
 const apiDomainName = `api.${appDomainName}`
+const xGovAppDomainName = deployer.getEnvPrefixedDomainName(`xgov.${process.env.BASE_DOMAIN}`)
 
 const apiCertificateRequest: CertificateRequest = {
   isWildCard: false,
@@ -28,6 +29,20 @@ const dns = appDomainName
       'dns-web',
       {
         domainName: appDomainName,
+        generateCertificate: true,
+        parameterRegions: [deployer.defaultRegion],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
+      },
+      'us-east-1',
+    )
+  : undefined
+
+const xGovDns = xGovAppDomainName
+  ? deployer.deploy(
+      DnsStack,
+      'dns-web',
+      {
+        domainName: xGovAppDomainName,
         generateCertificate: true,
         parameterRegions: [deployer.defaultRegion],
         certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
@@ -97,7 +112,18 @@ const api = deployer.deploy(ApiStack, 'api', {
   },
 })
 
+const xGovApp = deployer.deploy(StaticWebsiteStack, 'web', {
+  websiteFolder: process.env.WEBSITE_BUILD_PATH_XGOV ?? path.join(__dirname, '..', '..', 'src', 'xgov-dapp', 'dist'),
+  websiteNpmBuildCommand: 'build-xgov-dapp',
+  customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, xGovAppDomainName),
+  responseHeaders: responseHeaders,
+})
+
 if (dns) {
   app.addDependency(dns)
   api.addDependency(dns)
+}
+
+if (xGovDns) {
+  xGovApp.addDependency(xGovDns)
 }
