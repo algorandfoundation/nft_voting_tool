@@ -68,7 +68,7 @@ jobs:
       artifact-name: xgov-dapp
       static-site: true
       static-site-env-prefix: VITE
-      pre-run-script: cd src/dapp && npm run ci
+      pre-run-script: cd ../dapp && npm ci
     needs:
       - ci-xgov-dapp
       - ci-algorand
