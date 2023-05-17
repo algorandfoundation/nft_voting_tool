@@ -91,7 +91,3 @@ jobs:
         # CDK infrastructure build calls npm ci on /infrastructure/build, which may fail without NODE_AUTH_TOKEN
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
-
-      - name: Pre-run
-        if: ${{ inputs.pre-run-script }}
-        run: ${{ inputs.pre-run-script }}
