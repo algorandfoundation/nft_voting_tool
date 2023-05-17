@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/xgov-dapp
-      pre-run-script: cd src/dapp && npm run ci
+      pre-run-script: cd ./src/dapp && npm run ci
   build-api:
     name: Api
     uses: ./.github/workflows/node-ci.yml
