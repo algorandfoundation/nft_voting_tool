@@ -45,7 +45,7 @@ const xGovDns = xGovAppDomainName
         domainName: xGovAppDomainName,
         generateCertificate: true,
         parameterRegions: [deployer.defaultRegion],
-        certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
       },
       'us-east-1',
     )
