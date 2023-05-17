@@ -64,11 +64,11 @@ jobs:
     uses: ./.github/workflows/node-build-zip.yml
     with:
       working-directory: ./src/xgov-dapp
+      pre-run-script: cd ../dapp && npm ci
       build-path: dist
       artifact-name: xgov-dapp
       static-site: true
       static-site-env-prefix: VITE
-      pre-run-script: cd ../dapp && npm ci
     needs:
       - ci-xgov-dapp
       - ci-algorand
