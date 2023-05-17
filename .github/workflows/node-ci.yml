@@ -65,6 +65,10 @@ jobs:
           cache: "npm"
           cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
 
+      - name: Pre-run
+        if: ${{ inputs.pre-run-script }}
+        run: ${{ inputs.pre-run-script }}
+
       # run npm ci preventing script access to npm auth token
       - run: npm ci --ignore-scripts
         env:
