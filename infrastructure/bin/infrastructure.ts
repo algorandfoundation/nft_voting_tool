@@ -40,7 +40,7 @@ const dns = appDomainName
 const xGovDns = xGovAppDomainName
   ? deployer.deploy(
       DnsStack,
-      'dns-web',
+      'dns-xgovweb',
       {
         domainName: xGovAppDomainName,
         generateCertificate: true,
