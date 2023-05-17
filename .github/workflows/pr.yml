@@ -26,6 +26,7 @@ jobs:
     with:
       working-directory: ./src/xgov-dapp
       run-build: true
+    needs: [build-dapp]
   build-api:
     name: Api
     uses: ./.github/workflows/node-ci.yml

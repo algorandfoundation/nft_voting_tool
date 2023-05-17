@@ -69,7 +69,7 @@ jobs:
       static-site-env-prefix: VITE
     needs:
       - ci-xgov-dapp
-      - ci-algorand
+      - ci-dapp
   build-api:
     name: Build API
     uses: ./.github/workflows/node-build-zip.yml
