@@ -26,6 +26,9 @@ on:
         required: false
         type: string
         default: VITE
+      pre-run-script:
+        required: false
+        type: string
     secrets:
       npm-auth-token:
         description: NPM auth token (optional, GITHUB_TOKEN is used by default)
@@ -83,3 +86,7 @@ jobs:
           name: ${{ inputs.artifact-name }}
           path: ${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip
           if-no-files-found: error
+
+      - name: Pre-run
+        if: ${{ inputs.pre-run-script }}
+        run: ${{ inputs.pre-run-script }}

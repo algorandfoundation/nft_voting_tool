@@ -21,6 +21,13 @@ jobs:
     with:
       working-directory: ./src/dapp
       compile-script: npm run typecheck
+  ci-xgov-dapp:
+    name: CI xGov Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/xgov-dapp
+      compile-script: npm run typecheck
+      pre-run-script: cd ../dapp && npm ci
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
@@ -52,6 +59,19 @@ jobs:
     needs:
       - ci-dapp
       - ci-algorand
+  build-xgov-dapp:
+    name: Build xGov Dapp
+    uses: ./.github/workflows/node-build-zip.yml
+    with:
+      working-directory: ./src/xgov-dapp
+      build-path: dist
+      artifact-name: xgov-dapp
+      static-site: true
+      static-site-env-prefix: VITE
+      pre-run-script: cd src/dapp && npm run ci
+    needs:
+      - ci-xgov-dapp
+      - ci-algorand
   build-api:
     name: Build API
     uses: ./.github/workflows/node-build-zip.yml
@@ -76,6 +96,7 @@ jobs:
     concurrency: "${{ github.workflow }}-dev"
     needs:
       - build-dapp
+      - build-xgov-dapp
       - build-infrastructure
       - build-api
     steps:
@@ -85,8 +106,9 @@ jobs:
           DEPLOYMENT_ENVIRONMENT: testnet
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
-          BASE_DOMAIN: voting.algorand.foundation
+          BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
+          WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production

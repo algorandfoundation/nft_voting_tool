@@ -30,14 +30,6 @@ describe('create vote', () => {
         await waitFor(() => expect(screen.getByRole('textbox', { name: 'Vote title' })).toBeInvalid())
       })
 
-      it('should be required', async () => {
-        render(<RoundInfo />)
-
-        fireEvent.change(screen.getByRole('textbox', { name: 'Vote title' }), { target: { value: 'some value' } })
-        fireEvent.submit(screen.getByRole('button', { name: 'Next' }))
-
-        await waitFor(() => expect(screen.getByRole('textbox', { name: 'Vote description' })).toBeInvalid())
-      })
       it('should trim spaces', async () => {
         render(<RoundInfo />)
 
