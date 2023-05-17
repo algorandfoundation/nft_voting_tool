@@ -103,6 +103,7 @@ jobs:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
+          NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: testnet
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
@@ -117,6 +118,7 @@ jobs:
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
+            xgov-dapp:xgov-dapp/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
@@ -148,6 +150,7 @@ jobs:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
+          NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: prod
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
@@ -162,6 +165,7 @@ jobs:
         with:
           app-artifact-unzips: |-
             dapp:dapp/dist
+            xgov-dapp:xgov-dapp/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
