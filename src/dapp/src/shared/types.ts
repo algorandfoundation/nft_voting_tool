@@ -37,13 +37,7 @@ export type QuestionModel = {
   questionTitle: string
   questionDescription?: string
   answers: string[]
-  metadata?: {
-    link?: string
-    category?: string
-    focus_area?: string
-    threshold?: number
-    ask?: number
-  }
+  metadata?: Record<string, unknown>
 }
 
 export type VotingRoundModel = RoundInfo & { questions: QuestionModel[] } & VoteId & { snapshot?: VoteGatingSnapshot }

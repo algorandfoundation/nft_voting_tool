@@ -1,3 +1,4 @@
+import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
@@ -12,25 +13,38 @@ type ProposalCardProps = {
   threshold: number | undefined
   ask: number | undefined
   votesTally: number | undefined
+  hasClosed?: boolean
 }
 
-export const ProposalCard = ({ link, title, description, category, focus_area, threshold, ask, votesTally = 0 }: ProposalCardProps) => {
+export const ProposalCard = ({
+  link,
+  title,
+  description,
+  category,
+  focus_area,
+  threshold,
+  ask,
+  votesTally = 0,
+  hasClosed = false,
+}: ProposalCardProps) => {
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
+  const hasPassed = percentage >= 100
   return (
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
         <div>
-          {percentage >= 100 && (
+          {hasPassed && (
             <Chip
-              className="mr-2"
-              style={{
-                border: 'solid',
-                borderColor: '#01DC94',
-                borderRadius: '8px',
-                backgroundColor: '#E2FBD7',
-              }}
+              className="mr-2 border-green bg-green-light rounded-lg border border-solid"
               label="Passed"
               avatar={<CheckCircleIcon className="text-green" />}
+            />
+          )}
+          {hasClosed && !hasPassed && (
+            <Chip
+              className="mr-2 border-red bg-red-light rounded-lg border border-solid"
+              label="Did not pass"
+              avatar={<CancelIcon className="text-red" />}
             />
           )}
         </div>
@@ -51,7 +65,8 @@ export const ProposalCard = ({ link, title, description, category, focus_area, t
           {threshold && `${votesTally.toLocaleString()} of ${threshold.toLocaleString()} Votes`}
         </Typography>
         <Typography className="mb-2" variant="h6">
-          <strong>{ask && `${ask.toLocaleString()} ALGO asked`}</strong>
+          {hasClosed && hasPassed && ask && <strong>{`${ask.toLocaleString()} ALGO awarded`}</strong>}
+          {!hasClosed && ask && <strong>{`${ask.toLocaleString()} ALGO asked`}</strong>}
         </Typography>
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />

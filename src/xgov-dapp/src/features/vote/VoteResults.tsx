@@ -1,48 +1,82 @@
-import { Fragment } from 'react'
-import { Question } from '../../../../dapp/src/shared/IPFSGateway'
+import { Skeleton, Typography } from '@mui/material'
+import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
+import { VoteDetails } from './VoteDetails'
+import { VotingTime } from './VotingTime'
 
 type VoteResultsProps = {
-  question: Question
-  votingRoundResults: VotingRoundResult[]
+  votingRoundResults: VotingRoundResult[] | undefined
+  votingRoundMetadata: VotingRoundMetadata | undefined
+  votingRoundGlobalState: VotingRoundGlobalState
+  isLoadingVotingRoundData: boolean
+  isLoadingVotingRoundResults: boolean
   myVotes?: string[]
 }
 
-export const VoteResults = ({ question, votingRoundResults, myVotes }: VoteResultsProps) => {
-  const counts = question.options.map((option) => {
-    return votingRoundResults.find((item) => item.optionId === option.id)?.count || 0
-  })
-  const max = Math.max(...counts)
-
+export const VoteResults = ({
+  votingRoundResults,
+  votingRoundMetadata,
+  votingRoundGlobalState,
+  isLoadingVotingRoundData,
+  isLoadingVotingRoundResults,
+}: VoteResultsProps) => {
   return (
-    <div className="grid grid-cols-3 w-160 gap-2">
-      {question.options.map((option) => {
-        const result = votingRoundResults.find((result) => result.optionId === option.id)
-        return (
-          result && (
-            <Fragment key={option.id}>
-              <div className="col-span-2 h-10 flex items-center">
-                <div
-                  className="bg-algorand-orange-coral h-10 rounded-tr-xl rounded-br-xl min-w-[5px]"
-                  style={{ flexBasis: `${max ? (result.count / max) * 80 : 0}%` }}
-                ></div>
-                <div className="p-2 pr-6">
-                  {result.count}
-                  {result.count === 0 && ' Votes'}
-                </div>
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="col-span-1 sm:col-span-2">
+          <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
+        </div>
+        <div>
+          <VoteDetails
+            globalState={votingRoundGlobalState}
+            appId={votingRoundGlobalState.appId}
+            loading={isLoadingVotingRoundData}
+            roundMetadata={votingRoundMetadata}
+          />
+        </div>
+        <div></div>
+        <div></div>
+        <div>
+          <VotingTime className="sm:visible" globalState={votingRoundGlobalState} loading={isLoadingVotingRoundData} />
+        </div>
+        <div className="col-span-1 sm:col-span-3">
+          <Typography variant="h4">Proposals</Typography>
+        </div>
+        {isLoadingVotingRoundData ||
+          (isLoadingVotingRoundResults && (
+            <>
+              <div>
+                <Skeleton className="h-40 mb-4" variant="rectangular" />
               </div>
-              <div className="flex  items-center">
-                {option.label}
-                {myVotes?.includes(option.id) && (
-                  <span title="You voted for this option" className="ml-2">
-                    ⭐
-                  </span>
-                )}
+              <div>
+                <Skeleton className="h-40 mb-4" variant="rectangular" />
               </div>
-            </Fragment>
-          )
-        )
-      })}
+              <div>
+                <Skeleton className="h-40" variant="rectangular" />
+              </div>
+            </>
+          ))}
+        {!isLoadingVotingRoundResults &&
+          votingRoundMetadata?.questions.map((question, index) => (
+            <div>
+              {question.metadata && (
+                <ProposalCard
+                  title={question.prompt}
+                  description={question.description}
+                  category={question.metadata.category}
+                  focus_area={question.metadata.focus_area}
+                  link={question.metadata.link}
+                  threshold={question.metadata.threshold}
+                  ask={question.metadata.ask}
+                  votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                  hasClosed={true}
+                />
+              )}
+            </div>
+          ))}
+      </div>
     </div>
   )
 }
