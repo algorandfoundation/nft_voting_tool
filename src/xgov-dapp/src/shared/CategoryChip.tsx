@@ -17,7 +17,7 @@ const renderComponent = (category: string) => {
         <Chip
           style={{
             borderRadius: '8px',
-            backgroundColor: 'rgba(218, 215, 254, 1)',
+            backgroundColor: '#E9E8FF',
           }}
           label={Category.dApps}
         />
@@ -27,7 +27,7 @@ const renderComponent = (category: string) => {
         <Chip
           style={{
             borderRadius: '8px',
-            backgroundColor: 'rgba(218, 228, 224, 1)',
+            backgroundColor: '#FFE9FD',
           }}
           label={Category.Tools}
         />
@@ -37,7 +37,7 @@ const renderComponent = (category: string) => {
         <Chip
           style={{
             borderRadius: '8px',
-            backgroundColor: 'rgba(204, 248, 254, 1)',
+            backgroundColor: '#D7F0FF',
           }}
           label={Category.Community}
         />

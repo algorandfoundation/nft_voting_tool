@@ -26,6 +26,7 @@ import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
+import { VoteResults } from './VoteResults'
 import { VotingTime } from './VotingTime'
 
 function Vote() {
@@ -64,14 +65,19 @@ function Vote() {
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
   const isVoteCreator = votingRoundMetadata?.created.by === activeAddress ? true : false
+
   const canVote = hasVoteStarted && !hasVoteEnded && allowedToVote
+  const hasVoted = voterVotes !== undefined ? true : false
+  const hasClosed = votingRoundGlobalState && votingRoundGlobalState.close_time !== undefined ? true : false
+
   const canSubmitVote =
     canVote &&
     totalAllocatedPercentage >= 100 &&
     // totalAllocated === voteWeight &&
     activeAddress &&
     allowlistSignature &&
-    votingRoundMetadata
+    votingRoundMetadata &&
+    !hasVoted
 
   type VoteAllocation = {
     [key: string]: number
@@ -268,6 +274,18 @@ function Vote() {
     refetchVoteRoundData(voteId)
   }
 
+  if (hasClosed && votingRoundGlobalState) {
+    return (
+      <VoteResults
+        votingRoundResults={votingRoundResults}
+        votingRoundMetadata={votingRoundMetadata}
+        votingRoundGlobalState={votingRoundGlobalState}
+        isLoadingVotingRoundResults={isLoadingVotingRoundResults}
+        isLoadingVotingRoundData={isLoadingVotingRoundData}
+      />
+    )
+  }
+
   return (
     <div>
       <div>
@@ -303,7 +321,7 @@ function Vote() {
               )}
             </div>
             <div>
-              {canVote && (
+              {canVote && !hasVoted && (
                 <>
                   <Typography variant="h4">Your allocations</Typography>
                   <Typography>
@@ -340,7 +358,7 @@ function Vote() {
                     )}
                   </div>
                   <div className="flex items-center">
-                    {canVote && (
+                    {canVote && !hasVoted && (
                       <>
                         <TextField
                           type="number"
@@ -370,95 +388,106 @@ function Vote() {
           </div>
         </div>
 
-        <div className="col-span-2">
-          <div className="mb-2">
-            <VoteDetails
-              loading={isLoadingVotingRoundData}
-              appId={voteId}
-              globalState={votingRoundGlobalState}
-              roundMetadata={votingRoundMetadata}
-            />
-          </div>
-
-          {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
-            <div className="mb-4">
-              <Box className="bg-red-light flex rounded-xl px-4 py-6">
-                <div>
-                  <CancelIcon className="align-bottom mr-4 text-red" />
-                </div>
-                <div className="w-full">
-                  {!hasVoteStarted ? (
-                    <Typography>This voting session is not yet open. Please wait until the voting session opens to cast votes.</Typography>
-                  ) : !activeAddress ? (
-                    <div className="flex w-full justify-between">
-                      <div>
-                        <Typography>You haven’t connected your wallet.</Typography>
-                      </div>
-                      <div className="float-right">
-                        <Link className="no-underline hover:underline text-red" href="#" onClick={() => setShowConnectedWalletModal(true)}>
-                          Connect wallet
-                        </Link>
-                      </div>
-                    </div>
-                  ) : !allowedToVote ? (
-                    <Typography>Your wallet is not on the allow list for this voting round.</Typography>
-                  ) : (
-                    ''
-                  )}
-                </div>
-              </Box>
-            </div>
-          )}
-          <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-          {canVote && (
-            <div className="mt-4">
-              <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
-                <div>
-                  <FlashOnIcon className="align-bottom mr-4 text-yellow" />
-                </div>
-                <div>
-                  <Typography className="mb-3">Your voting power is determined by your current ALGO balance committed to xGov.</Typography>
-                  <Typography className="mb-3">
-                    For this round, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
-                  </Typography>
-                  <Typography>
-                    Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
-                    <strong>100%</strong>.
-                  </Typography>
-                  <Typography>
-                    <strong>Once you cast your votes, you cannot change them.</strong>
-                  </Typography>
-                </div>
-              </Box>
-            </div>
-          )}
-          {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
-            <div className="mb-4">
-              <CloseVotingRound
-                closingVotingRoundError={closingVotingRoundError}
-                loading={closingVotingRound}
-                handleCloseVotingRound={handleCloseVotingRound}
-                voteEnded={hasVoteEnded}
+        <div className="col-span-2 justify-between flex flex-col">
+          <div>
+            <div className="mb-2">
+              <VoteDetails
+                loading={isLoadingVotingRoundData}
+                appId={voteId}
+                globalState={votingRoundGlobalState}
+                roundMetadata={votingRoundMetadata}
               />
             </div>
-          )}
 
-          {canVote && (
-            <Box
-              className={clsx(
-                'flex items-center justify-between bottom-2 px-4 py-6 rounded-xl',
-                !canSubmitVote ? 'bg-algorand-vote-closed' : 'bg-green-light',
-              )}
-            >
-              <Typography>
-                <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
-                Once your allocations total to 100%, you’ll be able to cast your votes!
-              </Typography>
-              <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>
-                Submit
-              </Button>
-            </Box>
-          )}
+            {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
+              <div className="mb-4">
+                <Box className="bg-red-light flex rounded-xl px-4 py-6">
+                  <div>
+                    <CancelIcon className="align-bottom mr-4 text-red" />
+                  </div>
+                  <div className="w-full">
+                    {!hasVoteStarted ? (
+                      <Typography>
+                        This voting session is not yet open. Please wait until the voting session opens to cast votes.
+                      </Typography>
+                    ) : !activeAddress ? (
+                      <div className="flex w-full justify-between">
+                        <div>
+                          <Typography>You haven’t connected your wallet.</Typography>
+                        </div>
+                        <div className="float-right">
+                          <Link
+                            className="no-underline hover:underline text-red"
+                            href="#"
+                            onClick={() => setShowConnectedWalletModal(true)}
+                          >
+                            Connect wallet
+                          </Link>
+                        </div>
+                      </div>
+                    ) : !allowedToVote ? (
+                      <Typography>Your wallet is not on the allow list for this voting round.</Typography>
+                    ) : (
+                      ''
+                    )}
+                  </div>
+                </Box>
+              </div>
+            )}
+            <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+            {canVote && (
+              <div className="mt-4">
+                <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
+                  <div>
+                    <FlashOnIcon className="align-bottom mr-4 text-yellow" />
+                  </div>
+                  <div>
+                    <Typography className="mb-3">
+                      Your voting power is determined by your current ALGO balance committed to xGov.
+                    </Typography>
+                    <Typography className="mb-3">
+                      For this round, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
+                    </Typography>
+                    <Typography>
+                      Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
+                      <strong>100%</strong>.
+                    </Typography>
+                    <Typography>
+                      <strong>Once you cast your votes, you cannot change them.</strong>
+                    </Typography>
+                  </div>
+                </Box>
+              </div>
+            )}
+            {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
+              <div className="mb-4">
+                <CloseVotingRound
+                  closingVotingRoundError={closingVotingRoundError}
+                  loading={closingVotingRound}
+                  handleCloseVotingRound={handleCloseVotingRound}
+                  voteEnded={hasVoteEnded}
+                />
+              </div>
+            )}
+          </div>
+          <div>
+            {canVote && (
+              <Box
+                className={clsx(
+                  'flex items-center justify-between bottom-2 px-4 py-6 rounded-xl',
+                  !canSubmitVote ? 'bg-algorand-vote-closed' : 'bg-green-light',
+                )}
+              >
+                <Typography>
+                  <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
+                  {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
+                </Typography>
+                <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>
+                  Submit
+                </Button>
+              </Box>
+            )}
+          </div>
         </div>
       </div>
       <LoadingDialog loading={submittingVote} title="Submitting vote" note="Please check your wallet for any pending transactions" />
