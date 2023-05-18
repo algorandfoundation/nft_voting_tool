@@ -4,12 +4,6 @@ import dayjs from 'dayjs'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 
-const getVotingStateDescription = (round: VotingRoundGlobalState) => {
-  if (getHasVoteEnded(round)) return 'Voting round is closed!'
-  if (!getHasVoteStarted(round)) return 'Voting opens soon!'
-  return 'Voting round is open!'
-}
-
 type VotingTimeProps = {
   loading: boolean
   globalState: VotingRoundGlobalState | undefined | null
