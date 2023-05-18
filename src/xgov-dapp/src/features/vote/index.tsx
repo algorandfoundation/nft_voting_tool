@@ -462,7 +462,11 @@ function Vote() {
               </div>
             )}
 
-            {votingRoundGlobalState && snapshot && <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />}
+            {votingRoundGlobalState && snapshot && (
+              <div className="mt-4">
+                <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+              </div>
+            )}
 
             {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
               <div className="mb-4">
