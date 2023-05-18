@@ -3,7 +3,6 @@ import { Button, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
-import { ArrayFormItems } from './array-form-items/ArrayFormItems'
 import { useQuestions, useSetQuestions, useSetStep } from './state'
 import { useStepRedirect } from './useStepRedirect'
 
@@ -18,7 +17,6 @@ export const formSchema = zfd.formData({
 })
 
 type Fields = z.infer<typeof formSchema>
-const FieldArray = ArrayFormItems<Fields>
 
 export default function Questions() {
   const questions = useQuestions()
@@ -39,14 +37,13 @@ export default function Questions() {
         <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} defaultValues={{ questions }}>
           {(helper) => (
             <>
-              <FieldArray
-                field="questions"
-                label="Questions"
-                minimumItemCount={1}
-                defaultAppendValue={{ answers: [' ', ' '] }}
-                itemLabel="question"
-              >
-                {(questionIndex) => (
+              {helper.array({
+                field: 'questions',
+                label: 'Questions',
+                minimumItemCount: 1,
+                defaultAppendValue: { answers: [' ', ' '] },
+                itemLabel: 'question',
+                children: (questionIndex) => (
                   <div key={`q${questionIndex}`}>
                     {helper.textField({
                       label: 'Question or Category',
@@ -62,9 +59,8 @@ export default function Questions() {
                       minimumItemCount: 2,
                     })}
                   </div>
-                )}
-              </FieldArray>
-
+                ),
+              })}
               <div className="!mt-12">
                 <div className="flex gap-6 justify-end">
                   <Button variant="outlined" onClick={() => navigate(-1)}>

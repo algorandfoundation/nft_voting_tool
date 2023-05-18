@@ -25,12 +25,15 @@ export async function signCsv(csv: string, includeWeighting: boolean): Promise<{
     results.data
       .filter((row) => !!row.address)
       .map((row): Promise<SignedCsv> => {
-        const publicKey = algo.decodeAddress(row.address).publicKey
+        let publicKey = algo.decodeAddress(row.address).publicKey
         const weight = Number(row.weight ?? 0)
-        const keyAndWeighting = new Uint8Array(publicKey.length + 8)
-        keyAndWeighting.set(publicKey, 0)
-        keyAndWeighting.set(new algo.ABIUintType(64).encode(weight ?? 0), publicKey.length)
-        return ed.signAsync(includeWeighting ? keyAndWeighting : publicKey, privateKey).then((signature) => {
+        if (includeWeighting) {
+          const keyAndWeighting = new Uint8Array(publicKey.length + 8)
+          keyAndWeighting.set(publicKey, 0)
+          keyAndWeighting.set(new algo.ABIUintType(64).encode(weight ?? 0), publicKey.length)
+          publicKey = keyAndWeighting
+        }
+        return ed.signAsync(publicKey, privateKey).then((signature) => {
           return {
             address: row.address,
             signature: Buffer.from(signature).toString('base64'),
