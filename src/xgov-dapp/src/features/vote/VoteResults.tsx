@@ -1,9 +1,11 @@
 import { Skeleton, Typography } from '@mui/material'
-import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
+import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
+import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
+import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
 type VoteResultsProps = {
@@ -12,6 +14,7 @@ type VoteResultsProps = {
   votingRoundGlobalState: VotingRoundGlobalState
   isLoadingVotingRoundData: boolean
   isLoadingVotingRoundResults: boolean
+  snapshot: VoteGatingSnapshot | undefined
   myVotes?: string[]
 }
 
@@ -21,6 +24,7 @@ export const VoteResults = ({
   votingRoundGlobalState,
   isLoadingVotingRoundData,
   isLoadingVotingRoundResults,
+  snapshot,
 }: VoteResultsProps) => {
   return (
     <div>
@@ -36,8 +40,12 @@ export const VoteResults = ({
             roundMetadata={votingRoundMetadata}
           />
         </div>
-        <div></div>
-        <div></div>
+        <div>
+          <AlgoStats votingRoundMetadata={votingRoundMetadata} votingRoundResults={votingRoundResults} />
+        </div>
+        <div>
+          <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+        </div>
         <div>
           <VotingTime className="sm:visible" globalState={votingRoundGlobalState} loading={isLoadingVotingRoundData} />
         </div>

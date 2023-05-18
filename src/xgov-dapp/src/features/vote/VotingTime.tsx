@@ -19,9 +19,9 @@ type VotingTimeProps = {
 
 export const VotingTime = ({ loading, globalState, className }: VotingTimeProps) => (
   <div className={className}>
-    <Box className="bg-blue-light flex rounded-xl px-4 py-6">
+    <Box className="bg-purple-light flex rounded-xl px-4 py-6">
       <div>
-        <WatchLaterIcon className="mr-2 text-blue" />
+        <WatchLaterIcon className="mr-2 text-purple" />
       </div>
       <div className="w-full">
         <Stack>
@@ -41,19 +41,7 @@ export const VotingTime = ({ loading, globalState, className }: VotingTimeProps)
             </Typography>
           )}
         </Stack>
-        <Stack className="mt-3">
-          {loading ? (
-            <Skeleton variant="text" />
-          ) : (
-            <Typography>
-              To{' '}
-              <strong>
-                {dayjs(globalState?.end_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.end_time))}
-              </strong>
-            </Typography>
-          )}
-        </Stack>
-        {!!globalState?.close_time && (
+        {globalState?.close_time ? (
           <Stack className="mt-3">
             {loading ? (
               <Skeleton variant="text" />
@@ -62,6 +50,19 @@ export const VotingTime = ({ loading, globalState, className }: VotingTimeProps)
                 Closed at{' '}
                 <strong>
                   {dayjs(globalState.close_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState.close_time))}
+                </strong>
+              </Typography>
+            )}
+          </Stack>
+        ) : (
+          <Stack className="mt-3">
+            {loading ? (
+              <Skeleton variant="text" />
+            ) : (
+              <Typography>
+                To{' '}
+                <strong>
+                  {dayjs(globalState?.end_time).format('D MMMM YYYY HH:mm')} {getTimezone(dayjs(globalState?.end_time))}
                 </strong>
               </Typography>
             )}

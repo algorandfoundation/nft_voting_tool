@@ -27,6 +27,7 @@ import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
+import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
 function Vote() {
@@ -282,6 +283,7 @@ function Vote() {
         votingRoundGlobalState={votingRoundGlobalState}
         isLoadingVotingRoundResults={isLoadingVotingRoundResults}
         isLoadingVotingRoundData={isLoadingVotingRoundData}
+        snapshot={snapshot}
       />
     )
   }
@@ -459,6 +461,9 @@ function Vote() {
                 </Box>
               </div>
             )}
+
+            {votingRoundGlobalState && snapshot && <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />}
+
             {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
               <div className="mb-4">
                 <CloseVotingRound
