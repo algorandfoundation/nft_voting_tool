@@ -27,8 +27,8 @@ module.exports = {
           light: '#CCCCCC',
         },
         blue: {
-          DEFAULT: '#6270F2',
-          light: '#EAECFF',
+          DEFAULT: '#02A0FC',
+          light: '#D7F0FF',
         },
         yellow: {
           DEFAULT: '#F6C001',
@@ -41,6 +41,10 @@ module.exports = {
         green: {
           DEFAULT: '#00C785',
           light: '#E2FBD7',
+        },
+        purple: {
+          DEFAULT: '#6270F2',
+          light: '#E9E8FF',
         },
       },
       backgroundColor: {
