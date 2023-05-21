@@ -112,6 +112,12 @@ function validateSnapshotCsv(value: string, ctx: z.RefinementCtx) {
         message: `The address on row: ${index + 1} has no weight associated with it`,
       })
     }
+    if (isNaN(Number(row.weight)) || Number(row.weight) === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `The address on row: ${index + 1} has an invalid weight associated with it`,
+      })
+    }
   })
 }
 

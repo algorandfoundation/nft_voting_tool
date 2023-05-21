@@ -464,7 +464,7 @@ function Vote() {
 
             {votingRoundGlobalState && snapshot && (
               <div className="mt-4">
-                <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
               </div>
             )}
 

@@ -6,13 +6,13 @@ import { Link } from 'react-router-dom'
 import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { DisplayAddress } from '../../shared/DisplayAddress'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
+import { useCreatorAddresses } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
+import { VotingRoundStatus } from './VotingRoundTile'
 
 export const VotingRoundTileLoading = () => (
   <>
-    <Skeleton className="h-32" variant="rectangular" />
-    <Skeleton className="h-32" variant="rectangular" />
+    <Skeleton className="h-52" variant="rectangular" />
   </>
 )
 
@@ -27,7 +27,6 @@ const getRounds = (
 }
 
 const VotingRounds = () => {
-  const setShowConnectWalletModal = useSetShowConnectWalletModal()
   const { activeAddress } = useWallet()
   const creatorAddresses = useCreatorAddresses()
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
@@ -105,20 +104,7 @@ const VotingRounds = () => {
 
   return (
     <div className="container">
-      <Typography variant="h3">Voting rounds</Typography>
-      {isLoading ? (
-        <Skeleton variant="text" />
-      ) : !activeAddress ? (
-        <div className="my-8">
-          <Button variant="contained" onClick={() => setShowConnectWalletModal(true)}>
-            Connect wallet
-          </Button>
-        </div>
-      ) : (
-        <>
-          <Typography variant="body1">Voting rounds created by {walletLabel}</Typography>
-        </>
-      )}
+      <Typography variant="h3">Voting sessions</Typography>
 
       {isCreator && (
         <Button component={Link} to="/create" className="my-8" variant="contained">
@@ -133,9 +119,14 @@ const VotingRounds = () => {
         </Alert>
       )}
 
-      <VotingRoundSection label="Open" globalStates={openRounds} loading={isLoading} />
-      <VotingRoundSection label="Opening soon" globalStates={upcomingRounds} loading={isLoading} />
-      <VotingRoundSection label="Closed" globalStates={closedRounds} loading={isLoading} />
+      <VotingRoundSection label="Open" globalStates={openRounds} votingRoundStatus={VotingRoundStatus.OPEN} loading={isLoading} />
+      <VotingRoundSection
+        label="Opening soon"
+        globalStates={upcomingRounds}
+        votingRoundStatus={VotingRoundStatus.OPENING_SOON}
+        loading={isLoading}
+      />
+      <VotingRoundSection label="Closed" globalStates={closedRounds} votingRoundStatus={VotingRoundStatus.CLOSED} loading={isLoading} />
     </div>
   )
 }

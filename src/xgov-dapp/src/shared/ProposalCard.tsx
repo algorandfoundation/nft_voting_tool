@@ -1,8 +1,6 @@
-import CancelIcon from '@mui/icons-material/Cancel'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
-import { CategoryChip } from './CategoryChip'
+import { CategoryChip, DidNotPassChip, PassedChip } from './Chips'
 
 type ProposalCardProps = {
   link: string | undefined
@@ -33,20 +31,8 @@ export const ProposalCard = ({
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
         <div>
-          {hasPassed && (
-            <Chip
-              className="mr-2 border-green bg-green-light rounded-lg border border-solid"
-              label="Passed"
-              avatar={<CheckCircleIcon className="text-green" />}
-            />
-          )}
-          {hasClosed && !hasPassed && (
-            <Chip
-              className="mr-2 border-red bg-red-light rounded-lg border border-solid"
-              label="Did not pass"
-              avatar={<CancelIcon className="text-red" />}
-            />
-          )}
+          {hasPassed && <PassedChip />}
+          {hasClosed && !hasPassed && <DidNotPassChip />}
         </div>
         <div className="text-right">
           {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}

@@ -41,10 +41,19 @@ export const VoteResults = ({
           />
         </div>
         <div>
-          <AlgoStats votingRoundMetadata={votingRoundMetadata} votingRoundResults={votingRoundResults} />
+          <AlgoStats
+            isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
+            votingRoundMetadata={votingRoundMetadata}
+            votingRoundResults={votingRoundResults}
+            hasVoteClosed={true}
+          />
         </div>
         <div>
-          <VotingStats votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+          <VotingStats
+            isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
+            votingRoundGlobalState={votingRoundGlobalState}
+            snapshot={snapshot}
+          />
         </div>
         <div>
           <VotingTime className="sm:visible" globalState={votingRoundGlobalState} loading={isLoadingVotingRoundData} />
