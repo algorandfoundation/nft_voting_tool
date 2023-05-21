@@ -8,42 +8,22 @@ import { SnapshotRow } from '../../shared/csvSigner'
 import { VoteType } from '../../shared/types'
 import { Steps } from './Steps'
 import { VoteCreationSteps } from './VoteCreationSteps'
-import { SelectFormItem, SelectFormItemOption } from './select-form-item/SelectFormItem'
 import { useRoundInfo, useSetRoundInfo, useSetStep } from './state'
 
-function optionsForEnum<O extends object>(enumeration: O, includeEmpty?: boolean | string): SelectFormItemOption[] {
-  return [
-    ...(includeEmpty
-      ? [
-          {
-            label: typeof includeEmpty === 'string' ? includeEmpty : ' ',
-            value: '',
-          },
-        ]
-      : []),
-    ...Object.keys(enumeration)
-      .filter((k) => Number.isNaN(+k))
-      .map((k) => ({
-        label: k,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        value: (enumeration[k as keyof O] as any).toString?.() ?? '',
-      })),
-  ]
-}
-
-const formSchema = zfd.formData({
-  voteType: zfd.numeric(
-    z.nativeEnum(VoteType).refine((x) => x !== VoteType.PARTITIONED_WEIGHTING && x !== VoteType.NO_SNAPSHOT, 'Invalid vote type'),
-  ),
-  voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
-  voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
-  voteInformationUrl: zfd.text(z.string().trim().url().optional()),
-  start: zfd.text(),
-  end: zfd.text(),
-  snapshotFile: zfd.text(z.string()),
-  minimumVotes: zfd.numeric(z.number({ invalid_type_error: 'Should be a number' }).optional()),
-})
-//todo: .superRefine(validateSnapshotCsv)
+const formSchema = zfd
+  .formData({
+    voteType: zfd.numeric(
+      z.nativeEnum(VoteType).refine((x) => x !== VoteType.PARTITIONED_WEIGHTING && x !== VoteType.NO_SNAPSHOT, 'Invalid vote type'),
+    ),
+    voteTitle: zfd.text(z.string().trim().min(1, 'Required')),
+    voteDescription: zfd.text(z.string().trim().min(1, 'Required')),
+    voteInformationUrl: zfd.text(z.string().trim().url().optional()),
+    start: zfd.text(),
+    end: zfd.text(),
+    snapshotFile: zfd.text(z.string()),
+    minimumVotes: zfd.numeric(z.number({ invalid_type_error: 'Should be a number' }).optional()),
+  })
+  .superRefine(validateSnapshotCsv)
 
 function validateSnapshotCsv(value: { voteType: VoteType; snapshotFile?: string }, ctx: z.RefinementCtx) {
   if (value.voteType === VoteType.NO_SNAPSHOT) {
@@ -100,12 +80,21 @@ function validateSnapshotCsv(value: { voteType: VoteType; snapshotFile?: string 
         message: `The address on row: ${index + 1} is not valid`,
       })
     }
-    if (!row.weight) {
-      ctx.addIssue({
-        path: ['snapshotFile'],
-        code: z.ZodIssueCode.custom,
-        message: `The address on row: ${index + 1} has no weight associated with it`,
-      })
+    if (value.voteType > VoteType.NO_WEIGHTING) {
+      if (!row.weight) {
+        ctx.addIssue({
+          path: ['snapshotFile'],
+          code: z.ZodIssueCode.custom,
+          message: `The address on row: ${index + 1} has no weight associated with it`,
+        })
+      }
+      if (isNaN(Number(row.weight)) || Number(row.weight) === 0) {
+        ctx.addIssue({
+          path: ['snapshotFile'],
+          code: z.ZodIssueCode.custom,
+          message: `The address on row: ${index + 1} has an invalid weight associated with it`,
+        })
+      }
     }
   })
 }
@@ -134,13 +123,15 @@ export default function RoundInfo() {
                 label: 'Vote title',
                 field: 'voteTitle',
               })}
-              <SelectFormItem<Fields>
-                field="voteType"
-                label="Vote type"
-                options={optionsForEnum(VoteType, false).filter(
-                  (o) => ![Number(VoteType.NO_SNAPSHOT).toString(), Number(VoteType.PARTITIONED_WEIGHTING).toString()].includes(o.value),
-                )}
-              ></SelectFormItem>
+              {helper.selectField({
+                field: 'voteType',
+                label: 'Vote type',
+                options: helper
+                  .optionsForEnum(VoteType)
+                  .filter(
+                    (o) => ![Number(VoteType.NO_SNAPSHOT).toString(), Number(VoteType.PARTITIONED_WEIGHTING).toString()].includes(o.value),
+                  ),
+              })}
               {helper.textareaField({
                 label: 'Vote description',
                 field: 'voteDescription',
