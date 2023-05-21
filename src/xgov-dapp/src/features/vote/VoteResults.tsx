@@ -45,6 +45,7 @@ export const VoteResults = ({
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
             votingRoundMetadata={votingRoundMetadata}
             votingRoundResults={votingRoundResults}
+            hasVoteClosed={true}
           />
         </div>
         <div>
