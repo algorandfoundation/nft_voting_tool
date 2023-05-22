@@ -217,7 +217,8 @@ export const fetchAddressesThatVoted = async (appId: number) => {
         algosdk.decodeAddress(address)
         addresses.push(address)
       } catch (e) {
-        throw new Error(`Could not encode an address for the box with nameBase64: "${boxName.nameBase64}"`)
+        // eslint-disable-next-line no-console
+        console.error(`Could not encode an address for the box with nameBase64: "${boxName.nameBase64}"`)
       }
     }
   })
