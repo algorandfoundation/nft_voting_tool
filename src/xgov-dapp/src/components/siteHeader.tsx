@@ -1,5 +1,6 @@
 import { Disclosure, Popover } from '@headlessui/react'
 import { Typography } from '@mui/material'
+import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
@@ -50,7 +51,11 @@ export default function SiteHeader() {
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
   const showConnectWalletModal = () => setShowConnectedWalletModal(true)
   const walletLabel = connectedWallet ? getWalletLabel(connectedWallet) : 'Connect wallet'
+  const { providers } = useWallet()
   const creatorAddresses = useCreatorAddresses()
+
+  const activeProviders = providers ? providers.filter((provider) => provider.isActive === true) : []
+
   return (
     <Disclosure as="nav">
       {({ open }) => (
@@ -67,7 +72,7 @@ export default function SiteHeader() {
             </div>
             <div className="flex flex-1 justify-between">
               {/* Desktop Header */}
-              <div className="hidden lg:flex lg:flex-row lg:justify-between ml-5 flex-auto">
+              <div className="hidden lg:flex lg:flex-row lg:justify-between ml-5 flex-auto w-full">
                 {/*Site Links*/}
                 <Popover.Group as="nav" className="hidden lg:flex gap-[14px] cursor-pointer">
                   {navigation
@@ -96,13 +101,18 @@ export default function SiteHeader() {
                     })}
                 </Popover.Group>
 
-                <Link
-                  className="justify-self-end inline-flex items-center no-underline hover:underline text-black"
-                  to="#"
-                  onClick={showConnectWalletModal}
-                >
-                  <Typography>{walletLabel}</Typography>
-                </Link>
+                <div className="flex items-center">
+                  <Link
+                    className="justify-self-end inline-flex items-center no-underline hover:underline text-black bg-gray-50 h-min rounded-lg p-4"
+                    to="#"
+                    onClick={showConnectWalletModal}
+                  >
+                    {activeProviders && activeProviders[0] ? (
+                      <img width={30} height={30} className="mr-2" alt="Wallet provider icon" src={activeProviders[0].metadata.icon} />
+                    ) : null}
+                    <Typography>{walletLabel}</Typography>
+                  </Link>
+                </div>
               </div>
 
               <span className="flex-auto block"></span>

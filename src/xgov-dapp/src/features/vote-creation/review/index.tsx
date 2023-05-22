@@ -1,4 +1,4 @@
-import { Alert, Button, Link, Typography } from '@mui/material'
+import { Alert, Button, Link, TextField, Typography } from '@mui/material'
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -162,9 +162,21 @@ export default function Review() {
               </div>
             </div>
 
-            <div></div>
+            <div>
+              <Typography variant="h4" className="mt-6 mb-2">
+                xGovs list
+              </Typography>
+              {roundInfo.snapshotFile && (
+                <div className="w-full ">
+                  <TextField rows={20} fullWidth multiline className="bg-white" disabled value={roundInfo.snapshotFile} />
+                </div>
+              )}
+            </div>
 
             <div>
+              <Typography variant="h4" className="mt-6 mb-2">
+                Session Period
+              </Typography>
               <VotingTime className="hidden sm:block mt-4" loading={false} globalState={previewGlobalState} />
               <Alert className="max-w-xl mt-8 bg-algorand-warning font-semibold" icon={false}>
                 Review everything on this page carefully, as it cannot be changed once you create the voting round!
