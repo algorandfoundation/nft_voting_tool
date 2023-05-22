@@ -1,6 +1,5 @@
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
-import { useWallet } from '@txnlab/use-wallet'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
 import { useState } from 'react'
@@ -8,7 +7,6 @@ import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/sh
 import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
-import { useCreatorAddresses } from '../wallet/state'
 import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
@@ -32,10 +30,6 @@ export const VoteResults = ({
   isLoadingVotingRoundResults,
   snapshot,
 }: VoteResultsProps) => {
-  const { activeAddress } = useWallet()
-  const creatorAddresses = useCreatorAddresses()
-  const isCreator = activeAddress && (creatorAddresses.includes(activeAddress) || creatorAddresses.includes('any'))
-
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -134,28 +128,24 @@ export const VoteResults = ({
             </div>
           ))}
       </div>
-      {isCreator && (
-        <>
-          <div className="w-full text-right mt-4">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={generateAddressesThatVotedCsv}
-              disabled={isLoadingVotingRoundData || isDownloadingCsv}
-              endIcon={<FileDownloadIcon />}
-            >
-              Download addresses that voted
-            </Button>
-          </div>
-          {error && (
-            <div className="w-full flex mt-4 justify-end">
-              <Alert className="max-w-xl text-white bg-red font-semibold" icon={false}>
-                <Typography>Could not generate csv:</Typography>
-                <Typography>{error}</Typography>
-              </Alert>
-            </div>
-          )}
-        </>
+      <div className="w-full text-right mt-4">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={generateAddressesThatVotedCsv}
+          disabled={isLoadingVotingRoundData || isDownloadingCsv}
+          endIcon={<FileDownloadIcon />}
+        >
+          Download addresses that voted
+        </Button>
+      </div>
+      {error && (
+        <div className="w-full flex mt-4 justify-end">
+          <Alert className="max-w-xl text-white bg-red font-semibold" icon={false}>
+            <Typography>Could not generate csv:</Typography>
+            <Typography>{error}</Typography>
+          </Alert>
+        </div>
       )}
     </div>
   )
