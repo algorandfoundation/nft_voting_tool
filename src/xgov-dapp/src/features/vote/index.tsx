@@ -393,14 +393,16 @@ function Vote() {
 
         <div className="col-span-1 justify-between flex flex-col">
           <div>
-            <div className="mb-2">
-              <VoteDetails
-                loading={isLoadingVotingRoundData}
-                appId={voteId}
-                globalState={votingRoundGlobalState}
-                roundMetadata={votingRoundMetadata}
-              />
-            </div>
+            {!isLoadingVotingRoundData && (
+              <div className="mb-2">
+                <VoteDetails
+                  loading={isLoadingVotingRoundData}
+                  appId={voteId}
+                  globalState={votingRoundGlobalState}
+                  roundMetadata={votingRoundMetadata}
+                />
+              </div>
+            )}
 
             {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
               <div className="mb-4">
@@ -471,9 +473,11 @@ function Vote() {
               </div>
             )}
 
-            <div className="mt-4">
-              <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-            </div>
+            {votingRoundGlobalState && (
+              <div className="mt-4">
+                <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+              </div>
+            )}
 
             {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
               <div className="mb-4">
