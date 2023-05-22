@@ -29,6 +29,9 @@ export const theme = (rootElement: HTMLElement) =>
       success: {
         main: 'rgba(1, 220, 148, 1)',
       },
+      error: {
+        main: '#FF3A29',
+      },
     },
     shape: {
       borderRadius: 12,

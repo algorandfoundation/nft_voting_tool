@@ -3,6 +3,7 @@ import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
@@ -62,6 +63,11 @@ export const VoteResults = ({
 
   return (
     <div>
+      <div className="mb-4">
+        <Link to="/" className="no-underline text-gray-600 hover:underline">
+          <Typography>&#60; Back to Voting sessions</Typography>
+        </Link>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="col-span-1 sm:col-span-2">
           <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
