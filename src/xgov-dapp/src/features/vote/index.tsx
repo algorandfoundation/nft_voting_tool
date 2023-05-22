@@ -1,5 +1,4 @@
 import CancelIcon from '@mui/icons-material/Cancel'
-import FlashOnIcon from '@mui/icons-material/FlashOn'
 import ThumbUpIcon from '@mui/icons-material/ThumbUp'
 import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
@@ -27,6 +26,7 @@ import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
+import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
@@ -316,6 +316,11 @@ function Vote() {
           </div>
         )}
         <VotingTime className="visible sm:hidden mt-4" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+        {canVote && (
+          <div className="sm:hidden my-4">
+            <VotingInstructions voteWeight={voteWeight} />
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="col-span-2">
@@ -366,7 +371,7 @@ function Vote() {
                     <>
                       <TextField
                         type="number"
-                        className="w-32 bg-white ml-4 rounded-xl"
+                        className="w-32 bg-white m-4 rounded-xl"
                         disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
                         InputProps={{
                           inputProps: {
@@ -392,7 +397,7 @@ function Vote() {
         </div>
 
         <div className="col-span-1 justify-between flex flex-col">
-          <div>
+          <div className="hidden md:block">
             {!isLoadingVotingRoundData && (
               <div className="mb-2">
                 <VoteDetails
@@ -439,56 +444,36 @@ function Vote() {
                 </Box>
               </div>
             )}
-            {canVote && (
-              <div>
-                <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
-                  <div>
-                    <FlashOnIcon className="align-bottom mr-4 text-yellow" />
-                  </div>
-                  <div>
-                    <Typography className="mb-3">
-                      <strong>Voting instructions</strong>
-                    </Typography>
-                    <Typography className="mb-3">
-                      Your voting power is determined by your current ALGO balance committed to xGov.
-                    </Typography>
-                    <Typography className="mb-3">
-                      For this session, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
-                    </Typography>
-                    <Typography className="mb-3">
-                      Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
-                      <strong>100%</strong>.
-                    </Typography>
-                    <Typography>
-                      <strong>Once you cast your votes, you cannot change them.</strong>
-                    </Typography>
-                  </div>
-                </Box>
-              </div>
-            )}
+            <div>
+              {canVote && (
+                <div>
+                  <VotingInstructions voteWeight={voteWeight} />
+                </div>
+              )}
 
-            {votingRoundGlobalState && snapshot && (
-              <div className="mt-4">
-                <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
-              </div>
-            )}
+              {votingRoundGlobalState && snapshot && (
+                <div className="mt-4">
+                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                </div>
+              )}
 
-            {votingRoundGlobalState && (
-              <div className="mt-4">
-                <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-              </div>
-            )}
+              {votingRoundGlobalState && (
+                <div className="mt-4">
+                  <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+                </div>
+              )}
 
-            {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
-              <div className="mb-4">
-                <CloseVotingRound
-                  closingVotingRoundError={closingVotingRoundError}
-                  loading={closingVotingRound}
-                  handleCloseVotingRound={handleCloseVotingRound}
-                  voteEnded={hasVoteEnded}
-                />
-              </div>
-            )}
+              {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
+                <div className="mb-4">
+                  <CloseVotingRound
+                    closingVotingRoundError={closingVotingRoundError}
+                    loading={closingVotingRound}
+                    handleCloseVotingRound={handleCloseVotingRound}
+                    voteEnded={hasVoteEnded}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div>
             {canVote && (
