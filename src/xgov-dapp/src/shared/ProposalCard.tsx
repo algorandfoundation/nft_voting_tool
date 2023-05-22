@@ -1,6 +1,6 @@
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
-import { CategoryChip, DidNotPassChip, PassedChip } from './Chips'
+import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip } from './Chips'
 
 type ProposalCardProps = {
   link: string | undefined
@@ -27,6 +27,36 @@ export const ProposalCard = ({
 }: ProposalCardProps) => {
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
   const hasPassed = percentage >= 100
+
+  if (category === 'Abstain') {
+    return (
+      <Paper elevation={0} className="p-5">
+        <div className="flex justify-between">
+          <div>
+            <MockProposalChip />
+          </div>
+          <div className="text-right">
+            <AbstainChip />
+          </div>
+        </div>
+
+        <Typography className="mt-3 mb-3" variant="h5">
+          {title}
+        </Typography>
+        <div className="flex justify-between">
+          <Typography className="mb-2" variant="h6">
+            {`${votesTally.toLocaleString()} Votes`}
+          </Typography>
+          <Typography className="mb-2" variant="h6">
+            {!hasClosed && <strong>0 ALGO asked</strong>}
+          </Typography>
+        </div>
+        <LinearProgress color="error" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={100} />
+        {description && <Typography>{description}</Typography>}
+      </Paper>
+    )
+  }
+
   return (
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">

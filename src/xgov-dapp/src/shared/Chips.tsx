@@ -92,6 +92,10 @@ export const YouVotedChip = ({ isSmall = false }) => (
   />
 )
 
+export const MockProposalChip = () => <Chip className="mr-2 border-red bg-red-light rounded-lg border border-solid" label="Mock proposal" />
+
+export const AbstainChip = () => <Chip className="mr-2 bg-red-light rounded-lg" label="Abstain" />
+
 export const CategoryChip = ({ category }: Props) => {
   const component = renderComponent(category)
   return component
