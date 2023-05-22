@@ -292,7 +292,7 @@ function Vote() {
     <div>
       <div>
         {error && (
-          <Alert className="max-w-xl mt-4 text-white bg-red-light font-semibold" icon={false}>
+          <Alert className="max-w-xl mt-4 text-white bg-red font-semibold" icon={false}>
             <Typography>Could not load voting rounds details:</Typography>
             <Typography>{error}</Typography>
           </Alert>

@@ -1,8 +1,14 @@
-import { Skeleton, Typography } from '@mui/material'
+import FileDownloadIcon from '@mui/icons-material/FileDownload'
+import { Alert, Button, Skeleton, Typography } from '@mui/material'
+import { useWallet } from '@txnlab/use-wallet'
+import { saveAs } from 'file-saver'
+import Papa from 'papaparse'
+import { useState } from 'react'
 import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
+import { useCreatorAddresses } from '../wallet/state'
 import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
@@ -26,6 +32,40 @@ export const VoteResults = ({
   isLoadingVotingRoundResults,
   snapshot,
 }: VoteResultsProps) => {
+  const { activeAddress } = useWallet()
+  const creatorAddresses = useCreatorAddresses()
+  const isCreator = activeAddress && (creatorAddresses.includes(activeAddress) || creatorAddresses.includes('any'))
+
+  const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const generateAddressesThatVotedCsv = async () => {
+    if (votingRoundMetadata) {
+      setIsDownloadingCsv(true)
+      setError(null)
+      try {
+        const addresses = await fetchAddressesThatVoted(votingRoundGlobalState.appId)
+        const csvData = Papa.unparse(
+          addresses.map((address) => {
+            return { address }
+          }),
+        )
+
+        const blob = new Blob([csvData], { type: 'text/csv' })
+        saveAs(blob, `voters-${votingRoundMetadata.title}.csv`)
+      } catch (e) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(e)
+          setError('Unexpected error')
+        }
+      }
+      setIsDownloadingCsv(false)
+    }
+  }
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -77,7 +117,7 @@ export const VoteResults = ({
           ))}
         {!isLoadingVotingRoundResults &&
           votingRoundMetadata?.questions.map((question, index) => (
-            <div>
+            <div key={question.id}>
               {question.metadata && (
                 <ProposalCard
                   title={question.prompt}
@@ -94,6 +134,29 @@ export const VoteResults = ({
             </div>
           ))}
       </div>
+      {isCreator && (
+        <>
+          <div className="w-full text-right mt-4">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={generateAddressesThatVotedCsv}
+              disabled={isLoadingVotingRoundData || isDownloadingCsv}
+              endIcon={<FileDownloadIcon />}
+            >
+              Download addresses that voted
+            </Button>
+          </div>
+          {error && (
+            <div className="w-full flex mt-4 justify-end">
+              <Alert className="max-w-xl text-white bg-red font-semibold" icon={false}>
+                <Typography>Could not generate csv:</Typography>
+                <Typography>{error}</Typography>
+              </Alert>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
