@@ -1,11 +1,10 @@
 import CancelIcon from '@mui/icons-material/Cancel'
-import FlashOnIcon from '@mui/icons-material/FlashOn'
 import ThumbUpIcon from '@mui/icons-material/ThumbUp'
 import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   VoteGatingSnapshot,
   VotingRoundMetadata,
@@ -27,6 +26,7 @@ import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
+import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
@@ -290,6 +290,11 @@ function Vote() {
 
   return (
     <div>
+      <div className="mb-4">
+        <RouterLink to="/" className="no-underline text-gray-600 hover:underline">
+          <Typography>&#60; Back to Voting sessions</Typography>
+        </RouterLink>
+      </div>
       <div>
         {error && (
           <Alert className="max-w-xl mt-4 text-white bg-red-light font-semibold" icon={false}>
@@ -311,11 +316,16 @@ function Vote() {
           </div>
         )}
         <VotingTime className="visible sm:hidden mt-4" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+        {canVote && (
+          <div className="sm:hidden my-4">
+            <VotingInstructions voteWeight={voteWeight} />
+          </div>
+        )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="col-span-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="col-span-2">
               {isLoadingVotingRoundData ? (
                 <Skeleton className="h-12 w-1/2" variant="text" />
               ) : (
@@ -329,77 +339,75 @@ function Vote() {
                   <Typography>
                     {totalAllocatedPercentage}% total · {100 - totalAllocatedPercentage}% remaining to allocate
                   </Typography>
-                  <Typography>
-                    {totalAllocated.toLocaleString()} total · {voteWeight.toLocaleString()} remaining to allocate
-                  </Typography>
                 </>
               )}
             </div>
-            <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
-              {isLoadingVotingRoundData && (
-                <div>
-                  <Skeleton className="h-40 mb-4" variant="rectangular" />
-                  <Skeleton className="h-40 mb-4" variant="rectangular" />
-                  <Skeleton className="h-40" variant="rectangular" />
+
+            {isLoadingVotingRoundData && (
+              <div className="col-span-3">
+                <Skeleton className="h-40 mb-4" variant="rectangular" />
+                <Skeleton className="h-40 mb-4" variant="rectangular" />
+                <Skeleton className="h-40" variant="rectangular" />
+              </div>
+            )}
+            {votingRoundMetadata?.questions.map((question, index) => (
+              <div className="col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white rounded-lg">
+                <div className="col-span-2">
+                  {question.metadata && (
+                    <ProposalCard
+                      title={question.prompt}
+                      description={question.description}
+                      category={question.metadata.category}
+                      focus_area={question.metadata.focus_area}
+                      link={question.metadata.link}
+                      threshold={question.metadata.threshold}
+                      ask={question.metadata.ask}
+                      votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                    />
+                  )}
                 </div>
-              )}
-              {votingRoundMetadata?.questions.map((question, index) => (
-                <>
-                  <div>
-                    {question.metadata && (
-                      <ProposalCard
-                        title={question.prompt}
-                        description={question.description}
-                        category={question.metadata.category}
-                        focus_area={question.metadata.focus_area}
-                        link={question.metadata.link}
-                        threshold={question.metadata.threshold}
-                        ask={question.metadata.ask}
-                        votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                <div className="flex items-center col-span-1 bg-gray-100 m-3">
+                  {canVote && !hasVoted && (
+                    <>
+                      <TextField
+                        type="number"
+                        className="w-32 bg-white m-4 rounded-xl"
+                        disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
+                        InputProps={{
+                          inputProps: {
+                            max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
+                            min: 0,
+                          },
+                          endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                        }}
+                        id={question.id}
+                        variant="outlined"
+                        onChange={(e) => {
+                          updateVoteAllocations(question.id, parseFloat(e.target.value))
+                        }}
+                        value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
                       />
-                    )}
-                  </div>
-                  <div className="flex items-center">
-                    {canVote && !hasVoted && (
-                      <>
-                        <TextField
-                          type="number"
-                          className="w-32 bg-white"
-                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
-                          InputProps={{
-                            inputProps: {
-                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
-                              min: 0,
-                            },
-                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                          }}
-                          id={question.id}
-                          variant="outlined"
-                          onChange={(e) => {
-                            updateVoteAllocations(question.id, parseFloat(e.target.value))
-                          }}
-                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
-                        />
-                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
-                      </>
-                    )}
-                  </div>
-                </>
-              ))}
-            </div>
+                      <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="col-span-2 justify-between flex flex-col">
-          <div>
-            <div className="mb-2">
-              <VoteDetails
-                loading={isLoadingVotingRoundData}
-                appId={voteId}
-                globalState={votingRoundGlobalState}
-                roundMetadata={votingRoundMetadata}
-              />
-            </div>
+        <div className="col-span-1 justify-between flex flex-col">
+          <div className="hidden md:block">
+            {!isLoadingVotingRoundData && (
+              <div className="mb-2">
+                <VoteDetails
+                  loading={isLoadingVotingRoundData}
+                  appId={voteId}
+                  globalState={votingRoundGlobalState}
+                  roundMetadata={votingRoundMetadata}
+                />
+              </div>
+            )}
 
             {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
               <div className="mb-4">
@@ -436,48 +444,36 @@ function Vote() {
                 </Box>
               </div>
             )}
-            <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-            {canVote && (
-              <div className="mt-4">
-                <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
-                  <div>
-                    <FlashOnIcon className="align-bottom mr-4 text-yellow" />
-                  </div>
-                  <div>
-                    <Typography className="mb-3">
-                      Your voting power is determined by your current ALGO balance committed to xGov.
-                    </Typography>
-                    <Typography className="mb-3">
-                      For this round, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
-                    </Typography>
-                    <Typography>
-                      Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
-                      <strong>100%</strong>.
-                    </Typography>
-                    <Typography>
-                      <strong>Once you cast your votes, you cannot change them.</strong>
-                    </Typography>
-                  </div>
-                </Box>
-              </div>
-            )}
+            <div>
+              {canVote && (
+                <div>
+                  <VotingInstructions voteWeight={voteWeight} />
+                </div>
+              )}
 
-            {votingRoundGlobalState && snapshot && (
-              <div className="mt-4">
-                <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
-              </div>
-            )}
+              {votingRoundGlobalState && snapshot && (
+                <div className="mt-4">
+                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                </div>
+              )}
 
-            {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
-              <div className="mb-4">
-                <CloseVotingRound
-                  closingVotingRoundError={closingVotingRoundError}
-                  loading={closingVotingRound}
-                  handleCloseVotingRound={handleCloseVotingRound}
-                  voteEnded={hasVoteEnded}
-                />
-              </div>
-            )}
+              {votingRoundGlobalState && (
+                <div className="mt-4">
+                  <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
+                </div>
+              )}
+
+              {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
+                <div className="mb-4">
+                  <CloseVotingRound
+                    closingVotingRoundError={closingVotingRoundError}
+                    loading={closingVotingRound}
+                    handleCloseVotingRound={handleCloseVotingRound}
+                    voteEnded={hasVoteEnded}
+                  />
+                </div>
+              )}
+            </div>
           </div>
           <div>
             {canVote && (
@@ -487,10 +483,16 @@ function Vote() {
                   !canSubmitVote ? 'bg-algorand-vote-closed' : 'bg-green-light',
                 )}
               >
-                <Typography>
-                  <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
-                  {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
-                </Typography>
+                <div className="flex">
+                  <div>
+                    <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
+                  </div>
+                  <div>
+                    <Typography>
+                      {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
+                    </Typography>
+                  </div>
+                </div>
                 <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>
                   Submit
                 </Button>

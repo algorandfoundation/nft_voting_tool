@@ -17,7 +17,9 @@ const VotingStats: React.FC<VotingStatsComponentProps> = ({ votingRoundGlobalSta
         <PieChartIcon className="align-bottom mr-4 text-blue" />
       </div>
       <div className="w-full">
-        <Typography className="mb-3">Voting stats</Typography>
+        <Typography className="mb-3">
+          <strong>Voting stats</strong>
+        </Typography>
         {isLoading ? <Skeleton className="h-6 w-full" variant="text" /> : null}
         {!isLoading && snapshot && votingRoundGlobalState && (
           <Typography>{`${votingRoundGlobalState.voter_count} out of ${snapshot.snapshot.length} wallets voted`}</Typography>

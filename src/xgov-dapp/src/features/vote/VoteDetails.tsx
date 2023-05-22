@@ -17,10 +17,10 @@ export const VoteDetails = ({ loading, appId: voteId, globalState, roundMetadata
           <Box className="bg-white flex rounded-xl px-4 py-2 mr-4">
             <Link
               className="no-underline hover:underline"
-              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${globalState.metadata_ipfs_cid}`}
+              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${roundMetadata.voteGatingSnapshotCid}`}
               target="_blank"
             >
-              IPFS
+              xGov list
               <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </Link>
           </Box>
@@ -37,10 +37,10 @@ export const VoteDetails = ({ loading, appId: voteId, globalState, roundMetadata
           <Box className="bg-white flex rounded-xl px-4 py-2 mr-4">
             <Link
               className="no-underline hover:underline"
-              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${roundMetadata.voteGatingSnapshotCid}`}
+              href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${globalState.metadata_ipfs_cid}`}
               target="_blank"
             >
-              Allow list
+              Voting session metadata
               <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </Link>
           </Box>
