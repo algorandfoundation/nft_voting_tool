@@ -197,6 +197,34 @@ export const bootstrap = async (sender: TransactionSignerAccount, app: AppRefere
   })
 }
 
+export const fetchAddressesThatVoted = async (appId: number) => {
+  const appClient = algokit.getAppClient(
+    {
+      resolveBy: 'id',
+      app: JSON.stringify(appSpec),
+      id: appId,
+    },
+    algod,
+  )
+
+  const addresses = [] as string[]
+  const boxNames = await appClient.getBoxNames()
+  boxNames.forEach((boxName) => {
+    if (boxName.name !== 'V') {
+      try {
+        const address = algosdk.encodeAddress(boxName.nameRaw)
+        //Decoding to catch any addresses that are malformed
+        algosdk.decodeAddress(address)
+        addresses.push(address)
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(`Could not encode an address for the box with nameBase64: "${boxName.nameBase64}"`)
+      }
+    }
+  })
+  return addresses
+}
+
 export const castVote = async (
   sender: TransactionSignerAccount,
   weighting: number,
