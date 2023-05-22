@@ -25,34 +25,39 @@ const apiCertificateRequest: CertificateRequest = {
 
 const dns = appDomainName
   ? deployer.deploy(
-      DnsStack,
-      'dns-web',
-      {
-        domainName: appDomainName,
-        generateCertificate: true,
-        parameterRegions: [deployer.defaultRegion],
-        certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
-      },
-      'us-east-1',
-    )
+    DnsStack,
+    'dns-web',
+    {
+      domainName: appDomainName,
+      generateCertificate: true,
+      parameterRegions: [deployer.defaultRegion],
+      certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
+    },
+    'us-east-1',
+  )
   : undefined
 
 const xGovDns = xGovAppDomainName
   ? deployer.deploy(
-      DnsStack,
-      'dns-xgovweb',
-      {
-        domainName: xGovAppDomainName,
-        generateCertificate: true,
-        parameterRegions: [deployer.defaultRegion],
-        certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
-      },
-      'us-east-1',
-    )
+    DnsStack,
+    'dns-xgovweb',
+    {
+      domainName: xGovAppDomainName,
+      generateCertificate: true,
+      parameterRegions: [deployer.defaultRegion],
+      certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
+    },
+    'us-east-1',
+  )
   : undefined
 
 const responseHeaders: ResponseHeadersPolicyProps = {
   securityHeadersBehavior: {
+    contentSecurityPolicy: {
+      override: false,
+      contentSecurityPolicy:
+        "default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; connect-src *; font-src 'self' https://fonts.gstatic.com; frame-src 'self'; img-src 'self' api.testnet.voting.algorand.foundation data:; manifest-src 'self'; media-src 'self' api.testnet.voting.algorand.foundation; worker-src 'none'; upgrade-insecure-requests;",
+    },
     contentTypeOptions: {
       override: false,
     },
@@ -78,11 +83,6 @@ const responseHeaders: ResponseHeadersPolicyProps = {
   },
   customHeadersBehavior: {
     customHeaders: [
-      {
-        header: 'Content-Security-Policy-Report-Only',
-        override: false,
-        value: `default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' ${apiDomainName} data:; font-src 'self' https://fonts.gstatic.com; connect-src *; media-src 'self' ${apiDomainName}; object-src 'none'; frame-src 'self'; worker-src 'none'; base-uri 'self'; manifest-src 'self'; upgrade-insecure-requests`,
-      },
       {
         header: 'Permissions-Policy',
         override: false,
