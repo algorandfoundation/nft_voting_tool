@@ -1,3 +1,4 @@
+import CampaignIcon from '@mui/icons-material/Campaign'
 import CancelIcon from '@mui/icons-material/Cancel'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
@@ -55,6 +56,14 @@ export const PassedChip = () => (
     className="mr-2 border-green bg-green-light rounded-lg border border-solid"
     label="Passed"
     avatar={<CheckCircleIcon className="text-green" />}
+  />
+)
+
+export const VotesNeededToPassChip = ({ votesNeeded }: { votesNeeded: number }) => (
+  <Chip
+    className="mr-2 border-yellow bg-yellow-light rounded-lg border border-solid"
+    label={`${votesNeeded.toLocaleString()} votes needed to pass`}
+    avatar={<CampaignIcon className="text-yellow" />}
   />
 )
 
