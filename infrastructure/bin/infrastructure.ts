@@ -56,7 +56,7 @@ const responseHeaders: ResponseHeadersPolicyProps = {
     contentSecurityPolicy: {
       override: false,
       contentSecurityPolicy:
-        "default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; connect-src *; font-src 'self' https://fonts.gstatic.com; frame-src 'self'; img-src 'self' api.testnet.voting.algorand.foundation data:; manifest-src 'self'; media-src 'self' api.testnet.voting.algorand.foundation; worker-src 'none'; upgrade-insecure-requests;",
+        "default-src 'self'; script-src 'self' 'sha256-gpTXtSqO2yobu1NfigGIFT+I2q+NHG3K5qAkdbhk8vw='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; connect-src *; font-src 'self' https://fonts.gstatic.com; frame-src 'self' https://web.perawallet.app; img-src 'self' api.testnet.voting.algorand.foundation data:; manifest-src 'self'; media-src 'self' api.testnet.voting.algorand.foundation; worker-src 'none'; upgrade-insecure-requests;",
     },
     contentTypeOptions: {
       override: false,
