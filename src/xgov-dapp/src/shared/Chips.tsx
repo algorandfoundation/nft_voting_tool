@@ -1,6 +1,4 @@
-import CancelIcon from '@mui/icons-material/Cancel'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import ErrorIcon from '@mui/icons-material/Error'
+import { CheckCircleIcon, ExclamationCircleIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
 import { Chip } from '@mui/material'
 
 interface Props {
@@ -54,7 +52,15 @@ export const PassedChip = () => (
   <Chip
     className="mr-2 border-green bg-green-light rounded-lg border border-solid"
     label="Passed"
-    avatar={<CheckCircleIcon className="text-green" />}
+    avatar={<CheckCircleIcon className="h-5 w-5 text-green" />}
+  />
+)
+
+export const VotesNeededToPassChip = ({ votesNeeded }: { votesNeeded: number }) => (
+  <Chip
+    className="mr-2 border-yellow bg-yellow-light rounded-lg border border-solid"
+    label={`${votesNeeded.toLocaleString()} votes needed to pass`}
+    avatar={<MegaphoneIcon className="h-5 w-5 text-yellow" />}
   />
 )
 
@@ -62,7 +68,7 @@ export const DidNotPassChip = () => (
   <Chip
     className="mr-2 border-red bg-red-light rounded-lg border border-solid"
     label="Did not pass"
-    avatar={<CancelIcon className="text-red" />}
+    avatar={<ExclamationCircleIcon className="h-5 w-5 text-red" />}
   />
 )
 
@@ -79,7 +85,7 @@ export const YouHaveNotVotedChip = ({ isSmall = false }) => (
     className="mr-2 border-red bg-red-light rounded-lg border border-solid"
     label="You haven't voted"
     size={isSmall ? 'small' : 'medium'}
-    avatar={<ErrorIcon className="text-red" />}
+    avatar={<ExclamationCircleIcon className="h-5 w-5 text-red" />}
   />
 )
 
@@ -88,7 +94,7 @@ export const YouVotedChip = ({ isSmall = false }) => (
     className="mr-2 border-green bg-green-light rounded-lg border border-solid"
     label="You voted"
     size={isSmall ? 'small' : 'medium'}
-    avatar={<CheckCircleIcon className="text-green" />}
+    avatar={<CheckCircleIcon className="h-5 w-5 text-green" />}
   />
 )
 

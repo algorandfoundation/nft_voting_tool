@@ -1,4 +1,4 @@
-import PieChartIcon from '@mui/icons-material/PieChart'
+import { ChartPieIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Typography } from '@mui/material'
 import React from 'react'
 import { VoteGatingSnapshot } from '../../../../dapp/src/shared/IPFSGateway'
@@ -14,7 +14,7 @@ const VotingStats: React.FC<VotingStatsComponentProps> = ({ votingRoundGlobalSta
   return (
     <Box className="bg-blue-light flex rounded-xl px-4 py-6">
       <div>
-        <PieChartIcon className="align-bottom mr-4 text-blue" />
+        <ChartPieIcon className="h-7 w-7 mr-3 -mt-1 text-blue" />
       </div>
       <div className="w-full">
         <Typography className="mb-3">

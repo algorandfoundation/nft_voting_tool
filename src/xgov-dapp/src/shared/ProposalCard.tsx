@@ -1,6 +1,6 @@
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
-import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip } from './Chips'
+import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
 
 type ProposalCardProps = {
   link: string | undefined
@@ -27,6 +27,7 @@ export const ProposalCard = ({
 }: ProposalCardProps) => {
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
   const hasPassed = percentage >= 100
+  const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
 
   if (category === 'Abstain') {
     return (
@@ -63,11 +64,12 @@ export const ProposalCard = ({
         <div>
           {hasPassed && <PassedChip />}
           {hasClosed && !hasPassed && <DidNotPassChip />}
+          {!hasClosed && !hasPassed && votesNeeded > 0 && <VotesNeededToPassChip votesNeeded={votesNeeded} />}
         </div>
         <div className="text-right">
           {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
           {category && <CategoryChip category={category} />}
-          <Link className="text-grey-light align-text-top ml-2" href={link} target="_blank">
+          <Link className="text-grey-light align-text-top ml-2 inline-block" href={link} target="_blank">
             <LaunchIcon />
           </Link>
         </div>

@@ -1,4 +1,4 @@
-import WatchLaterIcon from '@mui/icons-material/WatchLater'
+import { ClockIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -21,7 +21,7 @@ export const VotingTime = ({ loading, globalState, className }: VotingTimeProps)
     <div className={className}>
       <Box className="bg-purple-light flex rounded-xl px-4 py-6">
         <div>
-          <WatchLaterIcon className="mr-2 text-purple" />
+          <ClockIcon className="h-7 w-7 mr-3 -mt-0.5 text-purple" />
         </div>
         <div className="w-full">
           <Stack>

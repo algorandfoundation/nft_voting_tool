@@ -23,7 +23,7 @@ export const theme = (rootElement: HTMLElement) =>
   createTheme({
     palette: {
       primary: {
-        main: 'rgba(0, 199, 133, 1)',
+        main: '#00B076',
         contrastText: '#fff',
       },
       success: {
@@ -37,7 +37,7 @@ export const theme = (rootElement: HTMLElement) =>
       borderRadius: 12,
     },
     typography: {
-      fontFamily: ['"Suisse Intl"', ...defaultSansFontFamily].join(','),
+      fontFamily: ['"DM Sans"', ...defaultSansFontFamily].join(','),
       h3: {
         fontSize: 32,
         fontWeight: 'bold',
@@ -71,10 +71,14 @@ export const theme = (rootElement: HTMLElement) =>
         },
       },
       MuiButton: {
+        defaultProps: {
+          disableElevation: true,
+        },
         styleOverrides: {
           root: {
             textTransform: 'none',
             minWidth: 128,
+            borderRadius: 10,
           },
         },
       },

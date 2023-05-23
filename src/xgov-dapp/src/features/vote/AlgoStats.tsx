@@ -1,4 +1,4 @@
-import TollIcon from '@mui/icons-material/Toll'
+import { CircleStackIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Typography } from '@mui/material'
 import React from 'react'
 import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
@@ -19,7 +19,7 @@ const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMe
     <div>
       <Box className="bg-yellow-light flex rounded-xl px-4 py-6">
         <div>
-          <TollIcon className="align-bottom mr-4 text-yellow" />
+          <CircleStackIcon className="h-7 w-7 mr-3 -mt-1 text-yellow" />
         </div>
         <div className="w-full">
           <Typography className="mb-3">ALGO stats</Typography>
