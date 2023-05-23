@@ -67,7 +67,7 @@ export const ProposalCard = ({
         <div className="text-right">
           {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
           {category && <CategoryChip category={category} />}
-          <Link className="text-grey-light align-text-top ml-2" href={link} target="_blank">
+          <Link className="text-grey-light align-text-top ml-2 inline-block" href={link} target="_blank">
             <LaunchIcon />
           </Link>
         </div>
