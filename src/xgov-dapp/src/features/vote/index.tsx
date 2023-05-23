@@ -1,5 +1,5 @@
+import { HandThumbUpIcon } from '@heroicons/react/24/solid'
 import CancelIcon from '@mui/icons-material/Cancel'
-import ThumbUpIcon from '@mui/icons-material/ThumbUp'
 import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
@@ -485,7 +485,7 @@ function Vote() {
               >
                 <div className="flex">
                   <div>
-                    <ThumbUpIcon className={clsx('align-bottom mr-4', !canSubmitVote ? '' : 'text-green')} />
+                    <HandThumbUpIcon className={clsx('align-bottom h-6 w-6 mr-3', !canSubmitVote ? '' : 'text-green')} />
                   </div>
                   <div>
                     <Typography>
