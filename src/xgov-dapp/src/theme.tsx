@@ -78,6 +78,7 @@ export const theme = (rootElement: HTMLElement) =>
           root: {
             textTransform: 'none',
             minWidth: 128,
+            borderRadius: 10,
           },
         },
       },
