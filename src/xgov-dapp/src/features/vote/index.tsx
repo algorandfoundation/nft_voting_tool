@@ -498,6 +498,12 @@ function Vote() {
                 </Button>
               </Box>
             )}
+            {errorSubmittingVote && (
+              <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
+                <Typography>Could not cast vote:</Typography>
+                <Typography>{errorSubmittingVote}</Typography>
+              </Alert>
+            )}
           </div>
         </div>
       </div>
