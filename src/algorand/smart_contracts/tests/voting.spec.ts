@@ -108,8 +108,8 @@ describe('voting', () => {
         sendParams: { fee: (2_000).microAlgos() },
       })
 
-      result.confirmation?.['inner-txns']?.forEach((t) => {
-        if (t['application-index']) opupId = t['application-index']
+      result.confirmation?.innerTxns?.forEach((t) => {
+        if (t.applicationIndex) opupId = Number(t.applicationIndex)
       })
 
       return result
@@ -128,8 +128,8 @@ describe('voting', () => {
         sendParams: { fee: (2_000).microAlgos() },
       })
 
-      result.confirmation?.['inner-txns']?.forEach((t) => {
-        if (t['application-index']) opupId = t['application-index']
+      result.confirmation?.innerTxns?.forEach((t) => {
+        if (t.applicationIndex) opupId = Number(t.applicationIndex)
       })
 
       return result
@@ -337,10 +337,10 @@ describe('voting', () => {
 
       const globalState = await appClient.getGlobalState()
       invariant(result.confirmation)
-      invariant(result.confirmation?.['inner-txns'])
-      const inner = result.confirmation['inner-txns'][result.confirmation['inner-txns'].length - 1]
-      expect(inner['asset-index']).not.toBe(0)
-      expect(inner['asset-index']).toBe(globalState.nft_asset_id.value)
+      invariant(result.confirmation.innerTxns)
+      const inner = result.confirmation.innerTxns[result.confirmation.innerTxns.length - 1]
+      expect(inner.assetIndex).not.toBe(0)
+      expect(inner.assetIndex).toBe(globalState.nft_asset_id.value)
       expect(globalState.close_time.value).toBeGreaterThanOrEqual(currentTime)
       let arc69Payload: any = {}
       try {

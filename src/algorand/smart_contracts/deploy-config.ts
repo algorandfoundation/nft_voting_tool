@@ -116,8 +116,8 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           boxes: ['V'],
         })
 
-        result.confirmation?.['inner-txns']?.forEach((t) => {
-          if (t['application-index']) opupId = t['application-index']
+        result.confirmation?.innerTxns?.forEach((t) => {
+          if (t.applicationIndex) opupId = t.applicationIndex
         })
       }
 
