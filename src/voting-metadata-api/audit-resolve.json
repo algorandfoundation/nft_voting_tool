@@ -1,0 +1,14 @@
+{
+  "decisions": {
+    "1092243|@aws-sdk/client-s3>@aws-sdk/client-sts>fast-xml-parser": {
+      "decision": "postpone",
+      "madeAt": 1686996047981
+    },
+    "1092243|@aws-sdk/client-secrets-manager>@aws-sdk/client-sts>fast-xml-parser": {
+      "decision": "postpone",
+      "madeAt": 1686996047981
+    }
+  },
+  "rules": {},
+  "version": 1
+}

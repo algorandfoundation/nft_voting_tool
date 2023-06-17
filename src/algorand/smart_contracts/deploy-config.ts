@@ -94,11 +94,11 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
       // Check if it's already been bootstrapped
       const appInfo = await algokit.getAppById(app.appId, algod)
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const isBootstrappedValue = appInfo.params['global-state']!.find(
+      const isBootstrappedValue = appInfo.params['globalState']!.find(
         (s) => s.key === Buffer.from('is_bootstrapped').toString('base64'),
       )!.value
       const isBootstrapped = isBootstrappedValue.type == 2 && isBootstrappedValue.uint === 1
-      const opupIdValue = appInfo.params['global-state']!.find(
+      const opupIdValue = appInfo.params['globalState']!.find(
         (s) => s.key === Buffer.from('ouaid').toString('base64'),
       )?.value
       let opupId = opupIdValue && opupIdValue.type === 2 ? opupIdValue.uint : 0
@@ -116,8 +116,8 @@ export async function deploy(name: (typeof contracts)[number], appSpec: AppSpec)
           boxes: ['V'],
         })
 
-        result.confirmation?.['inner-txns']?.forEach((t) => {
-          if (t['application-index']) opupId = t['application-index']
+        result.confirmation?.innerTxns?.forEach((t) => {
+          if (t.applicationIndex) opupId = t.applicationIndex
         })
       }
 

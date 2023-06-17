@@ -1,9 +1,9 @@
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
-import { ApplicationResponse, TealValue } from '@algorandfoundation/algokit-utils/types/algod'
 import { AppCompilationResult, AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { AppSourceMaps } from '@algorandfoundation/algokit-utils/types/app-client'
-import algosdk, { ABIUintType } from 'algosdk'
+import { ApplicationResult } from '@algorandfoundation/algokit-utils/types/indexer'
+import algosdk, { ABIUintType, modelsv2 } from 'algosdk'
 import * as uuid from 'uuid'
 import * as appSpec from '../../../algorand/smart_contracts/artifacts/VotingRoundApp/application.json'
 import { VotingRoundMetadata } from './IPFSGateway'
@@ -67,7 +67,7 @@ export const fetchVotingRoundGlobalStatesByCreators = async (creatorAddresses: s
 
 export const fetchVotingRoundGlobalStatesByCreator = async (creatorAddress: string): Promise<VotingRoundGlobalState[]> => {
   const applicationsByCreator = await indexer.lookupAccountCreatedApplications(creatorAddress).do()
-  const globalStates = applicationsByCreator.applications.map((app: ApplicationResponse) => {
+  const globalStates = applicationsByCreator.applications.map((app: ApplicationResult) => {
     if (!app.params['global-state'] || import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(app.id.toString())) {
       return undefined
     }
@@ -302,7 +302,7 @@ export const closeVotingRound = async (sender: TransactionSignerAccount, appId: 
 export const decodeVotingRoundGlobalState = (
   globalState: {
     key: string
-    value: TealValue
+    value: modelsv2.TealValue
   }[],
   appId: number,
 ): VotingRoundGlobalState => {
