@@ -1,5 +1,6 @@
 import { CheckCircleIcon, ExclamationCircleIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
 import { Chip } from '@mui/material'
+import clsx from 'clsx'
 
 interface Props {
   category: string
@@ -89,12 +90,21 @@ export const YouHaveNotVotedChip = ({ isSmall = false }) => (
   />
 )
 
-export const YouVotedChip = ({ isSmall = false }) => (
+export const YouVotedChip = ({ isSmall = false, isWhite = false }) => (
   <Chip
-    className="mr-2 border-green bg-green-light rounded-lg border border-solid"
+    className={clsx('mr-2 border-green rounded-lg border border-solid', isWhite ? 'bg-white' : 'bg-green-light')}
     label="You voted"
     size={isSmall ? 'small' : 'medium'}
     avatar={<CheckCircleIcon className="h-5 w-5 text-green" />}
+  />
+)
+
+export const YouDidNotVoteChip = () => (
+  <Chip
+    className="mr-2 border-red bg-white rounded-lg border border-solid"
+    label="You did not vote"
+    size="small"
+    avatar={<ExclamationCircleIcon className="h-5 w-5 text-red" />}
   />
 )
 
