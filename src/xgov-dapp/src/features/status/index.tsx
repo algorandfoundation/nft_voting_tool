@@ -11,29 +11,9 @@ import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../../../dapp/
 import { fetchVoterVotes, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { OpeningSoonChip, YouDidNotVoteChip, YouVotedChip } from '../../shared/Chips'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'
+import { GovenorTermPoolData, TermPool, fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'
 import { useCreatorAddresses } from '../wallet/state'
 import EligibilityStatus from './EligibilityStatus'
-
-interface TermPool {
-  id: string
-  name: string
-  end_date: string
-  start_date: string
-  total_pool: string
-}
-
-interface GovenorTermPoolData {
-  controller_address: string
-  inception: string
-  original_voting_power: string
-  amount: string
-  current_voting_power: string
-  eligibility: string
-  address: string
-  traceID: string
-  pool: string
-}
 
 function Status() {
   const { activeAddress } = useWallet()
