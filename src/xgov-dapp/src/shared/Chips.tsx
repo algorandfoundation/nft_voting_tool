@@ -75,8 +75,12 @@ export const DidNotPassChip = () => (
 
 export const OpenChip = () => <Chip className="mr-2 border-green bg-green-light rounded-lg border border-solid" label="Open" />
 
-export const OpeningSoonChip = () => (
-  <Chip className="mr-2 border-yellow bg-yellow-light rounded-lg border border-solid" label="Opening Soon" />
+export const OpeningSoonChip = ({ isSmall = false, isWhite = false }) => (
+  <Chip
+    size={isSmall ? 'small' : 'medium'}
+    className={clsx('mr-2 border-yellow rounded-lg border border-solid', isWhite ? 'bg-white' : 'bg-yellow-light')}
+    label="Opening Soon"
+  />
 )
 
 export const ClosedChip = () => <Chip className="mr-2 border-red bg-red-light rounded-lg border border-solid" label="Closed" size="small" />
