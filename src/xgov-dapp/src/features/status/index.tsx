@@ -44,8 +44,7 @@ function Status() {
   useEffect(() => {
     if (activeAddress) {
       setIsLoadingGovenorData(true)
-      fetchGovenorData('TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA').then((govenorData) => {
-        // fetchGovenorData(activeAddress).then((govenorData) => {
+      fetchGovenorData(activeAddress).then((govenorData) => {
         setGovenorData(govenorData)
         setIsLoadingGovenorData(false)
       })
