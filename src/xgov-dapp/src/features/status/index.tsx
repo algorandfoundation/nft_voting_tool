@@ -53,7 +53,7 @@ function Status() {
 
   useEffect(() => {
     setIsEligible(false)
-    if (govenorData && govenorData.length) {
+    if (govenorData?.length) {
       setIsEligible(govenorData[govenorData.length - 1].eligibility === 'eligible')
     }
   }, [govenorData])
@@ -68,7 +68,7 @@ function Status() {
         addressesToFetch = creatorAddresses
       }
 
-      if (addressesToFetch && addressesToFetch.length) {
+      if (addressesToFetch?.length) {
         ;(async () => {
           setError(null)
           setIsLoadingGlobalStates(false)
@@ -223,8 +223,7 @@ function Status() {
 
               {!isLoadingTermPools &&
                 !isLoadingGovenorData &&
-                termPools &&
-                termPools.length &&
+                termPools?.length &&
                 termPools.map((termPool) => {
                   const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
                   return (
