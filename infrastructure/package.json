@@ -53,6 +53,9 @@
     "constructs": "^10.1.255",
     "cross-env": "^7.0.3"
   },
+  "overrides": {
+    "semver": "7.5.2"
+  },
   "engines": {
     "node": ">=16.0"
   }

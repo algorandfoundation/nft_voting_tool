@@ -21,6 +21,7 @@ jobs:
     with:
       working-directory: ./src/dapp
       compile-script: npm run typecheck
+      audit-script: npm run audit
   ci-xgov-dapp:
     name: CI xGov Dapp
     uses: ./.github/workflows/node-ci.yml
@@ -28,6 +29,7 @@ jobs:
       working-directory: ./src/xgov-dapp
       pre-run-script: cd ../dapp && npm ci
       compile-script: npm run typecheck
+      audit-script: npm run audit
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
@@ -138,6 +140,8 @@ jobs:
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
             VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_HIDDEN_VOTING_ROUND_IDS: ${{ vars.HIDDEN_VOTING_ROUND_IDS }}
+            VITE_XGOV_GOVENERS_URL: ${{ vars.XGOV_GOVENERS_URL }}
+            VITE_XGOV_TERM_POOLS_URL: ${{ vars.XGOV_TERM_POOLS_URL }}
 
   deploy-to-prod:
     runs-on: ubuntu-latest
@@ -185,3 +189,5 @@ jobs:
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
             VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_HIDDEN_VOTING_ROUND_IDS: ${{ vars.HIDDEN_VOTING_ROUND_IDS }}
+            VITE_XGOV_GOVENERS_URL: ${{ vars.XGOV_GOVENERS_URL }}
+            VITE_XGOV_TERM_POOLS_URL: ${{ vars.XGOV_TERM_POOLS_URL }}

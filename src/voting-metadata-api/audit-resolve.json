@@ -2,11 +2,15 @@
   "decisions": {
     "1092243|@aws-sdk/client-s3>@aws-sdk/client-sts>fast-xml-parser": {
       "decision": "postpone",
-      "madeAt": 1686996047981
+      "madeAt": 1688656924336
     },
     "1092243|@aws-sdk/client-secrets-manager>@aws-sdk/client-sts>fast-xml-parser": {
       "decision": "postpone",
-      "madeAt": 1686996047981
+      "madeAt": 1688656924336
+    },
+    "1092330|optionator>word-wrap": {
+      "decision": "postpone",
+      "madeAt": 1688656926157
     }
   },
   "rules": {},
