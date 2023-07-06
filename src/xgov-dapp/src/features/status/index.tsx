@@ -44,7 +44,7 @@ function Status() {
   useEffect(() => {
     if (activeAddress) {
       setIsLoadingGovenorData(true)
-      fetchGovenorData(activeAddress).then((govenorData) => {
+      fetchGovenorData('TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA').then((govenorData) => {
         setGovenorData(govenorData)
         setIsLoadingGovenorData(false)
       })
@@ -358,21 +358,13 @@ function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGl
   if (isLoadingMetadata || isLoadingVotersVote) {
     return (
       <div className="table-row">
-        <div className="table-cell">
-          <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-        </div>
-        <div className="table-cell">
-          <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-        </div>
-        <div className="table-cell">
-          <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-        </div>
-        <div className="table-cell">
-          <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-        </div>
-        <div className="table-cell">
-          <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-        </div>
+        {Array.of(1, 2, 3, 4, 5).map((_, index) => {
+          return (
+            <div key={index} className="table-cell">
+              <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
+            </div>
+          )
+        })}
       </div>
     )
   }
