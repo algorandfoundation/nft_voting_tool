@@ -7,7 +7,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import { fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { GovenorTermPoolData, TermPool, fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'
-import { useCreatorAddresses } from '../wallet/state'
+import { useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import EligibilityStatus from './EligibilityStatus'
 import InformationBox from './InformationBox'
 import TermPoolsTable from './TermPoolsTable'
@@ -17,6 +17,8 @@ function Status() {
   const { activeAddress } = useWallet()
   const creatorAddresses = useCreatorAddresses()
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
+  const setShowConnectedWalletModal = useSetShowConnectWalletModal()
+  const showConnectWalletModal = () => setShowConnectedWalletModal(true)
 
   const [globalStates, setGlobalStates] = useState<VotingRoundGlobalState[]>([])
 
@@ -123,6 +125,19 @@ function Status() {
         <Typography>Could not load your xGov status details:</Typography>
         <Typography>{error}</Typography>
       </Alert>
+    )
+  }
+
+  if (!activeAddress) {
+    return (
+      <div className="text-center">
+        <Typography className="mt-8 text-center" variant="h3">
+          In order to check your xGov status you need to connect your wallet.
+        </Typography>
+        <Button onClick={showConnectWalletModal} variant="contained">
+          Connect wallet
+        </Button>
+      </div>
     )
   }
 
