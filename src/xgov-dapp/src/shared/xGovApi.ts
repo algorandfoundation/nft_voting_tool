@@ -19,7 +19,7 @@ export interface GovenorTermPoolData {
 }
 
 export async function fetchGovenorData(address: string) {
-  const res = await fetch(`https://governors.xgov-dev.algorandfoundation.tools/address/${address}`)
+  const res = await fetch(`${import.meta.env.VITE_XGOV_GOVENERS_URL}/${address}`)
   if (res.status === 404) {
     return null
   } else {
@@ -32,7 +32,7 @@ export async function fetchGovenorData(address: string) {
 }
 
 export async function fetchTermPools() {
-  const res = await fetch(`https://periods.xgov-dev.algorandfoundation.tools/term-pool`)
+  const res = await fetch(`${import.meta.env.VITE_XGOV_TERM_POOLS_URL}`)
   const resJson = await res.json()
   const sortedData: TermPool[] = resJson.sort((a: TermPool, b: TermPool) => parseInt(a.start_date, 10) - parseInt(b.start_date, 10))
   return sortedData

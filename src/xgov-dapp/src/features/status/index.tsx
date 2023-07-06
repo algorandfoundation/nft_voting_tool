@@ -1,19 +1,17 @@
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Alert, Box, Button, Link as MuiLink, Skeleton, Typography } from '@mui/material'
-import dayjs from 'dayjs'
 import { Link } from 'react-router-dom'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 
 import { useWallet } from '@txnlab/use-wallet'
-import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { fetchVoterVotes, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
-import { OpeningSoonChip, YouDidNotVoteChip, YouVotedChip } from '../../shared/Chips'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+import { fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { GovenorTermPoolData, TermPool, fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'
 import { useCreatorAddresses } from '../wallet/state'
 import EligibilityStatus from './EligibilityStatus'
+import InformationBox from './InformationBox'
+import TermPoolsTable from './TermPoolsTable'
+import VotingSessionsTable from './VotingSessionsTable'
 
 function Status() {
   const { activeAddress } = useWallet()
@@ -186,301 +184,19 @@ function Status() {
           </Box>
         )}
         <div className="col-span-1 sm:col-span-2">
-          {globalStates.length > 0 && (
-            <>
-              <div>
-                <Typography variant="h4">Voting sessions</Typography>
-              </div>
-              <div className="table w-full">
-                <div className="table-row">
-                  <div className="table-cell pl-4">
-                    <strong>Session</strong>
-                  </div>
-                  <div className="table-cell">
-                    <strong>Voting Status</strong>
-                  </div>
-                  <div className="table-cell">
-                    <strong>Duration</strong>
-                  </div>
-                  <div className="table-cell">
-                    <strong>Terms</strong>
-                  </div>
-                  <div className="table-cell">
-                    <strong>Actions</strong>
-                  </div>
-                </div>
-                {!isLoadingGlobalStates &&
-                  globalStates.map((globalState) => (
-                    <VoteSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} />
-                  ))}
-              </div>
-            </>
-          )}
-
-          {isLoadingGlobalStates && (
-            <div>
-              <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-              <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-              <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-            </div>
-          )}
-          <div className="col-span-1 sm:col-span-2 mt-4">
-            <div>
-              <Typography variant="h4">Term Pools</Typography>
-            </div>
-            <div className="table w-full">
-              <div className="table-row">
-                <div className="table-cell pl-4">
-                  <strong>Term</strong>
-                </div>
-                <div className="table-cell">
-                  <strong>Total Pool</strong>
-                </div>
-                <div className="table-cell">
-                  <strong>Your deposit</strong>
-                </div>
-                <div className="table-cell">
-                  <strong>Duration</strong>
-                </div>
-                <div className="table-cell">
-                  <strong>Earnings / Losses</strong>
-                </div>
-              </div>
-
-              {!isLoadingTermPools &&
-                !isLoadingGovenorData &&
-                termPools?.length &&
-                termPools.map((termPool) => {
-                  const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
-                  return (
-                    <div key={termPool.id} className="table-row">
-                      <div className="table-cell pb-2">
-                        <div className="bg-white py-4 rounded-l-lg pl-4">{termPool.name}</div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="bg-white py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="bg-white py-4">
-                          {termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="bg-white py-4">
-                          {dayjs(parseInt(termPool.start_date) * 1000).format('DD-MM-YYYY')} -{' '}
-                          {dayjs(parseInt(termPool.end_date) * 1000).format('DD-MM-YYYY')}
-                        </div>
-                      </div>
-                      <div className="table-cell">
-                        <div className="bg-white py-4 rounded-r-lg">TBD</div>
-                      </div>
-                    </div>
-                  )
-                })}
-            </div>
-            {isLoadingTermPools ||
-              (isLoadingGovenorData && (
-                <div>
-                  <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-                  <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-                  <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-                </div>
-              ))}
+          <div>
+            <VotingSessionsTable globalStates={globalStates} termPools={termPools} isLoading={isLoadingGlobalStates} />
+          </div>
+          <div className="mt-4">
+            <TermPoolsTable termPools={termPools} govenorData={govenorData} isLoading={isLoadingGovenorData || isLoadingTermPools} />
           </div>
         </div>
         <div>
-          <Box className="bg-white flex rounded-xl px-4 py-6">
-            <div className="w-full">
-              <Typography className="mb-3">
-                <strong>Voting Sessions</strong>
-              </Typography>
-              <Typography>
-                In this version of the xGov Voting Tool, <strong>you can vote one time only</strong>. Be sure to check your vote allocation
-                before submitting your vote.
-              </Typography>
-              <Typography className="mt-4 mb-3">
-                <strong>Maintaining your xGov eligilbility</strong>
-              </Typography>
-              <Typography>
-                <strong>Your xGov duty is to vote in all voting sessions during the 12 months of the Term Pool duration.</strong> That
-                maintains your eligibility to receive the Algo deposit (your original governance rewards) back at the end of the term pool.{' '}
-              </Typography>
-              <Typography>
-                <br />
-                <strong>You will become ineligible if fail to vote on a session.</strong> If you are stacking voting power by participating
-                in more than one Term Pool simultaneously, and miss a voting session, the total of Algos across all pools will be forfeited.
-              </Typography>
-              <Typography>
-                <br />
-                At the end of the Term Pool, the Algos forfeited by the ineligible xGovs will be distributed amongst all eligible xGovs.
-              </Typography>
-              <Typography className="mt-4 mb-4">
-                <strong>Your xGov Deposit</strong>
-              </Typography>
-              <Typography>
-                Your xGov deposit is equal to the governance rewards of the period you opted in to xGov. It is displayed in mAlgo (or
-                miliAlgo) because smart contracts cannot handle decimal numbers. Your xGov deposit plus your Term Pool forfeited Algo share
-                will be your payout in 12 months, if you remain eligible.
-              </Typography>
-            </div>
-          </Box>
+          <InformationBox />
         </div>
       </div>
     </div>
   )
-}
-
-function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGlobalState; termPools: TermPool[] }) {
-  const { activeAddress } = useWallet()
-
-  const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
-  const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState<boolean>(true)
-  const [isLoadingVotersVote, setIsLoadingVotersVote] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const hasVoted = voterVotes !== undefined ? true : false
-  const hasVoteStarted = !globalState ? false : getHasVoteStarted(globalState)
-  const hasVoteEnded = !globalState ? false : getHasVoteEnded(globalState)
-  const canVote = hasVoteStarted && !hasVoteEnded
-
-  useEffect(() => {
-    ;(async () => {
-      setError(null)
-      setIsLoadingMetadata(true)
-      try {
-        setVotingRoundMetadata(await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid))
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(e)
-          setError('Unexpected error')
-        }
-      } finally {
-        setIsLoadingMetadata(false)
-      }
-    })()
-  }, [globalState])
-
-  useEffect(() => {
-    refetchVotersVote(globalState.appId, activeAddress, votingRoundMetadata, globalState)
-  }, [globalState, activeAddress, votingRoundMetadata])
-
-  const refetchVotersVote = async (
-    voteId: number | undefined,
-    walletAddress: string | undefined,
-    votingRoundMetadata: VotingRoundMetadata | undefined,
-    votingRoundGlobalState: VotingRoundGlobalState | undefined,
-  ) => {
-    if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
-      setError(null)
-      setIsLoadingVotersVote(true)
-      try {
-        setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(e)
-          setError('Unexpected error')
-        }
-      } finally {
-        setIsLoadingVotersVote(false)
-      }
-    } else {
-      setIsLoadingVotersVote(false)
-      setError(null)
-      setVoterVotes(undefined)
-    }
-  }
-
-  const terms: number[] = []
-  termPools.forEach((termPool, index) => {
-    if (checkVoteIsInTerm(globalState, termPool)) {
-      terms.push(index + 1)
-    }
-  })
-
-  if (error) {
-    return (
-      <Alert className="max-w-xl mt-4 text-white bg-red font-semibold" icon={false}>
-        <Typography>Could not load voting session details:</Typography>
-        <Typography>{error}</Typography>
-      </Alert>
-    )
-  }
-
-  if (isLoadingMetadata || isLoadingVotersVote) {
-    return (
-      <div className="table-row">
-        {Array.of(1, 2, 3, 4, 5).map((_, index) => {
-          return (
-            <div key={index} className="table-cell">
-              <Skeleton className="h-14 w-full mt-2" variant="rectangular" />
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
-
-  if (votingRoundMetadata) {
-    return (
-      <div className="table-row">
-        <div className="table-cell pb-2">
-          <div className={clsx('py-4 rounded-l-lg pl-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>{votingRoundMetadata.title}</div>
-        </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
-            {hasVoted ? (
-              <YouVotedChip isSmall={true} isWhite={true} />
-            ) : hasVoteStarted ? (
-              <YouDidNotVoteChip />
-            ) : (
-              <OpeningSoonChip isSmall={true} isWhite={true} />
-            )}
-          </div>
-        </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
-            {dayjs(globalState.start_time).format('DD-MM-YYYY')} - {dayjs(globalState.end_time).format('DD-MM-YYYY')}
-          </div>
-        </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
-            {terms.length > 0 ? `Terms ${terms.join()}` : '-'}
-          </div>
-        </div>
-        <div className="table-cell">
-          <div
-            className={clsx('rounded-r-lg', hasVoted ? 'bg-green-light' : 'bg-yellow-light', hasVoted || !canVote ? 'py-4' : 'pt-2.5 pb-2')}
-          >
-            {hasVoted || !canVote ? (
-              <Link to={`/vote/${globalState.appId}`}>{globalState.close_time ? 'View session results' : 'View session'}</Link>
-            ) : (
-              <Button href={`/vote/${globalState.appId}`} variant="contained" color="primary">
-                Vote now
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  } else {
-    return null
-  }
-}
-
-function checkVoteIsInTerm(globalState: VotingRoundGlobalState, termPool: TermPool) {
-  const startDate1 = dayjs(globalState.start_time)
-  const endDate1 = dayjs(globalState.end_time)
-  const startDate2 = dayjs(parseInt(termPool.start_date) * 1000)
-  const endDate2 = dayjs(parseInt(termPool.end_date) * 1000)
-
-  return startDate1.isAfter(startDate2) && endDate1.isBefore(endDate2)
 }
 
 export default Status

@@ -15,6 +15,8 @@ interface ImportMetaEnv {
   readonly VITE_IS_TESTNET: string
   readonly VITE_CREATOR_ALLOW_LIST: string
   readonly VITE_HIDDEN_VOTING_ROUND_IDS: string
+  readonly VITE_XGOV_GOVENERS_URL: string
+  readonly VITE_XGOV_TERM_POOLS_URL: string
 }
 
 interface ImportMeta {
