@@ -22,8 +22,7 @@ function Status() {
 
   const [globalStates, setGlobalStates] = useState<VotingRoundGlobalState[]>([])
 
-  const [isLoadingTermPools, setIsLoadingTermPools] = useState(true)
-  const [isLoadingGovenorData, setIsLoadingGovenorData] = useState(true)
+  const [isLoadingXgovData, setIsLoadingXgovData] = useState(true)
   const [isLoadingGlobalStates, setIsLoadingGlobalStates] = useState(true)
 
   const [error, setError] = useState<string | null>(null)
@@ -34,35 +33,21 @@ function Status() {
   const isGovenor = govenorData !== null
 
   useEffect(() => {
-    setError(null)
-    setIsLoadingTermPools(true)
-    fetchTermPools()
-      .then((termPools) => {
-        setTermPools(termPools)
-      })
-      .catch((e) => {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(e)
-          setError('Unexpected error')
-        }
-      })
-      .finally(() => {
-        setIsLoadingTermPools(false)
-      })
-  }, [])
-
-  useEffect(() => {
     if (activeAddress) {
-      setError(null)
-      setIsLoadingGovenorData(true)
-      fetchGovenorData(activeAddress)
-        .then((govenorData) => {
+      ;(async () => {
+        setError(null)
+        setIsLoadingXgovData(true)
+        setIsEligible(false)
+
+        try {
+          //TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA
+          const [termPools, govenorData] = await Promise.all([fetchTermPools(), fetchGovenorData(activeAddress)])
+          setTermPools(termPools)
           setGovenorData(govenorData)
-        })
-        .catch((e) => {
+          if (govenorData?.length) {
+            setIsEligible(govenorData[govenorData.length - 1].eligibility === 'eligible')
+          }
+        } catch (e) {
           if (e instanceof Error) {
             setError(e.message)
           } else {
@@ -70,19 +55,12 @@ function Status() {
             console.error(e)
             setError('Unexpected error')
           }
-        })
-        .finally(() => {
-          setIsLoadingGovenorData(false)
-        })
+        } finally {
+          setIsLoadingXgovData(false)
+        }
+      })()
     }
   }, [activeAddress])
-
-  useEffect(() => {
-    setIsEligible(false)
-    if (govenorData?.length) {
-      setIsEligible(govenorData[govenorData.length - 1].eligibility === 'eligible')
-    }
-  }, [govenorData])
 
   useEffect(() => {
     if (isGovenor) {
@@ -171,8 +149,8 @@ function Status() {
             <LaunchIcon className="ml-2 text-grey-light align-bottom" />
           </MuiLink>
         </Box>
-        <EligibilityStatus isEligible={isEligible} isLoading={isLoadingGovenorData} />
-        {isLoadingGovenorData ? (
+        <EligibilityStatus isEligible={isEligible} isLoading={isLoadingXgovData} />
+        {isLoadingXgovData ? (
           <Skeleton className="h-40 w-full" variant="rectangular" />
         ) : (
           <Box className="bg-white flex rounded-xl px-4 py-6">
@@ -186,7 +164,7 @@ function Status() {
             </div>
           </Box>
         )}
-        {isLoadingGovenorData ? (
+        {isLoadingXgovData ? (
           <Skeleton className="h-40 w-full" variant="rectangular" />
         ) : (
           <Box className="bg-white flex rounded-xl px-4 py-6">
@@ -203,7 +181,7 @@ function Status() {
             <VotingSessionsTable globalStates={globalStates} termPools={termPools} isLoading={isLoadingGlobalStates} />
           </div>
           <div className="mt-4">
-            <TermPoolsTable termPools={termPools} govenorData={govenorData} isLoading={isLoadingGovenorData || isLoadingTermPools} />
+            <TermPoolsTable termPools={termPools} govenorData={govenorData} isLoading={isLoadingXgovData} />
           </div>
         </div>
         <div>
