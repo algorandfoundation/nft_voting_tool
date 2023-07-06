@@ -34,20 +34,46 @@ function Status() {
   const isGovenor = govenorData !== null
 
   useEffect(() => {
+    setError(null)
     setIsLoadingTermPools(true)
-    fetchTermPools().then((termPools) => {
-      setTermPools(termPools)
-      setIsLoadingTermPools(false)
-    })
+    fetchTermPools()
+      .then((termPools) => {
+        setTermPools(termPools)
+      })
+      .catch((e) => {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(e)
+          setError('Unexpected error')
+        }
+      })
+      .finally(() => {
+        setIsLoadingTermPools(false)
+      })
   }, [])
 
   useEffect(() => {
     if (activeAddress) {
+      setError(null)
       setIsLoadingGovenorData(true)
-      fetchGovenorData('TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA').then((govenorData) => {
-        setGovenorData(govenorData)
-        setIsLoadingGovenorData(false)
-      })
+      fetchGovenorData(activeAddress)
+        .then((govenorData) => {
+          setGovenorData(govenorData)
+        })
+        .catch((e) => {
+          if (e instanceof Error) {
+            setError(e.message)
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(e)
+            setError('Unexpected error')
+          }
+        })
+        .finally(() => {
+          setIsLoadingGovenorData(false)
+        })
     }
   }, [activeAddress])
 
@@ -311,6 +337,7 @@ function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGl
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
   const [isLoadingMetadata, setIsLoadingMetadata] = useState<boolean>(true)
   const [isLoadingVotersVote, setIsLoadingVotersVote] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
   const hasVoted = voterVotes !== undefined ? true : false
   const hasVoteStarted = !globalState ? false : getHasVoteStarted(globalState)
@@ -319,11 +346,19 @@ function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGl
 
   useEffect(() => {
     ;(async () => {
+      setError(null)
       setIsLoadingMetadata(true)
       try {
         setVotingRoundMetadata(await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid))
-        setIsLoadingMetadata(false)
       } catch (e) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(e)
+          setError('Unexpected error')
+        }
+      } finally {
         setIsLoadingMetadata(false)
       }
     })()
@@ -340,18 +375,42 @@ function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGl
     votingRoundGlobalState: VotingRoundGlobalState | undefined,
   ) => {
     if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
+      setError(null)
       setIsLoadingVotersVote(true)
       try {
         setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-        setIsLoadingVotersVote(false)
       } catch (e) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(e)
+          setError('Unexpected error')
+        }
+      } finally {
         setIsLoadingVotersVote(false)
-        // handleError(e)
       }
     } else {
       setIsLoadingVotersVote(false)
+      setError(null)
       setVoterVotes(undefined)
     }
+  }
+
+  const terms: number[] = []
+  termPools.forEach((termPool, index) => {
+    if (checkVoteIsInTerm(globalState, termPool)) {
+      terms.push(index + 1)
+    }
+  })
+
+  if (error) {
+    return (
+      <Alert className="max-w-xl mt-4 text-white bg-red font-semibold" icon={false}>
+        <Typography>Could not load voting session details:</Typography>
+        <Typography>{error}</Typography>
+      </Alert>
+    )
   }
 
   if (isLoadingMetadata || isLoadingVotersVote) {
@@ -367,13 +426,6 @@ function VoteSessionRow({ globalState, termPools }: { globalState: VotingRoundGl
       </div>
     )
   }
-
-  const terms: number[] = []
-  termPools.forEach((termPool, index) => {
-    if (checkVoteIsInTerm(globalState, termPool)) {
-      terms.push(index + 1)
-    }
-  })
 
   if (votingRoundMetadata) {
     return (
