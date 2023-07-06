@@ -61,7 +61,7 @@ function Status() {
   useEffect(() => {
     if (isGovenor) {
       setIsLoadingGlobalStates(true)
-      let addressesToFetch = [] as string[]
+      let addressesToFetch: string[] = []
       if (showMyRounds && activeAddress) {
         addressesToFetch = [activeAddress]
       } else if (!showMyRounds) {
