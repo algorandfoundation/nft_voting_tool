@@ -25,7 +25,7 @@ function EligibilityStatus({ isEligible, isLoading }: { isEligible: boolean; isL
         <div className="w-full flex align-bottom">
           <XCircleIcon className="h-7 w-7 mr-3 -mt-1 text-red" />
           <Typography className="mb-3">
-            <strong>You’re no longer an eligible xGov</strong>
+            <strong>You're no longer an eligible xGov</strong>
           </Typography>
           <div className="-mt-1 ml-auto">
             <Button variant="contained" color="info" size="small">
