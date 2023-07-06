@@ -66,8 +66,8 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
 
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState<boolean>(true)
-  const [isLoadingVotersVote, setIsLoadingVotersVote] = useState<boolean>(true)
+
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
   const hasVoted = voterVotes !== undefined ? true : false
@@ -77,56 +77,27 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
 
   useEffect(() => {
     ;(async () => {
-      setError(null)
-      setIsLoadingMetadata(true)
-      try {
-        setVotingRoundMetadata(await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid))
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(e)
-          setError('Unexpected error')
+      if (activeAddress) {
+        setError(null)
+        setIsLoading(true)
+        try {
+          const votingRoundMetadata = await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid)
+          setVotingRoundMetadata(votingRoundMetadata)
+          setVoterVotes(await fetchVoterVotes(globalState.appId, activeAddress, votingRoundMetadata, globalState))
+        } catch (e) {
+          if (e instanceof Error) {
+            setError(e.message)
+          } else {
+            // eslint-disable-next-line no-console
+            console.error(e)
+            setError('Unexpected error')
+          }
+        } finally {
+          setIsLoading(false)
         }
-      } finally {
-        setIsLoadingMetadata(false)
       }
     })()
-  }, [globalState])
-
-  useEffect(() => {
-    refetchVotersVote(globalState.appId, activeAddress, votingRoundMetadata, globalState)
-  }, [globalState, activeAddress, votingRoundMetadata])
-
-  const refetchVotersVote = async (
-    voteId: number | undefined,
-    walletAddress: string | undefined,
-    votingRoundMetadata: VotingRoundMetadata | undefined,
-    votingRoundGlobalState: VotingRoundGlobalState | undefined,
-  ) => {
-    if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
-      setError(null)
-      setIsLoadingVotersVote(true)
-      try {
-        setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-      } catch (e) {
-        if (e instanceof Error) {
-          setError(e.message)
-        } else {
-          // eslint-disable-next-line no-console
-          console.error(e)
-          setError('Unexpected error')
-        }
-      } finally {
-        setIsLoadingVotersVote(false)
-      }
-    } else {
-      setIsLoadingVotersVote(false)
-      setError(null)
-      setVoterVotes(undefined)
-    }
-  }
+  }, [globalState, activeAddress])
 
   const terms: number[] = []
   termPools.forEach((termPool, index) => {
@@ -144,7 +115,7 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
     )
   }
 
-  if (isLoadingMetadata || isLoadingVotersVote) {
+  if (isLoading) {
     return (
       <div className="table-row">
         {Array.of(1, 2, 3, 4, 5).map((_, index) => {
