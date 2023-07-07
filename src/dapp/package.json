@@ -11,7 +11,9 @@
     "lint:fix": "eslint --ext .ts,.tsx \"src/\" --fix",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "audit:resolve": "resolve-audit",
+    "audit": "check-audit"
   },
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^2.1.0",
@@ -65,6 +67,7 @@
     "eslint-plugin-prettier": "^4.2.1",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "npm-audit-resolver": "^3.0.0-RC.0",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.2.7",
     "ts-jest": "^29.0.5",
@@ -80,6 +83,7 @@
     },
     "cosmiconfig": {
       "yaml": "2.2.2"
-    }
+    },
+    "semver": "7.5.2"
   }
 }

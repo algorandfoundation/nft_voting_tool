@@ -32,6 +32,9 @@ export const theme = (rootElement: HTMLElement) =>
       error: {
         main: '#FF3A29',
       },
+      info: {
+        main: '#131DFF',
+      },
     },
     shape: {
       borderRadius: 12,
