@@ -126,7 +126,7 @@ function Status() {
           You have not signed up to be an xGov.
         </Typography>
         <Button href="https://algorand.foundation/xgov" target="_blank" className="mt-6" variant="contained" color="primary">
-          Find out more about xGov”
+          Find out more about xGov
         </Button>
       </div>
     )
