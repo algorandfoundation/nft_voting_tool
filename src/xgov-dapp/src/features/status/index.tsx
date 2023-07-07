@@ -125,8 +125,8 @@ function Status() {
         <Typography className="mt-8 text-center" variant="h3">
           You have not signed up to be an xGov.
         </Typography>
-        <Button href="" className="mt-6" variant="contained" color="primary">
-          Visit xGov portal to register
+        <Button href="https://algorand.foundation/xgov" target="_blank" className="mt-6" variant="contained" color="primary">
+          Find out more about xGov”
         </Button>
       </div>
     )
@@ -144,7 +144,7 @@ function Status() {
           <Typography variant="h3">Your xGov stats</Typography>
         </div>
         <Box className="bg-white flex rounded-xl px-4 py-2 mr-4 w-fit items-center ml-auto">
-          <MuiLink className="no-underline hover:underline" href="https://google.com" target="_blank">
+          <MuiLink className="no-underline hover:underline" href="https://algorand.foundation/xgov" target="_blank">
             xGov Program Info
             <LaunchIcon className="ml-2 text-grey-light align-bottom" />
           </MuiLink>
