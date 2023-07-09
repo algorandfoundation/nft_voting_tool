@@ -1,87 +1,62 @@
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
+import { DaffiWalletConnect } from '@daffiwallet/connect'
 import { PeraWalletConnect } from '@perawallet/connect'
 import {
-  AlgodClientOptions,
-  algosigner,
   DEFAULT_NETWORK,
   DEFAULT_NODE_BASEURL,
   DEFAULT_NODE_PORT,
   DEFAULT_NODE_TOKEN,
-  defly,
-  kmd,
-  mnemonic,
-  pera,
   PROVIDER_ID,
-  reconnectProviders,
-  WalletClient,
-  walletconnect,
+  ProvidersArray,
+  useInitializeProviders,
 } from '@txnlab/use-wallet'
-import WalletConnect from '@walletconnect/client'
-import QRCodeModal from 'algorand-walletconnect-qrcode-modal'
+import { WalletConnectModalSign } from '@walletconnect/modal-sign-html'
 import algosdk from 'algosdk'
 import { useEffect } from 'react'
 
-type SupportedProviders = Partial<{
-  kmd: Promise<WalletClient | null>
-  pera: Promise<WalletClient | null>
-  myalgo: Promise<WalletClient | null>
-  algosigner: Promise<WalletClient | null>
-  defly: Promise<WalletClient | null>
-  exodus: Promise<WalletClient | null>
-  walletconnect: Promise<WalletClient | null>
-  mnemonic: Promise<WalletClient | null>
-}>
-
 export function useAlgoWallet(context: { autoConnect: boolean; network: string; nodeServer: string; nodePort: string; nodeToken: string }) {
-  const algodOptions = [
-    context.nodeToken ?? DEFAULT_NODE_TOKEN,
-    context.nodeServer ?? DEFAULT_NODE_BASEURL,
-    context.nodePort ?? DEFAULT_NODE_PORT,
-  ] as AlgodClientOptions
-  const network = context.network ?? DEFAULT_NETWORK
-  const walletProviders: SupportedProviders = {
-    [PROVIDER_ID.PERA]: pera.init({
-      algosdkStatic: algosdk,
-      clientStatic: PeraWalletConnect,
-      algodOptions: algodOptions,
-      network: network,
-    }),
-    [PROVIDER_ID.DEFLY]: defly.init({
-      algosdkStatic: algosdk,
-      clientStatic: DeflyWalletConnect,
-      algodOptions: algodOptions,
-      network: network,
-    }),
-    [PROVIDER_ID.WALLETCONNECT]: walletconnect.init({
-      algosdkStatic: algosdk,
-      clientStatic: WalletConnect,
-      modalStatic: QRCodeModal,
-      algodOptions: algodOptions,
-      network: network,
-    }),
-  }
+  const providers = [
+    { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
+    { id: PROVIDER_ID.PERA, clientStatic: PeraWalletConnect },
+    { id: PROVIDER_ID.DAFFI, clientStatic: DaffiWalletConnect },
+    {
+      id: PROVIDER_ID.WALLETCONNECT,
+      clientStatic: WalletConnectModalSign,
+      clientOptions: {
+        projectId: 'ce0484235bcb9e2c431489a5ed84dac7',
+        metadata: {
+          name: 'xGov Dapp',
+          description: 'xGov Dapp',
+          url: '#',
+          icons: ['https://walletconnect.com/walletconnect-logo.png'],
+        },
+        modalOptions: {
+          themeVariables: {
+            '--wcm-z-index': '9999',
+          },
+        },
+      },
+    },
+  ] as ProvidersArray
 
   if (import.meta.env.VITE_ENVIRONMENT === 'local') {
-    walletProviders[PROVIDER_ID.MNEMONIC] = mnemonic.init({
-      algosdkStatic: algosdk,
-      algodOptions: algodOptions,
-      network: network,
-    })
-    walletProviders[PROVIDER_ID.KMD] = kmd.init({
-      algosdkStatic: algosdk,
-      algodOptions: algodOptions,
-      network: network,
-    })
-    walletProviders[PROVIDER_ID.ALGOSIGNER] = algosigner.init({
-      algosdkStatic: algosdk,
-      algodOptions: algodOptions,
-      network: network,
-    })
+    providers.push({ id: PROVIDER_ID.KMD })
   }
+
+  const walletProviders = useInitializeProviders({
+    providers: providers,
+    algosdkStatic: algosdk,
+    nodeConfig: {
+      network: context.network ?? DEFAULT_NETWORK,
+      nodeToken: context.nodeToken ?? DEFAULT_NODE_TOKEN,
+      nodeServer: context.nodeServer ?? DEFAULT_NODE_BASEURL,
+      nodePort: context.nodePort ?? DEFAULT_NODE_PORT,
+    },
+  })
 
   useEffect(() => {
     if (context.autoConnect) {
-      reconnectProviders(walletProviders)
+      // reconnectProviders(walletProviders)
     }
   }, [])
 
