@@ -87,6 +87,7 @@
     "cosmiconfig": {
       "yaml": "2.2.2"
     },
-    "semver": "7.5.2"
+    "semver": "7.5.2",
+    "tough-cookie": "4.1.3"
   }
 }

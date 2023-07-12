@@ -2,7 +2,7 @@
   "decisions": {
     "1092243|@aws-sdk/client-secrets-manager>@aws-sdk/client-sts>fast-xml-parser": {
       "decision": "postpone",
-      "madeAt": 1688657338637
+      "madeAt": 1689131509222
     },
     "1092310|@aws-cdk/core>@aws-cdk/cloud-assembly-schema>semver": {
       "decision": "postpone",
@@ -22,11 +22,27 @@
     },
     "1092330|cdk-dia>@aws-cdk/core>@aws-cdk/cloud-assembly-schema>semver>@aws-cdk/cx-api>word-wrap": {
       "decision": "postpone",
-      "madeAt": 1688657341614
+      "madeAt": 1689131510947
     },
     "1092330|optionator>word-wrap": {
       "decision": "postpone",
-      "madeAt": 1688657341614
+      "madeAt": 1689131510947
+    },
+    "1092461|@aws-cdk/core>@aws-cdk/cloud-assembly-schema>semver": {
+      "decision": "postpone",
+      "madeAt": 1689131508188
+    },
+    "1092461|aws-cdk-lib>semver": {
+      "decision": "postpone",
+      "madeAt": 1689131508188
+    },
+    "1092461|cdk-dia>@aws-cdk/core>@aws-cdk/cloud-assembly-schema>semver": {
+      "decision": "postpone",
+      "madeAt": 1689131508188
+    },
+    "1092447|aws-cdk-lib": {
+      "decision": "postpone",
+      "madeAt": 1689131510046
     }
   },
   "rules": {},
