@@ -13,7 +13,7 @@ function EligibilityStatus({ isEligible, isLoading }: { isEligible: boolean; isL
         </div>
         <div className="w-full">
           <Typography className="mb-3">
-            <strong>You're an elegible xgov</strong>
+            <strong>You're an eligible xGov</strong>
           </Typography>
           <Typography>Remember to continue voting to maintain your xGov eligibility.</Typography>
         </div>
