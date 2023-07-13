@@ -38,7 +38,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
           termPools.map((termPool) => {
             const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
             return (
-              <div key={termPool.id} className="table-row bg-white">
+              <div key={termPool.id} className="table-row">
                 <div className="table-cell bg-white  pb-2 rounded-l-lg ">
                   <div className="py-4 pl-4">{termPool.name}</div>
                 </div>
