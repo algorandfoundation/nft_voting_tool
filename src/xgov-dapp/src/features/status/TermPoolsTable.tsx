@@ -14,7 +14,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
       <div>
         <Typography variant="h4">Term Pools</Typography>
       </div>
-      <div className="table w-full">
+      <div className="table w-full border-spacing-y-2">
         <div className="table-row">
           <div className="table-cell pl-4">
             <strong>Term</strong>
@@ -38,26 +38,24 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
           termPools.map((termPool) => {
             const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
             return (
-              <div key={termPool.id} className="table-row">
-                <div className="table-cell pb-2">
-                  <div className="bg-white py-4 rounded-l-lg pl-4">{termPool.name}</div>
+              <div key={termPool.id} className="table-row bg-white">
+                <div className="table-cell bg-white  pb-2 rounded-l-lg ">
+                  <div className="py-4 pl-4">{termPool.name}</div>
                 </div>
-                <div className="table-cell">
-                  <div className="bg-white py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
+                <div className="table-cell bg-white">
+                  <div className=" py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
                 </div>
-                <div className="table-cell">
-                  <div className="bg-white py-4">
-                    {termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO
-                  </div>
+                <div className="table-cell bg-white ">
+                  <div className="py-4">{termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO</div>
                 </div>
-                <div className="table-cell">
-                  <div className="bg-white py-4">
+                <div className="table-cell bg-white ">
+                  <div className="py-4">
                     {dayjs(parseInt(termPool.start_date) * 1000).format('DD-MM-YYYY')} -{' '}
                     {dayjs(parseInt(termPool.end_date) * 1000).format('DD-MM-YYYY')}
                   </div>
                 </div>
-                <div className="table-cell">
-                  <div className="bg-white py-4 rounded-r-lg">TBD</div>
+                <div className="table-cell bg-white rounded-r-lg">
+                  <div className=" py-4">TBD</div>
                 </div>
               </div>
             )

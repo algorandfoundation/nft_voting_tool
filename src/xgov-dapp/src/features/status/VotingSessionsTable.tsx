@@ -24,7 +24,7 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
           <div>
             <Typography variant="h4">Voting sessions</Typography>
           </div>
-          <div className="table w-full">
+          <div className="table w-full border-spacing-y-2">
             <div className="table-row">
               <div className="table-cell pl-4">
                 <strong>Session</strong>
@@ -132,11 +132,11 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
   if (votingRoundMetadata) {
     return (
       <div className="table-row">
-        <div className="table-cell pb-2">
-          <div className={clsx('py-4 rounded-l-lg pl-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>{votingRoundMetadata.title}</div>
+        <div className={clsx('table-cell rounded-l-lg pb-2', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+          <div className="py-4  pl-4">{votingRoundMetadata.title}</div>
         </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+          <div className="py-4">
             {hasVoted ? (
               <YouVotedChip isSmall={true} isWhite={true} />
             ) : hasVoteStarted ? (
@@ -146,20 +146,16 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
             )}
           </div>
         </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+          <div className="py-4">
             {dayjs(globalState.start_time).format('DD-MM-YYYY')} - {dayjs(globalState.end_time).format('DD-MM-YYYY')}
           </div>
         </div>
-        <div className="table-cell">
-          <div className={clsx('py-4', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
-            {terms.length > 0 ? `Terms ${terms.join()}` : '-'}
-          </div>
+        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+          <div className="py-4">{terms.length > 0 ? `Terms ${terms.join()}` : '-'}</div>
         </div>
-        <div className="table-cell">
-          <div
-            className={clsx('rounded-r-lg', hasVoted ? 'bg-green-light' : 'bg-yellow-light', hasVoted || !canVote ? 'py-4' : 'pt-2.5 pb-2')}
-          >
+        <div className={clsx('table-cell rounded-r-lg', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+          <div className={clsx('rounded-r-lg', hasVoted || !canVote ? 'py-4' : 'pt-2.5 pb-2')}>
             {hasVoted || !canVote ? (
               <Link to={`/vote/${globalState.appId}`}>{globalState.close_time ? 'View session results' : 'View session'}</Link>
             ) : (

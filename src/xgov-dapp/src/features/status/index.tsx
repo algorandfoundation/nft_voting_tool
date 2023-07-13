@@ -139,8 +139,8 @@ function Status() {
           <Typography>&#60; Back to Voting sessions</Typography>
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="col-span-1 sm:col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="col-span-1 lg:col-span-2">
           <Typography variant="h3">Your xGov stats</Typography>
         </div>
         <Box className="bg-white flex rounded-xl px-4 py-2 mr-4 w-fit items-center ml-auto">
@@ -176,7 +176,9 @@ function Status() {
             </div>
           </Box>
         )}
-        <div className="col-span-1 sm:col-span-2">
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <div className="col-span-1 lg:col-span-2">
           <div>
             <VotingSessionsTable globalStates={globalStates} termPools={termPools} isLoading={isLoadingGlobalStates} />
           </div>
