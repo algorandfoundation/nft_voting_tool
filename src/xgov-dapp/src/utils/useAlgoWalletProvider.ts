@@ -12,7 +12,6 @@ import {
 } from '@txnlab/use-wallet'
 import { WalletConnectModalSign } from '@walletconnect/modal-sign-html'
 import algosdk from 'algosdk'
-import { useEffect } from 'react'
 
 export function useAlgoWallet(context: { autoConnect: boolean; network: string; nodeServer: string; nodePort: string; nodeToken: string }) {
   const providers = [
@@ -53,12 +52,6 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       nodePort: context.nodePort ?? DEFAULT_NODE_PORT,
     },
   })
-
-  useEffect(() => {
-    if (context.autoConnect) {
-      // reconnectProviders(walletProviders)
-    }
-  }, [])
 
   return {
     walletProviders,
