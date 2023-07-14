@@ -123,7 +123,7 @@ function Status() {
     return (
       <div className="text-center">
         <Typography className="mt-8 text-center" variant="h3">
-          You have not signed up to be an xGov.
+          You have not signed up or are no longer eligible to be an xGov.
         </Typography>
         <Button href="https://algorand.foundation/xgov" target="_blank" className="mt-6" variant="contained" color="primary">
           Find out more about xGov
