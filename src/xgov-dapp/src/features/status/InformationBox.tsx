@@ -31,7 +31,7 @@ function InformationBox() {
           <strong>Your xGov Deposit</strong>
         </Typography>
         <Typography>
-          Your xGov deposit is equal to the governance rewards of the period you opted in to xGov. It is displayed in mAlgo (or miliAlgo)
+          Your xGov deposit is equal to the governance rewards of the period you opted in to xGov. It is displayed in mAlgo (or microAlgo)
           because smart contracts cannot handle decimal numbers. Your xGov deposit plus your Term Pool forfeited Algo share will be your
           payout in 12 months, if you remain eligible.
         </Typography>
