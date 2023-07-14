@@ -24,27 +24,36 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
           <div>
             <Typography variant="h4">Voting sessions</Typography>
           </div>
-          <div className="table w-full border-spacing-y-2">
-            <div className="table-row">
-              <div className="table-cell pl-4">
-                <strong>Session</strong>
+          <div className="hidden lg:block">
+            <div className="table w-full border-spacing-y-2">
+              <div className="table-row">
+                <div className="table-cell pl-4">
+                  <strong>Session</strong>
+                </div>
+                <div className="table-cell">
+                  <strong>Voting Status</strong>
+                </div>
+                <div className="table-cell">
+                  <strong>Duration</strong>
+                </div>
+                <div className="table-cell">
+                  <strong>Terms</strong>
+                </div>
+                <div className="table-cell">
+                  <strong>Actions</strong>
+                </div>
               </div>
-              <div className="table-cell">
-                <strong>Voting Status</strong>
-              </div>
-              <div className="table-cell">
-                <strong>Duration</strong>
-              </div>
-              <div className="table-cell">
-                <strong>Terms</strong>
-              </div>
-              <div className="table-cell">
-                <strong>Actions</strong>
-              </div>
+              {!isLoading &&
+                globalStates.map((globalState) => (
+                  <VotingSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} isMobile={false} />
+                ))}
             </div>
+          </div>
+
+          <div className="lg:hidden">
             {!isLoading &&
               globalStates.map((globalState) => (
-                <VotingSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} />
+                <VotingSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} isMobile={true} />
               ))}
           </div>
         </>
@@ -61,7 +70,15 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
   )
 }
 
-function VotingSessionRow({ globalState, termPools }: { globalState: VotingRoundGlobalState; termPools: TermPool[] }) {
+function VotingSessionRow({
+  globalState,
+  termPools,
+  isMobile,
+}: {
+  globalState: VotingRoundGlobalState
+  termPools: TermPool[]
+  isMobile: boolean
+}) {
   const { activeAddress } = useWallet()
 
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
@@ -115,7 +132,7 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
     )
   }
 
-  if (isLoading) {
+  if (isLoading && !isMobile) {
     return (
       <div className="table-row">
         {Array.of(1, 2, 3, 4, 5).map((_, index) => {
@@ -129,13 +146,19 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
     )
   }
 
-  if (votingRoundMetadata) {
+  if (isLoading && isMobile) {
+    return <Skeleton className="h-40 w-full mb-4" variant="rectangular" />
+  }
+
+  const bgColor = hasVoted ? 'bg-green-light' : 'bg-yellow-light'
+
+  if (votingRoundMetadata && !isMobile) {
     return (
       <div className="table-row">
-        <div className={clsx('table-cell rounded-l-lg pb-2', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell rounded-l-lg pb-2', bgColor)}>
           <div className="py-4  pl-4">{votingRoundMetadata.title}</div>
         </div>
-        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell', bgColor)}>
           <div className="py-4">
             {hasVoted ? (
               <YouVotedChip isSmall={true} isWhite={true} />
@@ -146,15 +169,15 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
             )}
           </div>
         </div>
-        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell', bgColor)}>
           <div className="py-4">
             {dayjs(globalState.start_time).format('DD-MM-YYYY')} - {dayjs(globalState.end_time).format('DD-MM-YYYY')}
           </div>
         </div>
-        <div className={clsx('table-cell', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell', bgColor)}>
           <div className="py-4">{terms.length > 0 ? `Terms ${terms.join()}` : '-'}</div>
         </div>
-        <div className={clsx('table-cell rounded-r-lg', hasVoted ? 'bg-green-light' : 'bg-yellow-light')}>
+        <div className={clsx('table-cell rounded-r-lg', bgColor)}>
           <div className={clsx('rounded-r-lg', hasVoted || !canVote ? 'py-4' : 'pt-2.5 pb-2')}>
             {hasVoted || !canVote ? (
               <Link to={`/vote/${globalState.appId}`}>{globalState.close_time ? 'View session results' : 'View session'}</Link>
@@ -164,6 +187,49 @@ function VotingSessionRow({ globalState, termPools }: { globalState: VotingRound
               </Button>
             )}
           </div>
+        </div>
+      </div>
+    )
+  } else if (votingRoundMetadata && isMobile) {
+    return (
+      <div className={`grid grid-cols-3 mb-4 rounded-lg p-4 gap-2 ${bgColor}`}>
+        <div>
+          <strong>Session</strong>
+        </div>
+        <div className="col-span-2">{votingRoundMetadata.title}</div>
+        <div>
+          <strong>Voting Status</strong>
+        </div>
+        <div className="col-span-2">
+          {hasVoted ? (
+            <YouVotedChip isSmall={true} isWhite={true} />
+          ) : hasVoteStarted ? (
+            <YouDidNotVoteChip />
+          ) : (
+            <OpeningSoonChip isSmall={true} isWhite={true} />
+          )}
+        </div>
+        <div>
+          <strong>Duration</strong>
+        </div>
+        <div className="col-span-2">
+          {dayjs(globalState.start_time).format('DD-MM-YYYY')} - {dayjs(globalState.end_time).format('DD-MM-YYYY')}
+        </div>
+        <div>
+          <strong>Terms</strong>
+        </div>
+        <div className="col-span-2">{terms.length > 0 ? `Terms ${terms.join()}` : '-'}</div>
+        <div>
+          <strong>Actions</strong>
+        </div>
+        <div className="col-span-2">
+          {hasVoted || !canVote ? (
+            <Link to={`/vote/${globalState.appId}`}>{globalState.close_time ? 'View session results' : 'View session'}</Link>
+          ) : (
+            <Button href={`/vote/${globalState.appId}`} variant="contained" color="primary">
+              Vote now
+            </Button>
+          )}
         </div>
       </div>
     )
