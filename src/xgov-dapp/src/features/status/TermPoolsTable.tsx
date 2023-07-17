@@ -44,19 +44,21 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                     <div className="py-4 pl-4">{termPool.name}</div>
                   </div>
                   <div className="table-cell bg-white">
-                    <div className=" py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
+                    <div className="pl-2 py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
                   </div>
                   <div className="table-cell bg-white ">
-                    <div className="py-4">{termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO</div>
+                    <div className="pl-2 py-4">
+                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO
+                    </div>
                   </div>
                   <div className="table-cell bg-white ">
-                    <div className="py-4">
+                    <div className="pl-2 py-4">
                       {dayjs(parseInt(termPool.start_date) * 1000).format('DD-MM-YYYY')} -{' '}
                       {dayjs(parseInt(termPool.end_date) * 1000).format('DD-MM-YYYY')}
                     </div>
                   </div>
                   <div className="table-cell bg-white rounded-r-lg">
-                    <div className=" py-4">TBD</div>
+                    <div className="pl-2 py-4">-</div>
                   </div>
                 </div>
               )
@@ -82,7 +84,9 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                 <div>
                   <strong>Your deposit</strong>
                 </div>
-                <div className="col-span-2">{termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO</div>
+                <div className="col-span-2">
+                  {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} mALGO
+                </div>
                 <div>
                   <strong>Duration</strong>
                 </div>
@@ -93,7 +97,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                 <div>
                   <strong>Earnings / Losses</strong>
                 </div>
-                <div className="col-span-2">TBD</div>
+                <div className="col-span-2">-</div>
               </div>
             )
           })}

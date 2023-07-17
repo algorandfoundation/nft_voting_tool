@@ -9,6 +9,7 @@ export interface TermPool {
 export interface GovenorTermPoolData {
   controller_address: string
   inception: string
+  original_reward: string
   original_voting_power: string
   amount: string
   current_voting_power: string

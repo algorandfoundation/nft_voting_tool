@@ -159,7 +159,7 @@ function Status() {
                 <strong>Your xGov deposit</strong>
               </Typography>
               <Typography variant="h3">
-                {govenorData.reduce((sum, item) => sum + parseInt(item.amount), 0).toLocaleString()} mALGO
+                {govenorData.reduce((sum, item) => sum + parseInt(item.original_reward), 0).toLocaleString()} mALGO
               </Typography>
             </div>
           </Box>
@@ -172,7 +172,7 @@ function Status() {
               <Typography className="mb-3">
                 <strong>Total earnings from xGov participation</strong>
               </Typography>
-              <Typography variant="h3">TBD ALGO</Typography>
+              <Typography variant="h3">- ALGO</Typography>
             </div>
           </Box>
         )}
