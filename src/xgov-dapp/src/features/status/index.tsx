@@ -172,7 +172,7 @@ function Status() {
               <Typography className="mb-3">
                 <strong>Total earnings from xGov participation</strong>
               </Typography>
-              <Typography variant="h3">TBD ALGO</Typography>
+              <Typography variant="h3">- ALGO</Typography>
             </div>
           </Box>
         )}

@@ -58,7 +58,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                     </div>
                   </div>
                   <div className="table-cell bg-white rounded-r-lg">
-                    <div className="pl-2 py-4">TBD</div>
+                    <div className="pl-2 py-4">-</div>
                   </div>
                 </div>
               )
@@ -97,7 +97,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                 <div>
                   <strong>Earnings / Losses</strong>
                 </div>
-                <div className="col-span-2">TBD</div>
+                <div className="col-span-2">-</div>
               </div>
             )
           })}
