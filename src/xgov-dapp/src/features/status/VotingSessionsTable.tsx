@@ -30,16 +30,16 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
                 <div className="table-cell pl-4">
                   <strong>Session</strong>
                 </div>
-                <div className="table-cell">
+                <div className="table-cell pl-2">
                   <strong>Voting Status</strong>
                 </div>
-                <div className="table-cell">
+                <div className="table-cell pl-2">
                   <strong>Duration</strong>
                 </div>
-                <div className="table-cell">
+                <div className="table-cell pl-2">
                   <strong>Terms</strong>
                 </div>
-                <div className="table-cell">
+                <div className="table-cell pl-2">
                   <strong>Actions</strong>
                 </div>
               </div>
@@ -159,7 +159,7 @@ function VotingSessionRow({
           <div className="py-4  pl-4">{votingRoundMetadata.title}</div>
         </div>
         <div className={clsx('table-cell', bgColor)}>
-          <div className="py-4">
+          <div className="pl-2 py-4">
             {hasVoted ? (
               <YouVotedChip isSmall={true} isWhite={true} />
             ) : hasVoteStarted ? (
@@ -170,15 +170,15 @@ function VotingSessionRow({
           </div>
         </div>
         <div className={clsx('table-cell', bgColor)}>
-          <div className="py-4">
+          <div className="pl-2 py-4">
             {dayjs(globalState.start_time).format('DD-MM-YYYY')} - {dayjs(globalState.end_time).format('DD-MM-YYYY')}
           </div>
         </div>
         <div className={clsx('table-cell', bgColor)}>
-          <div className="py-4">{terms.length > 0 ? `Terms ${terms.join()}` : '-'}</div>
+          <div className="pl-2 py-4">{terms.length > 0 ? `Terms ${terms.join()}` : '-'}</div>
         </div>
         <div className={clsx('table-cell rounded-r-lg', bgColor)}>
-          <div className={clsx('rounded-r-lg', hasVoted || !canVote ? 'py-4' : 'pt-2.5 pb-2')}>
+          <div className={clsx('rounded-r-lg', hasVoted || !canVote ? 'pl-2 py-4' : 'pl-2 pt-2.5 pb-2')}>
             {hasVoted || !canVote ? (
               <Link to={`/vote/${globalState.appId}`}>{globalState.close_time ? 'View session results' : 'View session'}</Link>
             ) : (
