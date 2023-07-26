@@ -34,15 +34,19 @@
     },
     "1092461|aws-cdk-lib>semver": {
       "decision": "postpone",
-      "madeAt": 1689612187206
+      "madeAt": 1690382305457
     },
     "1092461|cdk-dia>@aws-cdk/core>@aws-cdk/cloud-assembly-schema>semver": {
       "decision": "postpone",
-      "madeAt": 1689612187206
+      "madeAt": 1690382305457
     },
     "1092447|aws-cdk-lib": {
       "decision": "postpone",
-      "madeAt": 1689612187812
+      "madeAt": 1690382304736
+    },
+    "1092593|word-wrap": {
+      "decision": "postpone",
+      "madeAt": 1690382306278
     }
   },
   "rules": {},
