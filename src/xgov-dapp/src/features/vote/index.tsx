@@ -322,9 +322,9 @@ function Vote() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="col-span-2">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="col-span-2">
               {isLoadingVotingRoundData ? (
                 <Skeleton className="h-12 w-1/2" variant="text" />
@@ -351,7 +351,7 @@ function Vote() {
               </div>
             )}
             {votingRoundMetadata?.questions.map((question, index) => (
-              <div className="col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white rounded-lg">
+              <div className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                 <div className="col-span-2">
                   {question.metadata && (
                     <ProposalCard

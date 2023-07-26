@@ -67,12 +67,18 @@ export const ProposalCard = ({
           {!hasClosed && !hasPassed && votesNeeded > 0 && <VotesNeededToPassChip votesNeeded={votesNeeded} />}
         </div>
         <div className="text-right">
-          {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
-          {category && <CategoryChip category={category} />}
+          <span className="hidden md:inline-block">
+            {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
+            {category && <CategoryChip category={category} />}
+          </span>
           <Link className="text-grey-light align-text-top ml-2 inline-block" href={link} target="_blank">
             <LaunchIcon />
           </Link>
         </div>
+      </div>
+      <div className="md:hidden mt-2">
+        {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
+        {category && <CategoryChip category={category} />}
       </div>
 
       <Typography className="mt-3 mb-3" variant="h5">
