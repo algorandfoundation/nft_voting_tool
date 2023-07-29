@@ -48,7 +48,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                   </div>
                   <div className="table-cell bg-white ">
                     <div className="pl-2 py-4">
-                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.amount).toLocaleString() : 0} mALGO
+                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} mALGO
                     </div>
                   </div>
                   <div className="table-cell bg-white ">
