@@ -22,7 +22,7 @@ export function calculateTotalAskedAndAwarded(
   let totalAsked = 0
 
   //Filtering out a specific misconfigured mock proposal
-  const filteredQuestions = votingRoundMetadata?.questions.filter((question) => question.prompt !== '#1 Mock Proposal')
+  const filteredQuestions = votingRoundMetadata?.questions.filter((question) => !question.prompt.toLowerCase().includes('mock proposal'))
 
   filteredQuestions?.forEach((question) => {
     totalAsked += question.metadata?.ask || 0
