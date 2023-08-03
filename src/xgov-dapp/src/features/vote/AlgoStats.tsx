@@ -22,7 +22,7 @@ const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMe
           <CircleStackIcon className="h-7 w-7 mr-3 -mt-1 text-yellow" />
         </div>
         <div className="w-full">
-          <Typography className="mb-3">ALGO stats</Typography>
+          <Typography className="mb-3">Stats</Typography>
           {isLoading ? (
             <>
               <Skeleton className="h-7 w-full mb-1" variant="text" />
@@ -34,7 +34,7 @@ const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMe
               <Typography className="mb-3">
                 {hasVoteClosed
                   ? `${totalAwarded.toLocaleString()} out of ${totalAsked.toLocaleString()} ALGO awarded`
-                  : `${totalAsked.toLocaleString()} ALGO xGov pool total`}
+                  : `${totalAsked.toLocaleString()} total ALGO asked`}
               </Typography>
               <Typography>{`${(totalAsked - totalAwarded).toLocaleString()} ALGO remaining`}</Typography>
             </>
