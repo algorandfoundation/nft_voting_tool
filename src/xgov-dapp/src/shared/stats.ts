@@ -21,7 +21,10 @@ export function calculateTotalAskedAndAwarded(
   let totalAwarded = 0
   let totalAsked = 0
 
-  votingRoundMetadata?.questions.forEach((question) => {
+  //Filtering out a specific misconfigured mock proposal
+  const filteredQuestions = votingRoundMetadata?.questions.filter((question) => question.prompt !== '#1 Mock Proposal')
+
+  filteredQuestions?.forEach((question) => {
     totalAsked += question.metadata?.ask || 0
     question.options.forEach((option) => {
       if (question.metadata && question.metadata.threshold && optionIdsToCounts[option.id] > question.metadata.threshold) {
