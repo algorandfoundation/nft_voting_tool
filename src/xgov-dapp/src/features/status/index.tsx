@@ -159,7 +159,7 @@ function Status() {
                 <strong>Your xGov deposit</strong>
               </Typography>
               <Typography variant="h3">
-                {govenorData.reduce((sum, item) => sum + parseInt(item.original_reward), 0).toLocaleString()} mALGO
+                {govenorData.reduce((sum, item) => sum + parseInt(item.original_reward), 0).toLocaleString()} µA
               </Typography>
             </div>
           </Box>

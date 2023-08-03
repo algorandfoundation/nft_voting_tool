@@ -44,11 +44,11 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                     <div className="py-4 pl-4">{termPool.name}</div>
                   </div>
                   <div className="table-cell bg-white">
-                    <div className="pl-2 py-4">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
+                    <div className="pl-2 py-4">{parseInt(termPool.total_pool).toLocaleString()} µA</div>
                   </div>
                   <div className="table-cell bg-white ">
                     <div className="pl-2 py-4">
-                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} mALGO
+                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} µA
                     </div>
                   </div>
                   <div className="table-cell bg-white ">
@@ -80,12 +80,12 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                 <div>
                   <strong>Total Pool</strong>
                 </div>
-                <div className="col-span-2">{parseInt(termPool.total_pool).toLocaleString()} mALGO</div>
+                <div className="col-span-2">{parseInt(termPool.total_pool).toLocaleString()} µA</div>
                 <div>
                   <strong>Your deposit</strong>
                 </div>
                 <div className="col-span-2">
-                  {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} mALGO
+                  {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} µA
                 </div>
                 <div>
                   <strong>Duration</strong>
