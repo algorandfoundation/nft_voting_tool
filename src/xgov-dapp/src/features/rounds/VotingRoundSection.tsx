@@ -21,7 +21,7 @@ export const VotingRoundSection = ({ label, globalStates, votingRoundStatus, loa
       <div
         className={clsx(
           'grid grid-cols-1 gap-3 md:gap-8',
-          votingRoundStatus === VotingRoundStatus.CLOSED ? 'sm:grid-cols-3' : 'sm:grid-cols-1',
+          votingRoundStatus === VotingRoundStatus.CLOSED ? 'lg:grid-cols-3' : 'lg:grid-cols-1',
         )}
       >
         {loading ? (

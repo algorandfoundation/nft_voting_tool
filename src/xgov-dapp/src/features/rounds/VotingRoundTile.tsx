@@ -146,7 +146,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
         ) : (
           <Typography variant="h4">{votingRoundMetadata?.title}</Typography>
         )}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div>
             <AlgoStats
               isLoading={isLoadingMetadata || isLoadingVotingRoundResults}
@@ -159,7 +159,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
             <VotingStats isLoading={isLoadingSnapshot} votingRoundGlobalState={globalState} snapshot={snapshot} />
           </div>
           <div>
-            <VotingTime globalState={globalState} loading={false} className="sm:visible" />
+            <VotingTime globalState={globalState} loading={false} className="lg:visible" />
           </div>
         </div>
       </Box>
