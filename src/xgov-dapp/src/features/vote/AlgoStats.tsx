@@ -36,7 +36,7 @@ const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMe
                   ? `${totalAwarded.toLocaleString()} out of ${totalAsked.toLocaleString()} ALGO awarded`
                   : `${totalAsked.toLocaleString()} total ALGO asked`}
               </Typography>
-              <Typography>{`${totalAwarded.toLocaleString()} ALGO approved`}</Typography>
+              <Typography>{!hasVoteClosed ? `${totalAwarded.toLocaleString()} ALGO approved` : ''}&nbsp;</Typography>
             </>
           ) : null}
         </div>
