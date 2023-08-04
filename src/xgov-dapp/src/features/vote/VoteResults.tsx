@@ -68,8 +68,8 @@ export const VoteResults = ({
           <Typography>&#60; Back to Voting sessions</Typography>
         </Link>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="col-span-1 sm:col-span-2">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="col-span-1 xl:col-span-2">
           <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
         </div>
         <div>
@@ -96,9 +96,9 @@ export const VoteResults = ({
           />
         </div>
         <div>
-          <VotingTime className="sm:visible" globalState={votingRoundGlobalState} loading={isLoadingVotingRoundData} />
+          <VotingTime className="xl:visible" globalState={votingRoundGlobalState} loading={isLoadingVotingRoundData} />
         </div>
-        <div className="col-span-1 sm:col-span-3">
+        <div className="col-span-1 xl:col-span-3">
           <Typography variant="h4">Proposals</Typography>
         </div>
         {isLoadingVotingRoundData ||
