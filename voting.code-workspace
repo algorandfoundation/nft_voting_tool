@@ -28,7 +28,6 @@
       "src/voting-metadata-api/": true,
       "src/xgov-dapp/": true,
     },
-    "vite.port": 5173,
     "jest.disabledWorkspaceFolders": [
       "infrastructure",
       "ROOT",
@@ -46,6 +45,7 @@
         "name": "Run All",
         "configurations": [
           { "name": "Run dApp (+ LocalNet)", "folder": "dapp" },
+          { "name": "Run xgov dApp", "folder": "xgov-dapp" },
           { "name": "Run api", "folder": "voting-metadata-api" }
         ],
         "presentation": {
@@ -57,6 +57,7 @@
         "name": "Run All (+ smart contract)",
         "configurations": [
           { "name": "Run dApp", "folder": "dapp" },
+          { "name": "Run xgov dApp", "folder": "xgov-dapp" },
           { "name": "Build & Deploy Beaker application", "folder": "algorand" },
           { "name": "Run api", "folder": "voting-metadata-api" }
         ],
