@@ -4,7 +4,7 @@ import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
-import { DisplayAddress } from '../../shared/DisplayAddress'
+import { VoteType } from '../../shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { useCreatorAddresses } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
@@ -68,20 +68,10 @@ const VotingRounds = () => {
     }
   }, [activeAddress, creatorAddresses, showMyRounds])
 
-  const walletLabel = showMyRounds ? (
-    <DisplayAddress address={activeAddress} />
-  ) : (
-    <>
-      {creatorAddresses.map((address) => (
-        <DisplayAddress key={address} address={address} />
-      ))}
-    </>
-  )
-
   const openRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
         (r: VotingRoundGlobalState) => r.end_time,
       )
     : []
@@ -89,7 +79,7 @@ const VotingRounds = () => {
   const upcomingRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
         (r: VotingRoundGlobalState) => r.start_time,
       )
     : []
@@ -97,7 +87,7 @@ const VotingRounds = () => {
   const closedRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => getHasVoteEnded(r),
+        (r) => getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
         (r: VotingRoundGlobalState) => r.end_time,
       )
     : []

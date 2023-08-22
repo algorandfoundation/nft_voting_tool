@@ -30,6 +30,7 @@ export type VotingRoundGlobalState = {
   total_options: number | undefined
   option_counts: number[] | undefined
   opUpAppId: number | undefined
+  vote_type: VoteType | undefined
 }
 
 export type TallyCounts = {
@@ -349,6 +350,10 @@ export const decodeVotingRoundGlobalState = (
           break
         case 'ouaid':
           decodedState.opUpAppId = Number(state.value.uint)
+          break
+        case 'vote_type':
+          decodedState.vote_type = state.value.uint as VoteType
+          break
       }
     } else {
       switch (globalKey) {

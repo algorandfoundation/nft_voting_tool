@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DisplayAddress } from '../../shared/DisplayAddress'
 import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../shared/VotingRoundContract'
+import { VoteType } from '../../shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { useCreatorAddresses, useSetShowConnectWalletModal } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
@@ -82,7 +83,7 @@ const VotingRounds = () => {
   const openRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type != VoteType.PARTITIONED_WEIGHTING,
         (r: VotingRoundGlobalState) => r.end_time,
       )
     : []
@@ -90,7 +91,7 @@ const VotingRounds = () => {
   const upcomingRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r),
+        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type != VoteType.PARTITIONED_WEIGHTING,
         (r: VotingRoundGlobalState) => r.start_time,
       )
     : []
@@ -99,7 +100,7 @@ const VotingRounds = () => {
     ? getRounds(
         globalStates,
         (r) => getHasVoteEnded(r),
-        (r: VotingRoundGlobalState) => r.end_time,
+        (r: VotingRoundGlobalState) => r.end_time && r.vote_type != VoteType.PARTITIONED_WEIGHTING,
       )
     : []
 
