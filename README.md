@@ -14,6 +14,7 @@ This project contains a number of components:
 
 * [Write-through cache Algorand IPFS gateway](./src/voting-metadata-api/README.md)
 * [Voting dApp](./src/dapp/README.md)
+* [xGov dApp](./src/xgov-dapp/README.md)
 * [Voting smart contract](./src/algorand/README.md)
 * [AWS CDK Infrastructure as Code](./infrastructure/README.md)
 * [GitHub Actions CI/CD pipeline](./.github)
