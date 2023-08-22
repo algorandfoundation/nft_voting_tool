@@ -37,6 +37,8 @@ The dApp is implemented using:
 5. Create voting round -> Sign a series of 3 x transactions in a row
    - Note: all values are immutable once the contract is created
 
+If you get a logic error when voting after creating a contract against LocalNet then the likely cause is you need to reset your LocalNet so the round time of it is synced up against reality (the error you receive is likely voting not started).
+
 ## Snapshot CSV
 
 Here's an example CSV file (with weight included, which is not required if the voting type is `NO_WEIGHTING`). Note: if testing locally, be sure to include the address(es) of the wallet(s) you are using so you can participate in the vote (or not if you are testing what happens when you aren't on the snapshot).

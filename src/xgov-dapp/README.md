@@ -30,6 +30,8 @@ The dApp is implemented using:
 4. Create voting round -> Sign a series of 3 x transactions in a row
    - Note: all values are immutable once the contract is created
 
+If you get a logic error when voting after creating a contract against LocalNet then the likely cause is you need to reset your LocalNet so the round time of it is synced up against reality (the error you receive is likely voting not started).
+
 ## Proposal CSV
 
 The proposal CSV contains the following columns:
