@@ -1,5 +1,5 @@
+import { useWallet } from '@makerxstudio/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
-import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'

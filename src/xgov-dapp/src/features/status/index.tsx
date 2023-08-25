@@ -3,7 +3,7 @@ import { Alert, Box, Button, Link as MuiLink, Skeleton, Typography } from '@mui/
 import { Link } from 'react-router-dom'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 
-import { useWallet } from '@txnlab/use-wallet'
+import { useWallet } from '@makerxstudio/use-wallet'
 import { useEffect, useState } from 'react'
 import { fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { GovenorTermPoolData, TermPool, fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'

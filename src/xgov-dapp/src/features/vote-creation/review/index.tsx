@@ -18,7 +18,7 @@ import {
 } from '../state'
 import { ConfirmationDialog } from './ConfirmationDialog'
 
-import { useWallet } from '@txnlab/use-wallet'
+import { useWallet } from '@makerxstudio/use-wallet'
 import Papa from 'papaparse'
 import { VotingRoundGlobalState } from '../../../../../dapp/src/shared/VotingRoundContract'
 import { VoteType } from '../../../../../dapp/src/shared/types'

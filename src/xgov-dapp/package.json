@@ -22,13 +22,14 @@
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.16",
     "@makerx/forms-mui": "^1.1.0",
+    "@makerxstudio/use-wallet": "^3.0.0",
     "@mui/icons-material": "^5.11.11",
     "@mui/material": "^5.11.13",
     "@mui/x-date-pickers": "^6.0.2",
     "@noble/ed25519": "^2.0.0",
     "@tailwindcss/forms": "^0.5.3",
-    "@txnlab/use-wallet": "^2.0.0",
     "@walletconnect/modal-sign-html": "^2.5.9",
+    "algosdk": "^2.5.0",
     "buffer": "^6.0.3",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.7",
@@ -81,7 +82,7 @@
   },
   "overrides": {
     "@blockshake/defly-connect": {
-      "algosdk": "^2.1.0"
+      "algosdk": "^2.5.0"
     },
     "postcss-load-config": {
       "yaml": "2.2.2"

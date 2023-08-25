@@ -1,6 +1,6 @@
 import { Disclosure, Popover } from '@headlessui/react'
+import { useWallet } from '@makerxstudio/use-wallet'
 import { Typography } from '@mui/material'
-import { useWallet } from '@txnlab/use-wallet'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
 import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'

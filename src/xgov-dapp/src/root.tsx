@@ -1,6 +1,6 @@
+import { WalletProvider } from '@makerxstudio/use-wallet'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { WalletProvider } from '@txnlab/use-wallet'
 import { PropsWithChildren } from 'react'
 import { Outlet } from 'react-router-dom'
 import SiteFooter from './components/siteFooter'

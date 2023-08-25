@@ -1,5 +1,5 @@
+import { useWallet } from '@makerxstudio/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
-import { useWallet } from '@txnlab/use-wallet'
 import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
