@@ -1,4 +1,4 @@
-import { useWallet } from '@makerxstudio/use-wallet'
+import { useWallet } from '@makerx/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'

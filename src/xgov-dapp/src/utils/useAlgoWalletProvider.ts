@@ -11,7 +11,7 @@ import {
   PROVIDER_ID,
   ProvidersArray,
   useInitializeProviders,
-} from '@makerxstudio/use-wallet'
+} from '@makerx/use-wallet'
 import { PeraWalletConnect } from '@perawallet/connect'
 import { WalletConnectModalSign } from '@walletconnect/modal-sign-html'
 import type _algosdk from 'algosdk'

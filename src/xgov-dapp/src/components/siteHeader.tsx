@@ -1,5 +1,5 @@
 import { Disclosure, Popover } from '@headlessui/react'
-import { useWallet } from '@makerxstudio/use-wallet'
+import { useWallet } from '@makerx/use-wallet'
 import { Typography } from '@mui/material'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'

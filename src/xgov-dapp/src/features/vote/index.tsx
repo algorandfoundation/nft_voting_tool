@@ -1,5 +1,5 @@
 import { HandThumbUpIcon } from '@heroicons/react/24/solid'
-import { useWallet } from '@makerxstudio/use-wallet'
+import { useWallet } from '@makerx/use-wallet'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
