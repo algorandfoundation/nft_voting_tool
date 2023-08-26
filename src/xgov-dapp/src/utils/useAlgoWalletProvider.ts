@@ -32,8 +32,6 @@ class ManualSigningProvider implements CustomProvider {
     }
     const authAddress = address ? prompt("Enter address of the signing account; leave blank if account hasn't been rekeyed") : undefined
 
-    localStorage.setItem('use-wallet:custom', JSON.stringify({ address, authAddress }))
-
     return {
       ...metadata,
       accounts: address
