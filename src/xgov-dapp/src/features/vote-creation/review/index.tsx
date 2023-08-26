@@ -120,6 +120,7 @@ export default function Review() {
     quorum: 0,
     total_options: 0,
     voter_count: 0,
+    vote_type: undefined,
   } as VotingRoundGlobalState
 
   return (
