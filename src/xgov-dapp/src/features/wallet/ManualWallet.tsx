@@ -49,10 +49,8 @@ const ManualWallet = (props: { manualWalletClient: custom | undefined }) => {
             </p>
             <ol>
               <li>
-                <div className="flex">
-                  <span className="flex-shrink">Copy the unsigned transaction payload </span>
-                  <CopyToClipBoard className="flex-1 w-4 h-4 ml-2 hover:text-purple" valueToCopy={manualWalletModal.payloadToSign} />
-                </div>
+                <span>Copy the unsigned transaction payload </span>
+                <CopyToClipBoard className="w-4 h-4 hover:text-purple" valueToCopy={manualWalletModal.payloadToSign} />
               </li>
               <li>
                 Load the value from the clipboard into a binary file e.g.
