@@ -1,6 +1,8 @@
 import { ValidatedForm, zfd } from '@makerx/forms-mui'
 import { custom } from '@makerx/use-wallet'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
+import { useRef } from 'react'
+import { UseFormReturn } from 'react-hook-form'
 import * as z from 'zod'
 import CopyToClipBoard from './copyToClipBoard'
 import { ManualSigningProvider, useManualWalletModal, useSetShowManualWalletModal } from './manualSigningProvider'
@@ -13,6 +15,7 @@ type Fields = z.infer<typeof formSchema>
 const ManualWallet = (props: { manualWalletClient: custom | undefined }) => {
   const manualWalletModal = useManualWalletModal()
   const setShowManualWalletModal = useSetShowManualWalletModal()
+  const formRef = useRef<UseFormReturn<Fields>>()
 
   const provider = props.manualWalletClient?.providerProxy as ManualSigningProvider | undefined
 
@@ -24,6 +27,9 @@ const ManualWallet = (props: { manualWalletClient: custom | undefined }) => {
   const onSubmit = (data: Fields) => {
     provider?.submitted(data.signedPayload)
     setShowManualWalletModal(false)
+    formRef.current?.reset({
+      signedPayload: '',
+    })
   }
 
   return (
@@ -78,7 +84,7 @@ const ManualWallet = (props: { manualWalletClient: custom | undefined }) => {
               <li>Past the value below and hit submit.</li>
             </ol>
             <hr />
-            <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit}>
+            <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} formContextRef={formRef}>
               {(helper) => (
                 <>
                   {helper.textField({
