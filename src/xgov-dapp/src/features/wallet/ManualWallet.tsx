@@ -81,7 +81,7 @@ const ManualWallet = (props: { manualWalletClient: custom | undefined }) => {
                 </div>
               </li>
               <li>Copy the signed transaction output to clipboard</li>
-              <li>Past the value below and hit submit.</li>
+              <li>Paste the value below and hit submit.</li>
             </ol>
             <hr />
             <ValidatedForm className="flex-row space-y-4" validator={formSchema} onSubmit={onSubmit} formContextRef={formRef}>
