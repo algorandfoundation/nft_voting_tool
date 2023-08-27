@@ -1,4 +1,4 @@
-import { WalletProvider } from '@makerx/use-wallet'
+import { WalletProvider, custom } from '@makerx/use-wallet'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { PropsWithChildren } from 'react'
@@ -6,6 +6,7 @@ import { Outlet } from 'react-router-dom'
 import SiteFooter from './components/siteFooter'
 import SiteHeader from './components/siteHeader'
 import ConnectWallet from './features/wallet/ConnectWallet'
+import ManualWallet from './features/wallet/ManualWallet'
 import ScrollToTop from './shared/router/ScrollToTop'
 import { useAlgoWallet } from './utils/useAlgoWalletProvider'
 
@@ -34,6 +35,13 @@ export default function Root() {
           </div>
         </SiteContent>
         <ConnectWallet />
+        <ManualWallet
+          manualWalletClient={
+            walletProviders.walletProviders && walletProviders.walletProviders.custom
+              ? (walletProviders.walletProviders.custom as custom)
+              : undefined
+          }
+        />
         <SiteFooter />
         <ScrollToTop />
       </WalletProvider>
