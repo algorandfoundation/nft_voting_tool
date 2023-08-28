@@ -1,0 +1,168 @@
+<mxfile host="65bd71144e" scale="2" border="0">
+    <diagram id="9uPX7DBKB3LBFImrSSiH" name="Page-1">
+        <mxGraphModel dx="1429" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="7" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="863" y="30" width="240" height="345" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;Voting Round&lt;br&gt;&lt;br&gt;App ID: Algorand app ID&lt;br&gt;vote_id: V{creation time as base-32 number}&lt;br&gt;&lt;br&gt;is_bootstrapped: boolean&lt;br&gt;ouaid: Algorand app ID of Op Up app&lt;br&gt;&lt;br&gt;start_time: unix epoch timestamp&lt;br&gt;close_time: unix epoch timestamp&lt;br&gt;end_time: 0 | unix epoch timestamp&lt;br&gt;&lt;br&gt;vote_type: VoteType&lt;br&gt;option_counts: int[]&lt;br&gt;total_options: int&lt;br&gt;metadata_ipfs_cid: IPFS CID&lt;br&gt;snapshot_public_key: public key bytes&lt;br&gt;quorum: int&lt;br&gt;&lt;br&gt;voter_count: int&lt;br&gt;&lt;br&gt;nft_asset_id: Algorand asset ID&lt;br&gt;nft_image_url: URL" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;verticalAlign=top;align=left;" vertex="1" parent="7">
+                    <mxGeometry width="240" height="345" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="7">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="31.363636363636363" as="sourcePoint"/>
+                        <mxPoint x="240" y="31.363636363636363" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="" style="endArrow=none;html=1;fontColor=#000000;entryX=1;entryY=0.176;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#000000;" edge="1" parent="7">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="73.26545454545453" as="sourcePoint"/>
+                        <mxPoint x="240" y="73.18181818181812" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="9" value="Creates as Algorand app&lt;br&gt;and bootstraps" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;fontColor=#000000;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="8" target="2">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="Generates&lt;br&gt;Uploads to IPFS&lt;br&gt;via write-through cache API" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" edge="1" parent="1" source="8" target="11">
+                    <mxGeometry x="-0.0025" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="8" value="Vote creator" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fillColor=#FFFFFF;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="45" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="650" y="185" width="140" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Vote Type&lt;br&gt;&lt;br&gt;0 = No snapshot&lt;br&gt;1 = No weighting&lt;br&gt;2 = Weighting&lt;br&gt;3 = Partitioned weighting" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;align=left;verticalAlign=top;" vertex="1" parent="17">
+                    <mxGeometry width="140" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="17">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="28" as="sourcePoint"/>
+                        <mxPoint x="140" y="28" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="18" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=none;endFill=0;exitX=0;exitY=0.546;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="2" target="4">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="400" y="275" width="240" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="" style="group" vertex="1" connectable="0" parent="20">
+                    <mxGeometry width="240" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="" style="group" vertex="1" connectable="0" parent="10">
+                    <mxGeometry width="240" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;Voting Round Metadata&lt;br&gt;&lt;br&gt;vote_id: V{creation time as base-32 number}&lt;br&gt;&lt;br&gt;type: VoteType&lt;br&gt;title: string&lt;br&gt;description: string&lt;br&gt;informationUrl: URL&lt;br&gt;start: ISO8601 date string&lt;br&gt;end: ISO8601 date string&lt;br&gt;voteGatingSnapshotCid: IPFS CID&lt;br&gt;&lt;br&gt;questions: Question[]&lt;br&gt;&lt;br&gt;created.at: ISO8601 string&lt;br&gt;created.by: Algorand account address" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;verticalAlign=top;align=left;" vertex="1" parent="31">
+                    <mxGeometry width="240" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="31">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="27.99818181818182" as="sourcePoint"/>
+                        <mxPoint x="240" y="27.99818181818182" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="" style="endArrow=none;html=1;fontColor=#000000;entryX=1;entryY=0.176;entryDx=0;entryDy=0;entryPerimeter=0;strokeColor=#000000;" edge="1" parent="20">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="58.079999999999984" as="sourcePoint"/>
+                        <mxPoint x="240" y="57.99999999999994" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" style="edgeStyle=none;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=none;endFill=0;entryX=0.004;entryY=0.667;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="11" target="2">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="640" y="485" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="29" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=none;endFill=0;exitX=0.007;exitY=0.651;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="11" target="25">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="Generates and discards private key&lt;br&gt;Uploads to IPFS&lt;br&gt;via write-through cache API" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;" edge="1" parent="1" source="8" target="25">
+                    <mxGeometry x="-0.3018" y="1" relative="1" as="geometry">
+                        <mxPoint x="325.83333333333326" y="115" as="sourcePoint"/>
+                        <mxPoint x="380" y="265" as="targetPoint"/>
+                        <mxPoint x="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="10" y="386" width="240" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;Voting Snapshot&lt;br&gt;&lt;br&gt;title: string&lt;br&gt;publicKey: Base64 public key bytes&lt;br&gt;snapshot: Snapshot[]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;verticalAlign=top;align=left;" vertex="1" parent="24">
+                    <mxGeometry width="240" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="26" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="24">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="28.996818181818185" as="sourcePoint"/>
+                        <mxPoint x="240" y="28.996818181818185" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="10" y="535" width="240" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;Snapshot&lt;br&gt;&lt;br&gt;address: Algorand account address&lt;br&gt;signature: Base64 encoded signature&lt;br&gt;weight: (Optional) int" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;align=left;verticalAlign=top;" vertex="1" parent="32">
+                    <mxGeometry width="240" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="32">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="28" as="sourcePoint"/>
+                        <mxPoint x="240" y="28" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="35" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=ERmany;endFill=0;" edge="1" parent="1" source="25" target="33">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" style="edgeStyle=none;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=none;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="4">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="486.00860595703125" y="346.6770553588867" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="650" y="345"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="37" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="400" y="535" width="240" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Question&lt;br&gt;&lt;br&gt;id: GUID&lt;br&gt;prompt: string&lt;br&gt;description: string&lt;br&gt;options: {id: GUID, label: string}[]&lt;br&gt;metadata: (Optional) JSON object" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;align=left;verticalAlign=top;" vertex="1" parent="37">
+                    <mxGeometry width="240" height="110.00000000000001" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="" style="endArrow=none;html=1;fontColor=#000000;strokeColor=#000000;" edge="1" parent="37">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint y="30.800000000000004" as="sourcePoint"/>
+                        <mxPoint x="240" y="30.800000000000004" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="40" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=ERmany;endFill=0;" edge="1" parent="1" source="11" target="38">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" value="Get voting round global state" style="edgeStyle=none;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="41" target="2">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="Download voting round metadata" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="41" target="11">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="Retrieve signature and weight for connected wallet address" style="edgeStyle=none;html=1;entryX=1;entryY=0.75;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="41" target="25">
+                    <mxGeometry x="-0.6098" y="2" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="640" y="675"/>
+                            <mxPoint x="340" y="675"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="45" value="Cast vote" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;endArrow=classic;endFill=1;" edge="1" parent="1" source="41" target="2">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1150" y="515"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="41" value="Voter" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;labelBackgroundColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fillColor=#FFFFFF;" vertex="1" parent="1">
+                    <mxGeometry x="968" y="485" width="30" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

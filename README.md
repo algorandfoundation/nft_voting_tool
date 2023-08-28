@@ -25,7 +25,7 @@ This project contains a number of components:
 
 ### Entities
 
-
+![Key entities](./docs/entities.png)
 
 ### Voting round creation
 
