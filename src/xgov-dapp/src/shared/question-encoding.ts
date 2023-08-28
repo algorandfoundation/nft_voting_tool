@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { AppReference, BoxReference } from '@algorandfoundation/algokit-utils/types/app'
 import * as uuid from 'uuid'
 

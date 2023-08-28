@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
