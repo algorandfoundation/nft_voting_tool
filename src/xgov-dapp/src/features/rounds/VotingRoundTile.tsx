@@ -135,7 +135,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
           </div>
           <div>
             {votingRoundStatus === VotingRoundStatus.OPEN && (
-              <Button href={`/vote/${globalState.appId}`} variant="contained" color="primary">
+              <Button component={Link} to={`/vote/${globalState.appId}`} variant="contained" color="primary">
                 View Proposals
               </Button>
             )}
