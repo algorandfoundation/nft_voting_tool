@@ -351,7 +351,7 @@ function Vote() {
               </div>
             )}
             {votingRoundMetadata?.questions.map((question, index) => (
-              <div className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
+              <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                 <div className="col-span-2">
                   {question.metadata && (
                     <ProposalCard
