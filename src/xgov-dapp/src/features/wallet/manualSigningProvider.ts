@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer'
 import { CustomProvider, Metadata, PROVIDER_ID } from '@makerx/use-wallet'
 import type _algosdk from 'algosdk'
 import { DefaultValue, SetterOrUpdater, atom, selector, useRecoilValue, useSetRecoilState } from 'recoil'
