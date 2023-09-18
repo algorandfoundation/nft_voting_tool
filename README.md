@@ -21,6 +21,49 @@ This project contains a number of components:
 
 ![Architecture](docs/architecture.png)
 
+## Flow
+
+### Entities
+
+![Key entities](./docs/entities.png)
+
+### Voting round creation
+
+```mermaid
+sequenceDiagram
+    Vote creator->>+dApp:Specify voting round details
+    Vote creator->>+dApp:Confirm
+    dApp->>+Wallet:Trigger signature
+    Wallet->>-Vote creator:Sign authorisation transaction
+    dApp->>IPFS:Upload voting snapshot
+    dApp->>-IPFS:Upload voting round metadata
+    dApp->>+Wallet:Trigger signature
+    Wallet->>-Vote creator:Sign app creation transactions
+    dApp->>+Wallet:Trigger signature
+    Wallet->>-Vote creator:Sign app bootstrap transaction
+    dApp-->>-Vote creator:Voting round created
+```
+
+### Voting
+
+```mermaid
+sequenceDiagram
+    Voter->>+dApp:View voting round
+    dApp->>Algorand:Get app global state
+    dApp->>IPFS:Get voting round metadata
+    dApp->>IPFS:Get voting snapshot
+    dApp-->>-Voter:Display voting round
+    Voter->>dApp:Select vote options
+    Voter->>+dApp:Cast vote
+    dApp->>+Wallet:Trigger signature
+    Wallet->>Voter:Sign fee payment transaction
+    Wallet->>-Voter:Sign app  call transaction
+    dApp->>Algorand:Submit voting transaction group
+    dApp-->>-Voter:Vote casted
+```
+
+
+
 ## Development setup
 To run the application locally you need 3 components running:
 
