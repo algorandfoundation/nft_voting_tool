@@ -172,7 +172,19 @@ function Status() {
               <Typography className="mb-3">
                 <strong>Total earnings from xGov participation</strong>
               </Typography>
-              <Typography variant="h3">- ALGO</Typography>
+              <Typography variant="h3">
+                {govenorData
+                  .reduce(
+                    (prev, current) =>
+                      prev +
+                      (current?.current_reward
+                        ? Math.floor(Number(current?.current_reward) - parseInt(current?.original_reward)) / 1_000_000
+                        : 0),
+                    0,
+                  )
+                  .toLocaleString()}{' '}
+                ALGO
+              </Typography>
             </div>
           </Box>
         )}

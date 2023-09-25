@@ -58,7 +58,13 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                     </div>
                   </div>
                   <div className="table-cell bg-white rounded-r-lg">
-                    <div className="pl-2 py-4">-</div>
+                    <div className="pl-2 py-4">
+                      {termPoolGovenorData && termPoolGovenorData?.current_reward
+                        ? `${Math.floor(
+                            Number(termPoolGovenorData?.current_reward) - parseInt(termPoolGovenorData?.original_reward),
+                          ).toLocaleString()} µA`
+                        : '-'}
+                    </div>
                   </div>
                 </div>
               )
@@ -97,7 +103,13 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                 <div>
                   <strong>Earnings / Losses</strong>
                 </div>
-                <div className="col-span-2">-</div>
+                <div className="col-span-2">
+                  {termPoolGovenorData && termPoolGovenorData?.current_reward
+                    ? `${Math.floor(
+                        Number(termPoolGovenorData?.current_reward) - parseInt(termPoolGovenorData?.original_reward),
+                      ).toLocaleString()} µA`
+                    : '-'}
+                </div>
               </div>
             )
           })}
