@@ -1,0 +1,9 @@
+{
+  "name": "xgov.algorand.foundation",
+  "workspaces": [
+    "src/*",
+    "src/algorand/smart-contracts"
+  ],
+  "author": "Algorand Foundation",
+  "license": "MIT"
+}

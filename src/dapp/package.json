@@ -1,5 +1,5 @@
 {
-  "name": "algorand-voting-tool",
+  "name": "algorand-voting-tool-deprecated",
   "private": true,
   "version": "0.0.0",
   "scripts": {
