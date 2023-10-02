@@ -1,15 +1,18 @@
 import { HandThumbUpIcon } from '@heroicons/react/24/solid'
 import { useWallet } from '@makerx/use-wallet'
 import CancelIcon from '@mui/icons-material/Cancel'
-import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useState } from 'react'
+import type { MouseEvent } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
+import SortIcon from '@mui/icons-material/Sort'
 import {
   VoteGatingSnapshot,
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
+  Question,
 } from '../../../../dapp/src/shared/IPFSGateway'
 import {
   TallyCounts,
@@ -29,7 +32,8 @@ import { VoteResults } from './VoteResults'
 import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-
+import { FilterMenu, SelectedItem } from './FilterMenu'
+import ClearIcon from '@mui/icons-material/Clear';
 function Vote() {
   const { voteId: voteIdParam } = useParams()
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -87,6 +91,13 @@ function Vote() {
   if (voteIdParam && import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(voteIdParam)) {
     navigate('/')
   }
+
+  const [sort, setSort] = useState<'ascending' | 'descending' | 'none'>('none')
+
+  /**
+   * Users Current Filter
+   */
+  const [filteredItems, setFilteredItems] = useState<SelectedItem[]>([])
 
   const updateVoteAllocations = (proposalId: string, amount: number) => {
     const newVoteAllocationsPercentage = { ...voteAllocationsPercentage }
@@ -275,6 +286,55 @@ function Vote() {
     refetchVoteRoundData(voteId)
   }
 
+  /**
+   * Handle Filter Chip Interactions
+   */
+  function handleFilterChange(type: string, name: string) {
+    const names = filteredItems.map((fa) => fa.name)
+    // Remove Filter
+    if (names.includes(name)) {
+      // Clone the current state to make it mutable
+      const clonedItems = [...filteredItems]
+      clonedItems.splice(names.indexOf(name), 1)
+      setFilteredItems(clonedItems)
+    }
+    // Add Filter
+    else {
+      setFilteredItems([...filteredItems, { name, type }])
+    }
+  }
+  function handleClearFilter() {
+    setFilteredItems([])
+    setSort('none')
+  }
+  function handleSortToggle() {
+    if (sort === 'ascending') {
+      setSort('descending')
+    } else {
+      setSort('ascending')
+    }
+  }
+  /**
+   * Filter Questions based on current state
+   */
+  function filterQuestions(q: Question) {
+    if (typeof q?.metadata?.focus_area !== 'string' || typeof q?.metadata?.category !== 'string') {
+      throw new TypeError('Invalid metadata')
+    }
+    const isFocus = (fa: SelectedItem) => q.metadata.focus_area === fa.name && fa.type === 'focus'
+    const isCategory = (fa: SelectedItem) => q.metadata.category === fa.name && fa.type === 'category'
+    return filteredItems.length === 0 || filteredItems.some((fa) => isFocus(fa) || isCategory(fa))
+  }
+
+  function sortQuestions(a: Question, b: Question) {
+    if (typeof a?.metadata?.ask !== 'number' || typeof b?.metadata?.ask !== 'number') {
+      throw new TypeError('Invalid Metadata')
+    }
+    if(sort === 'none') return 0
+    const isSorted = sort === 'ascending' ? a.metadata.ask < b.metadata.ask : a.metadata.ask > b.metadata.ask
+    return isSorted ? -1 : 1
+  }
+
   if (hasClosed && votingRoundGlobalState) {
     return (
       <VoteResults
@@ -350,61 +410,70 @@ function Vote() {
                 <Skeleton className="h-40" variant="rectangular" />
               </div>
             )}
-            {votingRoundMetadata?.questions.map((question, index) => (
-              <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
-                <div className="col-span-2">
-                  {question.metadata && (
-                    <ProposalCard
-                      title={question.prompt}
-                      description={question.description}
-                      category={question.metadata.category}
-                      focus_area={question.metadata.focus_area}
-                      link={question.metadata.link}
-                      threshold={question.metadata.threshold}
-                      ask={question.metadata.ask}
-                      votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
-                    />
-                  )}
-                </div>
-                <div className="flex items-center col-span-1 bg-gray-100 m-3">
-                  {canVote && !hasVoted && (
-                    <>
-                      <TextField
-                        type="number"
-                        className="w-32 bg-white m-4 rounded-xl"
-                        disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
-                        InputProps={{
-                          inputProps: {
-                            max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
-                            min: 0,
-                          },
-                          endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                        }}
-                        id={question.id}
-                        variant="outlined"
-                        onChange={(e) => {
-                          updateVoteAllocations(question.id, parseFloat(e.target.value))
-                        }}
-                        value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
+            {votingRoundMetadata?.questions
+              .filter(filterQuestions)
+              .sort(sortQuestions)
+              .map((question, index) => (
+                <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
+                  <div className="col-span-2">
+                    {question.metadata && (
+                      <ProposalCard
+                        title={question.prompt}
+                        description={question.description}
+                        category={question.metadata.category}
+                        focus_area={question.metadata.focus_area}
+                        link={question.metadata.link}
+                        threshold={question.metadata.threshold}
+                        ask={question.metadata.ask}
+                        votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
                       />
-                      <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
-                    </>
-                  )}
+                    )}
+                  </div>
+                  <div className="flex items-center col-span-1 bg-gray-100 m-3">
+                    {canVote && !hasVoted && (
+                      <>
+                        <TextField
+                          type="number"
+                          className="w-32 bg-white m-4 rounded-xl"
+                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
+                          InputProps={{
+                            inputProps: {
+                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
+                              min: 0,
+                            },
+                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                          }}
+                          id={question.id}
+                          variant="outlined"
+                          onChange={(e) => {
+                            updateVoteAllocations(question.id, parseFloat(e.target.value))
+                          }}
+                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
+                        />
+                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         <div className="col-span-1 justify-between flex flex-col">
           <div className="hidden md:block">
             {!isLoadingVotingRoundData && (
-              <div className="mb-2">
-                <VoteDetails
-                  loading={isLoadingVotingRoundData}
-                  appId={voteId}
-                  globalState={votingRoundGlobalState}
-                  roundMetadata={votingRoundMetadata}
+              <div className="mb-2 mt-8 flex justify-end">
+                <IconButton onClick={handleClearFilter}>
+                  <ClearIcon />
+                </IconButton>
+                <IconButton onClick={handleSortToggle}>
+                  <SortIcon />
+                </IconButton>
+                <FilterMenu
+                  questions={votingRoundMetadata?.questions}
+                  selected={filteredItems}
+                  onChange={handleFilterChange}
+                  onClear={handleClearFilter}
                 />
               </div>
             )}
@@ -462,7 +531,16 @@ function Vote() {
                   <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
                 </div>
               )}
-
+              {!isLoadingVotingRoundData && (
+                <div className="mt-4">
+                  <VoteDetails
+                    loading={isLoadingVotingRoundData}
+                    appId={voteId}
+                    globalState={votingRoundGlobalState}
+                    roundMetadata={votingRoundMetadata}
+                  />
+                </div>
+              )}
               {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
                 <div className="mb-4">
                   <CloseVotingRound
