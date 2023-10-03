@@ -63,7 +63,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: "npm"
-          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Pre-run
         if: ${{ inputs.pre-run-script }}

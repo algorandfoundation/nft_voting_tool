@@ -55,7 +55,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: "npm"
-          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       # prepare static sites for config transformation upon later deployment
       - if: ${{ inputs.static-site }}

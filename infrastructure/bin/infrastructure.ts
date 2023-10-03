@@ -93,12 +93,12 @@ const responseHeaders: ResponseHeadersPolicyProps = {
   removeHeaders: ['server'],
 }
 
-const app = deployer.deploy(StaticWebsiteStack, 'web', {
-  websiteFolder: process.env.WEBSITE_BUILD_PATH ?? path.join(__dirname, '..', '..', 'src', 'dapp', 'dist'),
-  websiteNpmBuildCommand: 'build-dapp',
-  customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, appDomainName),
-  responseHeaders: responseHeaders,
-})
+// const app = deployer.deploy(StaticWebsiteStack, 'web', {
+//   websiteFolder: process.env.WEBSITE_BUILD_PATH ?? path.join(__dirname, '..', '..', 'src', 'dapp', 'dist'),
+//   websiteNpmBuildCommand: 'build-dapp',
+//   customDomain: dns?.getDefaultCustomDomainProps(deployer.defaultRegion, appDomainName),
+//   responseHeaders: responseHeaders,
+// })
 
 const api = deployer.deploy(ApiStack, 'api', {
   apiBuildFolder: process.env.API_BUILD_PATH ?? path.join(__dirname, '..', '..', 'src', 'voting-metadata-api', 'build'),
@@ -120,7 +120,7 @@ const xGovApp = deployer.deploy(StaticWebsiteStack, 'xgovweb', {
 })
 
 if (dns) {
-  app.addDependency(dns)
+  // app.addDependency(dns)
   api.addDependency(dns)
 }
 

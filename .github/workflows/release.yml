@@ -15,19 +15,11 @@ permissions:
   packages: read
 
 jobs:
-  ci-dapp:
-    name: CI Dapp
-    uses: ./.github/workflows/node-ci.yml
-    with:
-      working-directory: ./src/dapp
-      compile-script: npm run typecheck
-      audit-script: npm run audit
   ci-xgov-dapp:
     name: CI xGov Dapp
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/xgov-dapp
-      pre-run-script: cd ../dapp && npm ci
       compile-script: npm run typecheck
       audit-script: npm run audit
   ci-api:
@@ -49,24 +41,11 @@ jobs:
     with:
       working-directory: ./src/algorand
 
-  build-dapp:
-    name: Build Dapp
-    uses: ./.github/workflows/node-build-zip.yml
-    with:
-      working-directory: ./src/dapp
-      build-path: dist
-      artifact-name: dapp
-      static-site: true
-      static-site-env-prefix: VITE
-    needs:
-      - ci-dapp
-      - ci-algorand
   build-xgov-dapp:
     name: Build xGov Dapp
     uses: ./.github/workflows/node-build-zip.yml
     with:
       working-directory: ./src/xgov-dapp
-      pre-run-script: cd ../dapp && npm ci
       build-path: dist
       artifact-name: xgov-dapp
       static-site: true
@@ -97,7 +76,6 @@ jobs:
     environment: Dev
     concurrency: "${{ github.workflow }}-dev"
     needs:
-      - build-dapp
       - build-xgov-dapp
       - build-infrastructure
       - build-api
@@ -110,7 +88,6 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
           BASE_DOMAIN: algorand.foundation
-          WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
@@ -119,7 +96,6 @@ jobs:
           API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
-            dapp:dapp/dist
             xgov-dapp:xgov-dapp/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -160,7 +136,6 @@ jobs:
           CDK_DEFAULT_ACCOUNT: ${{ secrets.CDK_DEFAULT_ACCOUNT }}
           AWS_DEFAULT_REGION: us-west-2
           BASE_DOMAIN: algorand.foundation
-          WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
@@ -169,7 +144,6 @@ jobs:
           API_BINARY_CONTENT_TYPES: 'image/*'
         with:
           app-artifact-unzips: |-
-            dapp:dapp/dist
             xgov-dapp:xgov-dapp/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

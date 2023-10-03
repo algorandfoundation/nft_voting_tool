@@ -51,8 +51,8 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: "npm"
-          cache-dependency-path: ${{ inputs.working-directory }}/smart_contracts/package-lock.json
-      
+          cache-dependency-path: ./package-lock.json
+
       # python dependencies
       - name: poetry install
         run: poetry install --no-interaction
