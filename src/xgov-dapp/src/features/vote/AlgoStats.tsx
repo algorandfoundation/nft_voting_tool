@@ -1,9 +1,9 @@
 import { CircleStackIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Typography } from '@mui/material'
 import React from 'react'
-import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { TallyCounts } from '../../../../dapp/src/shared/VotingRoundContract'
-import { calculateTotalAskedAndAwarded } from '../../shared/stats'
+import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { TallyCounts } from '@/shared/VotingRoundContract'
+import { calculateTotalAskedAndAwarded } from '@/shared/stats'
 
 interface AlgoStatsProps {
   votingRoundResults: TallyCounts | undefined

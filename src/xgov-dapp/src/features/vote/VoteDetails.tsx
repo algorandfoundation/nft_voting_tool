@@ -1,15 +1,14 @@
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Box, Link } from '@mui/material'
-import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 
 type VoteDetailsProps = {
-  loading: boolean
   appId: number
   globalState: VotingRoundGlobalState | undefined
   roundMetadata: VotingRoundMetadata | undefined
 }
-export const VoteDetails = ({ loading, appId: voteId, globalState, roundMetadata }: VoteDetailsProps) => {
+export const VoteDetails = ({ appId: voteId, globalState, roundMetadata }: VoteDetailsProps) => {
   return (
     <>
       {globalState && roundMetadata && (

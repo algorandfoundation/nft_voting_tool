@@ -10,18 +10,18 @@ import {
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
-} from '../../../../dapp/src/shared/IPFSGateway'
+} from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
   fetchTallyCounts,
   fetchVoterVotes,
   fetchVotingRoundGlobalState,
-} from '../../../../dapp/src/shared/VotingRoundContract'
-import { ProposalCard } from '../../shared/ProposalCard'
-import api from '../../shared/api'
-import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+} from '@/shared/VotingRoundContract'
+import { ProposalCard } from '@/shared/ProposalCard'
+import api from '@/shared/api'
+import { LoadingDialog } from '@/shared/loading/LoadingDialog'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
 import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { VoteDetails } from './VoteDetails'

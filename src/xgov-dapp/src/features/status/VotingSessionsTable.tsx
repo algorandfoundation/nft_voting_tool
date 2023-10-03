@@ -4,11 +4,11 @@ import clsx from 'clsx'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VotingRoundMetadata, fetchVotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState, fetchVoterVotes } from '../../../../dapp/src/shared/VotingRoundContract'
-import { OpeningSoonChip, YouDidNotVoteChip, YouVotedChip } from '../../shared/Chips'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { TermPool } from '../../shared/xGovApi'
+import { VotingRoundMetadata, fetchVotingRoundMetadata } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState, fetchVoterVotes } from '@/shared/VotingRoundContract'
+import { OpeningSoonChip, YouDidNotVoteChip, YouVotedChip } from '@/shared/Chips'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
+import { TermPool } from '@/shared/xGovApi'
 
 interface VotingSessionsTableProps {
   globalStates: VotingRoundGlobalState[]
@@ -87,7 +87,7 @@ function VotingSessionRow({
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
-  const hasVoted = voterVotes !== undefined ? true : false
+  const hasVoted = typeof voterVotes !== 'undefined'
   const hasVoteStarted = !globalState ? false : getHasVoteStarted(globalState)
   const hasVoteEnded = !globalState ? false : getHasVoteEnded(globalState)
   const canVote = hasVoteStarted && !hasVoteEnded

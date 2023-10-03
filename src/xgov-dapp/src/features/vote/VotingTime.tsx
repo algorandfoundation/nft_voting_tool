@@ -2,8 +2,8 @@ import { ClockIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
 dayjs.extend(relativeTime)
 
 type VotingTimeProps = {

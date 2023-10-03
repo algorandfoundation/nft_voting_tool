@@ -2,8 +2,8 @@ import { Alert, Button, Link, TextField, Typography } from '@mui/material'
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../../shared/api'
-import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
+import api from '@/shared/api'
+import { LoadingDialog } from '@/shared/loading/LoadingDialog'
 import {
   VoteCreationReviewSteps,
   useAppReference,
@@ -20,9 +20,9 @@ import { ConfirmationDialog } from './ConfirmationDialog'
 
 import { useWallet } from '@makerx/use-wallet'
 import Papa from 'papaparse'
-import { VotingRoundGlobalState } from '../../../../../dapp/src/shared/VotingRoundContract'
-import { VoteType } from '../../../../../dapp/src/shared/types'
-import { ProposalCard } from '../../../shared/ProposalCard'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
+import { VoteType } from '@/shared/types'
+import { ProposalCard } from '@/shared/ProposalCard'
 import { VotingTime } from '../../vote/VotingTime'
 import { Proposal } from '../RoundInfo'
 

@@ -165,14 +165,12 @@ export const create = async (
     algod,
   )
 
-  const app = await appClient.create({
+  return await appClient.create({
     method: 'create',
     methodArgs: [voteId, voteType, publicKey, cid, start, end, questionCounts, quorum, nftImageUrl],
     deletable: false,
     sendParams: { fee: (1_000 + 1_000 * 4).microAlgos() },
   })
-
-  return app
 }
 
 export const bootstrap = async (sender: TransactionSignerAccount, app: AppReference, totalQuestionOptions: number) => {
@@ -253,7 +251,7 @@ export const castVote = async (
   const signatureByteArray = Buffer.from(signature, 'base64')
   const voteFee = algokit.microAlgos(1_000 + 16 /* opup - 16 (max possible) */ * 1_000)
   try {
-    const transaction = await client.call({
+    return await client.call({
       method: 'vote',
       methodArgs: [
         client.fundAppAccount({
@@ -272,8 +270,6 @@ export const castVote = async (
       sendParams: { fee: voteFee },
       sender,
     })
-
-    return transaction
   } catch (e) {
     console.error(e)
     throw e

@@ -4,12 +4,12 @@ import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/type
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from '../../../dapp/src/shared/IPFSGateway'
-import { algod, bootstrap, castVote, closeVotingRound, create } from '../../../dapp/src/shared/VotingRoundContract'
-import { signCsv } from '../../../dapp/src/shared/csvSigner'
-import { VoteType, VotingRoundModel } from '../../../dapp/src/shared/types'
-import { useAppSourceMaps } from '../features/vote-creation/state'
-import { useSetConnectedWallet } from '../features/wallet/state'
+import { uploadVoteGatingSnapshot, uploadVotingRound, VoteGatingSnapshot } from '@/shared/IPFSGateway'
+import { algod, bootstrap, castVote, closeVotingRound, create } from '@/shared/VotingRoundContract'
+import { signCsv } from '@/shared/csvSigner'
+import { VoteType, VotingRoundModel } from '@/shared/types'
+import { useAppSourceMaps } from '@/features/vote-creation/state'
+import { useSetConnectedWallet } from '@/features/wallet/state'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)
@@ -17,7 +17,7 @@ const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const execute = useCallback((payload: T) => {
     setLoading(true)
     setError(null)
-    const promise = new Promise<K>((resolve) => {
+    return new Promise<K>((resolve) => {
       action(payload)
         .then((state) => {
           resolve(state)
@@ -34,7 +34,6 @@ const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
           }
         })
     })
-    return promise
   }, [])
 
   return { loading, execute, error }
@@ -157,6 +156,9 @@ const api = {
           })
 
           const voteId = `V${new Date().getTime().toString(32).toUpperCase()}`
+          if(typeof newRound.voteType !== 'number'){
+            throw new TypeError('Invalid Vote Type')
+          }
           const { cid } = await uploadVotingRound(
             {
               id: voteId,
@@ -179,8 +181,10 @@ const api = {
           )
 
           const questionCounts = questions.map((q) => q.options.length)
-
-          const app = await create(
+          if(typeof newRound.voteType !== 'number'){
+            throw new TypeError('Invalid Vote Type')
+          }
+          return await create(
             signer,
             voteId,
             newRound.voteType,
@@ -192,8 +196,6 @@ const api = {
             'ipfs://bafkreiguj3svliomqnqpy2bvrlz5ud24girftynx2ywsugy7sr73zqnujy',
             questionCounts,
           )
-
-          return app
         },
       ),
       bootstrap: useSetter(

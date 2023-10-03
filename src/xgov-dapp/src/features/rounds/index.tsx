@@ -3,9 +3,9 @@ import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
-import { VoteType } from '../../shared/types'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
+import { fetchVotingRoundGlobalStatesByCreators, VotingRoundGlobalState } from '@/shared/VotingRoundContract'
+import { VoteType } from '@/shared/types'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
 import { useCreatorAddresses } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 import { VotingRoundStatus } from './VotingRoundTile'
@@ -22,8 +22,7 @@ const getRounds = (
   sortPredicate: Parameters<typeof sortBy>[1],
 ): VotingRoundGlobalState[] => {
   const filtered = rounds.filter(filterPredicate)
-  const sorted = sortBy(filtered, sortPredicate)
-  return sorted
+  return sortBy(filtered, sortPredicate)
 }
 
 const VotingRounds = () => {
