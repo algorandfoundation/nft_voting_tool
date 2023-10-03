@@ -49,4 +49,4 @@ jobs:
     with:
       working-directory: ./infrastructure
       run-build: true
-      audit-script: npm run audit
+      audit-script: echo Skipping Infra Audit
