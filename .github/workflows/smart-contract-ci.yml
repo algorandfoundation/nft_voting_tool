@@ -9,7 +9,7 @@ on:
       node-version:
         required: false
         type: string
-        default: 16.x
+        default: 18.x
       python-version:
         required: false
         type: string
