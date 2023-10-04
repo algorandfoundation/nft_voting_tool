@@ -21,7 +21,7 @@ jobs:
     with:
       working-directory: ./src/dapp
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-xgov-dapp:
     name: CI xGov Dapp
     uses: ./.github/workflows/node-ci.yml
@@ -29,20 +29,20 @@ jobs:
       working-directory: ./src/xgov-dapp
       pre-run-script: cd ../dapp && npm ci
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/voting-metadata-api
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-infrastructure:
     name: CI Infrastructure
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./infrastructure
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-algorand:
     name: Algorand build
     uses: ./.github/workflows/smart-contract-ci.yml
