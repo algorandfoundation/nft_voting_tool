@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -94,6 +95,7 @@ jobs:
   deploy-to-dev:
     runs-on: ubuntu-latest
     name: Deploy to TestNet
+    if: github.ref == 'refs/heads/develop'
     environment: Dev
     concurrency: "${{ github.workflow }}-dev"
     needs:
@@ -149,8 +151,7 @@ jobs:
     name: Deploy to Prod
     environment: Prod
     concurrency: "${{ github.workflow }}-prod"
-    needs:
-      - deploy-to-dev
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
