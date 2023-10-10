@@ -2,7 +2,7 @@ import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
 
-type ProposalCardProps = {
+export type ProposalCardProps = {
   link: string | undefined
   title: string
   description?: string
