@@ -49,7 +49,7 @@ Array.prototype.shuffle = function () {
   return arr
 }
 
-function Vote() {
+function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' | 'none' }) {
   const { voteId: voteIdParam } = useParams()
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const voteId = Number(voteIdParam!)
@@ -108,7 +108,7 @@ function Vote() {
     navigate('/')
   }
 
-  const [sort, setSort] = useState<'ascending' | 'descending' | 'none'>('none')
+  const [sort, setSort] = useState<'ascending' | 'descending' | 'none'>(sortProp)
 
   /**
    * Users Current Filter
