@@ -34,7 +34,9 @@ import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 import { FilterMenu, SelectedItem } from './FilterMenu'
 import ClearIcon from '@mui/icons-material/Clear'
-
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 // Fisher-Yates shuffle
 Array.prototype.shuffle = function () {
   const arr = structuredClone(this)
@@ -339,8 +341,8 @@ function Vote() {
     if (typeof q?.metadata?.focus_area !== 'string' || typeof q?.metadata?.category !== 'string') {
       throw new TypeError('Invalid metadata')
     }
-    const isFocus = (fa: SelectedItem) => q.metadata.focus_area === fa.name && fa.type === 'focus'
-    const isCategory = (fa: SelectedItem) => q.metadata.category === fa.name && fa.type === 'category'
+    const isFocus = (fa: SelectedItem) => q?.metadata && q.metadata.focus_area === fa.name && fa.type === 'focus'
+    const isCategory = (fa: SelectedItem) => q?.metadata && q.metadata.category === fa.name && fa.type === 'category'
     return filteredItems.length === 0 || filteredItems.some((fa) => isFocus(fa) || isCategory(fa))
   }
 
@@ -484,18 +486,21 @@ function Vote() {
           <div className="hidden md:block">
             {!isLoadingVotingRoundData && (
               <div className="mb-2 mt-8 flex justify-end">
-                <IconButton onClick={handleClearFilter}>
-                  <ClearIcon />
-                </IconButton>
                 <IconButton onClick={handleSortToggle}>
-                  <SortIcon />
+                  {sort === 'none' && <ShuffleOnIcon />}
+                  {sort === 'ascending' && <ArrowUpwardIcon />}
+                  {sort === 'descending' && <ArrowDownwardIcon />}
                 </IconButton>
+
                 <FilterMenu
                   questions={votingRoundMetadata?.questions}
                   selected={filteredItems}
                   onChange={handleFilterChange}
                   onClear={handleClearFilter}
                 />
+                <IconButton onClick={handleClearFilter}>
+                  <ClearIcon />
+                </IconButton>
               </div>
             )}
 
