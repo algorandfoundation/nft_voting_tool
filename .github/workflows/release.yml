@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -21,7 +22,7 @@ jobs:
     with:
       working-directory: ./src/dapp
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-xgov-dapp:
     name: CI xGov Dapp
     uses: ./.github/workflows/node-ci.yml
@@ -29,20 +30,20 @@ jobs:
       working-directory: ./src/xgov-dapp
       pre-run-script: cd ../dapp && npm ci
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/voting-metadata-api
       compile-script: npm run typecheck
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-infrastructure:
     name: CI Infrastructure
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./infrastructure
-      audit-script: npm run audit
+      audit-script: npm run audit --audit-level=high
   ci-algorand:
     name: Algorand build
     uses: ./.github/workflows/smart-contract-ci.yml
@@ -94,6 +95,7 @@ jobs:
   deploy-to-dev:
     runs-on: ubuntu-latest
     name: Deploy to TestNet
+    if: github.ref == 'refs/heads/develop'
     environment: Dev
     concurrency: "${{ github.workflow }}-dev"
     needs:
@@ -149,8 +151,7 @@ jobs:
     name: Deploy to Prod
     environment: Prod
     concurrency: "${{ github.workflow }}-prod"
-    needs:
-      - deploy-to-dev
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main

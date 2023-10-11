@@ -25,7 +25,7 @@ on:
       audit-script:
         required: false
         type: string
-        default: npm audit
+        default: npm audit --audit-level=high
       build-script:
         required: false
         type: string

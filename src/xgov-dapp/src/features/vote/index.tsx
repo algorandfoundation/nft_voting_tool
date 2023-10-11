@@ -33,7 +33,20 @@ import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 import { FilterMenu, SelectedItem } from './FilterMenu'
-import ClearIcon from '@mui/icons-material/Clear';
+import ClearIcon from '@mui/icons-material/Clear'
+
+// Fisher-Yates shuffle
+Array.prototype.shuffle = function () {
+  const arr = structuredClone(this)
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
+  }
+  return arr
+}
+
 function Vote() {
   const { voteId: voteIdParam } = useParams()
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -46,6 +59,7 @@ function Vote() {
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
   const [snapshot, setSnapshot] = useState<VoteGatingSnapshot | undefined>(undefined)
   const [votingRoundResults, setVotingRoundResults] = useState<TallyCounts | undefined>(undefined)
+  const [optionIdsToCount, setOptionIdsToCount] = useState<{ [optionId: string]: number } | undefined>(undefined)
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
 
   const [isLoadingVotingRoundData, setIsLoadingVotingRoundData] = useState(true)
@@ -197,7 +211,10 @@ function Vote() {
     if (voteId && votingRoundMetadata) {
       setIsLoadingVotingRoundResults(true)
       try {
-        setVotingRoundResults(await fetchTallyCounts(voteId, votingRoundMetadata))
+        const roundResults = await fetchTallyCounts(voteId, votingRoundMetadata)
+        setVotingRoundResults(roundResults)
+        const oIdsToCounts = Object.fromEntries(roundResults?.map((result) => [result.optionId, result.count]))
+        setOptionIdsToCount(oIdsToCounts)
         setIsLoadingVotingRoundResults(false)
       } catch (e) {
         setIsLoadingVotingRoundResults(false)
@@ -206,6 +223,7 @@ function Vote() {
     } else {
       setIsLoadingVotingRoundResults(false)
       setVotingRoundResults(undefined)
+      setOptionIdsToCount(undefined)
     }
   }
 
@@ -330,7 +348,7 @@ function Vote() {
     if (typeof a?.metadata?.ask !== 'number' || typeof b?.metadata?.ask !== 'number') {
       throw new TypeError('Invalid Metadata')
     }
-    if(sort === 'none') return 0
+    if (sort === 'none') return 0
     const isSorted = sort === 'ascending' ? a.metadata.ask < b.metadata.ask : a.metadata.ask > b.metadata.ask
     return isSorted ? -1 : 1
   }
@@ -411,6 +429,7 @@ function Vote() {
               </div>
             )}
             {votingRoundMetadata?.questions
+              .shuffle()
               .filter(filterQuestions)
               .sort(sortQuestions)
               .map((question, index) => (
@@ -425,7 +444,9 @@ function Vote() {
                         link={question.metadata.link}
                         threshold={question.metadata.threshold}
                         ask={question.metadata.ask}
-                        votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
+                        votesTally={
+                          optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
+                        }
                       />
                     )}
                   </div>
