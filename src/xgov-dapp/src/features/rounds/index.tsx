@@ -1,14 +1,14 @@
 import { useWallet } from '@makerx/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 import { VoteType } from '../../shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { useCreatorAddresses } from '../wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 import { VotingRoundStatus } from './VotingRoundTile'
+import useGlobalStatesByCreatorQuery from '../../hooks/use-global-states-by-creator-query'
 
 export const VotingRoundTileLoading = () => (
   <>
@@ -22,51 +22,23 @@ const getRounds = (
   sortPredicate: Parameters<typeof sortBy>[1],
 ): VotingRoundGlobalState[] => {
   const filtered = rounds.filter(filterPredicate)
-  const sorted = sortBy(filtered, sortPredicate)
-  return sorted
+  return sortBy(filtered, sortPredicate)
 }
 
-const VotingRounds = () => {
+const VotingRoundsPage = () => {
   const { activeAddress } = useWallet()
   const creatorAddresses = useCreatorAddresses()
   const showMyRounds = creatorAddresses.length == 0 || creatorAddresses.includes('any')
   const isCreator = activeAddress && (creatorAddresses.includes(activeAddress) || creatorAddresses.includes('any'))
 
-  const [globalStates, setGlobalStates] = useState<VotingRoundGlobalState[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  let addressesToFetch = [] as string[]
+  if (showMyRounds && activeAddress) {
+    addressesToFetch = [activeAddress]
+  } else if (!showMyRounds) {
+    addressesToFetch = creatorAddresses
+  }
 
-  useEffect(() => {
-    let addressesToFetch = [] as string[]
-    if (showMyRounds && activeAddress) {
-      addressesToFetch = [activeAddress]
-    } else if (!showMyRounds) {
-      addressesToFetch = creatorAddresses
-    }
-
-    if (addressesToFetch && addressesToFetch.length) {
-      ;(async () => {
-        setError(null)
-        setIsLoading(true)
-        try {
-          setGlobalStates(await fetchVotingRoundGlobalStatesByCreators(addressesToFetch))
-          setIsLoading(false)
-        } catch (e) {
-          setIsLoading(false)
-          if (e instanceof Error) {
-            setError(e.message)
-          } else {
-            // eslint-disable-next-line no-console
-            console.error(e)
-            setError('Unexpected error')
-          }
-        }
-      })()
-    } else {
-      setIsLoading(false)
-      setGlobalStates([])
-    }
-  }, [activeAddress, creatorAddresses, showMyRounds])
+  const { data: globalStates, isLoading, isError, error } = useGlobalStatesByCreatorQuery(addressesToFetch)
 
   const openRounds = globalStates
     ? getRounds(
@@ -102,10 +74,10 @@ const VotingRounds = () => {
         </Button>
       )}
 
-      {error && (
+      {isError && (
         <Alert className="max-w-xl mt-4 text-white bg-red-600 font-semibold" icon={false}>
           <Typography>Could not load voting rounds:</Typography>
-          <Typography>{error}</Typography>
+          <Typography>{(error as Error).message}</Typography>
         </Alert>
       )}
 
@@ -121,4 +93,4 @@ const VotingRounds = () => {
   )
 }
 
-export default VotingRounds
+export default VotingRoundsPage
