@@ -4,7 +4,7 @@ import {Chip, Collapse, LinearProgress, Link, Paper, Typography, useTheme} from 
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
 import {useOverflow} from "./hooks/useOverflow";
 
-type ProposalCardProps = {
+export type ProposalCardProps = {
   link: string | undefined
   title: string
   description?: string

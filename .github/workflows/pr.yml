@@ -28,7 +28,9 @@ jobs:
       working-directory: ./src/xgov-dapp
       pre-run-script: cd ../dapp && npm ci
       audit-script: npm run audit --audit-level=high
+      run-dispatch: true
     secrets:
+      chromatic-token: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
       npm-auth-token: ${{ secrets.GITHUB_TOKEN }}
   build-api:
     name: Api
