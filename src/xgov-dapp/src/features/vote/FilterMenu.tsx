@@ -20,9 +20,15 @@ export type FilterMenuProps = {
 export function FilterMenu({
   questions = [],
   selected = [],
-  onClose = () => {},
-  onChange = () => {},
-  onClear = () => {},
+  onClose = () => {
+    return
+  },
+  onChange = () => {
+    return
+  },
+  onClear = () => {
+    return
+  },
 }: FilterMenuProps = {}) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -100,9 +106,7 @@ export function FilterMenu({
         </MenuItem>
         {categories.map((fa) => (
           <MenuItem onClick={() => onChange('category', fa)}>
-            <ListItemIcon>
-              {isSelected('category', fa) ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon/> }
-            </ListItemIcon>
+            <ListItemIcon>{isSelected('category', fa) ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}</ListItemIcon>
             {fa}
           </MenuItem>
         ))}
