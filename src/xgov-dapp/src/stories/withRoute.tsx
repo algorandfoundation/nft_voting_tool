@@ -76,7 +76,7 @@ export function withRoute(
   }: WithRouterOptions = DEFAULT_OPTIONS,
 ) {
   return layout
-    ? (args) => {
+    ? (args?: object) => {
         useStoryWallet(wallet)
         return (
           <MemoryRouter initialEntries={entries}>
@@ -94,7 +94,7 @@ export function withRoute(
         )
       }
     : routes
-    ? (args) => {
+    ? (args?: object) => {
         useStoryWallet(wallet)
         return (
           <MemoryRouter>
@@ -104,7 +104,7 @@ export function withRoute(
           </MemoryRouter>
         )
       }
-    : (args) => {
+    : (args?: object) => {
         useStoryWallet(wallet)
         return (
           <MemoryRouter>

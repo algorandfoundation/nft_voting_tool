@@ -1,9 +1,12 @@
 import { withRoute } from '../../stories/withRoute'
 import { VoteResults as Component, VoteResultsProps } from './VoteResults'
+import { ComponentType } from 'react'
+
+const RenderPage = (props: VoteResultsProps) => <Component {...props} />
 
 export default {
   title: 'Pages',
-  render: withRoute((props: VoteResultsProps) => <Component {...props} />, { layout: true }),
+  render: withRoute(RenderPage as ComponentType, { layout: true }),
 }
 
 export const VoteResult = {
