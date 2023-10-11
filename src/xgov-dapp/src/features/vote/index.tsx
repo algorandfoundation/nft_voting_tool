@@ -3,10 +3,8 @@ import { useWallet } from '@makerx/use-wallet'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
-import type { MouseEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import SortIcon from '@mui/icons-material/Sort'
 import {
   VoteGatingSnapshot,
   VotingRoundMetadata,

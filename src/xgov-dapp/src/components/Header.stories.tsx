@@ -1,6 +1,4 @@
 import HeaderComponent from './siteHeader'
-import { withRoute } from '../stories/withRoute'
-import Root from '../stories/Root'
 import { MemoryRouter } from 'react-router-dom'
 
 export default {
