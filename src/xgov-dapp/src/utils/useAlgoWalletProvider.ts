@@ -46,6 +46,7 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
         },
       },
     },
+    { id: PROVIDER_ID.EXODUS },
     {
       id: PROVIDER_ID.CUSTOM,
       clientOptions: {

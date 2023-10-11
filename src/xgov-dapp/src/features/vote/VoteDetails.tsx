@@ -3,7 +3,7 @@ import { Box, Link } from '@mui/material'
 import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 
-type VoteDetailsProps = {
+export type VoteDetailsProps = {
   loading: boolean
   appId: number
   globalState: VotingRoundGlobalState | undefined

@@ -28,12 +28,12 @@ function InformationBox() {
           At the end of the Term Pool, the Algos forfeited by the ineligible xGovs will be distributed amongst all eligible xGovs.
         </Typography>
         <Typography className="mt-4 mb-4">
-          <strong>Your xGov Deposit</strong>
+          <strong>Your xGov Current Balance</strong>
         </Typography>
         <Typography>
-          Your xGov deposit is equal to the governance rewards of the period you opted in to xGov. It is displayed in µA (or microAlgo)
-          because smart contracts cannot handle decimal numbers. Your xGov deposit plus your Term Pool forfeited Algo share will be your
-          payout in 12 months, if you remain eligible.
+          Your xGov Current Balance is equal to the sum of the Governance Rewards of the periods you opted in to xGov plus your Term Pool
+          forfeited Algo share. It is displayed in µA (or microAlgo) because smart contracts cannot handle decimal numbers. You will receive
+          your Deposit, plus the forfeited Algo share, after 12 months from the commitment.
         </Typography>
       </div>
     </Box>

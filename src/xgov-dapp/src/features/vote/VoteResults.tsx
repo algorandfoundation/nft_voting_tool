@@ -13,7 +13,7 @@ import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
-type VoteResultsProps = {
+export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined
   votingRoundMetadata: VotingRoundMetadata | undefined
   votingRoundGlobalState: VotingRoundGlobalState

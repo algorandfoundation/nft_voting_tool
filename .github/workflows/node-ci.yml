@@ -37,7 +37,17 @@ on:
       pre-run-script:
         required: false
         type: string
+      chromatic-token:
+        required: false
+        type: string
+      run-dispatch:
+        required: false
+        type: boolean
+        default: false
     secrets:
+      chromatic-token:
+        description: Chromatic project token
+        required: false
       npm-auth-token:
         description: NPM auth token (optional, GITHUB_TOKEN is used by default)
         required: false
@@ -45,7 +55,6 @@ on:
 jobs:
   node-ci:
     runs-on: ubuntu-latest
-
     defaults:
       run:
         shell: bash
@@ -91,3 +100,12 @@ jobs:
         # CDK infrastructure build calls npm ci on /infrastructure/build, which may fail without NODE_AUTH_TOKEN
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm-auth-token || secrets.GITHUB_TOKEN }}
+      - name: Copy .env
+        if: ${{ inputs.run-dispatch }}
+        run: cp ${{inputs.working.directory}}.env.testnet.template ${{inputs.working.directory}}.env
+      - name: Dispatch
+        if:  ${{ inputs.run-dispatch }}
+        uses: chromaui/action@v1
+        with:
+          workingDir: ${{ inputs.working-directory }}
+          projectToken: ${{ secrets.chromatic-token }}
