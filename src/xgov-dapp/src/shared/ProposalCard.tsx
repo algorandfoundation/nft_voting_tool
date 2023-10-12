@@ -28,13 +28,21 @@ export const ProposalCard = ({
   hasClosed = false,
 }: ProposalCardProps) => {
   // Handle collapse state
-  const descriptionRef = useRef(null)
-  const isOverflow = useOverflow(descriptionRef)
+  const [isOverflow, setIsOverflow] = useState(false)
+  const { ref } = useOverflow((result) => {
+    if (result !== isOverflow) setIsOverflow(result)
+  })
+  const [hasOpened, setHasOpened] = useState(false)
   const [expanded, setExpanded] = useState(false)
   // Derived State
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
   const hasPassed = percentage >= 100
   const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
+
+  function handleClick(){
+    if(!hasOpened) setHasOpened(true)
+    setExpanded(!expanded)
+  }
 
   if (category === 'Abstain') {
     return (
@@ -61,12 +69,12 @@ export const ProposalCard = ({
         </div>
         <LinearProgress color="error" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={100} />
         {description && (
-          <Collapse ref={descriptionRef} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+          <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
             <Typography>{description}</Typography>
           </Collapse>
         )}
-        {isOverflow && (
-          <Typography className="text-right mt-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        {(isOverflow || hasOpened) && (
+          <Typography className="text-right mt-2 cursor-pointer" onClick={handleClick}>
             {expanded ? 'Show Less' : 'Read More'}
           </Typography>
         )}
@@ -111,12 +119,12 @@ export const ProposalCard = ({
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
       {description && (
-        <Collapse ref={descriptionRef} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+        <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
           <Typography>{description}</Typography>
         </Collapse>
       )}
-      {isOverflow && (
-        <Typography className="text-right mt-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+      {(isOverflow || hasOpened) && (
+        <Typography className="text-right mt-2 cursor-pointer" onClick={handleClick}>
           {expanded ? 'Show Less' : 'Read More'}
         </Typography>
       )}
