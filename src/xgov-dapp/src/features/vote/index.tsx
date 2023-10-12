@@ -35,6 +35,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+
 // Fisher-Yates shuffle
 Array.prototype.shuffle = function () {
   const arr = structuredClone(this)
@@ -353,6 +354,17 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     return isSorted ? -1 : 1
   }
 
+  function hasPassed(q: Question) {
+    const votesTally = optionIdsToCount && optionIdsToCount[q.options[0].id] ? optionIdsToCount[q.options[0].id] : 0
+    const percentage = q.metadata?.threshold && q.metadata.threshold > 0 ? Math.min(100, (votesTally / q.metadata.threshold) * 100) : 100
+    return percentage >= 100
+  }
+
+  function pinPassedQuestions(a: Question, b: Question) {
+    const isSorted = !hasPassed(a) && hasPassed(b)
+    return isSorted ? -1 : 1
+  }
+
   if (hasClosed && votingRoundGlobalState) {
     return (
       <VoteResults
@@ -432,6 +444,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               .shuffle()
               .filter(filterQuestions)
               .sort(sortQuestions)
+              .sort(pinPassedQuestions)
               .map((question, index) => (
                 <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                   <div className="col-span-2">
