@@ -64,7 +64,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
 
   const [isLoadingVotingRoundData, setIsLoadingVotingRoundData] = useState(true)
-  const [_isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
   const [isLoadingVotingRoundResults, setIsLoadingVotingRoundResults] = useState(true)
 
   const [error, setError] = useState<string | null>(null)
@@ -192,16 +191,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     votingRoundGlobalState: VotingRoundGlobalState | undefined,
   ) => {
     if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
-      setIsLoadingVotersVote(true)
       try {
         setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-        setIsLoadingVotersVote(false)
       } catch (e) {
-        setIsLoadingVotersVote(false)
         handleError(e)
       }
     } else {
-      setIsLoadingVotersVote(false)
       setVoterVotes(undefined)
     }
   }
