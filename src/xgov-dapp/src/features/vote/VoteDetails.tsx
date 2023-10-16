@@ -9,7 +9,7 @@ export type VoteDetailsProps = {
   globalState: VotingRoundGlobalState | undefined
   roundMetadata: VotingRoundMetadata | undefined
 }
-export const VoteDetails = ({ loading, appId: voteId, globalState, roundMetadata }: VoteDetailsProps) => {
+export const VoteDetails = ({ loading: _loading, appId: voteId, globalState, roundMetadata }: VoteDetailsProps) => {
   return (
     <>
       {globalState && roundMetadata && (

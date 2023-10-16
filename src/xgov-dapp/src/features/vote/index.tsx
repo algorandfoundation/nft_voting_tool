@@ -3,7 +3,7 @@ import { useWallet } from '@makerx/use-wallet'
 import CancelIcon from '@mui/icons-material/Cancel'
 import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   VoteGatingSnapshot,
@@ -64,9 +64,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
 
   const [isLoadingVotingRoundData, setIsLoadingVotingRoundData] = useState(true)
-  const [isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
   const [isLoadingVotingRoundResults, setIsLoadingVotingRoundResults] = useState(true)
-  const isLoadingResults = isLoadingVotersVote || isLoadingVotingRoundResults
 
   const [error, setError] = useState<string | null>(null)
 
@@ -80,7 +78,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
 
   const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
-  const totalAllocated = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
@@ -194,16 +191,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     votingRoundGlobalState: VotingRoundGlobalState | undefined,
   ) => {
     if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
-      setIsLoadingVotersVote(true)
       try {
         setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-        setIsLoadingVotersVote(false)
       } catch (e) {
-        setIsLoadingVotersVote(false)
         handleError(e)
       }
     } else {
-      setIsLoadingVotersVote(false)
       setVoterVotes(undefined)
     }
   }
@@ -378,6 +371,14 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     )
   }
 
+  // Randomize questions on metadata change
+  const randomQuestions = useMemo<Question[]>(() => {
+    if (votingRoundMetadata && Array.isArray(votingRoundMetadata.questions) && votingRoundMetadata.questions.length > 0) {
+      return votingRoundMetadata.questions.shuffle()
+    } else {
+      return []
+    }
+  }, [votingRoundMetadata])
   return (
     <div>
       <div className="mb-4">
@@ -440,13 +441,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 <Skeleton className="h-40" variant="rectangular" />
               </div>
             )}
-            {votingRoundMetadata?.questions
-              .shuffle()
+            {randomQuestions
               .filter(filterQuestions)
               .sort(sortQuestions)
               .sort(pinPassedQuestions)
-              .map((question, index) => (
-                <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
+              .map((question) => (
+                <div key={question.id} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                   <div className="col-span-2">
                     {question.metadata && (
                       <ProposalCard

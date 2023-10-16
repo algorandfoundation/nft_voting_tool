@@ -1,25 +1,19 @@
-import React, { useLayoutEffect } from 'react'
-import type { MutableRefObject } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
-export const useOverflow = (ref: MutableRefObject<HTMLElement | null>, callback?: (hasOverflow: boolean) => boolean) => {
-  const [isOverflow, setIsOverflow] = React.useState<boolean | undefined>(undefined)
-
+export const useOverflow = (onChange?: (isOverflow: boolean) => void) => {
+  const [isOverflow, setIsOverflow] = useState<boolean>()
+  const ref = useRef<HTMLElement>()
   useLayoutEffect(() => {
     const { current } = ref
-
-    const trigger = () => {
-      if (!current) return
-      const hasOverflow = current.scrollHeight > current.clientHeight
-
-      setIsOverflow(hasOverflow)
-
-      if (callback) callback(hasOverflow)
+    if (!current) {
+      return
     }
+    const hasOverflow = current.scrollHeight > current.clientHeight
 
-    if (current) {
-      trigger()
-    }
-  }, [callback, ref])
+    setIsOverflow(hasOverflow)
 
-  return isOverflow
+    if (onChange) onChange(hasOverflow)
+  }, [onChange, ref])
+
+  return { ref, isOverflow }
 }
