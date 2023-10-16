@@ -64,9 +64,8 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
 
   const [isLoadingVotingRoundData, setIsLoadingVotingRoundData] = useState(true)
-  const [isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
+  const [_isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
   const [isLoadingVotingRoundResults, setIsLoadingVotingRoundResults] = useState(true)
-  const isLoadingResults = isLoadingVotersVote || isLoadingVotingRoundResults
 
   const [error, setError] = useState<string | null>(null)
 
@@ -80,7 +79,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
 
   const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
-  const totalAllocated = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
@@ -452,7 +450,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               .filter(filterQuestions)
               .sort(sortQuestions)
               .sort(pinPassedQuestions)
-              .map((question, index) => (
+              .map((question) => (
                 <div key={question.id} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                   <div className="col-span-2">
                     {question.metadata && (

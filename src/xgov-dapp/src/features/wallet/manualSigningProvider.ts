@@ -19,7 +19,7 @@ const manualWalletAtom = atom<ManualWallet>({
 const showManualWalletModalSelector = selector({
   key: 'showManualWalletModalSelector',
   get: ({ get }) => get(manualWalletAtom).showManualWalletModal,
-  set: ({ set, get }, newValue) => {
+  set: ({ set, get: _get }, newValue) => {
     set(manualWalletAtom, {
       showManualWalletModal: newValue instanceof DefaultValue ? false : newValue,
       payloadToSign: '',

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, Collapse, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
@@ -39,8 +39,8 @@ export const ProposalCard = ({
   const hasPassed = percentage >= 100
   const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
 
-  function handleClick(){
-    if(!hasOpened) setHasOpened(true)
+  function handleClick() {
+    if (!hasOpened) setHasOpened(true)
     setExpanded(!expanded)
   }
 
