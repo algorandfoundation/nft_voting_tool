@@ -357,6 +357,14 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     const isSorted = !hasPassed(a) && hasPassed(b)
     return isSorted ? -1 : 1
   }
+  // Randomize questions on metadata change
+  const randomQuestions = useMemo<Question[]>(() => {
+    if (votingRoundMetadata && Array.isArray(votingRoundMetadata.questions) && votingRoundMetadata.questions.length > 0) {
+      return votingRoundMetadata.questions.shuffle()
+    } else {
+      return []
+    }
+  }, [votingRoundMetadata])
 
   if (hasClosed && votingRoundGlobalState) {
     return (
@@ -371,14 +379,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     )
   }
 
-  // Randomize questions on metadata change
-  const randomQuestions = useMemo<Question[]>(() => {
-    if (votingRoundMetadata && Array.isArray(votingRoundMetadata.questions) && votingRoundMetadata.questions.length > 0) {
-      return votingRoundMetadata.questions.shuffle()
-    } else {
-      return []
-    }
-  }, [votingRoundMetadata])
+
   return (
     <div>
       <div className="mb-4">
