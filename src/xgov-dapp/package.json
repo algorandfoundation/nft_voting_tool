@@ -31,6 +31,7 @@
     "@mui/material": "^5.11.13",
     "@mui/x-date-pickers": "^6.0.2",
     "@noble/ed25519": "^2.0.0",
+    "@randlabs/myalgo-connect": "^1.4.2",
     "@tailwindcss/forms": "^0.5.3",
     "@walletconnect/modal-sign-html": "^2.5.9",
     "algosdk": "^2.5.0",
