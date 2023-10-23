@@ -34,6 +34,26 @@ export const VoteResults = ({
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const totalVotes = votingRoundResults?.reduce((accumulator, curr) => {
+    return accumulator + curr.count
+  }, 0)
+
+  const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
+    return accumulator + (curr.weight || 0)
+  }, 0)
+
+  const votingRoundMetadataClone = structuredClone(votingRoundMetadata) as VotingRoundMetadata
+
+  votingRoundMetadataClone.questions.map((question) => {
+    if (question.metadata) {
+      question.metadata.threshold =
+        question.metadata.threshold && totalVotes && totalVotingPower && totalVotingPower !== 0
+          ? (question.metadata.threshold * totalVotes) / totalVotingPower
+          : question.metadata.threshold
+    }
+    return question
+  })
+
   const generateAddressesThatVotedCsv = async () => {
     if (votingRoundMetadata) {
       setIsDownloadingCsv(true)
@@ -83,7 +103,7 @@ export const VoteResults = ({
         <div>
           <AlgoStats
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
-            votingRoundMetadata={votingRoundMetadata}
+            votingRoundMetadata={votingRoundMetadataClone}
             votingRoundResults={votingRoundResults}
             hasVoteClosed={true}
           />
@@ -116,7 +136,7 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadata?.questions.map((question, index) => (
+          votingRoundMetadataClone.questions.map((question, index) => (
             <div key={question.id}>
               {question.metadata && (
                 <ProposalCard
