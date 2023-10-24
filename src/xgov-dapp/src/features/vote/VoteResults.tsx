@@ -2,7 +2,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
@@ -34,25 +34,34 @@ export const VoteResults = ({
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const totalVotes = votingRoundResults?.reduce((accumulator, curr) => {
-    return accumulator + curr.count
-  }, 0)
-
-  const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
-    return accumulator + (curr.weight || 0)
-  }, 0)
-
-  const votingRoundMetadataClone = structuredClone(votingRoundMetadata) as VotingRoundMetadata
-
-  votingRoundMetadataClone.questions.map((question) => {
-    if (question.metadata) {
-      question.metadata.threshold =
-        question.metadata.threshold && totalVotes && totalVotingPower && totalVotingPower !== 0
-          ? (question.metadata.threshold * totalVotes) / totalVotingPower
-          : question.metadata.threshold
+  const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
+    if (
+      votingRoundMetadata === undefined ||
+      snapshot === undefined ||
+      isLoadingVotingRoundResults === true ||
+      isLoadingVotingRoundData === true
+    ) {
+      return undefined
     }
-    return question
-  })
+    const clone = structuredClone(votingRoundMetadata) as VotingRoundMetadata
+    const totalVotes = votingRoundResults?.reduce((accumulator, curr) => {
+      return accumulator + curr.count
+    }, 0)
+
+    const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
+      return accumulator + (curr.weight || 0)
+    }, 0)
+    clone.questions.map((question) => {
+      if (question.metadata) {
+        question.metadata.threshold =
+          question.metadata.threshold && totalVotes && totalVotingPower && totalVotingPower !== 0
+            ? (question.metadata.threshold * totalVotes) / totalVotingPower
+            : question.metadata.threshold
+      }
+      return question
+    })
+    return clone
+  }, [votingRoundMetadata, snapshot, isLoadingVotingRoundData, isLoadingVotingRoundResults])
 
   const generateAddressesThatVotedCsv = async () => {
     if (votingRoundMetadata) {
@@ -136,7 +145,7 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadataClone.questions.map((question, index) => (
+          votingRoundMetadataClone?.questions.map((question, index) => (
             <div key={question.id}>
               {question.metadata && (
                 <ProposalCard
