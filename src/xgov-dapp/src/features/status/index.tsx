@@ -170,7 +170,7 @@ function Status() {
           <Box className="bg-white flex rounded-xl px-4 py-6">
             <div className="w-full">
               <Typography className="mb-3">
-                <strong>Total earnings from xGov participation</strong>
+                <strong>Potential earnings from xGov participation</strong>
               </Typography>
               <Typography variant="h3">
                 {govenorData
