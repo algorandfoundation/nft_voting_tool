@@ -353,6 +353,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     return percentage >= 100
   }
 
+  // a compare function that sorts passed questions to the bottom
   function pinPassedQuestions(a: Question, b: Question) {
     const isSorted = !hasPassed(a) && hasPassed(b)
     return isSorted ? -1 : 1
@@ -378,7 +379,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
       />
     )
   }
-
 
   return (
     <div>
