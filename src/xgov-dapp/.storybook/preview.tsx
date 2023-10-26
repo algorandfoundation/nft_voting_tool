@@ -9,6 +9,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { useAlgoWallet } from '../src/utils/useAlgoWalletProvider'
 import { RecoilRoot } from 'recoil'
 import { ComponentType } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 
 const preview: Preview = {
@@ -24,6 +25,13 @@ const preview: Preview = {
   }
 }
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,
+    },
+  },
+})
 // TODO: Create Providers.tsx
 export const decorators = [
   (Story: ComponentType) => {
@@ -39,7 +47,9 @@ export const decorators = [
         <RecoilRoot>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <WalletProvider value={walletProviders.walletProviders}>
+              <QueryClientProvider client={queryClient}>
               <Story />
+              </QueryClientProvider>
             </WalletProvider>
           </LocalizationProvider>
         </RecoilRoot>
