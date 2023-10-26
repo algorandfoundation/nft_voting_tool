@@ -1,4 +1,4 @@
-import { UseQueryResult } from '@tanstack/react-query'
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, UseQueryResult } from '@tanstack/react-query'
 
 import type { TallyCounts, VotingRoundGlobalState } from '../../../dapp/src/shared/VotingRoundContract'
 import type { VoteGatingSnapshot, VotingRoundMetadata } from '../../../dapp/src/shared/IPFSGateway'
@@ -11,6 +11,7 @@ import useSnapshotQuery from './use-snapshot-query'
 import useTallyCountsQuery from './use-tally-counts-query'
 import { useVoterVotesQuery } from './use-voter-votes-query'
 import { UseXGovQueryOptions } from './index'
+import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/types/account'
 
 type UseVotingRoundQueryResponse = {
   errors: Error[]
@@ -18,14 +19,42 @@ type UseVotingRoundQueryResponse = {
     hasVoteStarted: boolean
     hasVoteEnded: boolean
     hasClosed: boolean
-    submit: any
-    close: any
+    submit: {
+      error: string | null
+      loading: boolean
+      execute: (payload: {
+        signature: string
+        weighting: number
+        selectedOptionIndexes: number[]
+        weightings: number[]
+        signer: TransactionSignerAccount
+        appId: number
+      }) => Promise<void>
+    }
+    close: {
+      error: string | null
+      loading: boolean
+      execute: (payload: { signer: TransactionSignerAccount; appId: number }) => Promise<void>
+    }
     globalState: VotingRoundGlobalState | undefined
     snapshot: VoteGatingSnapshot | undefined
     metadata: VotingRoundMetadata | undefined
     tallyCounts: TallyCounts | undefined
   }
-  refetch: any
+  refetch: {
+    globalState: <TPageData>(
+      options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+    ) => Promise<QueryObserverResult<VotingRoundGlobalState | undefined, unknown>>
+    metadata: <TPageData>(
+      options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+    ) => Promise<QueryObserverResult<VotingRoundMetadata | undefined, unknown>>
+    snapshot: <TPageData>(
+      options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+    ) => Promise<QueryObserverResult<VoteGatingSnapshot | undefined, unknown>>
+    tallyCounts: <TPageData>(
+      options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined,
+    ) => Promise<QueryObserverResult<TallyCounts | undefined, unknown>>
+  }
   isLoading: boolean
   isError: boolean
 }
@@ -84,7 +113,12 @@ export function useVotingRound(voteId: number | string | undefined, options?: Us
       submit,
       close,
     },
-    refetch: tallyCounts.refetch,
+    refetch: {
+      tallyCounts: tallyCounts.refetch,
+      globalState: globalState.refetch,
+      metadata: metadata.refetch,
+      snapshot: snapshot.refetch,
+    },
     isLoading,
     isError,
   }
