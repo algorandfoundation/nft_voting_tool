@@ -1,15 +1,16 @@
 import { HandThumbUpIcon } from '@heroicons/react/24/solid'
 import { useWallet } from '@makerx/use-wallet'
 import CancelIcon from '@mui/icons-material/Cancel'
-import { Alert, Box, Button, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   VoteGatingSnapshot,
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
+  Question,
 } from '../../../../dapp/src/shared/IPFSGateway'
 import {
   TallyCounts,
@@ -29,8 +30,25 @@ import { VoteResults } from './VoteResults'
 import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
+import { FilterMenu, SelectedItem } from './FilterMenu'
+import ClearIcon from '@mui/icons-material/Clear'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 
-function Vote() {
+// Fisher-Yates shuffle
+Array.prototype.shuffle = function () {
+  const arr = structuredClone(this)
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
+  }
+  return arr
+}
+
+function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' | 'none' }) {
   const { voteId: voteIdParam } = useParams()
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const voteId = Number(voteIdParam!)
@@ -42,12 +60,11 @@ function Vote() {
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
   const [snapshot, setSnapshot] = useState<VoteGatingSnapshot | undefined>(undefined)
   const [votingRoundResults, setVotingRoundResults] = useState<TallyCounts | undefined>(undefined)
+  const [optionIdsToCount, setOptionIdsToCount] = useState<{ [optionId: string]: number } | undefined>(undefined)
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
 
   const [isLoadingVotingRoundData, setIsLoadingVotingRoundData] = useState(true)
-  const [isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
   const [isLoadingVotingRoundResults, setIsLoadingVotingRoundResults] = useState(true)
-  const isLoadingResults = isLoadingVotersVote || isLoadingVotingRoundResults
 
   const [error, setError] = useState<string | null>(null)
 
@@ -61,7 +78,6 @@ function Vote() {
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
 
   const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
-  const totalAllocated = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
@@ -87,6 +103,13 @@ function Vote() {
   if (voteIdParam && import.meta.env.VITE_HIDDEN_VOTING_ROUND_IDS?.split(',')?.includes(voteIdParam)) {
     navigate('/')
   }
+
+  const [sort, setSort] = useState<'ascending' | 'descending' | 'none'>(sortProp)
+
+  /**
+   * Users Current Filter
+   */
+  const [filteredItems, setFilteredItems] = useState<SelectedItem[]>([])
 
   const updateVoteAllocations = (proposalId: string, amount: number) => {
     const newVoteAllocationsPercentage = { ...voteAllocationsPercentage }
@@ -168,16 +191,12 @@ function Vote() {
     votingRoundGlobalState: VotingRoundGlobalState | undefined,
   ) => {
     if (voteId && walletAddress && votingRoundMetadata && votingRoundGlobalState) {
-      setIsLoadingVotersVote(true)
       try {
         setVoterVotes(await fetchVoterVotes(voteId, walletAddress, votingRoundMetadata, votingRoundGlobalState))
-        setIsLoadingVotersVote(false)
       } catch (e) {
-        setIsLoadingVotersVote(false)
         handleError(e)
       }
     } else {
-      setIsLoadingVotersVote(false)
       setVoterVotes(undefined)
     }
   }
@@ -186,7 +205,10 @@ function Vote() {
     if (voteId && votingRoundMetadata) {
       setIsLoadingVotingRoundResults(true)
       try {
-        setVotingRoundResults(await fetchTallyCounts(voteId, votingRoundMetadata))
+        const roundResults = await fetchTallyCounts(voteId, votingRoundMetadata)
+        setVotingRoundResults(roundResults)
+        const oIdsToCounts = Object.fromEntries(roundResults?.map((result) => [result.optionId, result.count]))
+        setOptionIdsToCount(oIdsToCounts)
         setIsLoadingVotingRoundResults(false)
       } catch (e) {
         setIsLoadingVotingRoundResults(false)
@@ -195,6 +217,7 @@ function Vote() {
     } else {
       setIsLoadingVotingRoundResults(false)
       setVotingRoundResults(undefined)
+      setOptionIdsToCount(undefined)
     }
   }
 
@@ -275,6 +298,75 @@ function Vote() {
     refetchVoteRoundData(voteId)
   }
 
+  /**
+   * Handle Filter Chip Interactions
+   */
+  function handleFilterChange(type: string, name: string) {
+    const names = filteredItems.map((fa) => fa.name)
+    // Remove Filter
+    if (names.includes(name)) {
+      // Clone the current state to make it mutable
+      const clonedItems = [...filteredItems]
+      clonedItems.splice(names.indexOf(name), 1)
+      setFilteredItems(clonedItems)
+    }
+    // Add Filter
+    else {
+      setFilteredItems([...filteredItems, { name, type }])
+    }
+  }
+  function handleClearFilter() {
+    setFilteredItems([])
+    setSort('none')
+  }
+  function handleSortToggle() {
+    if (sort === 'ascending') {
+      setSort('descending')
+    } else {
+      setSort('ascending')
+    }
+  }
+  /**
+   * Filter Questions based on current state
+   */
+  function filterQuestions(q: Question) {
+    if (typeof q?.metadata?.focus_area !== 'string' || typeof q?.metadata?.category !== 'string') {
+      throw new TypeError('Invalid metadata')
+    }
+    const isFocus = (fa: SelectedItem) => q?.metadata && q.metadata.focus_area === fa.name && fa.type === 'focus'
+    const isCategory = (fa: SelectedItem) => q?.metadata && q.metadata.category === fa.name && fa.type === 'category'
+    return filteredItems.length === 0 || filteredItems.some((fa) => isFocus(fa) || isCategory(fa))
+  }
+
+  function sortQuestions(a: Question, b: Question) {
+    if (typeof a?.metadata?.ask !== 'number' || typeof b?.metadata?.ask !== 'number') {
+      throw new TypeError('Invalid Metadata')
+    }
+    if (sort === 'none') return 0
+    const isSorted = sort === 'ascending' ? a.metadata.ask < b.metadata.ask : a.metadata.ask > b.metadata.ask
+    return isSorted ? -1 : 1
+  }
+
+  function hasPassed(q: Question) {
+    const votesTally = optionIdsToCount && optionIdsToCount[q.options[0].id] ? optionIdsToCount[q.options[0].id] : 0
+    const percentage = q.metadata?.threshold && q.metadata.threshold > 0 ? Math.min(100, (votesTally / q.metadata.threshold) * 100) : 100
+    return percentage >= 100
+  }
+
+  // a compare function that sorts passed questions to the bottom
+  function pinPassedQuestions(a: Question, b: Question) {
+    const isSorted = !hasPassed(a) && hasPassed(b)
+    return isSorted ? -1 : 1
+  }
+  // Randomize questions on metadata change
+  const randomQuestions = useMemo<Question[]>(() => {
+    if (votingRoundMetadata && Array.isArray(votingRoundMetadata.questions) && votingRoundMetadata.questions.length > 0) {
+      return votingRoundMetadata.questions.shuffle()
+    } else {
+      return []
+    }
+  }, [votingRoundMetadata])
+
   if (hasClosed && votingRoundGlobalState) {
     return (
       <VoteResults
@@ -350,62 +442,77 @@ function Vote() {
                 <Skeleton className="h-40" variant="rectangular" />
               </div>
             )}
-            {votingRoundMetadata?.questions.map((question, index) => (
-              <div key={index} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
-                <div className="col-span-2">
-                  {question.metadata && (
-                    <ProposalCard
-                      title={question.prompt}
-                      description={question.description}
-                      category={question.metadata.category}
-                      focus_area={question.metadata.focus_area}
-                      link={question.metadata.link}
-                      threshold={question.metadata.threshold}
-                      ask={question.metadata.ask}
-                      votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
-                    />
-                  )}
-                </div>
-                <div className="flex items-center col-span-1 bg-gray-100 m-3">
-                  {canVote && !hasVoted && (
-                    <>
-                      <TextField
-                        type="number"
-                        className="w-32 bg-white m-4 rounded-xl"
-                        disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
-                        InputProps={{
-                          inputProps: {
-                            max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
-                            min: 0,
-                          },
-                          endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                        }}
-                        id={question.id}
-                        variant="outlined"
-                        onChange={(e) => {
-                          updateVoteAllocations(question.id, parseFloat(e.target.value))
-                        }}
-                        value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
+            {randomQuestions
+              .filter(filterQuestions)
+              .sort(sortQuestions)
+              .sort(pinPassedQuestions)
+              .map((question) => (
+                <div key={question.id} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
+                  <div className="col-span-2">
+                    {question.metadata && (
+                      <ProposalCard
+                        title={question.prompt}
+                        description={question.description}
+                        category={question.metadata.category}
+                        focus_area={question.metadata.focus_area}
+                        link={question.metadata.link}
+                        threshold={question.metadata.threshold}
+                        ask={question.metadata.ask}
+                        votesTally={
+                          optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
+                        }
                       />
-                      <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
-                    </>
-                  )}
+                    )}
+                  </div>
+                  <div className="flex items-center col-span-1 bg-gray-100 m-3">
+                    {canVote && !hasVoted && (
+                      <>
+                        <TextField
+                          type="number"
+                          className="w-32 bg-white m-4 rounded-xl"
+                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
+                          InputProps={{
+                            inputProps: {
+                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
+                              min: 0,
+                            },
+                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+                          }}
+                          id={question.id}
+                          variant="outlined"
+                          onChange={(e) => {
+                            updateVoteAllocations(question.id, parseFloat(e.target.value))
+                          }}
+                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
+                        />
+                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
 
         <div className="col-span-1 justify-between flex flex-col">
           <div className="hidden md:block">
             {!isLoadingVotingRoundData && (
-              <div className="mb-2">
-                <VoteDetails
-                  loading={isLoadingVotingRoundData}
-                  appId={voteId}
-                  globalState={votingRoundGlobalState}
-                  roundMetadata={votingRoundMetadata}
+              <div className="mb-2 mt-8 flex justify-end">
+                <IconButton onClick={handleSortToggle}>
+                  {sort === 'none' && <ShuffleOnIcon />}
+                  {sort === 'ascending' && <ArrowUpwardIcon />}
+                  {sort === 'descending' && <ArrowDownwardIcon />}
+                </IconButton>
+
+                <FilterMenu
+                  questions={votingRoundMetadata?.questions}
+                  selected={filteredItems}
+                  onChange={handleFilterChange}
+                  onClear={handleClearFilter}
                 />
+                <IconButton onClick={handleClearFilter}>
+                  <ClearIcon />
+                </IconButton>
               </div>
             )}
 
@@ -462,7 +569,16 @@ function Vote() {
                   <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
                 </div>
               )}
-
+              {!isLoadingVotingRoundData && (
+                <div className="mt-4">
+                  <VoteDetails
+                    loading={isLoadingVotingRoundData}
+                    appId={voteId}
+                    globalState={votingRoundGlobalState}
+                    roundMetadata={votingRoundMetadata}
+                  />
+                </div>
+              )}
               {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
                 <div className="mb-4">
                   <CloseVotingRound

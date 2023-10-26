@@ -156,10 +156,10 @@ function Status() {
           <Box className="bg-white flex rounded-xl px-4 py-6">
             <div className="w-full">
               <Typography className="mb-3">
-                <strong>Your xGov deposit</strong>
+                <strong>Your xGov Current Balance</strong>
               </Typography>
               <Typography variant="h3">
-                {govenorData.reduce((sum, item) => sum + parseInt(item.original_reward), 0).toLocaleString()} µA
+                {govenorData.reduce((sum, item) => sum + parseInt(item.current_reward), 0).toLocaleString()} µA
               </Typography>
             </div>
           </Box>
@@ -170,9 +170,21 @@ function Status() {
           <Box className="bg-white flex rounded-xl px-4 py-6">
             <div className="w-full">
               <Typography className="mb-3">
-                <strong>Total earnings from xGov participation</strong>
+                <strong>Potential earnings from xGov participation</strong>
               </Typography>
-              <Typography variant="h3">- ALGO</Typography>
+              <Typography variant="h3">
+                {govenorData
+                  .reduce(
+                    (prev, current) =>
+                      prev +
+                      (current?.current_reward
+                        ? Math.floor(Number(current?.current_reward) - parseInt(current?.original_reward)) / 1_000_000
+                        : 0),
+                    0,
+                  )
+                  .toLocaleString()}{' '}
+                ALGO
+              </Typography>
             </div>
           </Box>
         )}

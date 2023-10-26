@@ -1,5 +1,5 @@
 import { CheckCircleIcon, ExclamationCircleIcon, MegaphoneIcon } from '@heroicons/react/24/solid'
-import { Chip } from '@mui/material'
+import { Chip, ChipProps } from '@mui/material'
 import clsx from 'clsx'
 
 interface Props {
@@ -119,4 +119,19 @@ export const AbstainChip = () => <Chip className="mr-2 bg-red-light rounded-lg" 
 export const CategoryChip = ({ category }: Props) => {
   const component = renderComponent(category)
   return component
+}
+
+const FILTER_CHIP_COLORS: { [k: string]: string } = {
+  Onboarding: '#FFE9FD',
+}
+export function FilterChip(props: ChipProps) {
+  return (
+    <Chip
+      style={{
+        borderRadius: '8px',
+        backgroundColor: typeof props.label === 'string' ? FILTER_CHIP_COLORS[props.label] : '#D7F0FF',
+      }}
+      {...props}
+    />
+  )
 }
