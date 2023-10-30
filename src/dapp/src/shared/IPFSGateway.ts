@@ -25,6 +25,10 @@ export interface VotingRoundMetadata {
   /** The questions being voted on as part of the voting round */
   questions: Question[]
   created: CreatedMetadata
+  /** The total amount allocated for the community grants program aka xGov
+   * this is optional for backwards compatibility
+   */
+  communityGrantAllocation?: number
 }
 
 export interface Question {
