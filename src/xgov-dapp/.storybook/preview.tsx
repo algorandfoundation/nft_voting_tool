@@ -25,13 +25,7 @@ const preview: Preview = {
   }
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60,
-    },
-  },
-})
+const queryClient = new QueryClient()
 // TODO: Create Providers.tsx
 export const decorators = [
   (Story: ComponentType) => {
