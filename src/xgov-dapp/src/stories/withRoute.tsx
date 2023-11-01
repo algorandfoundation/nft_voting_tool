@@ -1,13 +1,10 @@
-import { ComponentType, useEffect } from 'react'
+import { ComponentType, PropsWithChildren, ReactNode, useEffect } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { useWallet } from '@makerx/use-wallet'
 import Root from './Root'
 
-export type WithRouterOptions = {
-  /**
-   * Enable routes, ignored when layout === true
-   */
-  routes?: boolean
+export type RouterOptions = {
+  enabled: boolean
   /**
    * React router path
    *
@@ -20,24 +17,41 @@ export type WithRouterOptions = {
    * Mocks location of the component
    */
   entries?: string[]
+}
+export type WalletOptions = {
+  address?: string
+  enabled: boolean
+}
+export type WithMocksOptions = {
+  /**
+   * Enable routes, ignored when layout === true
+   */
+  router?: RouterOptions
   /**
    * Override the Manual Wallet Provider
    */
-  wallet?: string
+  wallet?: WalletOptions
   /**
-   * Full Layout
-   *
-   * Includes Router and Main Layout
+   * Include the Header and Footer
    */
-  layout?: boolean
+  appShell?: boolean
+  /**
+   * Child Components Prop
+   */
+  children?: ReactNode
 }
 
-const DEFAULT_OPTIONS = {
-  routes: true,
-  path: '/',
-  entries: ['/'],
-  wallet: 'HIETYX6Z242IHPLDCQWI3DVG7DINEHGMOPYEWVUS5CRN7RJRTN5Q4IF2SM',
-  layout: false,
+export const DEFAULT_OPTIONS = {
+  router: {
+    enabled: true,
+    path: '/*',
+    entries: ['/'],
+  },
+  wallet: {
+    enabled: true,
+    address: 'HIETYX6Z242IHPLDCQWI3DVG7DINEHGMOPYEWVUS5CRN7RJRTN5Q4IF2SM',
+  },
+  appShell: false,
 }
 
 function useStoryWallet(wallet: string) {
@@ -56,60 +70,68 @@ function useStoryWallet(wallet: string) {
   return wallet
 }
 
+type MockProps = {
+  options?: WithMocksOptions
+} & PropsWithChildren
+
+function WalletWrapper({ options = DEFAULT_OPTIONS, children }: MockProps) {
+  if (typeof options?.wallet?.address !== 'string') {
+    throw new TypeError('Must have a valid wallet')
+  }
+  useStoryWallet(options.wallet.address)
+  return <Wrapper options={options}>{children}</Wrapper>
+}
+function Wrapper({ options = DEFAULT_OPTIONS, children }: MockProps) {
+  if (options?.appShell) {
+    return (
+      <MemoryRouter initialEntries={options.router?.entries}>
+        <Routes>
+          <Route path={options.router?.path} element={<Root>{children}</Root>} />
+        </Routes>
+      </MemoryRouter>
+    )
+  }
+
+  if (options?.router?.enabled) {
+    return (
+      <MemoryRouter initialEntries={options.router.entries}>
+        <Routes>
+          <Route path={options.router.path} element={children} />
+        </Routes>
+      </MemoryRouter>
+    )
+  }
+
+  return <>{children}</>
+}
+
+export function withStorybookWrapper<P extends object>(
+  Component: ComponentType<P>,
+  options: WithMocksOptions = DEFAULT_OPTIONS,
+): ComponentType<P> {
+  const opts = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  }
+  if (opts.wallet.enabled) {
+    return (props: P) => (
+      <WalletWrapper options={opts}>
+        <Component {...props} />
+      </WalletWrapper>
+    )
+  }
+  return (props: P) => (
+    <Wrapper options={opts}>
+      <Component {...props} />
+    </Wrapper>
+  )
+}
 /**
  *
- * @param Component - composed component
- * @param routes - enable routes, ignored when layout === true
- * @param path
- * @param entries
- * @param wallet
- * @param layout
+ * @param Component
+ * @param options
+ * @deprecated
  */
-export function withRoute(
-  Component: ComponentType,
-  {
-    routes = DEFAULT_OPTIONS.routes,
-    path = DEFAULT_OPTIONS.path,
-    entries = DEFAULT_OPTIONS.entries,
-    wallet = DEFAULT_OPTIONS.wallet,
-    layout = DEFAULT_OPTIONS.layout,
-  }: WithRouterOptions = DEFAULT_OPTIONS,
-) {
-  return layout
-    ? (args?: object) => {
-        useStoryWallet(wallet)
-        return (
-          <MemoryRouter initialEntries={entries}>
-            <Routes>
-              <Route
-                path={path}
-                element={
-                  <Root>
-                    <Component {...args} />
-                  </Root>
-                }
-              />
-            </Routes>
-          </MemoryRouter>
-        )
-      }
-    : routes
-    ? (args?: object) => {
-        useStoryWallet(wallet)
-        return (
-          <MemoryRouter>
-            <Routes>
-              <Route element={<Component {...args} />} />
-            </Routes>
-          </MemoryRouter>
-        )
-      }
-    : (args?: object) => {
-        useStoryWallet(wallet)
-        return (
-          <MemoryRouter>
-            <Component {...args} />
-          </MemoryRouter>
-        )
-      }
+export function withRoute<P extends object>(Component: ComponentType<P>, options: WithMocksOptions = DEFAULT_OPTIONS): ComponentType<P> {
+  return withStorybookWrapper<P>(Component, options)
 }

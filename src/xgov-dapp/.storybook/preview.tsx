@@ -10,7 +10,8 @@ import { useAlgoWallet } from '../src/utils/useAlgoWalletProvider'
 import { RecoilRoot } from 'recoil'
 import { ComponentType } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
+import {mockDateDecorator} from 'storybook-mock-date-decorator'
+import { withActions } from '@storybook/addon-actions/decorator';
 
 const preview: Preview = {
   parameters: {
@@ -28,6 +29,8 @@ const preview: Preview = {
 const queryClient = new QueryClient()
 // TODO: Create Providers.tsx
 export const decorators = [
+  withActions,
+  mockDateDecorator,
   (Story: ComponentType) => {
     const walletProviders = useAlgoWallet({
       nodeToken: '',

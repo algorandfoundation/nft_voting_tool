@@ -16,20 +16,120 @@ import { calculateTotalAskedAndAwarded } from '../../shared/stats'
 import AlgoStats from '../vote/AlgoStats'
 import VotingStats from '../vote/VotingStats'
 import { VotingTime } from '../vote/VotingTime'
+import { VotingRoundStatus } from './types'
 dayjs.extend(relativeTime)
 
+export type VotingRoundWrapperProps = {
+  state: VotingRoundGlobalState
+  status: VotingRoundStatus
+}
+
 export type VotingRoundTileProps = {
-  globalState: VotingRoundGlobalState
-  votingRoundStatus: VotingRoundStatus
+  state: VotingRoundGlobalState
+  status: VotingRoundStatus
+  activeAddress: string | undefined
+  metadata: {
+    data: VotingRoundMetadata | undefined
+    isLoading: boolean
+  }
+  snapshot: {
+    data: VoteGatingSnapshot | undefined
+    isLoading: boolean
+  }
+  result: {
+    data: TallyCounts | undefined
+    isLoading: boolean
+  }
+  voterVotes: {
+    data: string[] | undefined
+    isLoading: boolean
+  }
+}
+export const VotingRoundTile = ({ state, status, activeAddress, metadata, snapshot, result, voterVotes }: VotingRoundTileProps) => {
+  const hasVoted = voterVotes.data !== undefined
+  if (status === VotingRoundStatus.OPEN || status === VotingRoundStatus.OPENING_SOON) {
+    return (
+      <Box className="bg-white rounded-lg p-5">
+        <div className="mb-2 justify-between flex">
+          <div>
+            {status === VotingRoundStatus.OPEN ? (
+              <>
+                <OpenChip />
+                {activeAddress && !result.isLoading && (hasVoted ? <YouVotedChip /> : <YouHaveNotVotedChip />)}
+              </>
+            ) : (
+              <OpeningSoonChip />
+            )}
+          </div>
+          <div>
+            {status === VotingRoundStatus.OPEN && (
+              <Button component={Link} to={`/vote/${state.appId}`} variant="contained" color="primary">
+                View Proposals
+              </Button>
+            )}
+          </div>
+        </div>
+        {metadata.isLoading ? (
+          <Skeleton className="h-10 w-full" variant="text" />
+        ) : (
+          <Typography variant="h4">{metadata.data?.title}</Typography>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div>
+            <AlgoStats
+              isLoading={metadata.isLoading || result.isLoading}
+              votingRoundMetadata={metadata.data}
+              votingRoundResults={result.data}
+              hasVoteClosed={false}
+            />
+          </div>
+          <div>
+            <VotingStats isLoading={snapshot.isLoading} votingRoundGlobalState={state} snapshot={snapshot.data} />
+          </div>
+          <div>
+            <VotingTime globalState={state} loading={false} className="lg:visible" />
+          </div>
+        </div>
+      </Box>
+    )
+  }
+
+  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(result.data, metadata.data)
+
+  return (
+    <Box className="bg-white rounded-lg p-5">
+      <div className="mb-3 justify-between flex">
+        <div>
+          <ClosedChip />
+          {activeAddress && !voterVotes.isLoading && (hasVoted ? <YouVotedChip isSmall={true} /> : <YouHaveNotVotedChip isSmall={true} />)}
+        </div>
+        <div>
+          <Link to={`/vote/${state.appId}`}>View Results</Link>
+        </div>
+      </div>
+      <div className="">
+        {metadata.isLoading ? (
+          <Skeleton className="h-12 w-full" variant="text" />
+        ) : (
+          <Typography variant="h5" className="mb-5">
+            {metadata.data?.title}
+          </Typography>
+        )}
+      </div>
+      <Typography className="mb-4">
+        {(result.isLoading || metadata.isLoading) && <Skeleton className="h-6 w-full" variant="text" />}
+        {!result.isLoading && !metadata.isLoading && `${totalAwarded} of ${totalAsked} ALGO allocated`}
+      </Typography>
+      <Typography className="mb-4">
+        {snapshot.isLoading && <Skeleton className="h-6 w-full" variant="text" />}
+        {!snapshot.isLoading && snapshot.data && `${state.voter_count} out of ${snapshot.data.snapshot.length} wallets voted`}
+      </Typography>
+      <Typography>Closed {state.close_time ? dayjs(state?.close_time).fromNow() : dayjs(state?.end_time).fromNow()}</Typography>
+    </Box>
+  )
 }
 
-export enum VotingRoundStatus {
-  OPEN = 1,
-  OPENING_SOON = 2,
-  CLOSED = 3,
-}
-
-export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundTileProps) => {
+export default function VotingRoundTileWrapper({ state, status }: VotingRoundWrapperProps) {
   const { activeAddress } = useWallet()
 
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
@@ -42,14 +142,12 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
   const [isLoadingVotersVote, setIsLoadingVotersVote] = useState(true)
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(true)
 
-  const hasVoted = voterVotes !== undefined ? true : false
-
   useEffect(() => {
     ;(async () => {
-      if (globalState) {
+      if (state) {
         setIsLoadingMetadata(true)
         try {
-          setVotingRoundMetadata(await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid))
+          setVotingRoundMetadata(await fetchVotingRoundMetadata(state.metadata_ipfs_cid))
           setIsLoadingMetadata(false)
         } catch (e) {
           setIsLoadingMetadata(false)
@@ -59,15 +157,15 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
         setVotingRoundMetadata(undefined)
       }
     })()
-  }, [globalState])
+  }, [state])
 
   useEffect(() => {
-    refetchVotersVote(globalState.appId, activeAddress, votingRoundMetadata, globalState)
-  }, [globalState, activeAddress, votingRoundMetadata])
+    refetchVotersVote(state.appId, activeAddress, votingRoundMetadata, state)
+  }, [state, activeAddress, votingRoundMetadata])
 
   useEffect(() => {
-    refetchVoteResults(globalState.appId, votingRoundMetadata)
-  }, [globalState, votingRoundMetadata])
+    refetchVoteResults(state.appId, votingRoundMetadata)
+  }, [state, votingRoundMetadata])
 
   useEffect(() => {
     ;(async () => {
@@ -119,86 +217,27 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
     }
   }
 
-  if (votingRoundStatus === VotingRoundStatus.OPEN || votingRoundStatus === VotingRoundStatus.OPENING_SOON) {
-    return (
-      <Box className="bg-white rounded-lg p-5">
-        <div className="mb-2 justify-between flex">
-          <div>
-            {votingRoundStatus === VotingRoundStatus.OPEN ? (
-              <>
-                <OpenChip />
-                {activeAddress && !isLoadingVotersVote && (hasVoted ? <YouVotedChip /> : <YouHaveNotVotedChip />)}
-              </>
-            ) : (
-              <OpeningSoonChip />
-            )}
-          </div>
-          <div>
-            {votingRoundStatus === VotingRoundStatus.OPEN && (
-              <Button component={Link} to={`/vote/${globalState.appId}`} variant="contained" color="primary">
-                View Proposals
-              </Button>
-            )}
-          </div>
-        </div>
-        {isLoadingMetadata ? (
-          <Skeleton className="h-10 w-full" variant="text" />
-        ) : (
-          <Typography variant="h4">{votingRoundMetadata?.title}</Typography>
-        )}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div>
-            <AlgoStats
-              isLoading={isLoadingMetadata || isLoadingVotingRoundResults}
-              votingRoundMetadata={votingRoundMetadata}
-              votingRoundResults={votingRoundResults}
-              hasVoteClosed={false}
-            />
-          </div>
-          <div>
-            <VotingStats isLoading={isLoadingSnapshot} votingRoundGlobalState={globalState} snapshot={snapshot} />
-          </div>
-          <div>
-            <VotingTime globalState={globalState} loading={false} className="lg:visible" />
-          </div>
-        </div>
-      </Box>
-    )
-  }
-
-  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata)
-
   return (
-    <Box className="bg-white rounded-lg p-5">
-      <div className="mb-3 justify-between flex">
-        <div>
-          <ClosedChip />
-          {activeAddress && !isLoadingVotersVote && (hasVoted ? <YouVotedChip isSmall={true} /> : <YouHaveNotVotedChip isSmall={true} />)}
-        </div>
-        <div>
-          <Link to={`/vote/${globalState.appId}`}>View Results</Link>
-        </div>
-      </div>
-      <div className="">
-        {isLoadingMetadata ? (
-          <Skeleton className="h-12 w-full" variant="text" />
-        ) : (
-          <Typography variant="h5" className="mb-5">
-            {votingRoundMetadata?.title}
-          </Typography>
-        )}
-      </div>
-      <Typography className="mb-4">
-        {(isLoadingVotingRoundResults || isLoadingMetadata) && <Skeleton className="h-6 w-full" variant="text" />}
-        {!isLoadingVotingRoundResults && !isLoadingMetadata && `${totalAwarded} of ${totalAsked} ALGO allocated`}
-      </Typography>
-      <Typography className="mb-4">
-        {isLoadingSnapshot && <Skeleton className="h-6 w-full" variant="text" />}
-        {!isLoadingSnapshot && snapshot && `${globalState.voter_count} out of ${snapshot.snapshot.length} wallets voted`}
-      </Typography>
-      <Typography>
-        Closed {globalState.close_time ? dayjs(globalState?.close_time).fromNow() : dayjs(globalState?.end_time).fromNow()}
-      </Typography>
-    </Box>
+    <VotingRoundTile
+      state={state}
+      status={status}
+      activeAddress={activeAddress}
+      metadata={{
+        data: votingRoundMetadata,
+        isLoading: isLoadingMetadata,
+      }}
+      snapshot={{
+        data: snapshot,
+        isLoading: isLoadingSnapshot,
+      }}
+      result={{
+        data: votingRoundResults,
+        isLoading: isLoadingVotingRoundResults,
+      }}
+      voterVotes={{
+        data: voterVotes,
+        isLoading: isLoadingVotersVote,
+      }}
+    />
   )
 }
