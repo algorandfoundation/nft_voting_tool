@@ -1,4 +1,4 @@
-import { withRoute } from '../../stories/withRoute'
+import { withStorybookWrapper } from '../../stories/withRoute'
 import { VoteResults as Component, VoteResultsProps } from './VoteResults'
 import { ComponentType } from 'react'
 
@@ -6,7 +6,7 @@ const RenderPage = (props: VoteResultsProps) => <Component {...props} />
 
 export default {
   title: 'Pages',
-  render: withRoute(RenderPage as ComponentType, { layout: true }),
+  render: withStorybookWrapper(RenderPage as ComponentType, { appShell: true }),
 }
 
 export const VoteResult = {

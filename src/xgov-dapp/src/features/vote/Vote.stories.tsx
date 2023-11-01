@@ -5,10 +5,16 @@ import { withRoute } from '../../stories/withRoute'
 export default {
   title: 'Pages',
   render: withRoute(() => <VotePage sort="descending" />, {
-    wallet: 'TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA',
-    path: '/vote/:voteId',
-    entries: ['/vote/286064112'],
-    layout: true,
+    wallet: {
+      enabled: true,
+      // address: 'TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA',
+    },
+    router: {
+      enabled: true,
+      path: '/vote/:voteId',
+      entries: ['/vote/286064112'],
+    },
+    appShell: true,
   }),
 }
 

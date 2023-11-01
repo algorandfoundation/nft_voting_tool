@@ -112,6 +112,10 @@ export function withStorybookWrapper<P extends object>(
   const opts = {
     ...DEFAULT_OPTIONS,
     ...options,
+    wallet: {
+      ...DEFAULT_OPTIONS.wallet,
+      ...options.wallet,
+    },
   }
   if (opts.wallet.enabled) {
     return (props: P) => (
