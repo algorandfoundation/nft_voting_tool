@@ -2,10 +2,11 @@ import { ValidatedForm, z, zfd } from '@makerx/forms-mui'
 import { Typography } from '@mui/material'
 import { decodeAddress } from 'algosdk'
 import dayjs from 'dayjs'
-import Papa from 'papaparse'
+import Papa, { UnparseObject } from 'papaparse'
 import { useNavigate } from 'react-router-dom'
 import { SnapshotRow } from '../../../../dapp/src/shared/csvSigner'
 import { useRoundInfo, useSetRoundInfo } from './state'
+import sanitizeHtml from 'sanitize-html'
 
 export type Proposal = {
   title: string
@@ -23,7 +24,7 @@ const formSchema = zfd.formData({
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
-  proposalFile: zfd.text(z.string().trim().min(1, 'Required').superRefine(validateProposalCsv)),
+  proposalFile: zfd.text(z.string().trim().min(1, 'Required').transform(validateProposalCsv)),
   snapshotFile: zfd.text(z.string().trim().min(1, 'Required').superRefine(validateSnapshotCsv)),
 })
 
@@ -57,6 +58,7 @@ function validateProposalCsv(value: string, ctx: z.RefinementCtx) {
     })
   }
   parsed.data.forEach((proposal, index) => {
+    proposal.description = sanitizeHtml(proposal.description)
     requiredFields.forEach((field) => {
       if (!proposal[field as keyof Proposal]) {
         ctx.addIssue({
@@ -66,6 +68,8 @@ function validateProposalCsv(value: string, ctx: z.RefinementCtx) {
       }
     })
   })
+
+  return Papa.unparse(parsed as unknown as UnparseObject<Proposal>)
 }
 
 function validateSnapshotCsv(value: string, ctx: z.RefinementCtx) {
