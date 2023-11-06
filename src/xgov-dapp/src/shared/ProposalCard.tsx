@@ -14,6 +14,7 @@ export type ProposalCardProps = {
   ask: number | undefined
   votesTally: number | undefined
   hasClosed?: boolean
+  forcePass?: boolean
 }
 
 export const ProposalCard = ({
@@ -26,6 +27,7 @@ export const ProposalCard = ({
   ask,
   votesTally = 0,
   hasClosed = false,
+  forcePass = false,
 }: ProposalCardProps) => {
   // Handle collapse state
   const [isOverflow, setIsOverflow] = useState(false)
@@ -36,7 +38,7 @@ export const ProposalCard = ({
   const [expanded, setExpanded] = useState(false)
   // Derived State
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
-  const hasPassed = percentage >= 100
+  const hasPassed = percentage >= 100 || forcePass
   const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
 
   function handleClick() {
