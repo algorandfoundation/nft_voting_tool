@@ -1,3 +1,4 @@
+import { version as VERSION } from '../../package.json'
 // Keep in sync between voting.py, VotingRoundContract.ts and types.ts
 enum VoteType {
   NO_SNAPSHOT = 0,
@@ -9,6 +10,10 @@ enum VoteType {
 /** A discrete opportunity for vote casters to participate in a vote for a given context, this may consist of one or more questions */
 export interface VotingRoundMetadata {
   id: string
+  /**
+   * Metadata Semantic Version
+   */
+  version?: string
   type: VoteType
   title: string
   description?: string
@@ -56,6 +61,10 @@ export interface Option {
 
 export interface VoteGatingSnapshot {
   title: string
+  /**
+   * Snapshot Semantic Version
+   */
+  version?: string
   /** Base 64 encoded public key corresponding to the ephemeral private key that was created to secure this snapshot */
   publicKey: string
   created: CreatedMetadata
@@ -114,11 +123,15 @@ async function getData<T>(cid: string): Promise<T> {
 }
 
 export async function fetchVotingRoundMetadata(cid: string): Promise<VotingRoundMetadata> {
-  return await getData<VotingRoundMetadata>(cid)
+  return await getData<VotingRoundMetadata>(cid).then((metadata) =>
+    typeof metadata.version === 'undefined' ? { ...metadata, version: '1.0.0' } : metadata,
+  )
 }
 
 export async function fetchVotingSnapshot(snapshotCid: string): Promise<VoteGatingSnapshot | undefined> {
-  return await getData<VoteGatingSnapshot>(snapshotCid)
+  return await getData<VoteGatingSnapshot>(snapshotCid).then((snapshot) =>
+    typeof snapshot.version === 'undefined' ? { ...snapshot, version: '1.0.0' } : snapshot,
+  )
 }
 
 function generateFile(data: VotingRoundMetadata | VoteGatingSnapshot, fileName: string): File {
@@ -130,6 +143,9 @@ export async function uploadVoteGatingSnapshot(
   voteGatingSnapshot: VoteGatingSnapshot,
   authSignature: { address: string; signedTransaction: Uint8Array },
 ): Promise<Response> {
+  if (typeof voteGatingSnapshot.version === 'undefined') {
+    voteGatingSnapshot.version = VERSION
+  }
   const voteGratingSnapshotFile = generateFile(voteGatingSnapshot, 'voteGatingSnapshot.json')
   return await uploadFile(voteGratingSnapshotFile, authSignature)
 }
@@ -138,6 +154,9 @@ export async function uploadVotingRound(
   votingRound: VotingRoundMetadata,
   authSignature: { address: string; signedTransaction: Uint8Array },
 ): Promise<Response> {
+  if (typeof votingRound.version === 'undefined') {
+    votingRound.version = VERSION
+  }
   const votingRoundFile = generateFile(votingRound, 'votingRound.json')
   return await uploadFile(votingRoundFile, authSignature)
 }
