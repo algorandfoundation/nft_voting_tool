@@ -21,6 +21,7 @@ export type RoundInfo = {
   snapshotFile?: string | undefined
   minimumVotes?: number | undefined
   voteInformationUrl?: string
+  communityGrantAllocation?: number | undefined
 }
 
 export type Vote = {

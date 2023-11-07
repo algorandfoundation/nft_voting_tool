@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
+import { Question, VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
 import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
@@ -12,6 +12,7 @@ import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
+import { calculateTotalAskedAndAwarded } from '../../shared/stats'
 
 export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined
@@ -34,6 +35,28 @@ export const VoteResults = ({
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const oIdsToCounts = useMemo<{ [key: string]: number }>(() => {
+    if (votingRoundResults === undefined) {
+      return {}
+    }
+    return Object.fromEntries(votingRoundResults?.map((result) => [result.optionId, result.count]))
+  }, [votingRoundResults])
+
+  const passedPercentage = (q: Question) => {
+    if (q.options.length === 0 || !q.metadata || !q.metadata.threshold) {
+      return 0
+    }
+    const votesTally = oIdsToCounts[q.options[0].id] ? oIdsToCounts[q.options[0].id] : 0
+    return Math.min(100, (votesTally / q.metadata.threshold) * 100)
+  }
+
+  const isReserveList = (question: Question) => {
+    const percentage = passedPercentage(question)
+    return percentage < 100 && percentage >= 60 // TODO: make this configurable
+  }
+
+  // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
+  // we clone the metadata so that we don't mutate the original metadata
   const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
     if (
       votingRoundMetadata === undefined ||
@@ -51,6 +74,8 @@ export const VoteResults = ({
     const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
       return accumulator + (curr.weight || 0)
     }, 0)
+    // change threshold to be out of total votes instead of total voting power
+    // according to https://algorandfoundation.atlassian.net/browse/AF-73
     clone.questions.map((question) => {
       if (question.metadata) {
         question.metadata.threshold =
@@ -62,6 +87,39 @@ export const VoteResults = ({
     })
     return clone
   }, [votingRoundMetadata, snapshot, isLoadingVotingRoundData, isLoadingVotingRoundResults])
+
+  const reserveList = useMemo<Question[]>(() => {
+    if (votingRoundMetadataClone === undefined) {
+      return []
+    }
+    // sort reserve list by success rate, descending
+    return votingRoundMetadataClone.questions.filter(isReserveList).sort((a, b) => {
+      const percentageA = passedPercentage(a)
+      const percentageB = passedPercentage(b)
+      return percentageB - percentageA
+    })
+  }, [votingRoundMetadataClone])
+
+  const passedReserveList = useMemo<Set<string>>(() => {
+    if (
+      reserveList.length === 0 ||
+      votingRoundResults === undefined ||
+      votingRoundMetadataClone === undefined ||
+      votingRoundMetadataClone.communityGrantAllocation === undefined
+    ) {
+      return new Set()
+    }
+    const passedReserveList: Set<string> = new Set()
+    const { totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadataClone)
+    let awardsForReserveList = votingRoundMetadataClone.communityGrantAllocation - totalAwarded.algos().microAlgos
+    for (const question of reserveList) {
+      if (question.metadata && question.metadata.ask && awardsForReserveList >= question.metadata.ask.algos().microAlgos) {
+        passedReserveList.add(question.id)
+        awardsForReserveList -= question.metadata.ask.algos().microAlgos
+      }
+    }
+    return passedReserveList
+  }, [reserveList, votingRoundResults, votingRoundMetadataClone])
 
   const generateAddressesThatVotedCsv = async () => {
     if (votingRoundMetadata) {
@@ -115,6 +173,7 @@ export const VoteResults = ({
             votingRoundMetadata={votingRoundMetadataClone}
             votingRoundResults={votingRoundResults}
             hasVoteClosed={true}
+            passedReserveList={passedReserveList}
           />
         </div>
         <div>
@@ -145,23 +204,69 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadataClone?.questions.map((question, index) => (
-            <div key={question.id}>
-              {question.metadata && (
-                <ProposalCard
-                  title={question.prompt}
-                  description={question.description}
-                  category={question.metadata.category}
-                  focus_area={question.metadata.focus_area}
-                  link={question.metadata.link}
-                  threshold={question.metadata.threshold}
-                  ask={question.metadata.ask}
-                  votesTally={votingRoundResults && votingRoundResults[index] ? votingRoundResults[index].count : 0}
-                  hasClosed={true}
-                />
-              )}
+          votingRoundMetadataClone?.questions
+            .filter((q) => !isReserveList(q))
+            .map((question) => (
+              <div key={question.id}>
+                {question.metadata && (
+                  <ProposalCard
+                    title={question.prompt}
+                    description={question.description}
+                    category={question.metadata.category}
+                    focus_area={question.metadata.focus_area}
+                    link={question.metadata.link}
+                    threshold={question.metadata.threshold}
+                    ask={question.metadata.ask}
+                    votesTally={
+                      question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
+                    }
+                    hasClosed={true}
+                  />
+                )}
+              </div>
+            ))}
+        {reserveList.length > 0 && (
+          <>
+            <div className="col-span-1 xl:col-span-3">
+              <Typography variant="h4">Reserve List</Typography>
             </div>
-          ))}
+            {isLoadingVotingRoundData ||
+              (isLoadingVotingRoundResults && (
+                <>
+                  <div>
+                    <Skeleton className="h-40 mb-4" variant="rectangular" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-40 mb-4" variant="rectangular" />
+                  </div>
+                  <div>
+                    <Skeleton className="h-40" variant="rectangular" />
+                  </div>
+                </>
+              ))}
+            {!isLoadingVotingRoundResults &&
+              reserveList.map((question) => (
+                <div key={question.id}>
+                  {question.metadata && (
+                    <ProposalCard
+                      title={question.prompt}
+                      description={question.description}
+                      category={question.metadata.category}
+                      focus_area={question.metadata.focus_area}
+                      link={question.metadata.link}
+                      threshold={question.metadata.threshold}
+                      ask={question.metadata.ask}
+                      votesTally={
+                        question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
+                      }
+                      hasClosed={true}
+                      forcePass={passedReserveList.has(question.id)}
+                    />
+                  )}
+                </div>
+              ))}
+          </>
+        )}
       </div>
       <div className="w-full text-right mt-4">
         <Button

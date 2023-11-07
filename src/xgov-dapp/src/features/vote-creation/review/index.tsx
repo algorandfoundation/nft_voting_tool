@@ -1,4 +1,4 @@
-import { Alert, Button, Link, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Link, Stack, TextField, Typography } from '@mui/material'
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -146,7 +146,7 @@ export default function Review() {
               <div className="grid grid-cols-1 gap-4">
                 {proposals.map((proposal) => {
                   return proposal && proposal.threshold ? (
-                    <div key={proposal.link}>
+                    <div key={proposal.title.replace(' ', '-')}>
                       <ProposalCard
                         link={proposal.link}
                         title={proposal.title}
@@ -179,6 +179,18 @@ export default function Review() {
                 Session Period
               </Typography>
               <VotingTime className="hidden sm:block mt-4" loading={false} globalState={previewGlobalState} />
+              <Box className="bg-green-light flex mt-4 rounded-xl px-4 py-6">
+                <Stack>
+                  <Typography>
+                    <strong>Community Allocation: </strong>
+                  </Typography>
+                  <Typography>
+                    {roundInfo.communityGrantAllocation ? roundInfo.communityGrantAllocation.microAlgos().algos.toLocaleString('en-US') : 0}{' '}
+                    ALGO{roundInfo.communityGrantAllocation === 1 ? '' : 's'}
+                  </Typography>
+                  <Typography>{(roundInfo.communityGrantAllocation || 0).microAlgos().toString()} </Typography>
+                </Stack>
+              </Box>
               <Alert className="max-w-xl mt-8 bg-algorand-warning font-semibold" icon={false}>
                 Review everything on this page carefully, as it cannot be changed once you create the voting round!
               </Alert>

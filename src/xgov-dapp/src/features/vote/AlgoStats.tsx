@@ -10,10 +10,11 @@ interface AlgoStatsProps {
   votingRoundMetadata: VotingRoundMetadata | undefined
   hasVoteClosed: boolean
   isLoading: boolean
+  passedReserveList?: Set<string>
 }
 
-const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMetadata, hasVoteClosed, isLoading }) => {
-  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata)
+const AlgoStats: React.FC<AlgoStatsProps> = ({ votingRoundResults, votingRoundMetadata, hasVoteClosed, isLoading, passedReserveList }) => {
+  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata, passedReserveList)
 
   return (
     <div>
