@@ -35,15 +35,15 @@ export const VoteResults = ({
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const oIdsToCounts = useMemo(() => {
+  const oIdsToCounts = useMemo<{ [key: string]: number }>(() => {
     if (votingRoundResults === undefined) {
-      return undefined
+      return {}
     }
     return Object.fromEntries(votingRoundResults?.map((result) => [result.optionId, result.count]))
   }, [votingRoundResults])
 
   const passedPercentage = (q: Question) => {
-    if (!oIdsToCounts || q.options.length === 0 || !q.metadata || !q.metadata.threshold) {
+    if (q.options.length === 0 || !q.metadata || !q.metadata.threshold) {
       return 0
     }
     const votesTally = oIdsToCounts[q.options[0].id] ? oIdsToCounts[q.options[0].id] : 0
@@ -88,9 +88,9 @@ export const VoteResults = ({
     return clone
   }, [votingRoundMetadata, snapshot, isLoadingVotingRoundData, isLoadingVotingRoundResults])
 
-  const reserveList = useMemo<Question[] | undefined>(() => {
+  const reserveList = useMemo<Question[]>(() => {
     if (votingRoundMetadataClone === undefined) {
-      return undefined
+      return []
     }
     // sort reserve list by success rate, descending
     return votingRoundMetadataClone.questions.filter(isReserveList).sort((a, b) => {
@@ -100,14 +100,14 @@ export const VoteResults = ({
     })
   }, [votingRoundMetadataClone])
 
-  const passedReserveList = useMemo<Set<string> | undefined>(() => {
+  const passedReserveList = useMemo<Set<string>>(() => {
     if (
-      reserveList === undefined ||
+      reserveList.length === 0 ||
       votingRoundResults === undefined ||
       votingRoundMetadataClone === undefined ||
       votingRoundMetadataClone.communityGrantAllocation === undefined
     ) {
-      return undefined
+      return new Set()
     }
     const passedReserveList: Set<string> = new Set()
     const { totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadataClone)
@@ -218,16 +218,14 @@ export const VoteResults = ({
                     threshold={question.metadata.threshold}
                     ask={question.metadata.ask}
                     votesTally={
-                      oIdsToCounts && question.options.length > 0 && oIdsToCounts[question.options[0].id]
-                        ? oIdsToCounts[question.options[0].id]
-                        : 0
+                      question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
                     }
                     hasClosed={true}
                   />
                 )}
               </div>
             ))}
-        {reserveList && reserveList.length > 0 && (
+        {reserveList.length > 0 && (
           <>
             <div className="col-span-1 xl:col-span-3">
               <Typography variant="h4">Reserve List</Typography>
@@ -259,12 +257,10 @@ export const VoteResults = ({
                       threshold={question.metadata.threshold}
                       ask={question.metadata.ask}
                       votesTally={
-                        oIdsToCounts && question.options.length > 0 && oIdsToCounts[question.options[0].id]
-                          ? oIdsToCounts[question.options[0].id]
-                          : 0
+                        question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
                       }
                       hasClosed={true}
-                      forcePass={passedReserveList && passedReserveList.has(question.id)}
+                      forcePass={passedReserveList.has(question.id)}
                     />
                   )}
                 </div>

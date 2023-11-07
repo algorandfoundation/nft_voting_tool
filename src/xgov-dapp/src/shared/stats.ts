@@ -9,7 +9,7 @@ export interface TotalAskedAndAwarded {
 export function calculateTotalAskedAndAwarded(
   votingRoundResults: TallyCounts | undefined,
   votingRoundMetadata: VotingRoundMetadata | undefined,
-  forcePassed?: Set<string>
+  forcePassed?: Set<string>,
 ): TotalAskedAndAwarded {
   const optionIdsToCounts = {} as {
     [optionId: string]: number
