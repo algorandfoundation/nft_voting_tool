@@ -8,11 +8,18 @@ import { Question, VoteGatingSnapshot, VotingRoundMetadata } from '../../../../d
 import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ProposalCard } from '../../shared/ProposalCard'
 import { VotingRoundResult } from '../../shared/types'
+import {
+  generateOptionIDsToCountsMapping,
+  generatePassedReserveList,
+  generateReserveList,
+  isReserveList,
+  transformToDynamicThresholds,
+} from '../../utils/common'
 import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-import { calculateTotalAskedAndAwarded } from '../../shared/stats'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
 
 export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined
@@ -35,25 +42,10 @@ export const VoteResults = ({
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const oIdsToCounts = useMemo<{ [key: string]: number }>(() => {
-    if (votingRoundResults === undefined) {
-      return {}
-    }
-    return Object.fromEntries(votingRoundResults?.map((result) => [result.optionId, result.count]))
-  }, [votingRoundResults])
+  const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
+  const isDynamicThresholdEnabled = dynamicThresholdSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
 
-  const passedPercentage = (q: Question) => {
-    if (q.options.length === 0 || !q.metadata || !q.metadata.threshold) {
-      return 0
-    }
-    const votesTally = oIdsToCounts[q.options[0].id] ? oIdsToCounts[q.options[0].id] : 0
-    return Math.min(100, (votesTally / q.metadata.threshold) * 100)
-  }
-
-  const isReserveList = (question: Question) => {
-    const percentage = passedPercentage(question)
-    return percentage < 100 && percentage >= 60 // TODO: make this configurable
-  }
+  const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
 
   // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
   // we clone the metadata so that we don't mutate the original metadata
@@ -61,64 +53,42 @@ export const VoteResults = ({
     if (
       votingRoundMetadata === undefined ||
       snapshot === undefined ||
+      votingRoundResults === undefined ||
       isLoadingVotingRoundResults === true ||
       isLoadingVotingRoundData === true
     ) {
       return undefined
     }
-    const clone = structuredClone(votingRoundMetadata) as VotingRoundMetadata
-    const totalVotes = votingRoundResults?.reduce((accumulator, curr) => {
+    if (!isDynamicThresholdEnabled) {
+      return votingRoundMetadata
+    }
+    const totalVotes = votingRoundResults.reduce((accumulator, curr) => {
       return accumulator + curr.count
     }, 0)
 
-    const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
+    const totalVotingPower = snapshot.snapshot.reduce((accumulator, curr) => {
       return accumulator + (curr.weight || 0)
     }, 0)
     // change threshold to be out of total votes instead of total voting power
     // according to https://algorandfoundation.atlassian.net/browse/AF-73
-    clone.questions.map((question) => {
-      if (question.metadata) {
-        question.metadata.threshold =
-          question.metadata.threshold && totalVotes && totalVotingPower && totalVotingPower !== 0
-            ? (question.metadata.threshold * totalVotes) / totalVotingPower
-            : question.metadata.threshold
-      }
-      return question
-    })
-    return clone
+    return transformToDynamicThresholds(votingRoundMetadata, totalVotes, totalVotingPower)
   }, [votingRoundMetadata, snapshot, isLoadingVotingRoundData, isLoadingVotingRoundResults])
 
   const reserveList = useMemo<Question[]>(() => {
+    if (!isReserveListEnabled) {
+      return []
+    }
     if (votingRoundMetadataClone === undefined) {
       return []
     }
-    // sort reserve list by success rate, descending
-    return votingRoundMetadataClone.questions.filter(isReserveList).sort((a, b) => {
-      const percentageA = passedPercentage(a)
-      const percentageB = passedPercentage(b)
-      return percentageB - percentageA
-    })
+    return generateReserveList(votingRoundMetadataClone, optionIDsToCounts)
   }, [votingRoundMetadataClone])
 
   const passedReserveList = useMemo<Set<string>>(() => {
-    if (
-      reserveList.length === 0 ||
-      votingRoundResults === undefined ||
-      votingRoundMetadataClone === undefined ||
-      votingRoundMetadataClone.communityGrantAllocation === undefined
-    ) {
+    if (reserveList.length === 0 || votingRoundResults === undefined || votingRoundMetadataClone === undefined) {
       return new Set()
     }
-    const passedReserveList: Set<string> = new Set()
-    const { totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadataClone)
-    let awardsForReserveList = votingRoundMetadataClone.communityGrantAllocation - totalAwarded.algos().microAlgos
-    for (const question of reserveList) {
-      if (question.metadata && question.metadata.ask && awardsForReserveList >= question.metadata.ask.algos().microAlgos) {
-        passedReserveList.add(question.id)
-        awardsForReserveList -= question.metadata.ask.algos().microAlgos
-      }
-    }
-    return passedReserveList
+    return generatePassedReserveList(reserveList, votingRoundResults, votingRoundMetadataClone)
   }, [reserveList, votingRoundResults, votingRoundMetadataClone])
 
   const generateAddressesThatVotedCsv = async () => {
@@ -205,7 +175,11 @@ export const VoteResults = ({
           ))}
         {!isLoadingVotingRoundResults &&
           votingRoundMetadataClone?.questions
-            .filter((q) => !isReserveList(q))
+            .filter((q) =>
+              isReserveListEnabled && q.options.length > 0 && optionIDsToCounts[q.options[0].id]
+                ? !isReserveList(q, optionIDsToCounts[q.options[0].id])
+                : true,
+            )
             .map((question) => (
               <div key={question.id}>
                 {question.metadata && (
@@ -218,14 +192,16 @@ export const VoteResults = ({
                     threshold={question.metadata.threshold}
                     ask={question.metadata.ask}
                     votesTally={
-                      question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
+                      question.options.length > 0 && optionIDsToCounts[question.options[0].id]
+                        ? optionIDsToCounts[question.options[0].id]
+                        : 0
                     }
                     hasClosed={true}
                   />
                 )}
               </div>
             ))}
-        {reserveList.length > 0 && (
+        {isReserveListEnabled && reserveList.length > 0 && (
           <>
             <div className="col-span-1 xl:col-span-3">
               <Typography variant="h4">Reserve List</Typography>
@@ -257,7 +233,9 @@ export const VoteResults = ({
                       threshold={question.metadata.threshold}
                       ask={question.metadata.ask}
                       votesTally={
-                        question.options.length > 0 && oIdsToCounts[question.options[0].id] ? oIdsToCounts[question.options[0].id] : 0
+                        question.options.length > 0 && optionIDsToCounts[question.options[0].id]
+                          ? optionIDsToCounts[question.options[0].id]
+                          : 0
                       }
                       hasClosed={true}
                       forcePass={passedReserveList.has(question.id)}
