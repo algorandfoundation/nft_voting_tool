@@ -1,16 +1,20 @@
 import { HandThumbUpIcon } from '@heroicons/react/24/solid'
 import { useWallet } from '@makerx/use-wallet'
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
+import ClearIcon from '@mui/icons-material/Clear'
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
 import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
+  Question,
   VoteGatingSnapshot,
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
-  Question,
 } from '../../../../dapp/src/shared/IPFSGateway'
 import {
   TallyCounts,
@@ -25,16 +29,13 @@ import { LoadingDialog } from '../../shared/loading/LoadingDialog'
 import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
 import { useSetShowConnectWalletModal } from '../wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
+import { FilterMenu, SelectedItem } from './FilterMenu'
 import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
 import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-import { FilterMenu, SelectedItem } from './FilterMenu'
-import ClearIcon from '@mui/icons-material/Clear'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import { generateOptionIDsToCountsMapping } from '../../utils/common'
 
 // Fisher-Yates shuffle
 Array.prototype.shuffle = function () {
@@ -207,8 +208,8 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
       try {
         const roundResults = await fetchTallyCounts(voteId, votingRoundMetadata)
         setVotingRoundResults(roundResults)
-        const oIdsToCounts = Object.fromEntries(roundResults?.map((result) => [result.optionId, result.count]))
-        setOptionIdsToCount(oIdsToCounts)
+        const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
+        setOptionIdsToCount(optionIDsToCounts)
         setIsLoadingVotingRoundResults(false)
       } catch (e) {
         setIsLoadingVotingRoundResults(false)
