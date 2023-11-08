@@ -23,6 +23,7 @@ import {
 import AlgoStats from '../vote/AlgoStats'
 import VotingStats from '../vote/VotingStats'
 import { VotingTime } from '../vote/VotingTime'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
 dayjs.extend(relativeTime)
 
 export type VotingRoundTileProps = {
@@ -51,9 +52,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
 
   const hasVoted = voterVotes !== undefined ? true : false
 
-  const reserveListSupportedVersions = ['2.0.0']
   const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
-  const dynamicThresholdSupportedVersions = ['2.0.0']
   const isDynamicThresholdEnabled = dynamicThresholdSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}

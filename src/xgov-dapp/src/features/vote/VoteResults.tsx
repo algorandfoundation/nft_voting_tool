@@ -19,6 +19,7 @@ import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
 
 export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined
@@ -40,9 +41,8 @@ export const VoteResults = ({
 }: VoteResultsProps) => {
   const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const reserveListSupportedVersions = ['2.0.0']
+
   const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
-  const dynamicThresholdSupportedVersions = ['2.0.0']
   const isDynamicThresholdEnabled = dynamicThresholdSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
