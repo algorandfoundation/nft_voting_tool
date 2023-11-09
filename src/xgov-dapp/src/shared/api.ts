@@ -173,6 +173,7 @@ const api = {
                 at: new Date().toISOString(),
                 by: signer.addr,
               },
+              communityGrantAllocation: newRound.communityGrantAllocation,
             },
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             auth,

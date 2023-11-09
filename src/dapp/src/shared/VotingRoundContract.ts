@@ -275,6 +275,7 @@ export const castVote = async (
 
     return transaction
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e)
     throw e
   }

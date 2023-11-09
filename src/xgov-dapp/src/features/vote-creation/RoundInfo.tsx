@@ -23,6 +23,7 @@ const formSchema = zfd.formData({
   voteInformationUrl: zfd.text(z.string().trim().url().optional()),
   start: zfd.text(),
   end: zfd.text(),
+  communityGrantAllocation: zfd.numeric(z.number().positive().min(1, 'Must be at least 1')),
   proposalFile: zfd.text(z.string().trim().min(1, 'Required').superRefine(validateProposalCsv)),
   snapshotFile: zfd.text(z.string().trim().min(1, 'Required').superRefine(validateSnapshotCsv)),
 })
@@ -168,6 +169,11 @@ export default function RoundInfo() {
                   fromISO: (date) => dayjs(date) as unknown as Date,
                 })}
               </div>
+              {helper.textField({
+                label: 'Community grant allocation',
+                field: 'communityGrantAllocation',
+                hint: 'Amount of microALGO to allocate to the community grant pool',
+              })}
               {helper.textFileFormField({
                 label: 'Proposals',
                 field: 'proposalFile',

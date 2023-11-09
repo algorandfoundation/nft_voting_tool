@@ -1,0 +1,20 @@
+name: Chromatic
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-xgov-dapp:
+    name: xGov Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/xgov-dapp
+      pre-run-script: cd ../dapp && npm ci
+      audit-script: npm run audit --audit-level=high
+      run-dispatch: true
+    secrets:
+      chromatic-token: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+      npm-auth-token: ${{ secrets.GITHUB_TOKEN }}

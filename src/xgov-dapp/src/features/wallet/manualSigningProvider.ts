@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer'
 import { CustomProvider, Metadata, PROVIDER_ID } from '@makerx/use-wallet'
 import type _algosdk from 'algosdk'
-import { DefaultValue, SetterOrUpdater, atom, selector, useRecoilValue, useSetRecoilState } from 'recoil'
+import { atom, DefaultValue, selector, SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil'
 
 type ManualWallet = {
   payloadToSign: string
@@ -19,7 +19,7 @@ const manualWalletAtom = atom<ManualWallet>({
 const showManualWalletModalSelector = selector({
   key: 'showManualWalletModalSelector',
   get: ({ get }) => get(manualWalletAtom).showManualWalletModal,
-  set: ({ set, get }, newValue) => {
+  set: ({ set, get: _get }, newValue) => {
     set(manualWalletAtom, {
       showManualWalletModal: newValue instanceof DefaultValue ? false : newValue,
       payloadToSign: '',
@@ -63,8 +63,24 @@ export class ManualSigningProvider implements CustomProvider {
   cancelled() {
     this.submittedValue = null
   }
-
   async connect(metadata: Metadata) {
+    //TODO: Add custom Storybook/Test provider, could be useful as a package
+    if (import.meta.env.STORYBOOK === 'true') {
+      return {
+        ...metadata,
+        accounts: [
+          // Creator
+          { address: import.meta.env.VITE_STORYBOOK_WALLET, name: import.meta.env.VITE_STORYBOOK_WALLET, providerId: PROVIDER_ID.CUSTOM },
+          // Governor
+          {
+            address: 'TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA',
+            name: 'TWI4TQQGI2BWT4CDCGZJCNHDYAJE5OLFBMFKXEG3OBWFOLIPGJCY6HAHKA',
+            providerId: PROVIDER_ID.CUSTOM,
+          },
+        ],
+      }
+    }
+
     let address = prompt('Enter address of your account')
     if (address && !this.algosdk.isValidAddress(address)) {
       alert('Invalid address; please try again')

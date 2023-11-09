@@ -12,6 +12,7 @@ export interface GovenorTermPoolData {
   original_reward: string
   original_voting_power: string
   amount: string
+  current_reward: string
   current_voting_power: string
   eligibility: string
   address: string

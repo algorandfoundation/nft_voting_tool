@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import LaunchIcon from '@mui/icons-material/Launch'
-import { Chip, LinearProgress, Link, Paper, Typography } from '@mui/material'
+import { Chip, Collapse, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
+import { useOverflow } from './hooks/useOverflow'
 
-type ProposalCardProps = {
+export type ProposalCardProps = {
   link: string | undefined
   title: string
   description?: string
@@ -12,6 +14,7 @@ type ProposalCardProps = {
   ask: number | undefined
   votesTally: number | undefined
   hasClosed?: boolean
+  forcePass?: boolean
 }
 
 export const ProposalCard = ({
@@ -24,10 +27,24 @@ export const ProposalCard = ({
   ask,
   votesTally = 0,
   hasClosed = false,
+  forcePass = false,
 }: ProposalCardProps) => {
+  // Handle collapse state
+  const [isOverflow, setIsOverflow] = useState(false)
+  const { ref } = useOverflow((result) => {
+    if (result !== isOverflow) setIsOverflow(result)
+  })
+  const [hasOpened, setHasOpened] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  // Derived State
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
-  const hasPassed = percentage >= 100
+  const hasPassed = percentage >= 100 || forcePass
   const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
+
+  function handleClick() {
+    if (!hasOpened) setHasOpened(true)
+    setExpanded(!expanded)
+  }
 
   if (category === 'Abstain') {
     return (
@@ -53,7 +70,16 @@ export const ProposalCard = ({
           </Typography>
         </div>
         <LinearProgress color="error" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={100} />
-        {description && <Typography>{description}</Typography>}
+        {description && (
+          <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+            <Typography>{description}</Typography>
+          </Collapse>
+        )}
+        {(isOverflow || hasOpened) && (
+          <Typography className="text-right mt-2 cursor-pointer" onClick={handleClick}>
+            {expanded ? 'Show Less' : 'Read More'}
+          </Typography>
+        )}
       </Paper>
     )
   }
@@ -94,7 +120,16 @@ export const ProposalCard = ({
         </Typography>
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
-      {description && <Typography>{description}</Typography>}
+      {description && (
+        <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+          <Typography dangerouslySetInnerHTML={{ __html: description }}></Typography>
+        </Collapse>
+      )}
+      {(isOverflow || hasOpened) && (
+        <Typography className="text-right mt-2 cursor-pointer" onClick={handleClick}>
+          {expanded ? 'Show Less' : 'Read More'}
+        </Typography>
+      )}
     </Paper>
   )
 }

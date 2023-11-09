@@ -25,6 +25,7 @@ const defaultRoundInfo: RoundInfo = {
   voteDescription: '',
   voteInformationUrl: '',
   voteTitle: '',
+  communityGrantAllocation: 0,
 }
 
 const defaultAuth = {

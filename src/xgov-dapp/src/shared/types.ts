@@ -12,6 +12,7 @@ export type RoundInfo = {
   end: string
   proposalFile: string
   snapshotFile?: string | undefined
+  communityGrantAllocation?: number | undefined
 }
 
 export type Vote = {

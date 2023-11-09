@@ -9,6 +9,7 @@ export interface TotalAskedAndAwarded {
 export function calculateTotalAskedAndAwarded(
   votingRoundResults: TallyCounts | undefined,
   votingRoundMetadata: VotingRoundMetadata | undefined,
+  forcePassed?: Set<string>,
 ): TotalAskedAndAwarded {
   const optionIdsToCounts = {} as {
     [optionId: string]: number
@@ -23,11 +24,14 @@ export function calculateTotalAskedAndAwarded(
 
   //Filtering out a specific misconfigured mock proposal
   const filteredQuestions = votingRoundMetadata?.questions.filter((question) => !question.prompt.toLowerCase().includes('mock proposal'))
-
   filteredQuestions?.forEach((question) => {
     totalAsked += question.metadata?.ask || 0
+    if (forcePassed?.has(question.id)) {
+      totalAwarded += question.metadata?.ask || 0
+      return
+    }
     question.options.forEach((option) => {
-      if (question.metadata && question.metadata.threshold && optionIdsToCounts[option.id] > question.metadata.threshold) {
+      if (question.metadata && question.metadata.threshold && optionIdsToCounts[option.id] >= question.metadata.threshold) {
         totalAwarded += question.metadata?.ask || 0
       }
     })
