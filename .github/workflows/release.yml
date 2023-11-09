@@ -152,6 +152,11 @@ jobs:
     environment: Prod
     concurrency: "${{ github.workflow }}-prod"
     if: github.ref == 'refs/heads/main'
+    needs:
+      - build-dapp
+      - build-xgov-dapp
+      - build-infrastructure
+      - build-api
     steps:
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
