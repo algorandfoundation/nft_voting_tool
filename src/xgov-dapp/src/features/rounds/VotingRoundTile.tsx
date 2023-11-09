@@ -2,9 +2,10 @@ import { useWallet } from '@makerx/use-wallet'
 import { Box, Button, Skeleton, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
+  Question,
   VoteGatingSnapshot,
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
@@ -13,9 +14,16 @@ import {
 import { TallyCounts, VotingRoundGlobalState, fetchTallyCounts, fetchVoterVotes } from '../../../../dapp/src/shared/VotingRoundContract'
 import { ClosedChip, OpenChip, OpeningSoonChip, YouHaveNotVotedChip, YouVotedChip } from '../../shared/Chips'
 import { calculateTotalAskedAndAwarded } from '../../shared/stats'
+import {
+  generateOptionIDsToCountsMapping,
+  generatePassedReserveList,
+  generateReserveList,
+  transformToDynamicThresholds,
+} from '../../utils/common'
 import AlgoStats from '../vote/AlgoStats'
 import VotingStats from '../vote/VotingStats'
 import { VotingTime } from '../vote/VotingTime'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
 dayjs.extend(relativeTime)
 
 export type VotingRoundTileProps = {
@@ -43,6 +51,57 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(true)
 
   const hasVoted = voterVotes !== undefined ? true : false
+
+  const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
+  const isDynamicThresholdEnabled = dynamicThresholdSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
+
+  const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
+
+  // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
+  // we clone the metadata so that we don't mutate the original metadata
+  const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
+    if (
+      votingRoundMetadata === undefined ||
+      snapshot === undefined ||
+      votingRoundResults === undefined ||
+      isLoadingVotingRoundResults === true ||
+      isLoadingMetadata === true ||
+      isLoadingSnapshot === true ||
+      isLoadingVotersVote === true
+    ) {
+      return undefined
+    }
+    if (!isDynamicThresholdEnabled) {
+      return votingRoundMetadata
+    }
+    const totalVotes = votingRoundResults.reduce((accumulator, curr) => {
+      return accumulator + curr.count
+    }, 0)
+
+    const totalVotingPower = snapshot.snapshot.reduce((accumulator, curr) => {
+      return accumulator + (curr.weight || 0)
+    }, 0)
+    // change threshold to be out of total votes instead of total voting power
+    // according to https://algorandfoundation.atlassian.net/browse/AF-73
+    return transformToDynamicThresholds(votingRoundMetadata, totalVotes, totalVotingPower)
+  }, [votingRoundMetadata, snapshot, isLoadingMetadata, isLoadingVotingRoundResults, isLoadingSnapshot, isLoadingVotersVote])
+
+  const reserveList = useMemo<Question[]>(() => {
+    if (!isReserveListEnabled) {
+      return []
+    }
+    if (votingRoundMetadataClone === undefined) {
+      return []
+    }
+    return generateReserveList(votingRoundMetadataClone, optionIDsToCounts)
+  }, [votingRoundMetadataClone])
+
+  const passedReserveList = useMemo<Set<string>>(() => {
+    if (reserveList.length === 0 || votingRoundResults === undefined || votingRoundMetadataClone === undefined) {
+      return new Set()
+    }
+    return generatePassedReserveList(reserveList, votingRoundResults, votingRoundMetadataClone)
+  }, [reserveList, votingRoundResults, votingRoundMetadataClone])
 
   useEffect(() => {
     ;(async () => {
@@ -166,7 +225,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
     )
   }
 
-  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata)
+  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata, passedReserveList)
 
   return (
     <Box className="bg-white rounded-lg p-5">
