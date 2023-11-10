@@ -208,7 +208,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
       try {
         const roundResults = await fetchTallyCounts(voteId, votingRoundMetadata)
         setVotingRoundResults(roundResults)
-        const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
+        const optionIDsToCounts = roundResults !== undefined ? generateOptionIDsToCountsMapping(roundResults) : {}
         setOptionIdsToCount(optionIDsToCounts)
         setIsLoadingVotingRoundResults(false)
       } catch (e) {
