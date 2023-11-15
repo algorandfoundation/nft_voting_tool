@@ -25,11 +25,11 @@ const formSchema = zfd.formData({
   start: zfd.text(),
   end: zfd.text(),
   communityGrantAllocation: zfd.numeric(z.number().positive().min(1, 'Must be at least 1')),
-  proposalFile: zfd.text(z.string().trim().min(1, 'Required').transform(validateProposalCsv)),
+  proposalFile: zfd.text(z.string().trim().min(1, 'Required').transform(validateAndSanitizeProposalCsv)),
   snapshotFile: zfd.text(z.string().trim().min(1, 'Required').superRefine(validateSnapshotCsv)),
 })
 
-function validateProposalCsv(value: string, ctx: z.RefinementCtx) {
+function validateAndSanitizeProposalCsv(value: string, ctx: z.RefinementCtx) {
   const parsed = Papa.parse<Proposal>(value, { header: true })
   const requiredFields = ['title', 'description', 'link', 'category', 'focus_area', 'threshold', 'ask']
   if (parsed.errors.length > 0) {
