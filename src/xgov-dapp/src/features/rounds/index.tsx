@@ -1,5 +1,6 @@
 import { useWallet } from '@makerx/use-wallet'
-import { Alert, Button, Skeleton, Typography } from '@mui/material'
+import LaunchIcon from '@mui/icons-material/Launch'
+import { Alert, Box, Button, Skeleton, Typography, Link as MuiLink } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -94,6 +95,14 @@ const VotingRounds = () => {
 
   return (
     <div className="container">
+      <div className="flex flex-col items-end">
+        <Box className="bg-white flex rounded-xl px-4 py-2 items-center">
+          <MuiLink className="no-underline hover:underline" href="https://www.algorand.foundation/xgov-guide" target="_blank">
+            xGov Guide
+            <LaunchIcon className="ml-2 text-grey-light align-bottom" />
+          </MuiLink>
+        </Box>
+      </div>
       <Typography variant="h3">Voting sessions</Typography>
 
       {isCreator && (
