@@ -425,6 +425,25 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 <Typography variant="h4">Proposals</Typography>
               )}
             </div>
+            {!isLoadingVotingRoundData && (
+              <div className="flex justify-end lg:hidden">
+                <IconButton onClick={handleSortToggle}>
+                  {sort === 'none' && <ShuffleOnIcon />}
+                  {sort === 'ascending' && <ArrowUpwardIcon />}
+                  {sort === 'descending' && <ArrowDownwardIcon />}
+                </IconButton>
+
+                <FilterMenu
+                  questions={votingRoundMetadata?.questions}
+                  selected={filteredItems}
+                  onChange={handleFilterChange}
+                  onClear={handleClearFilter}
+                />
+                <IconButton onClick={handleClearFilter}>
+                  <ClearIcon />
+                </IconButton>
+              </div>
+            )}
             <div>
               {canVote && !hasVoted && (
                 <>
