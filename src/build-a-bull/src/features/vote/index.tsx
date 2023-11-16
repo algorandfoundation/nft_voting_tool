@@ -333,11 +333,13 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   }
 
   function sortQuestions(a: Question, b: Question) {
-    if (typeof a?.metadata?.ask !== 'number' || typeof b?.metadata?.ask !== 'number') {
-      throw new TypeError('Invalid Metadata')
+    if(typeof optionIdsToCount === 'undefined'){
+      return 0
     }
+    const aCount = optionIdsToCount[a.options[0].id]
+    const bCount = optionIdsToCount[b.options[0].id]
     if (sort === 'none') return 0
-    const isSorted = sort === 'ascending' ? a.metadata.ask < b.metadata.ask : a.metadata.ask > b.metadata.ask
+    const isSorted = sort === 'ascending' ? aCount < bCount : aCount > bCount
     return isSorted ? -1 : 1
   }
 
