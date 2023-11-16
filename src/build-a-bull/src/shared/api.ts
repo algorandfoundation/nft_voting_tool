@@ -4,12 +4,12 @@ import { TransactionSignerAccount } from '@algorandfoundation/algokit-utils/type
 import { AppReference } from '@algorandfoundation/algokit-utils/types/app'
 import { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from '../../../dapp/src/shared/IPFSGateway'
-import { algod, bootstrap, castVote, closeVotingRound, create } from '../../../dapp/src/shared/VotingRoundContract'
-import { signCsv } from '../../../dapp/src/shared/csvSigner'
-import { VoteType, VotingRoundModel } from '../../../dapp/src/shared/types'
-import { useAppSourceMaps } from '../features/vote-creation/state'
-import { useSetConnectedWallet } from '../features/wallet/state'
+import { VoteGatingSnapshot, uploadVoteGatingSnapshot, uploadVotingRound } from '@/shared/IPFSGateway'
+import { algod, bootstrap, castVote, closeVotingRound, create } from '@/shared/VotingRoundContract'
+import { signCsv } from '@/shared/csvSigner'
+import { VoteType, VotingRoundModel } from '@/shared/types'
+import { useAppSourceMaps } from '@/features/vote-creation/state'
+import { useSetConnectedWallet } from '@/features/wallet/state'
 
 const useSetter = <T, K>(action: (payload: T) => Promise<K>) => {
   const [loading, setLoading] = useState(false)

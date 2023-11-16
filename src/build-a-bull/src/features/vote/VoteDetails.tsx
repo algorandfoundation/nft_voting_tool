@@ -1,7 +1,7 @@
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Box, Link } from '@mui/material'
-import { VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 
 export type VoteDetailsProps = {
   loading: boolean

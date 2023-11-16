@@ -1,5 +1,5 @@
-import { VotingRoundMetadata } from '../../../dapp/src/shared/IPFSGateway'
-import { TallyCounts } from '../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { TallyCounts } from '@/shared/VotingRoundContract'
 
 export interface TotalAskedAndAwarded {
   totalAwarded: number

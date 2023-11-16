@@ -4,7 +4,7 @@ import { decodeAddress } from 'algosdk'
 import dayjs from 'dayjs'
 import Papa from 'papaparse'
 import { useNavigate } from 'react-router-dom'
-import { SnapshotRow } from '../../../../dapp/src/shared/csvSigner'
+import { SnapshotRow } from '@/shared/csvSigner'
 import { useRoundInfo, useSetRoundInfo } from './state'
 
 export type Proposal = {

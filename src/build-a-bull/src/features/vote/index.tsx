@@ -15,19 +15,19 @@ import {
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
-} from '../../../../dapp/src/shared/IPFSGateway'
+} from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
   fetchTallyCounts,
   fetchVoterVotes,
   fetchVotingRoundGlobalState,
-} from '../../../../dapp/src/shared/VotingRoundContract'
-import { ProposalCard } from '../../shared/ProposalCard'
-import api from '../../shared/api'
-import { LoadingDialog } from '../../shared/loading/LoadingDialog'
-import { getHasVoteEnded, getHasVoteStarted } from '../../shared/vote'
-import { useSetShowConnectWalletModal } from '../wallet/state'
+} from '@/shared/VotingRoundContract'
+import { ProposalCard } from '@/shared/ProposalCard'
+import api from '@/shared/api'
+import { LoadingDialog } from '@/shared/loading/LoadingDialog'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
+import { useSetShowConnectWalletModal } from '@/features/wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { FilterMenu, SelectedItem } from './FilterMenu'
 import { VoteDetails } from './VoteDetails'
@@ -35,7 +35,7 @@ import { VoteResults } from './VoteResults'
 import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-import { generateOptionIDsToCountsMapping } from '../../utils/common'
+import { generateOptionIDsToCountsMapping } from '@/utils/common'
 
 // Fisher-Yates shuffle
 Array.prototype.shuffle = function () {

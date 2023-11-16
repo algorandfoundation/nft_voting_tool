@@ -1,7 +1,7 @@
 import { MouseEvent, useMemo, useState } from 'react'
 import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
-import { Question } from '../../../../dapp/src/shared/IPFSGateway'
+import { Question } from '@/shared/IPFSGateway'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 

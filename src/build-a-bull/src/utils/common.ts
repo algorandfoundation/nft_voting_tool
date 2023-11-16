@@ -1,6 +1,6 @@
-import { Question, VotingRoundMetadata } from '../../../dapp/src/shared/IPFSGateway'
-import { calculateTotalAskedAndAwarded } from '../shared/stats'
-import { VotingRoundResult } from '../shared/types'
+import { Question, VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { calculateTotalAskedAndAwarded } from '@/shared/stats'
+import { VotingRoundResult } from '@/shared/types'
 
 export function transformToDynamicThresholds(
   votingRoundMetadata: VotingRoundMetadata,

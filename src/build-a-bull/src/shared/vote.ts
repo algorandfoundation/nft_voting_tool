@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { VotingRoundGlobalState } from './../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 
 export const getHasVoteStarted = (round: VotingRoundGlobalState) => dayjs(round.start_time) <= dayjs()
 

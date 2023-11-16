@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material'
 import clsx from 'clsx'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 import { NoRounds } from './NoRounds'
 import { VotingRoundStatus, VotingRoundTile } from './VotingRoundTile'
 import { VotingRoundTileLoading } from './index'

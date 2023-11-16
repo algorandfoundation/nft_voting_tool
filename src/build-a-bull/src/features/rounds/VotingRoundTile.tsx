@@ -10,20 +10,20 @@ import {
   VotingRoundMetadata,
   fetchVotingRoundMetadata,
   fetchVotingSnapshot,
-} from '../../../../dapp/src/shared/IPFSGateway'
-import { TallyCounts, VotingRoundGlobalState, fetchTallyCounts, fetchVoterVotes } from '../../../../dapp/src/shared/VotingRoundContract'
-import { ClosedChip, OpenChip, OpeningSoonChip, YouHaveNotVotedChip, YouVotedChip } from '../../shared/Chips'
-import { calculateTotalAskedAndAwarded } from '../../shared/stats'
+} from '@/shared/IPFSGateway'
+import { TallyCounts, VotingRoundGlobalState, fetchTallyCounts, fetchVoterVotes } from '@/shared/VotingRoundContract'
+import { ClosedChip, OpenChip, OpeningSoonChip, YouHaveNotVotedChip, YouVotedChip } from '@/shared/Chips'
+import { calculateTotalAskedAndAwarded } from '@/shared/stats'
 import {
   generateOptionIDsToCountsMapping,
   generatePassedReserveList,
   generateReserveList,
   transformToDynamicThresholds,
-} from '../../utils/common'
-import AlgoStats from '../vote/AlgoStats'
-import VotingStats from '../vote/VotingStats'
-import { VotingTime } from '../vote/VotingTime'
-import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
+} from '@/utils/common'
+import AlgoStats from '@/features/vote/AlgoStats'
+import VotingStats from '@/features/vote/VotingStats'
+import { VotingTime } from '@/features/vote/VotingTime'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '@/constants'
 dayjs.extend(relativeTime)
 
 export type VotingRoundTileProps = {

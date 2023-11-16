@@ -4,22 +4,22 @@ import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Question, VoteGatingSnapshot, VotingRoundMetadata } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState, fetchAddressesThatVoted } from '../../../../dapp/src/shared/VotingRoundContract'
-import { ProposalCard } from '../../shared/ProposalCard'
-import { VotingRoundResult } from '../../shared/types'
+import { Question, VoteGatingSnapshot, VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState, fetchAddressesThatVoted } from '@/shared/VotingRoundContract'
+import { ProposalCard } from '@/shared/ProposalCard'
+import { VotingRoundResult } from '@/shared/types'
 import {
   generateOptionIDsToCountsMapping,
   generatePassedReserveList,
   generateReserveList,
   isReserveList,
   transformToDynamicThresholds,
-} from '../../utils/common'
+} from '@/utils/common'
 import AlgoStats from './AlgoStats'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '../../constants'
+import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '@/constants'
 
 export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined

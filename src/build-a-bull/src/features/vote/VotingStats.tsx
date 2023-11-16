@@ -1,8 +1,8 @@
 import { ChartPieIcon } from '@heroicons/react/24/solid'
 import { Box, Skeleton, Typography } from '@mui/material'
 import React from 'react'
-import { VoteGatingSnapshot } from '../../../../dapp/src/shared/IPFSGateway'
-import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
+import { VoteGatingSnapshot } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 
 interface VotingStatsComponentProps {
   votingRoundGlobalState: VotingRoundGlobalState
