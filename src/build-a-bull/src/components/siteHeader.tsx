@@ -7,6 +7,7 @@ import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
 import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../features/wallet/state'
 import { getWalletLabel } from '../shared/wallet'
 import { MenuIcon, XIcon } from './icons'
+import { forwardRef } from "react";
 
 interface Link {
   name: string
@@ -45,7 +46,7 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
   )
 }
 
-export default function SiteHeader() {
+export default forwardRef(function SiteHeader(props, ref) {
   const navigation = createNavigation()
   const connectedWallet = useConnectedWallet()
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
@@ -59,7 +60,7 @@ export default function SiteHeader() {
   return (
     <Disclosure as="nav">
       {({ open }) => (
-        <div className="container mx-auto">
+        <div className="container mx-auto" ref={ref}>
           {/*Header Content*/}
           <div className="flex justify-between lg:justify-start px-6">
             {/*Site Icon + Name */}
@@ -149,4 +150,4 @@ export default function SiteHeader() {
       )}
     </Disclosure>
   )
-}
+})
