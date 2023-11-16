@@ -13,14 +13,14 @@ export const VotingInstructions = ({ voteWeight }: { voteWeight: number }) => {
           <strong>Voting instructions</strong>
         </Typography>
         <Typography className="mb-3">
-          For this event, your voting power is <strong>{voteWeight.toLocaleString()} Votes</strong>.
+          For this event, your voting power is <strong>{voteWeight.toLocaleString()} Vote{voteWeight === 1 ? '' : "s"}</strong>.
         </Typography>
         <Typography className="mb-3">
           Please distribute <strong>percentages</strong> of your voting power to your selected project below, totalling to{' '}
           <strong>100%</strong>.
         </Typography>
         <Typography>
-          <strong>Once you cast your votes, you cannot change them.</strong>
+          <strong>Once you cast your vote{voteWeight === 1 ? '' : 's'}, you cannot change them.</strong>
         </Typography>
       </div>
     </Box>

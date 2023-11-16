@@ -46,51 +46,12 @@ export const ProposalCard = ({
     setExpanded(!expanded)
   }
 
-  if (category === 'Abstain') {
-    return (
-      <Paper elevation={0} className="p-5">
-        <div className="flex justify-between">
-          <div>
-            <MockProposalChip />
-          </div>
-          <div className="text-right">
-            <AbstainChip />
-          </div>
-        </div>
-
-        <Typography className="mt-3 mb-3" variant="h5">
-          {title}
-        </Typography>
-        <div className="flex justify-between">
-          <Typography className="mb-2" variant="h6">
-            {`${votesTally.toLocaleString()} Votes`}
-          </Typography>
-          <Typography className="mb-2" variant="h6">
-            {!hasClosed && <strong>0 ALGO asked</strong>}
-          </Typography>
-        </div>
-        <LinearProgress color="error" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={100} />
-        {description && (
-          <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
-            <Typography>{description}</Typography>
-          </Collapse>
-        )}
-        {(isOverflow || hasOpened) && (
-          <Typography className="text-right mt-2 cursor-pointer" onClick={handleClick}>
-            {expanded ? 'Show Less' : 'Read More'}
-          </Typography>
-        )}
-      </Paper>
-    )
-  }
-
   return (
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
         <div>
           {hasPassed && <PassedChip />}
           {hasClosed && !hasPassed && <DidNotPassChip />}
-          {!hasClosed && !hasPassed && votesNeeded > 0 && <VotesNeededToPassChip votesNeeded={votesNeeded} />}
         </div>
         <div className="text-right">
           <span className="hidden md:inline-block">
@@ -116,7 +77,6 @@ export const ProposalCard = ({
         </Typography>
         <Typography className="mb-2" variant="h6">
           {hasClosed && hasPassed && ask && <strong>{`${ask.toLocaleString()} ALGO awarded`}</strong>}
-          {!hasClosed && ask && <strong>{`${ask.toLocaleString()} ALGO asked`}</strong>}
         </Typography>
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
