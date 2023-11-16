@@ -1,5 +1,5 @@
 {
-  "name": "algorand-voting-tool",
+  "name": "@algorandfoundation/build-a-bull-voting-ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
