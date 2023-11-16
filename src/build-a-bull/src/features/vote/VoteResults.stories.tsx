@@ -31,8 +31,8 @@ export const VoteResult = {
       questions: [
         {
           id: '6b6af6c2-7bd2-4b78-a0ef-65635a8b70cc',
-          prompt: 'xGov Handoff',
-          description: 'Handing off xGov',
+          prompt: 'Handoff',
+          description: 'Handing off',
           options: [
             {
               id: 'adaaf940-3405-4a72-80b8-bd63e8ef99f6',
@@ -49,7 +49,7 @@ export const VoteResult = {
         },
         {
           id: 'c24c409e-b190-40d1-be04-cf1011c69f7d',
-          prompt: 'xGov Refactor',
+          prompt: 'Refactor',
           description:
             'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus blandit sit amet leo sit amet volutpat. Donec commodo mattis turpis et suscipit. Sed tortor magna, vestibulum sit amet dignissim eget, egestas at diam. Cras feugiat risus sit amet turpis dignissim feugiat. Nullam eu justo in neque iaculis gravida. Curabitur et nisi at mauris ullamcorper venenatis nec varius risus. Mauris eu arcu ut eros ultricies imperdiet. Quisque interdum, lorem rutrum euismod sagittis, ex lectus tincidunt justo, vitae pretium sapien neque a dui.\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. In vestibulum id leo vestibulum placerat. In fringilla purus eros, pulvinar interdum lorem rutrum id. Duis pharetra erat a risus semper, eget auctor nibh laoreet. Phasellus metus lectus, volutpat non pellentesque a, fermentum sed mi. Pellentesque lacus augue, bibendum vel mi sed, gravida rutrum est. Vivamus sit amet dignissim purus. Fusce sodales orci sed metus feugiat, ac placerat enim porta. Quisque lacus neque, elementum a diam sit amet, molestie pellentesque lacus. Vestibulum condimentum velit in viverra volutpat. Sed porta euismod hendrerit. Etiam sollicitudin semper ornare. Donec nec ex facilisis, imperdiet risus vitae, vestibulum nulla.',
           options: [

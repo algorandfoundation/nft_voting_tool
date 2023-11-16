@@ -33,7 +33,7 @@ const walletAddressSelector = selector({
 
 const creatorAddresses = atom<string[]>({
   key: 'creatorAddresses',
-  default: import.meta.env.VITE_XGOV_CREATOR_ALLOW_LIST.split(','),
+  default: import.meta.env.VITE_HACKATHON_CREATOR_ALLOW_LIST.split(','),
 })
 
 export const useShowConnectWalletModal = () => useRecoilValue(showConnectWalletModalSelector)

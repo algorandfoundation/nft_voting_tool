@@ -333,7 +333,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   }
 
   function sortQuestions(a: Question, b: Question) {
-    if(typeof optionIdsToCount === 'undefined'){
+    if (typeof optionIdsToCount === 'undefined') {
       return 0
     }
     const aCount = optionIdsToCount[a.options[0].id]

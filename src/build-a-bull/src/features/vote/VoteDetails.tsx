@@ -20,7 +20,7 @@ export const VoteDetails = ({ loading: _loading, appId: voteId, globalState, rou
               href={`${import.meta.env.VITE_IPFS_GATEWAY_URL}/${roundMetadata.voteGatingSnapshotCid}`}
               target="_blank"
             >
-              xGov list
+              Voting Addresses
               <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </Link>
           </Box>

@@ -35,8 +35,8 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
       clientOptions: {
         projectId: 'ce0484235bcb9e2c431489a5ed84dac7',
         metadata: {
-          name: 'xGov Dapp',
-          description: 'xGov Dapp',
+          name: 'Dapp',
+          description: 'Dapp',
           url: '#',
           icons: ['https://walletconnect.com/walletconnect-logo.png'],
         },

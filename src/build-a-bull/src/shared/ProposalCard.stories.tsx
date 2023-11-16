@@ -14,7 +14,7 @@ export default {
 export const ProposalCard = {
   args: {
     link: 'https://example.com',
-    title: 'Amazing xGov Propsal',
+    title: 'Amazing Proposal',
     description: 'Really interesting idea that involved the Algorand blockchain',
     category: 'Tools',
     focus_area: 'User Onboarding',

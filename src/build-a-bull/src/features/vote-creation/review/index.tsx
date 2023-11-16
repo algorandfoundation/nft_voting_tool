@@ -165,7 +165,7 @@ export default function Review() {
 
             <div>
               <Typography variant="h4" className="mt-6 mb-2">
-                xGovs list
+                Voting Addresses
               </Typography>
               {roundInfo.snapshotFile && (
                 <div className="w-full ">
