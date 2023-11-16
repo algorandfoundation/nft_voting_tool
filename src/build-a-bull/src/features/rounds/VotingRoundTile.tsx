@@ -4,13 +4,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Question,
-  VoteGatingSnapshot,
-  VotingRoundMetadata,
-  fetchVotingRoundMetadata,
-  fetchVotingSnapshot,
-} from '@/shared/IPFSGateway'
+import { Question, VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '@/shared/IPFSGateway'
 import { TallyCounts, VotingRoundGlobalState, fetchTallyCounts, fetchVoterVotes } from '@/shared/VotingRoundContract'
 import { ClosedChip, OpenChip, OpeningSoonChip, YouHaveNotVotedChip, YouVotedChip } from '@/shared/Chips'
 import { calculateTotalAskedAndAwarded } from '@/shared/stats'

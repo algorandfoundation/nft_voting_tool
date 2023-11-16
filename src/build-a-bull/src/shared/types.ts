@@ -1,6 +1,5 @@
 import { VoteGatingSnapshot } from './IPFSGateway'
 
-
 export type QuestionModel = {
   questionTitle: string
   questionDescription?: string

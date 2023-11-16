@@ -8,7 +8,6 @@ import SiteFooter from './components/siteFooter'
 import SiteHeader from './components/siteHeader'
 import ConnectWallet from './features/wallet/ConnectWallet'
 import ManualWallet from './features/wallet/ManualWallet'
-import ScrollToTop from './shared/router/ScrollToTop'
 import { useAlgoWallet } from './utils/useAlgoWalletProvider'
 
 type LayoutProps = PropsWithChildren<unknown>

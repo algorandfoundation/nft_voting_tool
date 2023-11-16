@@ -9,13 +9,7 @@ import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextFie
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import {
-  Question,
-  VoteGatingSnapshot,
-  VotingRoundMetadata,
-  fetchVotingRoundMetadata,
-  fetchVotingSnapshot,
-} from '@/shared/IPFSGateway'
+import { Question, VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
@@ -30,7 +24,6 @@ import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
 import { useSetShowConnectWalletModal } from '@/features/wallet/state'
 import { CloseVotingRound } from './CloseVotingRound'
 import { FilterMenu, SelectedItem } from './FilterMenu'
-import { VoteDetails } from './VoteDetails'
 import { VoteResults } from './VoteResults'
 import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'

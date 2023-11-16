@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, Collapse, LinearProgress, Link, Paper, Typography } from '@mui/material'
-import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
+import { CategoryChip, DidNotPassChip, PassedChip } from './Chips'
 import { useOverflow } from './hooks/useOverflow'
 
 export type ProposalCardProps = {
@@ -39,7 +39,6 @@ export const ProposalCard = ({
   // Derived State
   const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
   const hasPassed = percentage >= 100 || forcePass
-  const votesNeeded = threshold && threshold > 0 ? threshold - votesTally : 0
 
   function handleClick() {
     if (!hasOpened) setHasOpened(true)
