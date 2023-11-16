@@ -26,7 +26,7 @@ export const VotingTime = ({ loading, globalState, className }: VotingTimeProps)
         <div className="w-full">
           <Stack>
             <Typography>
-              <strong>Session Period</strong>
+              <strong>Event Period</strong>
             </Typography>
           </Stack>
           <Stack className="mt-3">

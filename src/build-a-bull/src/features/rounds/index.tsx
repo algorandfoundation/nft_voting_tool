@@ -94,7 +94,7 @@ const VotingRounds = () => {
 
   return (
     <div className="container">
-      <Typography variant="h3">Voting sessions</Typography>
+      <Typography variant="h3">Events</Typography>
 
       {isCreator && (
         <Button component={Link} to="/create" className="my-8" variant="contained">

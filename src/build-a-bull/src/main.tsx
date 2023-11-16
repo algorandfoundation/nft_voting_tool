@@ -6,7 +6,6 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { RecoilRoot } from 'recoil'
 import ErrorPage from './error-page'
 import VotingRounds from './features/rounds'
-import Status from './features/status'
 import Vote from './features/vote'
 import RoundInfo from './features/vote-creation/RoundInfo'
 import Review from './features/vote-creation/review'
@@ -47,10 +46,6 @@ const router = createBrowserRouter([
       {
         path: 'connect-wallet',
         element: <ConnectWallet />,
-      },
-      {
-        path: 'status',
-        element: <Status />,
       },
     ],
   },

@@ -1,4 +1,5 @@
 import { WalletProvider, custom } from '@makerx/use-wallet'
+import Box from '@mui/material/Box'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { PropsWithChildren } from 'react'
@@ -29,6 +30,7 @@ export default function Root() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <WalletProvider value={walletProviders.walletProviders}>
         <SiteHeader />
+        <Box component="img" src="/images/hero.png" sx={{ width: '99.2vw' }} />
         <SiteContent>
           <div className="min-h-screen py-8 px-8">
             <Outlet />
@@ -43,7 +45,6 @@ export default function Root() {
           }
         />
         <SiteFooter />
-        <ScrollToTop />
       </WalletProvider>
     </LocalizationProvider>
   )

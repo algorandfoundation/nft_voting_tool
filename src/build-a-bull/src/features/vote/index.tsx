@@ -385,7 +385,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     <div>
       <div className="mb-4">
         <RouterLink to="/" className="no-underline text-gray-600 hover:underline">
-          <Typography>&#60; Back to Voting sessions</Typography>
+          <Typography>&#60; Back to events</Typography>
         </RouterLink>
       </div>
       <div>
@@ -422,7 +422,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               {isLoadingVotingRoundData ? (
                 <Skeleton className="h-12 w-1/2" variant="text" />
               ) : (
-                <Typography variant="h4">Proposals</Typography>
+                <Typography variant="h4">Projects</Typography>
               )}
             </div>
             <div>
@@ -568,16 +568,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               {votingRoundGlobalState && (
                 <div className="mt-4">
                   <VotingTime className="sm:visible" loading={isLoadingVotingRoundData} globalState={votingRoundGlobalState} />
-                </div>
-              )}
-              {!isLoadingVotingRoundData && (
-                <div className="mt-4">
-                  <VoteDetails
-                    loading={isLoadingVotingRoundData}
-                    appId={voteId}
-                    globalState={votingRoundGlobalState}
-                    roundMetadata={votingRoundMetadata}
-                  />
                 </div>
               )}
               {isVoteCreator && !votingRoundGlobalState?.close_time && votingRoundGlobalState?.nft_image_url && (
