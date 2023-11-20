@@ -2,7 +2,7 @@ import { WalletProvider, custom } from '@makerx/use-wallet'
 import Box from '@mui/material/Box'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import {PropsWithChildren, useEffect, useRef, useState} from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import SiteFooter from './components/siteFooter'
 import SiteHeader from './components/siteHeader'
@@ -25,21 +25,21 @@ export default function Root() {
     network: import.meta.env.VITE_ALGOD_NETWORK,
     autoConnect: true,
   })
-  const headerRef = useRef<Element|null>(null)
-  const heroRef = useRef<Element|null>(null)
+  const headerRef = useRef<HTMLDivElement | null>(null)
+  const heroRef = useRef<Element | null>(null)
   const [offset, setOffset] = useState(0)
   useEffect(() => {
-    const heroHeight = heroRef.current?.clientHeight || heroRef.current?.scrollHeight
-    const headerHeight = headerRef.current?.clientHeight || headerRef.current?.scrollHeight
-    if(typeof heroHeight === 'number' && typeof headerRef.current?.clientHeight === 'number'){
+    const heroHeight = heroRef.current?.clientHeight || heroRef.current?.scrollHeight || 0
+    const headerHeight = headerRef.current?.clientHeight || headerRef.current?.scrollHeight || 0
+    if (typeof heroHeight === 'number' && typeof headerRef.current?.clientHeight === 'number') {
       setOffset(heroHeight + headerHeight)
     }
-  }, [headerRef, heroRef, setOffset]);
+  }, [headerRef, heroRef, setOffset])
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <WalletProvider value={walletProviders.walletProviders}>
-        <SiteHeader ref={headerRef}/>
-        <Box component="img" src="/images/hero.png" sx={{ display: 'block', width: '98vw', margin: 'auto' }} ref={heroRef}/>
+        <SiteHeader ref={headerRef} />
+        <Box component="img" src="/images/hero.png" sx={{ display: 'block', width: '98vw', margin: 'auto' }} ref={heroRef} />
         <SiteContent>
           <div className="min-h-screen py-8 px-8">
             <Outlet />
