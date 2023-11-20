@@ -38,7 +38,6 @@ jobs:
     with:
       working-directory: ./src/build-a-bull
       audit-script: npm run audit --audit-level=high
-      run-dispatch: true
     secrets:
       npm-auth-token: ${{ secrets.GITHUB_TOKEN }}
   build-api:
