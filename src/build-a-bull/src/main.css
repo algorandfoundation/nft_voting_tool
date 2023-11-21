@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Regular.ttf') format('truetype');
+  font-display: 'swapping';
+}
+
+#root {
+  background-color: #f8f8f8;
+}
+
+nav {
+  background-color: #ffffff;
+}
