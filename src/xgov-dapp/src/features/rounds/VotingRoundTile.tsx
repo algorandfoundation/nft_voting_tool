@@ -57,13 +57,21 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
 
+  const totalVotes = votingRoundResults?.reduce((accumulator, curr) => {
+    return accumulator + curr.count
+  }, 0)
+
+  const totalVotingPower = snapshot?.snapshot.reduce((accumulator, curr) => {
+    return accumulator + (curr.weight || 0)
+  }, 0)
+
   // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
   // we clone the metadata so that we don't mutate the original metadata
   const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
     if (
       votingRoundMetadata === undefined ||
-      snapshot === undefined ||
-      votingRoundResults === undefined ||
+      totalVotes === undefined ||
+      totalVotingPower === undefined ||
       isLoadingVotingRoundResults === true ||
       isLoadingMetadata === true ||
       isLoadingSnapshot === true ||
@@ -74,17 +82,18 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
     if (!isDynamicThresholdEnabled) {
       return votingRoundMetadata
     }
-    const totalVotes = votingRoundResults.reduce((accumulator, curr) => {
-      return accumulator + curr.count
-    }, 0)
-
-    const totalVotingPower = snapshot.snapshot.reduce((accumulator, curr) => {
-      return accumulator + (curr.weight || 0)
-    }, 0)
     // change threshold to be out of total votes instead of total voting power
     // according to https://algorandfoundation.atlassian.net/browse/AF-73
     return transformToDynamicThresholds(votingRoundMetadata, totalVotes, totalVotingPower)
-  }, [votingRoundMetadata, snapshot, isLoadingMetadata, isLoadingVotingRoundResults, isLoadingSnapshot, isLoadingVotersVote])
+  }, [
+    votingRoundMetadata,
+    totalVotes,
+    totalVotingPower,
+    isLoadingMetadata,
+    isLoadingVotingRoundResults,
+    isLoadingSnapshot,
+    isLoadingVotersVote,
+  ])
 
   const reserveList = useMemo<Question[]>(() => {
     if (!isReserveListEnabled) {
@@ -215,7 +224,12 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
             />
           </div>
           <div>
-            <VotingStats isLoading={isLoadingSnapshot} votingRoundGlobalState={globalState} snapshot={snapshot} />
+            <VotingStats
+              isLoading={isLoadingSnapshot}
+              votingRoundGlobalState={globalState}
+              snapshot={snapshot}
+              votingRoundResults={votingRoundResults}
+            />
           </div>
           <div>
             <VotingTime globalState={globalState} loading={false} className="lg:visible" />
@@ -254,6 +268,17 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
       <Typography className="mb-4">
         {isLoadingSnapshot && <Skeleton className="h-6 w-full" variant="text" />}
         {!isLoadingSnapshot && snapshot && `${globalState.voter_count} out of ${snapshot.snapshot.length} wallets voted`}
+      </Typography>
+      <Typography className="mb-4">
+        {(isLoadingSnapshot || isLoadingVotingRoundResults) && <Skeleton className="h-6 w-full" variant="text" />}
+        {!(isLoadingSnapshot || isLoadingVotingRoundResults) &&
+          totalVotes !== undefined &&
+          totalVotingPower !== undefined &&
+          totalVotingPower !== 0 &&
+          `${totalVotes.toLocaleString()} out of ${totalVotingPower.toLocaleString()} total stake voted (${(
+            (100 * totalVotes) /
+            totalVotingPower
+          ).toLocaleString(undefined, { maximumFractionDigits: 2 })}%)`}
       </Typography>
       <Typography>
         Closed {globalState.close_time ? dayjs(globalState?.close_time).fromNow() : dayjs(globalState?.end_time).fromNow()}

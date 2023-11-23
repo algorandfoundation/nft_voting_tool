@@ -561,7 +561,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
               {votingRoundGlobalState && snapshot && (
                 <div className="mt-4">
-                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                  <VotingStats
+                    isLoading={isLoadingVotingRoundData}
+                    votingRoundGlobalState={votingRoundGlobalState}
+                    snapshot={snapshot}
+                    votingRoundResults={votingRoundResults}
+                  />
                 </div>
               )}
 
