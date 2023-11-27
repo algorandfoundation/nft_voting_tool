@@ -1,5 +1,5 @@
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
-import { Box, Button, Skeleton, Typography } from '@mui/material'
+import { Box, Skeleton, Typography } from '@mui/material'
 
 function EligibilityStatus({ isEligible, isLoading }: { isEligible: boolean; isLoading: boolean }) {
   if (isLoading) {
@@ -27,11 +27,6 @@ function EligibilityStatus({ isEligible, isLoading }: { isEligible: boolean; isL
           <Typography className="mb-3">
             <strong>You're no longer an eligible xGov</strong>
           </Typography>
-          <div className="-mt-1 ml-auto">
-            <Button variant="contained" color="info" size="small">
-              Re-Enroll
-            </Button>
-          </div>
         </div>
         <div className="w-full">
           <Typography>You did not vote in the most recent voting session, so your xGov status has been revoked.</Typography>
