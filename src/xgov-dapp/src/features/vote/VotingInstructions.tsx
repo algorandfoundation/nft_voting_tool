@@ -21,8 +21,10 @@ export const VotingInstructions = ({ voteWeight }: { voteWeight: number }) => {
           <strong>100%</strong>.
         </Typography>
         <Typography className="mb-3">
-          You can allocate 100% to one proposal or distribute as you like amongst a few. It is not required to allocate votes to all
-          proposals.
+          <strong>
+            You can allocate 100% to one proposal or distribute as you like amongst a few. It is not required to allocate votes to all
+            proposals.
+          </strong>
         </Typography>
         <Typography>
           <strong>Once you cast your votes, you cannot change them.</strong>
