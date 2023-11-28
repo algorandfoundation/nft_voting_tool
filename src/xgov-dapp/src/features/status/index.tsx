@@ -200,7 +200,12 @@ function Status() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div className="col-span-1 lg:col-span-2">
           <div>
-            <VotingSessionsTable globalStates={globalStates} termPools={termPools} isLoading={isLoadingGlobalStates} />
+            <VotingSessionsTable
+              globalStates={globalStates}
+              termPools={termPools}
+              isLoading={isLoadingGlobalStates}
+              isEligible={isEligible}
+            />
           </div>
           <div className="mt-4">
             <TermPoolsTable termPools={termPools} govenorData={govenorData} isLoading={isLoadingXgovData} />
