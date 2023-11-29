@@ -1,0 +1,81 @@
+import { ClockIcon } from '@heroicons/react/24/solid'
+import { Box, Skeleton, Stack, Typography } from '@mui/material'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
+import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
+dayjs.extend(relativeTime)
+
+type VotingTimeProps = {
+  loading: boolean
+  globalState: VotingRoundGlobalState | undefined | null
+  className: string
+}
+
+export const VotingTime = ({ loading, globalState, className }: VotingTimeProps) => {
+  const hasVoteStarted = globalState && getHasVoteStarted(globalState)
+  const hasVoteEnded = globalState && getHasVoteEnded(globalState)
+  const hasVoteClosed = globalState && globalState.close_time
+
+  return (
+    <div className={className}>
+      <Box className="bg-purple-light flex rounded-xl px-4 py-6">
+        <div>
+          <ClockIcon className="h-7 w-7 mr-3 -mt-0.5 text-purple" />
+        </div>
+        <div className="w-full">
+          <Stack>
+            <Typography>
+              <strong>Event Period</strong>
+            </Typography>
+          </Stack>
+          <Stack className="mt-3">
+            {loading ? (
+              <Skeleton variant="text" />
+            ) : (
+              <Typography>
+                {hasVoteStarted ? 'Opened' : 'Voting opens'}{' '}
+                <span className={hasVoteStarted ? '' : 'text-red'}>
+                  <strong>{`${dayjs(globalState?.start_time).fromNow()} (${dayjs(globalState?.start_time).format(
+                    'D MMMM YYYY HH:mm',
+                  )})`}</strong>
+                </span>
+              </Typography>
+            )}
+          </Stack>
+          {hasVoteClosed ? (
+            <Stack className="mt-3">
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  Closed{' '}
+                  <span>
+                    <strong>{`${dayjs(globalState?.close_time).fromNow()} (${dayjs(globalState?.close_time).format(
+                      'D MMMM YYYY HH:mm',
+                    )})`}</strong>
+                  </span>
+                </Typography>
+              )}
+            </Stack>
+          ) : (
+            <Stack className="mt-3">
+              {loading ? (
+                <Skeleton variant="text" />
+              ) : (
+                <Typography>
+                  {hasVoteEnded ? 'Voting closed' : 'Voting closes'}{' '}
+                  <span className={hasVoteStarted && !hasVoteEnded ? 'text-red' : ''}>
+                    <strong>{`${dayjs(globalState?.end_time).fromNow()} (${dayjs(globalState?.end_time).format(
+                      'D MMMM YYYY HH:mm',
+                    )})`}</strong>
+                  </span>
+                </Typography>
+              )}
+            </Stack>
+          )}
+        </div>
+      </Box>
+    </div>
+  )
+}

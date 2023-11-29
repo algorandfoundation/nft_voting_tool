@@ -143,12 +143,20 @@ function Status() {
         <div className="col-span-1 lg:col-span-2">
           <Typography variant="h3">Your xGov stats</Typography>
         </div>
-        <Box className="bg-white flex rounded-xl px-4 py-2 mr-4 w-fit items-center ml-auto">
-          <MuiLink className="no-underline hover:underline" href="https://algorand.foundation/xgov" target="_blank">
-            xGov Program Info
-            <LaunchIcon className="ml-2 text-grey-light align-bottom" />
-          </MuiLink>
-        </Box>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Box className="bg-white flex rounded-xl px-4 py-2 items-center">
+            <MuiLink className="no-underline hover:underline" href="https://algorand.foundation/xgov" target="_blank">
+              xGov Program Info
+              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
+            </MuiLink>
+          </Box>
+          <Box className="bg-white flex rounded-xl px-4 py-2 items-center">
+            <MuiLink className="no-underline hover:underline" href="https://www.algorand.foundation/xgov-guide" target="_blank">
+              xGov Guide
+              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
+            </MuiLink>
+          </Box>
+        </div>
         <EligibilityStatus isEligible={isEligible} isLoading={isLoadingXgovData} />
         {isLoadingXgovData ? (
           <Skeleton className="h-40 w-full" variant="rectangular" />
@@ -192,7 +200,12 @@ function Status() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div className="col-span-1 lg:col-span-2">
           <div>
-            <VotingSessionsTable globalStates={globalStates} termPools={termPools} isLoading={isLoadingGlobalStates} />
+            <VotingSessionsTable
+              globalStates={globalStates}
+              termPools={termPools}
+              isLoading={isLoadingGlobalStates}
+              isEligible={isEligible}
+            />
           </div>
           <div className="mt-4">
             <TermPoolsTable termPools={termPools} govenorData={govenorData} isLoading={isLoadingXgovData} />
