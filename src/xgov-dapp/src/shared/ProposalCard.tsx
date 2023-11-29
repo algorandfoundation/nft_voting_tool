@@ -3,6 +3,7 @@ import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, Collapse, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
 import { useOverflow } from './hooks/useOverflow'
+import { Visibility } from '@mui/icons-material'
 
 export type ProposalCardProps = {
   link: string | undefined
@@ -80,6 +81,7 @@ export const ProposalCard = ({
             {expanded ? 'Show Less' : 'Read More'}
           </Typography>
         )}
+        <div style={isOverflow || hasOpened ? { visibility: 'hidden' } : { height: '2rem' }}></div>
       </Paper>
     )
   }
@@ -130,6 +132,7 @@ export const ProposalCard = ({
           {expanded ? 'Show Less' : 'Read More'}
         </Typography>
       )}
+      <div style={isOverflow || hasOpened ? { visibility: 'hidden' } : { height: '2rem' }}></div>
     </Paper>
   )
 }
