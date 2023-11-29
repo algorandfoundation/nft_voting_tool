@@ -46,7 +46,7 @@ export const ProposalCard = ({
   }
 
   return (
-    <Paper elevation={100000} className="p-5">
+    <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
         <div>
           {hasPassed && <PassedChip />}
