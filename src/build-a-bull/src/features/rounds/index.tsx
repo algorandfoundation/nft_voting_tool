@@ -71,7 +71,7 @@ const VotingRounds = () => {
   const openRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
+        (r) => getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.NO_SNAPSHOT,
         (r: VotingRoundGlobalState) => r.end_time,
       )
     : []
@@ -79,7 +79,7 @@ const VotingRounds = () => {
   const upcomingRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
+        (r) => !getHasVoteStarted(r) && !getHasVoteEnded(r) && r.vote_type == VoteType.NO_SNAPSHOT,
         (r: VotingRoundGlobalState) => r.start_time,
       )
     : []
@@ -87,7 +87,7 @@ const VotingRounds = () => {
   const closedRounds = globalStates
     ? getRounds(
         globalStates,
-        (r) => getHasVoteEnded(r) && r.vote_type == VoteType.PARTITIONED_WEIGHTING,
+        (r) => getHasVoteEnded(r) && r.vote_type == VoteType.NO_SNAPSHOT,
         (r: VotingRoundGlobalState) => r.end_time,
       )
     : []

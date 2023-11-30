@@ -13,6 +13,7 @@ export type ProposalCardProps = {
   threshold: number | undefined
   ask: number | undefined
   votesTally: number | undefined
+  totalVotes: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
 }
@@ -26,6 +27,7 @@ export const ProposalCard = ({
   threshold,
   ask,
   votesTally = 0,
+  totalVotes = 0,
   hasClosed = false,
   forcePass = false,
 }: ProposalCardProps) => {
@@ -72,7 +74,7 @@ export const ProposalCard = ({
       </Typography>
       <div className="flex justify-between">
         <Typography className="mb-2" variant="h6">
-          {threshold && `${votesTally.toLocaleString()} of ${threshold.toLocaleString()} Votes`}
+          {threshold && `${votesTally.toLocaleString()} of ${totalVotes} Votes`}
         </Typography>
         <Typography className="mb-2" variant="h6">
           {hasClosed && hasPassed && ask && <strong>{`${ask.toLocaleString()} ALGO awarded`}</strong>}

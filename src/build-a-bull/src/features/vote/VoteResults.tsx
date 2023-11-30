@@ -27,7 +27,7 @@ export type VoteResultsProps = {
   votingRoundGlobalState: VotingRoundGlobalState
   isLoadingVotingRoundData: boolean
   isLoadingVotingRoundResults: boolean
-  snapshot: VoteGatingSnapshot | undefined
+  snapshot?: VoteGatingSnapshot | undefined
   myVotes?: string[]
 }
 
@@ -150,7 +150,6 @@ export const VoteResults = ({
           <VotingStats
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
             votingRoundGlobalState={votingRoundGlobalState}
-            snapshot={snapshot}
           />
         </div>
         <div>

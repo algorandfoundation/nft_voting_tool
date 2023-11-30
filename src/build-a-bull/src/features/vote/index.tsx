@@ -5,7 +5,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ClearIcon from '@mui/icons-material/Clear'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
@@ -52,7 +52,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [votingRoundGlobalState, setVotingRoundGlobalState] = useState<VotingRoundGlobalState | undefined>(undefined)
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
-  const [snapshot, setSnapshot] = useState<VoteGatingSnapshot | undefined>(undefined)
   const [votingRoundResults, setVotingRoundResults] = useState<TallyCounts | undefined>(undefined)
   const [optionIdsToCount, setOptionIdsToCount] = useState<{ [optionId: string]: number } | undefined>(undefined)
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
@@ -63,7 +62,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const [error, setError] = useState<string | null>(null)
 
   const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
-  const [allowedToVote, setAllowToVote] = useState<boolean>(false)
   const [voteWeight, setVoteWeight] = useState<number>(0)
   const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
   const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
@@ -77,16 +75,18 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
   const isVoteCreator = votingRoundMetadata?.created.by === activeAddress ? true : false
 
-  const canVote = hasVoteStarted && !hasVoteEnded && allowedToVote
+  const canVote = hasVoteStarted && !hasVoteEnded
   const hasVoted = voterVotes !== undefined ? true : false
   const hasClosed = votingRoundGlobalState && votingRoundGlobalState.close_time !== undefined ? true : false
+
+
+  const totalVotes = useMemo(()=>votingRoundResults ? votingRoundResults.reduce((c, r)=>c + r.count, 0) : 0, [votingRoundResults])
 
   const canSubmitVote =
     canVote &&
     totalAllocatedPercentage >= 100 &&
     // totalAllocated === voteWeight &&
     activeAddress &&
-    allowlistSignature &&
     votingRoundMetadata &&
     !hasVoted
 
@@ -146,7 +146,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const refetchVoteRoundData = async (voteId: number | undefined) => {
     setVotingRoundGlobalState(undefined)
     setVotingRoundMetadata(undefined)
-    setSnapshot(undefined)
     setError(null)
     if (voteId) {
       setIsLoadingVotingRoundData(true)
@@ -159,11 +158,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
         const roundMetadata = await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid)
         if (!roundMetadata) {
           throw new Error(`Could not retrieve voting round metadata with cid: ${globalState.metadata_ipfs_cid}`)
-        }
-
-        if (roundMetadata.voteGatingSnapshotCid) {
-          const snapshot = await fetchVotingSnapshot(roundMetadata.voteGatingSnapshotCid)
-          setSnapshot(snapshot)
         }
 
         setVotingRoundGlobalState(globalState)
@@ -215,25 +209,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     }
   }
 
-  useEffect(() => {
-    setAllowlistSignature(null)
-    setAllowToVote(false)
-    if (snapshot?.snapshot) {
-      const addressSnapshot = snapshot?.snapshot.find((addressSnapshot) => {
-        return addressSnapshot.address === activeAddress
-      })
-      if (addressSnapshot) {
-        setAllowlistSignature(addressSnapshot.signature)
-        setAllowToVote(true)
-        if (addressSnapshot.weight && isFinite(addressSnapshot.weight)) {
-          setVoteWeight(addressSnapshot.weight)
-        } else {
-          setVoteWeight(1)
-        }
-      }
-    }
-  }, [snapshot, activeAddress])
-
   const handleError = (e: unknown) => {
     if (e instanceof Error) {
       setError(e.message)
@@ -272,10 +247,10 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     }
 
     await submitVote({
-      signature: allowlistSignature,
+      signature: allowlistSignature || '',
       selectedOptionIndexes: votingRoundMetadata.questions.map(() => 0),
-      weighting: voteWeight,
-      weightings: votingRoundMetadata.questions.map((question) => (newVoteAllocations[question.id] ? newVoteAllocations[question.id] : 0)),
+      weighting: 0,
+      weightings: votingRoundMetadata.questions.map(() => 0),
       signer: { addr: activeAddress, signer },
       appId: voteId,
     })
@@ -371,7 +346,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
         votingRoundGlobalState={votingRoundGlobalState}
         isLoadingVotingRoundResults={isLoadingVotingRoundResults}
         isLoadingVotingRoundData={isLoadingVotingRoundData}
-        snapshot={snapshot}
       />
     )
   }
@@ -457,32 +431,15 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                         votesTally={
                           optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
                         }
+                        totalVotes={totalVotes}
                       />
                     )}
                   </div>
                   <div className="flex items-center col-span-1 bg-gray-100 m-3">
                     {canVote && !hasVoted && (
-                      <>
-                        <TextField
-                          type="number"
-                          className="w-32 bg-white m-4 rounded-xl"
-                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
-                          InputProps={{
-                            inputProps: {
-                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
-                              min: 0,
-                            },
-                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                          }}
-                          id={question.id}
-                          variant="outlined"
-                          onChange={(e) => {
-                            updateVoteAllocations(question.id, parseFloat(e.target.value))
-                          }}
-                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
-                        />
-                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
-                      </>
+                        <Checkbox sx={{margin: "auto", width: "200px"}} onChange={(e)=>{
+                          // updateVoteAllocations(question.id, parseFloat(e.target.value))
+                        }}/>
                     )}
                   </div>
                 </div>
@@ -512,7 +469,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               </div>
             )}
 
-            {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
+            {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress) && (
               <div className="mb-4">
                 <Box className="bg-red-light flex rounded-xl px-4 py-6">
                   <div>
@@ -538,8 +495,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                           </Link>
                         </div>
                       </div>
-                    ) : !allowedToVote ? (
-                      <Typography>Your wallet is not on the allow list for this voting round.</Typography>
                     ) : (
                       ''
                     )}
@@ -554,9 +509,9 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 </div>
               )}
 
-              {votingRoundGlobalState && snapshot && (
+              {votingRoundGlobalState && (
                 <div className="mt-4">
-                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} />
                 </div>
               )}
 

@@ -2,8 +2,8 @@ import { Alert, Box, Button, Link, Stack, TextField, Typography } from '@mui/mat
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../../shared/api'
-import { LoadingDialog } from '../../../shared/loading/LoadingDialog'
+import api from '@/shared/api'
+import { LoadingDialog } from '@/shared/loading/LoadingDialog'
 import {
   VoteCreationReviewSteps,
   useAppReference,
@@ -56,12 +56,11 @@ export default function Review() {
         setAuth(await auth.execute({ signer }))
         break
       case VoteCreationReviewSteps.Create:
-        // eslint-disable-next-line no-case-declarations
-        const app = await create.execute({
+        console.log({
           auth: authData,
           newRound: {
             ...roundInfo,
-            voteType: VoteType.PARTITIONED_WEIGHTING,
+            voteType: VoteType.NO_SNAPSHOT,
             questions: proposals.map((proposal) => {
               return {
                 questionTitle: proposal.title,
@@ -73,7 +72,30 @@ export default function Review() {
                   threshold: Number(proposal.threshold),
                   ask: Number(proposal.ask),
                 },
-                answers: ['yes'],
+                answers: ['Yes', 'No'],
+              }
+            }),
+          },
+          signer,
+        })
+        // eslint-disable-next-line no-case-declarations
+        const app = await create.execute({
+          auth: authData,
+          newRound: {
+            ...roundInfo,
+            voteType: VoteType.NO_SNAPSHOT,
+            questions: proposals.map((proposal) => {
+              return {
+                questionTitle: proposal.title,
+                questionDescription: proposal.description,
+                metadata: {
+                  link: proposal.link,
+                  category: proposal.category,
+                  focus_area: proposal.focus_area,
+                  threshold: Number(proposal.threshold),
+                  ask: Number(proposal.ask),
+                },
+                answers: ['Yes', 'No'],
               }
             }),
           },
@@ -89,10 +111,12 @@ export default function Review() {
 
         break
       case VoteCreationReviewSteps.Bootstrap:
+        console.log(proposals)
         await bootstrap.execute({
           app: appRef,
           signer,
-          totalQuestionOptions: proposals.length,
+          // Two options per proposal
+          totalQuestionOptions: proposals.length * 2,
         })
         break
     }
@@ -138,7 +162,7 @@ export default function Review() {
         </Link>
         <div>
           <Typography variant="h3">Preview of {roundInfo.voteTitle}</Typography>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Typography variant="h4" className="mt-6 mb-2">
                 Proposals
@@ -162,35 +186,11 @@ export default function Review() {
                 })}
               </div>
             </div>
-
-            <div>
-              <Typography variant="h4" className="mt-6 mb-2">
-                Voting Addresses
-              </Typography>
-              {roundInfo.snapshotFile && (
-                <div className="w-full ">
-                  <TextField rows={20} fullWidth multiline className="bg-white" disabled value={roundInfo.snapshotFile} />
-                </div>
-              )}
-            </div>
-
             <div>
               <Typography variant="h4" className="mt-6 mb-2">
                 Session Period
               </Typography>
               <VotingTime className="hidden sm:block mt-4" loading={false} globalState={previewGlobalState} />
-              <Box className="bg-green-light flex mt-4 rounded-xl px-4 py-6">
-                <Stack>
-                  <Typography>
-                    <strong>Community Allocation: </strong>
-                  </Typography>
-                  <Typography>
-                    {roundInfo.communityGrantAllocation ? roundInfo.communityGrantAllocation.microAlgos().algos.toLocaleString('en-US') : 0}{' '}
-                    ALGO{roundInfo.communityGrantAllocation === 1 ? '' : 's'}
-                  </Typography>
-                  <Typography>{(roundInfo.communityGrantAllocation || 0).microAlgos().toString()} </Typography>
-                </Stack>
-              </Box>
               <Alert className="max-w-xl mt-8 bg-algorand-warning font-semibold" icon={false}>
                 Review everything on this page carefully, as it cannot be changed once you create the voting round!
               </Alert>
