@@ -122,7 +122,7 @@ export const ProposalCard = ({
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
       {description && (
         <Collapse ref={ref} collapsedSize={isOverflow || hasOpened ? `${1.5 * 4}rem` : `${1.5 * 4 + 2}rem`} in={expanded}>
-          <Typography dangerouslySetInnerHTML={{ __html: description }}></Typography>
+          <Typography>{description}</Typography>
         </Collapse>
       )}
       {(isOverflow || hasOpened) && (
