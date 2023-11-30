@@ -71,8 +71,8 @@ export const ProposalCard = ({
         </div>
         <LinearProgress color="error" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={100} />
         {description && (
-          <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
-            <Typography>{description}</Typography>
+          <Collapse ref={ref} collapsedSize={isOverflow || hasOpened ? `${1.5 * 4}rem` : `${1.5 * 4 + 2}rem`} in={expanded}>
+            <Typography dangerouslySetInnerHTML={{ __html: description }}></Typography>
           </Collapse>
         )}
         {(isOverflow || hasOpened) && (
@@ -80,7 +80,6 @@ export const ProposalCard = ({
             {expanded ? 'Show Less' : 'Read More'}
           </Typography>
         )}
-        <div style={isOverflow || hasOpened ? { visibility: 'hidden' } : { height: '2rem' }}></div>
       </Paper>
     )
   }
@@ -122,7 +121,7 @@ export const ProposalCard = ({
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
       {description && (
-        <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+        <Collapse ref={ref} collapsedSize={isOverflow || hasOpened ? `${1.5 * 4}rem` : `${1.5 * 4 + 2}rem`} in={expanded}>
           <Typography dangerouslySetInnerHTML={{ __html: description }}></Typography>
         </Collapse>
       )}
@@ -131,7 +130,6 @@ export const ProposalCard = ({
           {expanded ? 'Show Less' : 'Read More'}
         </Typography>
       )}
-      <div style={isOverflow || hasOpened ? { visibility: 'hidden' } : { height: '2rem' }}></div>
     </Paper>
   )
 }
