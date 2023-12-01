@@ -82,10 +82,10 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const totalVotes = useMemo(()=>votingRoundResults ? votingRoundResults.reduce((c, r)=>c + r.count, 0) : 0, [votingRoundResults])
 
+  const [voteState, setVoteState] = useState<{[k: string]: boolean}>({})
+
   const canSubmitVote =
     canVote &&
-    totalAllocatedPercentage >= 100 &&
-    // totalAllocated === voteWeight &&
     activeAddress &&
     votingRoundMetadata &&
     !hasVoted
@@ -104,21 +104,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
    * Users Current Filter
    */
   const [filteredItems, setFilteredItems] = useState<SelectedItem[]>([])
-
-  const updateVoteAllocations = (proposalId: string, amount: number) => {
-    const newVoteAllocationsPercentage = { ...voteAllocationsPercentage }
-    if (!isFinite(amount)) {
-      amount = 0
-    }
-
-    if (amount > 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]) {
-      amount = 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]
-    }
-
-    newVoteAllocationsPercentage[proposalId] = amount
-    setVoteAllocations({ ...voteAllocations, [proposalId]: Math.round((amount / 100) * voteWeight) })
-    setVoteAllocationsPercentage(newVoteAllocationsPercentage)
-  }
 
   useEffect(() => {
     const newVoteAllocationsPercentage = {} as VoteAllocation
@@ -222,33 +207,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const handleSubmitVote = async () => {
     if (!canSubmitVote) return
 
-    const sumOfVotes = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
-    const difference = voteWeight - sumOfVotes
-
-    const newVoteAllocations = { ...voteAllocations }
-
-    if (difference !== 0) {
-      let isAdjusted = false
-      if (difference < 0) {
-        Object.entries(newVoteAllocations).forEach(([key, value]) => {
-          if (value > Math.abs(difference) && !isAdjusted) {
-            newVoteAllocations[key] = value - Math.abs(difference)
-            isAdjusted = true
-          }
-        })
-      } else {
-        Object.entries(newVoteAllocations).forEach(([key, value]) => {
-          if (newVoteAllocations[key] > 0 && !isAdjusted) {
-            newVoteAllocations[key] = value + difference
-            isAdjusted = true
-          }
-        })
-      }
-    }
-
     await submitVote({
       signature: allowlistSignature || '',
-      selectedOptionIndexes: votingRoundMetadata.questions.map(() => 0),
+      selectedOptionIndexes: votingRoundMetadata.questions.map((q) => {
+        // Has been selected and selection is true, otherwise vote No
+        return q.id in voteState ? voteState[q.id] ? 0 : 1 : 1
+      }),
       weighting: 0,
       weightings: votingRoundMetadata.questions.map(() => 0),
       signer: { addr: activeAddress, signer },
@@ -437,8 +401,8 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                   </div>
                   <div className="flex items-center col-span-1 bg-gray-100 m-3">
                     {canVote && !hasVoted && (
-                        <Checkbox sx={{margin: "auto", width: "200px"}} onChange={(e)=>{
-                          // updateVoteAllocations(question.id, parseFloat(e.target.value))
+                        <Checkbox sx={{margin: "auto"}} onChange={(e)=>{
+                          setVoteState({...voteState, [question.id]: e.target.checked})
                         }}/>
                     )}
                   </div>
