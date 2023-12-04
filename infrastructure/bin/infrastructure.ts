@@ -16,7 +16,7 @@ const deployer = new CDKDeployer({
 const appDomainName = deployer.getEnvPrefixedDomainName(`voting.${process.env.BASE_DOMAIN}`)
 const apiDomainName = `api.${appDomainName}`
 const xGovAppDomainName = deployer.getEnvPrefixedDomainName(`xgov.${process.env.BASE_DOMAIN}`)
-const eventsAppDomainName = deployer.getEnvPrefixedDomainName(`build-a-bull.${process.env.BASE_DOMAIN}`)
+const eventsAppDomainName = deployer.getEnvPrefixedDomainName(`bab.${process.env.BASE_DOMAIN}`)
 
 const apiCertificateRequest: CertificateRequest = {
   isWildCard: false,
