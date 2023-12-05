@@ -124,6 +124,8 @@ jobs:
       - build-infrastructure
       - build-api
     steps:
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
