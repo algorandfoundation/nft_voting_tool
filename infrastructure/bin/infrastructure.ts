@@ -135,7 +135,7 @@ const xGovApp = deployer.deploy(StaticWebsiteStack, 'xgovweb', {
 })
 
 const eventsApp = deployer.deploy(StaticWebsiteStack, 'eventweb', {
-  websiteFolder: process.env.WEBSITE_BUILD_PATH_XGOV ?? path.join(__dirname, '..', '..', 'src', 'build-a-bull', 'dist'),
+  websiteFolder: process.env.WEBSITE_BUILD_PATH_BAB ?? path.join(__dirname, '..', '..', 'src', 'build-a-bull', 'dist'),
   websiteNpmBuildCommand: 'build-events-dapp',
   customDomain: eventsDns?.getDefaultCustomDomainProps(deployer.defaultRegion, eventsAppDomainName),
   responseHeaders: responseHeaders,
