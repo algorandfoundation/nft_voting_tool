@@ -54,7 +54,7 @@ export default function Root() {
           }
         />
         <SiteFooter />
-        <ScrollToTop offset={offset} />
+        {/*<ScrollToTop offset={offset} />*/}
       </WalletProvider>
     </LocalizationProvider>
   )
