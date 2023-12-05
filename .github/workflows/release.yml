@@ -134,6 +134,7 @@ jobs:
           BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
+          WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
@@ -190,6 +191,7 @@ jobs:
           BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
+          WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
