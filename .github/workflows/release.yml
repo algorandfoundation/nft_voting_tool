@@ -88,7 +88,7 @@ jobs:
     with:
       working-directory: ./src/build-a-bull
       build-path: dist
-      artifact-name: build-a-bull-dapp
+      artifact-name: build-a-bull
       static-site: true
       static-site-env-prefix: VITE
     needs:
@@ -124,8 +124,6 @@ jobs:
       - build-infrastructure
       - build-api
     steps:
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
       - name: Deploy
         uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
         env:
