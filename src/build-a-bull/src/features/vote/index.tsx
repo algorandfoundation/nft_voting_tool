@@ -61,7 +61,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [error, setError] = useState<string | null>(null)
 
-  const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
   const [voteWeight, setVoteWeight] = useState<number>(0)
   const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
   const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
@@ -79,16 +78,19 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const hasVoted = voterVotes !== undefined ? true : false
   const hasClosed = votingRoundGlobalState && votingRoundGlobalState.close_time !== undefined ? true : false
 
+  function getTotalVotes() {
+    return votingRoundResults && votingRoundMetadata
+      ? votingRoundResults.reduce((c, r) => {
+          const isYesOption = votingRoundMetadata.questions.map((q) => q.options[0]).some((el) => el.id === r.optionId)
+          return isYesOption ? c + r.count : c
+        }, 0)
+      : 0
+  }
+  const totalVotes = useMemo(() => getTotalVotes(), [votingRoundResults, votingRoundMetadata])
 
-  const totalVotes = useMemo(()=>votingRoundResults ? votingRoundResults.reduce((c, r)=>c + r.count, 0) : 0, [votingRoundResults])
+  const [voteState, setVoteState] = useState<{ [k: string]: boolean }>({})
 
-  const [voteState, setVoteState] = useState<{[k: string]: boolean}>({})
-
-  const canSubmitVote =
-    canVote &&
-    activeAddress &&
-    votingRoundMetadata &&
-    !hasVoted
+  const canSubmitVote = canVote && activeAddress && votingRoundMetadata && !hasVoted
 
   type VoteAllocation = {
     [key: string]: number
@@ -208,10 +210,10 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     if (!canSubmitVote) return
 
     await submitVote({
-      signature: allowlistSignature || '',
+      signature: '',
       selectedOptionIndexes: votingRoundMetadata.questions.map((q) => {
         // Has been selected and selection is true, otherwise vote No
-        return q.id in voteState ? voteState[q.id] ? 0 : 1 : 1
+        return q.id in voteState ? (voteState[q.id] ? 0 : 1) : 1
       }),
       weighting: 0,
       weightings: votingRoundMetadata.questions.map(() => 0),
@@ -401,9 +403,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                   </div>
                   <div className="flex items-center col-span-1 bg-gray-100 m-3">
                     {canVote && !hasVoted && (
-                        <Checkbox sx={{margin: "auto"}} onChange={(e)=>{
-                          setVoteState({...voteState, [question.id]: e.target.checked})
-                        }}/>
+                      <Checkbox
+                        sx={{ margin: 'auto' }}
+                        onChange={(e) => {
+                          setVoteState({ ...voteState, [question.id]: e.target.checked })
+                        }}
+                      />
                     )}
                   </div>
                 </div>
