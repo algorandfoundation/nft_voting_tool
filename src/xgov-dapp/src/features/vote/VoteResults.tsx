@@ -151,6 +151,7 @@ export const VoteResults = ({
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
             votingRoundGlobalState={votingRoundGlobalState}
             snapshot={snapshot}
+            votingRoundResults={votingRoundResults}
           />
         </div>
         <div>

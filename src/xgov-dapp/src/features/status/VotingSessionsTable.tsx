@@ -14,9 +14,10 @@ interface VotingSessionsTableProps {
   globalStates: VotingRoundGlobalState[]
   termPools: TermPool[]
   isLoading: boolean
+  isEligible: boolean
 }
 
-function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessionsTableProps) {
+function VotingSessionsTable({ globalStates, isLoading, termPools, isEligible }: VotingSessionsTableProps) {
   return (
     <>
       {globalStates.length > 0 && (
@@ -45,7 +46,13 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
               </div>
               {!isLoading &&
                 globalStates.map((globalState) => (
-                  <VotingSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} isMobile={false} />
+                  <VotingSessionRow
+                    key={globalState.appId}
+                    globalState={globalState}
+                    termPools={termPools}
+                    isMobile={false}
+                    isEligible={isEligible}
+                  />
                 ))}
             </div>
           </div>
@@ -53,7 +60,13 @@ function VotingSessionsTable({ globalStates, isLoading, termPools }: VotingSessi
           <div className="lg:hidden">
             {!isLoading &&
               globalStates.map((globalState) => (
-                <VotingSessionRow key={globalState.appId} globalState={globalState} termPools={termPools} isMobile={true} />
+                <VotingSessionRow
+                  key={globalState.appId}
+                  globalState={globalState}
+                  termPools={termPools}
+                  isMobile={true}
+                  isEligible={isEligible}
+                />
               ))}
           </div>
         </>
@@ -74,10 +87,12 @@ function VotingSessionRow({
   globalState,
   termPools,
   isMobile,
+  isEligible,
 }: {
   globalState: VotingRoundGlobalState
   termPools: TermPool[]
   isMobile: boolean
+  isEligible: boolean
 }) {
   const { activeAddress } = useWallet()
 
@@ -90,7 +105,7 @@ function VotingSessionRow({
   const hasVoted = voterVotes !== undefined ? true : false
   const hasVoteStarted = !globalState ? false : getHasVoteStarted(globalState)
   const hasVoteEnded = !globalState ? false : getHasVoteEnded(globalState)
-  const canVote = hasVoteStarted && !hasVoteEnded
+  const canVote = hasVoteStarted && !hasVoteEnded && isEligible
 
   useEffect(() => {
     ;(async () => {

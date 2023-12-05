@@ -20,6 +20,12 @@ export const VotingInstructions = ({ voteWeight }: { voteWeight: number }) => {
           Please distribute <strong>percentages</strong> of your voting power to your selected proposals below, totalling to{' '}
           <strong>100%</strong>.
         </Typography>
+        <Typography className="mb-3">
+          <strong>
+            You can allocate 100% to one proposal or distribute as you like amongst a few. It is not required to allocate votes to all
+            proposals.
+          </strong>
+        </Typography>
         <Typography>
           <strong>Once you cast your votes, you cannot change them.</strong>
         </Typography>

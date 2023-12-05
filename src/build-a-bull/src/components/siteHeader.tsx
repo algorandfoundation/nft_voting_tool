@@ -46,7 +46,7 @@ function NavLink(props: { currentClasses: string; defaultClasses: string; link: 
   )
 }
 
-export default forwardRef(function SiteHeader(props, ref) {
+export default forwardRef<HTMLDivElement>(function SiteHeader(props, ref) {
   const navigation = createNavigation()
   const connectedWallet = useConnectedWallet()
   const setShowConnectedWalletModal = useSetShowConnectWalletModal()
