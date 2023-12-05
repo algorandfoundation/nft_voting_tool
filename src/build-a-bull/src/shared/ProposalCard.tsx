@@ -13,7 +13,7 @@ export type ProposalCardProps = {
   threshold: number | undefined
   ask: number | undefined
   votesTally: number | undefined
-  totalVotes: number | undefined
+  totalVotes?: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
 }

@@ -209,7 +209,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
             />
           </div>
           <div>
-            <VotingStats votingRoundGlobalState={globalState}/>
+            <VotingStats votingRoundGlobalState={globalState} isLoading={isLoadingMetadata || isLoadingVotingRoundResults} />
           </div>
           <div>
             <VotingTime globalState={globalState} loading={false} className="lg:visible" />

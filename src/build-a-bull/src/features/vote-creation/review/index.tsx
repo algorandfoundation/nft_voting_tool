@@ -56,28 +56,6 @@ export default function Review() {
         setAuth(await auth.execute({ signer }))
         break
       case VoteCreationReviewSteps.Create:
-        console.log({
-          auth: authData,
-          newRound: {
-            ...roundInfo,
-            voteType: VoteType.NO_SNAPSHOT,
-            questions: proposals.map((proposal) => {
-              return {
-                questionTitle: proposal.title,
-                questionDescription: proposal.description,
-                metadata: {
-                  link: proposal.link,
-                  category: proposal.category,
-                  focus_area: proposal.focus_area,
-                  threshold: Number(proposal.threshold),
-                  ask: Number(proposal.ask),
-                },
-                answers: ['Yes', 'No'],
-              }
-            }),
-          },
-          signer,
-        })
         // eslint-disable-next-line no-case-declarations
         const app = await create.execute({
           auth: authData,
