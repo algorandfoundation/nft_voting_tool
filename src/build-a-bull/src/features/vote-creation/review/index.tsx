@@ -89,7 +89,6 @@ export default function Review() {
 
         break
       case VoteCreationReviewSteps.Bootstrap:
-        console.log(proposals)
         await bootstrap.execute({
           app: appRef,
           signer,
