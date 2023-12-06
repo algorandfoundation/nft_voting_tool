@@ -360,17 +360,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 <Typography variant="h4">Projects</Typography>
               )}
             </div>
-            <div>
-              {canVote && !hasVoted && (
-                <>
-                  <Typography variant="h4">Your allocations</Typography>
-                  <Typography>
-                    {totalAllocatedPercentage}% total · {100 - totalAllocatedPercentage}% remaining to allocate
-                  </Typography>
-                </>
-              )}
-            </div>
-
             {isLoadingVotingRoundData && (
               <div className="col-span-3">
                 <Skeleton className="h-40 mb-4" variant="rectangular" />
@@ -515,7 +504,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                   </div>
                   <div>
                     <Typography>
-                      {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
+                      {!hasVoted ? 'Submit your vote!' : "You've already voted!"}
                     </Typography>
                   </div>
                 </div>
