@@ -100,17 +100,6 @@ export function FilterMenu({
             {fa}
           </MenuItem>
         ))}
-        <Divider />
-        <MenuItem disabled sx={{ opacity: '1 !important' }}>
-          Category
-        </MenuItem>
-        {categories.map((fa) => (
-          <MenuItem onClick={() => onChange('category', fa)}>
-            <ListItemIcon>{isSelected('category', fa) ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}</ListItemIcon>
-            {fa}
-          </MenuItem>
-        ))}
-        <Divider />
         <MenuItem onClick={onClear}>Clear</MenuItem>
       </Menu>
     </div>
