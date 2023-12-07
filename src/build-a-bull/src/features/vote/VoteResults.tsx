@@ -47,6 +47,15 @@ export const VoteResults = ({
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
 
+  const countVotesTally = (question: Question) => {
+    return question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+  }
+
+  const passedToTopSort = (q1: Question, q2: Question) => {
+    if (!q1.metadata?.threshold || !q2.metadata?.threshold) return 0
+    return countVotesTally(q2) / q2.metadata.threshold - countVotesTally(q1) / q1.metadata.threshold
+  }
+
   // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
   // we clone the metadata so that we don't mutate the original metadata
   const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
@@ -179,6 +188,7 @@ export const VoteResults = ({
                 ? !isReserveList(q, optionIDsToCounts[q.options[0].id])
                 : true,
             )
+            .sort((q1, q2) => passedToTopSort(q1, q2))
             .map((question) => (
               <div key={question.id}>
                 {question.metadata && (
@@ -190,11 +200,7 @@ export const VoteResults = ({
                     link={question.metadata.link}
                     threshold={question.metadata.threshold}
                     ask={question.metadata.ask}
-                    votesTally={
-                      question.options.length > 0 && optionIDsToCounts[question.options[0].id]
-                        ? optionIDsToCounts[question.options[0].id]
-                        : 0
-                    }
+                    votesTally={countVotesTally(question)}
                     hasClosed={true}
                   />
                 )}
@@ -220,28 +226,26 @@ export const VoteResults = ({
                 </>
               ))}
             {!isLoadingVotingRoundResults &&
-              reserveList.map((question) => (
-                <div key={question.id}>
-                  {question.metadata && (
-                    <ProposalCard
-                      title={question.prompt}
-                      description={question.description}
-                      category={question.metadata.category}
-                      focus_area={question.metadata.focus_area}
-                      link={question.metadata.link}
-                      threshold={question.metadata.threshold}
-                      ask={question.metadata.ask}
-                      votesTally={
-                        question.options.length > 0 && optionIDsToCounts[question.options[0].id]
-                          ? optionIDsToCounts[question.options[0].id]
-                          : 0
-                      }
-                      hasClosed={true}
-                      forcePass={passedReserveList.has(question.id)}
-                    />
-                  )}
-                </div>
-              ))}
+              reserveList
+                .sort((q1, q2) => passedToTopSort(q1, q2))
+                .map((question) => (
+                  <div key={question.id}>
+                    {question.metadata && (
+                      <ProposalCard
+                        title={question.prompt}
+                        description={question.description}
+                        category={question.metadata.category}
+                        focus_area={question.metadata.focus_area}
+                        link={question.metadata.link}
+                        threshold={question.metadata.threshold}
+                        ask={question.metadata.ask}
+                        votesTally={countVotesTally(question)}
+                        hasClosed={true}
+                        forcePass={passedReserveList.has(question.id)}
+                      />
+                    )}
+                  </div>
+                ))}
           </>
         )}
       </div>
