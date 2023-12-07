@@ -5,11 +5,11 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ClearIcon from '@mui/icons-material/Clear'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import { Alert, Box, Button, Checkbox, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, IconButton, Link, Skeleton, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import { Question, VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '@/shared/IPFSGateway'
+import { Question, VotingRoundMetadata, fetchVotingRoundMetadata } from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
@@ -61,14 +61,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [error, setError] = useState<string | null>(null)
 
-  const [voteWeight, setVoteWeight] = useState<number>(0)
-  const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
-  const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
+  const [voteWeight] = useState<number>(0)
+  const [_, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
+  const [__, setVoteAllocations] = useState<VoteAllocation>({})
 
   const { loading: submittingVote, execute: submitVote, error: errorSubmittingVote } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
-
-  const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
@@ -503,9 +501,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                     <HandThumbUpIcon className={clsx('align-bottom h-6 w-6 mr-3', !canSubmitVote ? '' : 'text-green')} />
                   </div>
                   <div>
-                    <Typography>
-                      {!hasVoted ? 'Submit your vote!' : "You've already voted!"}
-                    </Typography>
+                    <Typography>{!hasVoted ? 'Submit your vote!' : "You've already voted!"}</Typography>
                   </div>
                 </div>
                 <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>
