@@ -13,8 +13,7 @@ export const VotingInstructions = ({ voteWeight }: { voteWeight: number }) => {
           <strong>Voting instructions</strong>
         </Typography>
         <Typography className="mb-3">
-          Select the projects you wish to vote for
-          <strong>100%</strong>.
+          Select the projects you wish to vote for.
         </Typography>
         <Typography>
           <strong>Once you cast your vote, you cannot change them.</strong>
