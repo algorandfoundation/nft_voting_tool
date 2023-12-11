@@ -40,8 +40,8 @@ const VotingRounds = () => {
   const navigate = useNavigate()
   useEffect(() => {
     // TODO: add production voting round
-    const appId = import.meta.env.VITE_ALGOD_NETWORK === 'testnet' ? '499163907' : ''
-    if (import.meta.env.VITE_ENVIRONMENT !== 'local') {
+    const appId = import.meta.env.VITE_ALGOD_NETWORK === 'testnet' ? 499163907 : undefined
+    if (import.meta.env.VITE_ENVIRONMENT !== 'local' && typeof appId === 'number') {
       navigate(`/vote/${appId}`)
     }
   }, [])
