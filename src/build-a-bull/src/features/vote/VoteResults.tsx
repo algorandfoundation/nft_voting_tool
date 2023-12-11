@@ -56,6 +56,10 @@ export const VoteResults = ({
     return countVotesTally(q2) / q2.metadata.threshold - countVotesTally(q1) / q1.metadata.threshold
   }
 
+  const passedToTopSortReserve = (q1: Question, q2: Question, passedReserveList: Set<string>) => {
+    return passedReserveList.has(q2.id) ? 100 : passedReserveList.has(q1.id) ? -100 : passedToTopSort(q1, q2)
+  }
+
   // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
   // we clone the metadata so that we don't mutate the original metadata
   const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
@@ -227,7 +231,7 @@ export const VoteResults = ({
               ))}
             {!isLoadingVotingRoundResults &&
               reserveList
-                .sort((q1, q2) => passedToTopSort(q1, q2))
+                .sort((q1, q2) => passedToTopSortReserve(q1, q2, passedReserveList))
                 .map((question) => (
                   <div key={question.id}>
                     {question.metadata && (
