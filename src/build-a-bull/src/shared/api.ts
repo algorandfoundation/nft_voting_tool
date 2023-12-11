@@ -155,7 +155,7 @@ const api = {
               ...(question.metadata ? { metadata: question.metadata } : {}),
             }
           })
-          if(typeof newRound.voteType === 'undefined'){
+          if (typeof newRound.voteType === 'undefined') {
             throw new TypeError('Invalid Vote Type')
           }
           const voteId = `V${new Date().getTime().toString(32).toUpperCase()}`

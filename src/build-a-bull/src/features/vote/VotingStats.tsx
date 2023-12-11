@@ -19,9 +19,7 @@ const VotingStats: React.FC<VotingStatsComponentProps> = ({ votingRoundGlobalSta
           <strong>Voting stats</strong>
         </Typography>
         {isLoading ? <Skeleton className="h-6 w-full" variant="text" /> : null}
-        {!isLoading && votingRoundGlobalState && (
-          <Typography>{`${votingRoundGlobalState.voter_count} wallets voted`}</Typography>
-        )}
+        {!isLoading && votingRoundGlobalState && <Typography>{`${votingRoundGlobalState.voter_count} wallets voted`}</Typography>}
         <Typography className="mb-3">&nbsp;</Typography>
       </div>
     </Box>

@@ -2,24 +2,16 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Question, VoteGatingSnapshot, VotingRoundMetadata } from '@/shared/IPFSGateway'
-import { VotingRoundGlobalState, fetchAddressesThatVoted } from '@/shared/VotingRoundContract'
+import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 import { ProposalCard } from '@/shared/ProposalCard'
 import { VotingRoundResult } from '@/shared/types'
-import {
-  generateOptionIDsToCountsMapping,
-  generatePassedReserveList,
-  generateReserveList,
-  isReserveList,
-  transformToDynamicThresholds,
-} from '@/utils/common'
-import AlgoStats from './AlgoStats'
+import { generateOptionIDsToCountsMapping } from '@/utils/common'
 import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
-import { dynamicThresholdSupportedVersions, reserveListSupportedVersions } from '@/constants'
 
 export type VoteResultsProps = {
   votingRoundResults: VotingRoundResult[] | undefined
@@ -27,7 +19,6 @@ export type VoteResultsProps = {
   votingRoundGlobalState: VotingRoundGlobalState
   isLoadingVotingRoundData: boolean
   isLoadingVotingRoundResults: boolean
-  snapshot?: VoteGatingSnapshot | undefined
   myVotes?: string[]
 }
 
@@ -37,74 +28,30 @@ export const VoteResults = ({
   votingRoundGlobalState,
   isLoadingVotingRoundData,
   isLoadingVotingRoundResults,
-  snapshot,
 }: VoteResultsProps) => {
-  const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
+  const [isDownloadingProposalsCsv, setIsDownloadingProposalsCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
-  const isDynamicThresholdEnabled = dynamicThresholdSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
 
-  // clone the voting round metadata and adjust the threshold to be out of total votes instead of total voting power
-  // we clone the metadata so that we don't mutate the original metadata
-  const votingRoundMetadataClone = useMemo<VotingRoundMetadata | undefined>(() => {
-    if (
-      votingRoundMetadata === undefined ||
-      snapshot === undefined ||
-      votingRoundResults === undefined ||
-      isLoadingVotingRoundResults === true ||
-      isLoadingVotingRoundData === true
-    ) {
-      return undefined
-    }
-    if (!isDynamicThresholdEnabled) {
-      return votingRoundMetadata
-    }
-    const totalVotes = votingRoundResults.reduce((accumulator, curr) => {
-      return accumulator + curr.count
-    }, 0)
-
-    const totalVotingPower = snapshot.snapshot.reduce((accumulator, curr) => {
-      return accumulator + (curr.weight || 0)
-    }, 0)
-    // change threshold to be out of total votes instead of total voting power
-    // according to https://algorandfoundation.atlassian.net/browse/AF-73
-    return transformToDynamicThresholds(votingRoundMetadata, totalVotes, totalVotingPower)
-  }, [votingRoundMetadata, snapshot, isLoadingVotingRoundData, isLoadingVotingRoundResults])
-
-  const reserveList = useMemo<Question[]>(() => {
-    if (!isReserveListEnabled) {
-      return []
-    }
-    if (votingRoundMetadataClone === undefined) {
-      return []
-    }
-    return generateReserveList(votingRoundMetadataClone, optionIDsToCounts)
-  }, [votingRoundMetadataClone])
-
-  const passedReserveList = useMemo<Set<string>>(() => {
-    if (reserveList.length === 0 || votingRoundResults === undefined || votingRoundMetadataClone === undefined) {
-      return new Set()
-    }
-    return generatePassedReserveList(reserveList, votingRoundResults, votingRoundMetadataClone)
-  }, [reserveList, votingRoundResults, votingRoundMetadataClone])
-
-  const generateAddressesThatVotedCsv = async () => {
+  const generateProposalsResultsCsv = async () => {
     if (votingRoundMetadata) {
-      setIsDownloadingCsv(true)
+      setIsDownloadingProposalsCsv(true)
       setError(null)
       try {
-        const addresses = await fetchAddressesThatVoted(votingRoundGlobalState.appId)
         const csvData = Papa.unparse(
-          addresses.map((address) => {
-            return { address }
+          votingRoundMetadata.questions.map((question) => {
+            const votesTally =
+              question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+            return {
+              project: question.prompt,
+              votes: votesTally,
+            }
           }),
         )
 
         const blob = new Blob([csvData], { type: 'text/csv' })
-        saveAs(blob, `voters-${votingRoundMetadata.title}.csv`)
+        saveAs(blob, `proposals-${votingRoundMetadata.title}.csv`)
       } catch (e) {
         if (e instanceof Error) {
           setError(e.message)
@@ -114,7 +61,7 @@ export const VoteResults = ({
           setError('Unexpected error')
         }
       }
-      setIsDownloadingCsv(false)
+      setIsDownloadingProposalsCsv(false)
     }
   }
 
@@ -135,15 +82,6 @@ export const VoteResults = ({
             appId={votingRoundGlobalState.appId}
             loading={isLoadingVotingRoundData}
             roundMetadata={votingRoundMetadata}
-          />
-        </div>
-        <div>
-          <AlgoStats
-            isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
-            votingRoundMetadata={votingRoundMetadataClone}
-            votingRoundResults={votingRoundResults}
-            hasVoteClosed={true}
-            passedReserveList={passedReserveList}
           />
         </div>
         <div>
@@ -173,87 +111,35 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadataClone?.questions
-            .filter((q) =>
-              isReserveListEnabled && q.options.length > 0 && optionIDsToCounts[q.options[0].id]
-                ? !isReserveList(q, optionIDsToCounts[q.options[0].id])
-                : true,
-            )
-            .map((question) => (
-              <div key={question.id}>
-                {question.metadata && (
-                  <ProposalCard
-                    title={question.prompt}
-                    description={question.description}
-                    category={question.metadata.category}
-                    focus_area={question.metadata.focus_area}
-                    link={question.metadata.link}
-                    threshold={question.metadata.threshold}
-                    ask={question.metadata.ask}
-                    votesTally={
-                      question.options.length > 0 && optionIDsToCounts[question.options[0].id]
-                        ? optionIDsToCounts[question.options[0].id]
-                        : 0
-                    }
-                    hasClosed={true}
-                  />
-                )}
-              </div>
-            ))}
-        {isReserveListEnabled && reserveList.length > 0 && (
-          <>
-            <div className="col-span-1 xl:col-span-3">
-              <Typography variant="h4">Reserve List</Typography>
+          votingRoundMetadata?.questions.map((question) => (
+            <div key={question.id}>
+              {question.metadata && (
+                <ProposalCard
+                  title={question.prompt}
+                  description={question.description}
+                  category={question.metadata.category}
+                  focus_area={question.metadata.focus_area}
+                  link={question.metadata.link}
+                  threshold={question.metadata.threshold}
+                  ask={question.metadata.ask}
+                  votesTally={
+                    question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+                  }
+                  hasClosed={true}
+                />
+              )}
             </div>
-            {isLoadingVotingRoundData ||
-              (isLoadingVotingRoundResults && (
-                <>
-                  <div>
-                    <Skeleton className="h-40 mb-4" variant="rectangular" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-40 mb-4" variant="rectangular" />
-                  </div>
-                  <div>
-                    <Skeleton className="h-40" variant="rectangular" />
-                  </div>
-                </>
-              ))}
-            {!isLoadingVotingRoundResults &&
-              reserveList.map((question) => (
-                <div key={question.id}>
-                  {question.metadata && (
-                    <ProposalCard
-                      title={question.prompt}
-                      description={question.description}
-                      category={question.metadata.category}
-                      focus_area={question.metadata.focus_area}
-                      link={question.metadata.link}
-                      threshold={question.metadata.threshold}
-                      ask={question.metadata.ask}
-                      votesTally={
-                        question.options.length > 0 && optionIDsToCounts[question.options[0].id]
-                          ? optionIDsToCounts[question.options[0].id]
-                          : 0
-                      }
-                      hasClosed={true}
-                      forcePass={passedReserveList.has(question.id)}
-                    />
-                  )}
-                </div>
-              ))}
-          </>
-        )}
+          ))}
       </div>
       <div className="w-full text-right mt-4">
         <Button
           variant="contained"
           color="primary"
-          onClick={generateAddressesThatVotedCsv}
-          disabled={isLoadingVotingRoundData || isDownloadingCsv}
+          onClick={generateProposalsResultsCsv}
+          disabled={isLoadingVotingRoundData || isDownloadingProposalsCsv}
           endIcon={<FileDownloadIcon />}
         >
-          Download addresses that voted
+          Download proposals results CSV
         </Button>
       </div>
       {error && (
