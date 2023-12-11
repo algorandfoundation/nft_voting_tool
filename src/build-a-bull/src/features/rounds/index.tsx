@@ -10,6 +10,8 @@ import { useCreatorAddresses } from '@/features/wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 import { VotingRoundStatus } from './VotingRoundTile'
 
+const NETWORK = import.meta.env.VITE_ALGOD_NETWORK
+
 export const VotingRoundTileLoading = () => (
   <>
     <Skeleton className="h-52" variant="rectangular" />
@@ -38,13 +40,11 @@ const VotingRounds = () => {
 
   // Redirect to live round
   const navigate = useNavigate()
-  useEffect(() => {
-    // TODO: add production voting round
-    const appId = import.meta.env.VITE_ALGOD_NETWORK === 'testnet' ? 499163907 : undefined
-    if (import.meta.env.VITE_ENVIRONMENT !== 'local' && typeof appId === 'number') {
-      navigate(`/vote/${appId}`)
-    }
-  }, [])
+  // TODO: add production voting round
+  const appId = NETWORK === 'testnet' ? 499163907 : 'must be added'
+  if (import.meta.env.VITE_ENVIRONMENT !== 'local' && typeof appId === 'number') {
+    navigate(`/vote/${appId}`)
+  }
 
   useEffect(() => {
     let addressesToFetch = [] as string[]
