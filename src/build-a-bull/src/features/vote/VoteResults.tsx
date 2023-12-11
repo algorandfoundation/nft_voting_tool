@@ -2,14 +2,12 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState } from 'react'
 import { VotingRoundMetadata } from '@/shared/IPFSGateway'
 import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 import { ProposalCard } from '@/shared/ProposalCard'
 import { VotingRoundResult } from '@/shared/types'
 import { generateOptionIDsToCountsMapping } from '@/utils/common'
-import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
@@ -33,7 +31,15 @@ export const VoteResults = ({
   const [error, setError] = useState<string | null>(null)
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
-
+  function getTotalVotes() {
+    return votingRoundResults && votingRoundMetadata
+      ? votingRoundResults.reduce((c, r) => {
+          const isYesOption = votingRoundMetadata.questions.map((q) => q.options[0]).some((el) => el.id === r.optionId)
+          return isYesOption ? c + r.count : c
+        }, 0)
+      : 0
+  }
+  const totalVotes = useMemo(() => getTotalVotes(), [votingRoundResults, votingRoundMetadata])
   const generateProposalsResultsCsv = async () => {
     if (votingRoundMetadata) {
       setIsDownloadingProposalsCsv(true)
@@ -71,14 +77,7 @@ export const VoteResults = ({
         <div className="col-span-1 xl:col-span-2">
           <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
         </div>
-        <div>
-          <VoteDetails
-            globalState={votingRoundGlobalState}
-            appId={votingRoundGlobalState.appId}
-            loading={isLoadingVotingRoundData}
-            roundMetadata={votingRoundMetadata}
-          />
-        </div>
+        <div></div>
         <div>
           <VotingStats
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
@@ -118,6 +117,7 @@ export const VoteResults = ({
                   threshold={question.metadata.threshold}
                   ask={question.metadata.ask}
                   skipTags={true}
+                  totalVotes={totalVotes}
                   votesTally={
                     question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
                   }
