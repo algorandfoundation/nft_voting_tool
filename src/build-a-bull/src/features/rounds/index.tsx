@@ -2,7 +2,7 @@ import { useWallet } from '@makerx/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import sortBy from 'lodash.sortby'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { VotingRoundGlobalState, fetchVotingRoundGlobalStatesByCreators } from '@/shared/VotingRoundContract'
 import { VoteType } from '@/shared/types'
 import { getHasVoteEnded, getHasVoteStarted } from '@/shared/vote'
@@ -35,6 +35,15 @@ const VotingRounds = () => {
   const [globalStates, setGlobalStates] = useState<VotingRoundGlobalState[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Redirect to live round
+  const navigate = useNavigate()
+  useEffect(() => {
+    const appId = import.meta.env.VITE_ALGOD_NETWORK === 'testnet' ? '499163907' : ''
+    if (import.meta.env.VITE_ENVIRONMENT !== 'dev') {
+      navigate(`/vote/${appId}`)
+    }
+  }, [])
 
   useEffect(() => {
     let addressesToFetch = [] as string[]
