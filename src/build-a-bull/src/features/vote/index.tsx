@@ -316,11 +316,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   return (
     <div>
-      <div className="mb-4">
-        <RouterLink to="/" className="no-underline text-gray-600 hover:underline">
-          <Typography>&#60; Back to events</Typography>
-        </RouterLink>
-      </div>
       <div>
         {error && (
           <Alert className="max-w-xl mt-4 text-white bg-red font-semibold" icon={false}>

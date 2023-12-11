@@ -67,11 +67,6 @@ export const VoteResults = ({
 
   return (
     <div>
-      <div className="mb-4">
-        <Link to="/" className="no-underline text-gray-600 hover:underline">
-          <Typography>&#60; Back to Voting sessions</Typography>
-        </Link>
-      </div>
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="col-span-1 xl:col-span-2">
           <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
