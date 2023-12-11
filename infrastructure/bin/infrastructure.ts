@@ -16,6 +16,7 @@ const deployer = new CDKDeployer({
 const appDomainName = deployer.getEnvPrefixedDomainName(`voting.${process.env.BASE_DOMAIN}`)
 const apiDomainName = `api.${appDomainName}`
 const xGovAppDomainName = deployer.getEnvPrefixedDomainName(`xgov.${process.env.BASE_DOMAIN}`)
+const eventsAppDomainName = deployer.getEnvPrefixedDomainName(`bab.${process.env.BASE_DOMAIN}`)
 
 const apiCertificateRequest: CertificateRequest = {
   isWildCard: false,
@@ -25,30 +26,44 @@ const apiCertificateRequest: CertificateRequest = {
 
 const dns = appDomainName
   ? deployer.deploy(
-    DnsStack,
-    'dns-web',
-    {
-      domainName: appDomainName,
-      generateCertificate: true,
-      parameterRegions: [deployer.defaultRegion],
-      certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
-    },
-    'us-east-1',
-  )
+      DnsStack,
+      'dns-web',
+      {
+        domainName: appDomainName,
+        generateCertificate: true,
+        parameterRegions: [deployer.defaultRegion],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST, apiCertificateRequest],
+      },
+      'us-east-1',
+    )
   : undefined
 
 const xGovDns = xGovAppDomainName
   ? deployer.deploy(
-    DnsStack,
-    'dns-xgovweb',
-    {
-      domainName: xGovAppDomainName,
-      generateCertificate: true,
-      parameterRegions: [deployer.defaultRegion],
-      certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
-    },
-    'us-east-1',
-  )
+      DnsStack,
+      'dns-xgovweb',
+      {
+        domainName: xGovAppDomainName,
+        generateCertificate: true,
+        parameterRegions: [deployer.defaultRegion],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
+      },
+      'us-east-1',
+    )
+  : undefined
+
+const eventsDns = eventsAppDomainName
+  ? deployer.deploy(
+      DnsStack,
+      'dns-eventsweb',
+      {
+        domainName: eventsAppDomainName,
+        generateCertificate: true,
+        parameterRegions: [deployer.defaultRegion],
+        certificateRequests: [DnsStack.ROOT_CERT_REQUEST],
+      },
+      'us-east-1',
+    )
   : undefined
 
 const responseHeaders: ResponseHeadersPolicyProps = {
@@ -119,6 +134,13 @@ const xGovApp = deployer.deploy(StaticWebsiteStack, 'xgovweb', {
   responseHeaders: responseHeaders,
 })
 
+const eventsApp = deployer.deploy(StaticWebsiteStack, 'eventweb', {
+  websiteFolder: process.env.WEBSITE_BUILD_PATH_BAB ?? path.join(__dirname, '..', '..', 'src', 'build-a-bull', 'dist'),
+  websiteNpmBuildCommand: 'build-events-dapp',
+  customDomain: eventsDns?.getDefaultCustomDomainProps(deployer.defaultRegion, eventsAppDomainName),
+  responseHeaders: responseHeaders,
+})
+
 if (dns) {
   app.addDependency(dns)
   api.addDependency(dns)
@@ -126,4 +148,8 @@ if (dns) {
 
 if (xGovDns) {
   xGovApp.addDependency(xGovDns)
+}
+
+if (eventsDns) {
+  eventsApp.addDependency(eventsDns)
 }

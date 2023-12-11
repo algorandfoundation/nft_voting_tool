@@ -32,6 +32,14 @@ jobs:
     secrets:
       chromatic-token: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
       npm-auth-token: ${{ secrets.GITHUB_TOKEN }}
+  build-event-dapp:
+    name: Events Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/build-a-bull
+      audit-script: npm run audit --audit-level=high
+    secrets:
+      npm-auth-token: ${{ secrets.GITHUB_TOKEN }}
   build-api:
     name: Api
     uses: ./.github/workflows/node-ci.yml

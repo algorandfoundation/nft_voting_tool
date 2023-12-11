@@ -31,6 +31,13 @@ jobs:
       pre-run-script: cd ../dapp && npm ci
       compile-script: npm run typecheck
       audit-script: npm run audit --audit-level=high
+  ci-events-dapp:
+    name: CI Events Dapp
+    uses: ./.github/workflows/node-ci.yml
+    with:
+      working-directory: ./src/build-a-bull
+      compile-script: npm run typecheck
+      audit-script: npm run audit --audit-level=high
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
@@ -75,6 +82,18 @@ jobs:
     needs:
       - ci-xgov-dapp
       - ci-algorand
+  build-events-dapp:
+    name: Build Events Dapp
+    uses: ./.github/workflows/node-build-zip.yml
+    with:
+      working-directory: ./src/build-a-bull
+      build-path: dist
+      artifact-name: build-a-bull
+      static-site: true
+      static-site-env-prefix: VITE
+    needs:
+      - ci-events-dapp
+      - ci-algorand
   build-api:
     name: Build API
     uses: ./.github/workflows/node-build-zip.yml
@@ -101,6 +120,7 @@ jobs:
     needs:
       - build-dapp
       - build-xgov-dapp
+      - build-events-dapp
       - build-infrastructure
       - build-api
     steps:
@@ -114,6 +134,7 @@ jobs:
           BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
+          WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
@@ -123,6 +144,7 @@ jobs:
           app-artifact-unzips: |-
             dapp:dapp/dist
             xgov-dapp:xgov-dapp/dist
+            build-a-bull:build-a-bull/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
@@ -141,6 +163,7 @@ jobs:
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
             VITE_XGOV_CREATOR_ALLOW_LIST: ${{ vars.XGOV_CREATOR_ALLOW_LIST_ADDRESSES }}
+            VITE_HACKATHON_CREATOR_ALLOW_LIST: ${{ vars.HACKATHON_CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_HIDDEN_VOTING_ROUND_IDS: ${{ vars.HIDDEN_VOTING_ROUND_IDS }}
             VITE_XGOV_GOVENERS_URL: ${{ vars.XGOV_GOVENERS_URL }}
@@ -155,6 +178,7 @@ jobs:
     needs:
       - build-dapp
       - build-xgov-dapp
+      - build-events-dapp
       - build-infrastructure
       - build-api
     steps:
@@ -168,6 +192,7 @@ jobs:
           BASE_DOMAIN: algorand.foundation
           WEBSITE_BUILD_PATH: ${{ github.workspace }}/dapp/dist
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
+          WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
           WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
           NODE_ENV: production
@@ -177,6 +202,7 @@ jobs:
           app-artifact-unzips: |-
             dapp:dapp/dist
             xgov-dapp:xgov-dapp/dist
+            build-a-bull:build-a-bull/dist
             api:api/build
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
@@ -195,6 +221,7 @@ jobs:
             VITE_NFT_EXPLORER_URL: ${{ vars.NFT_EXPLORER_URL }}
             VITE_IS_TESTNET: ${{ vars.IS_TESTNET }}
             VITE_XGOV_CREATOR_ALLOW_LIST: ${{ vars.XGOV_CREATOR_ALLOW_LIST_ADDRESSES }}
+            VITE_HACKATHON_CREATOR_ALLOW_LIST: ${{ vars.HACKATHON_CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_CREATOR_ALLOW_LIST: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
             VITE_HIDDEN_VOTING_ROUND_IDS: ${{ vars.HIDDEN_VOTING_ROUND_IDS }}
             VITE_XGOV_GOVENERS_URL: ${{ vars.XGOV_GOVENERS_URL }}

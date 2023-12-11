@@ -13,6 +13,7 @@ export type ProposalCardProps = {
   threshold: number | undefined
   ask: number | undefined
   votesTally: number | undefined
+  totalVotes?: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
 }
@@ -26,6 +27,7 @@ export const ProposalCard = ({
   threshold,
   ask,
   votesTally = 0,
+  totalVotes = 0,
   hasClosed = false,
   forcePass = false,
 }: ProposalCardProps) => {
@@ -72,7 +74,7 @@ export const ProposalCard = ({
       </Typography>
       <div className="flex justify-between">
         <Typography className="mb-2" variant="h6">
-          {threshold && `${votesTally.toLocaleString()} of ${threshold.toLocaleString()} Votes`}
+          {threshold && `${votesTally.toLocaleString()} of ${totalVotes} Votes`}
         </Typography>
         <Typography className="mb-2" variant="h6">
           {hasClosed && hasPassed && ask && <strong>{`${ask.toLocaleString()} ALGO awarded`}</strong>}
@@ -80,7 +82,7 @@ export const ProposalCard = ({
       </div>
       <LinearProgress color="success" style={{ height: 8, borderRadius: 10 }} className="mb-4" variant="determinate" value={percentage} />
       {description && (
-        <Collapse ref={ref} collapsedSize={`${1.5 * 4}rem`} in={expanded}>
+        <Collapse ref={ref} collapsedSize={isOverflow || hasOpened ? `${1.5 * 4}rem` : `${1.5 * 4 + 2}rem`} in={expanded}>
           <Typography dangerouslySetInnerHTML={{ __html: description }}></Typography>
         </Collapse>
       )}

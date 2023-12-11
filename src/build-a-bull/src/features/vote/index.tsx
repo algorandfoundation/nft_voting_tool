@@ -5,11 +5,11 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ClearIcon from '@mui/icons-material/Clear'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, IconButton, Link, Skeleton, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import { Question, VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '@/shared/IPFSGateway'
+import { Question, VotingRoundMetadata, fetchVotingRoundMetadata } from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
@@ -52,7 +52,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [votingRoundGlobalState, setVotingRoundGlobalState] = useState<VotingRoundGlobalState | undefined>(undefined)
   const [votingRoundMetadata, setVotingRoundMetadata] = useState<VotingRoundMetadata | undefined>(undefined)
-  const [snapshot, setSnapshot] = useState<VoteGatingSnapshot | undefined>(undefined)
   const [votingRoundResults, setVotingRoundResults] = useState<TallyCounts | undefined>(undefined)
   const [optionIdsToCount, setOptionIdsToCount] = useState<{ [optionId: string]: number } | undefined>(undefined)
   const [voterVotes, setVoterVotes] = useState<string[] | undefined>(undefined)
@@ -62,33 +61,34 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [error, setError] = useState<string | null>(null)
 
-  const [allowlistSignature, setAllowlistSignature] = useState<null | string>(null)
-  const [allowedToVote, setAllowToVote] = useState<boolean>(false)
-  const [voteWeight, setVoteWeight] = useState<number>(0)
-  const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
-  const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
+  const [voteWeight] = useState<number>(0)
+  const [_, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
+  const [__, setVoteAllocations] = useState<VoteAllocation>({})
 
   const { loading: submittingVote, execute: submitVote, error: errorSubmittingVote } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
-
-  const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
   const isVoteCreator = votingRoundMetadata?.created.by === activeAddress ? true : false
 
-  const canVote = hasVoteStarted && !hasVoteEnded && allowedToVote
+  const canVote = hasVoteStarted && !hasVoteEnded
   const hasVoted = voterVotes !== undefined ? true : false
   const hasClosed = votingRoundGlobalState && votingRoundGlobalState.close_time !== undefined ? true : false
 
-  const canSubmitVote =
-    canVote &&
-    totalAllocatedPercentage >= 100 &&
-    // totalAllocated === voteWeight &&
-    activeAddress &&
-    allowlistSignature &&
-    votingRoundMetadata &&
-    !hasVoted
+  function getTotalVotes() {
+    return votingRoundResults && votingRoundMetadata
+      ? votingRoundResults.reduce((c, r) => {
+          const isYesOption = votingRoundMetadata.questions.map((q) => q.options[0]).some((el) => el.id === r.optionId)
+          return isYesOption ? c + r.count : c
+        }, 0)
+      : 0
+  }
+  const totalVotes = useMemo(() => getTotalVotes(), [votingRoundResults, votingRoundMetadata])
+
+  const [voteState, setVoteState] = useState<{ [k: string]: boolean }>({})
+
+  const canSubmitVote = canVote && activeAddress && votingRoundMetadata && !hasVoted
 
   type VoteAllocation = {
     [key: string]: number
@@ -104,21 +104,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
    * Users Current Filter
    */
   const [filteredItems, setFilteredItems] = useState<SelectedItem[]>([])
-
-  const updateVoteAllocations = (proposalId: string, amount: number) => {
-    const newVoteAllocationsPercentage = { ...voteAllocationsPercentage }
-    if (!isFinite(amount)) {
-      amount = 0
-    }
-
-    if (amount > 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]) {
-      amount = 100 - totalAllocatedPercentage + voteAllocationsPercentage[proposalId]
-    }
-
-    newVoteAllocationsPercentage[proposalId] = amount
-    setVoteAllocations({ ...voteAllocations, [proposalId]: Math.round((amount / 100) * voteWeight) })
-    setVoteAllocationsPercentage(newVoteAllocationsPercentage)
-  }
 
   useEffect(() => {
     const newVoteAllocationsPercentage = {} as VoteAllocation
@@ -146,7 +131,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const refetchVoteRoundData = async (voteId: number | undefined) => {
     setVotingRoundGlobalState(undefined)
     setVotingRoundMetadata(undefined)
-    setSnapshot(undefined)
     setError(null)
     if (voteId) {
       setIsLoadingVotingRoundData(true)
@@ -159,11 +143,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
         const roundMetadata = await fetchVotingRoundMetadata(globalState.metadata_ipfs_cid)
         if (!roundMetadata) {
           throw new Error(`Could not retrieve voting round metadata with cid: ${globalState.metadata_ipfs_cid}`)
-        }
-
-        if (roundMetadata.voteGatingSnapshotCid) {
-          const snapshot = await fetchVotingSnapshot(roundMetadata.voteGatingSnapshotCid)
-          setSnapshot(snapshot)
         }
 
         setVotingRoundGlobalState(globalState)
@@ -215,25 +194,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     }
   }
 
-  useEffect(() => {
-    setAllowlistSignature(null)
-    setAllowToVote(false)
-    if (snapshot?.snapshot) {
-      const addressSnapshot = snapshot?.snapshot.find((addressSnapshot) => {
-        return addressSnapshot.address === activeAddress
-      })
-      if (addressSnapshot) {
-        setAllowlistSignature(addressSnapshot.signature)
-        setAllowToVote(true)
-        if (addressSnapshot.weight && isFinite(addressSnapshot.weight)) {
-          setVoteWeight(addressSnapshot.weight)
-        } else {
-          setVoteWeight(1)
-        }
-      }
-    }
-  }, [snapshot, activeAddress])
-
   const handleError = (e: unknown) => {
     if (e instanceof Error) {
       setError(e.message)
@@ -247,35 +207,14 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
   const handleSubmitVote = async () => {
     if (!canSubmitVote) return
 
-    const sumOfVotes = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
-    const difference = voteWeight - sumOfVotes
-
-    const newVoteAllocations = { ...voteAllocations }
-
-    if (difference !== 0) {
-      let isAdjusted = false
-      if (difference < 0) {
-        Object.entries(newVoteAllocations).forEach(([key, value]) => {
-          if (value > Math.abs(difference) && !isAdjusted) {
-            newVoteAllocations[key] = value - Math.abs(difference)
-            isAdjusted = true
-          }
-        })
-      } else {
-        Object.entries(newVoteAllocations).forEach(([key, value]) => {
-          if (newVoteAllocations[key] > 0 && !isAdjusted) {
-            newVoteAllocations[key] = value + difference
-            isAdjusted = true
-          }
-        })
-      }
-    }
-
     await submitVote({
-      signature: allowlistSignature,
-      selectedOptionIndexes: votingRoundMetadata.questions.map(() => 0),
-      weighting: voteWeight,
-      weightings: votingRoundMetadata.questions.map((question) => (newVoteAllocations[question.id] ? newVoteAllocations[question.id] : 0)),
+      signature: '',
+      selectedOptionIndexes: votingRoundMetadata.questions.map((q) => {
+        // Has been selected and selection is true, otherwise vote No
+        return q.id in voteState ? (voteState[q.id] ? 0 : 1) : 1
+      }),
+      weighting: 0,
+      weightings: votingRoundMetadata.questions.map(() => 0),
       signer: { addr: activeAddress, signer },
       appId: voteId,
     })
@@ -371,7 +310,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
         votingRoundGlobalState={votingRoundGlobalState}
         isLoadingVotingRoundResults={isLoadingVotingRoundResults}
         isLoadingVotingRoundData={isLoadingVotingRoundData}
-        snapshot={snapshot}
       />
     )
   }
@@ -420,17 +358,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 <Typography variant="h4">Projects</Typography>
               )}
             </div>
-            <div>
-              {canVote && !hasVoted && (
-                <>
-                  <Typography variant="h4">Your allocations</Typography>
-                  <Typography>
-                    {totalAllocatedPercentage}% total · {100 - totalAllocatedPercentage}% remaining to allocate
-                  </Typography>
-                </>
-              )}
-            </div>
-
             {isLoadingVotingRoundData && (
               <div className="col-span-3">
                 <Skeleton className="h-40 mb-4" variant="rectangular" />
@@ -457,32 +384,18 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                         votesTally={
                           optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
                         }
+                        totalVotes={totalVotes}
                       />
                     )}
                   </div>
                   <div className="flex items-center col-span-1 bg-gray-100 m-3">
                     {canVote && !hasVoted && (
-                      <>
-                        <TextField
-                          type="number"
-                          className="w-32 bg-white m-4 rounded-xl"
-                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
-                          InputProps={{
-                            inputProps: {
-                              max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
-                              min: 0,
-                            },
-                            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                          }}
-                          id={question.id}
-                          variant="outlined"
-                          onChange={(e) => {
-                            updateVoteAllocations(question.id, parseFloat(e.target.value))
-                          }}
-                          value={voteAllocationsPercentage[question.id] ? `${voteAllocationsPercentage[question.id]}` : 0}
-                        />
-                        <small>&nbsp;&nbsp; ~{voteAllocations[question.id] ? voteAllocations[question.id] : 0} votes</small>
-                      </>
+                      <Checkbox
+                        sx={{ margin: 'auto' }}
+                        onChange={(e) => {
+                          setVoteState({ ...voteState, [question.id]: e.target.checked })
+                        }}
+                      />
                     )}
                   </div>
                 </div>
@@ -512,7 +425,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               </div>
             )}
 
-            {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress || !allowedToVote) && (
+            {!isLoadingVotingRoundData && (!hasVoteStarted || !activeAddress) && (
               <div className="mb-4">
                 <Box className="bg-red-light flex rounded-xl px-4 py-6">
                   <div>
@@ -538,8 +451,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                           </Link>
                         </div>
                       </div>
-                    ) : !allowedToVote ? (
-                      <Typography>Your wallet is not on the allow list for this voting round.</Typography>
                     ) : (
                       ''
                     )}
@@ -554,9 +465,9 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 </div>
               )}
 
-              {votingRoundGlobalState && snapshot && (
+              {votingRoundGlobalState && (
                 <div className="mt-4">
-                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} snapshot={snapshot} />
+                  <VotingStats isLoading={isLoadingVotingRoundData} votingRoundGlobalState={votingRoundGlobalState} />
                 </div>
               )}
 
@@ -590,9 +501,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                     <HandThumbUpIcon className={clsx('align-bottom h-6 w-6 mr-3', !canSubmitVote ? '' : 'text-green')} />
                   </div>
                   <div>
-                    <Typography>
-                      {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
-                    </Typography>
+                    <Typography>{!hasVoted ? 'Submit your vote!' : "You've already voted!"}</Typography>
                   </div>
                 </div>
                 <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>

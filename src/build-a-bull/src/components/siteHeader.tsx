@@ -7,7 +7,7 @@ import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
 import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../features/wallet/state'
 import { getWalletLabel } from '../shared/wallet'
 import { MenuIcon, XIcon } from './icons'
-import { forwardRef } from "react";
+import { forwardRef } from 'react'
 
 interface Link {
   name: string
