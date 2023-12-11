@@ -19,10 +19,7 @@ interface Link {
   onClick?: () => void
 }
 
-const createNavigation = () =>
-  [
-    { name: 'Create', href: '/create', protect: true },
-  ] as Link[]
+const createNavigation = () => [{ name: 'Create', href: '/create', protect: true }] as Link[]
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
   const classes = 'no-underline text-black'

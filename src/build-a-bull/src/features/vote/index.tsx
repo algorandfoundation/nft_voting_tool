@@ -8,7 +8,7 @@ import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
 import { Alert, Box, Button, Checkbox, IconButton, Link, Skeleton, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Question, VotingRoundMetadata, fetchVotingRoundMetadata } from '@/shared/IPFSGateway'
 import {
   TallyCounts,
