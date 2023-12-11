@@ -122,6 +122,7 @@ export const VoteResults = ({
                   link={question.metadata.link}
                   threshold={question.metadata.threshold}
                   ask={question.metadata.ask}
+                  skipTags={true}
                   votesTally={
                     question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
                   }
