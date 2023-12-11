@@ -41,8 +41,8 @@ const VotingRounds = () => {
   // Redirect to live round
   const navigate = useNavigate()
   // TODO: add production voting round
-  const appId = NETWORK === 'testnet' ? 499163907 : 'must be added'
-  if (import.meta.env.VITE_ENVIRONMENT !== 'local' && typeof appId === 'number') {
+  const appId = NETWORK === 'testnet' ? 499163907 : 1158913461
+  if (import.meta.env.VITE_ENVIRONMENT !== 'local') {
     navigate(`/vote/${appId}`)
   }
 
