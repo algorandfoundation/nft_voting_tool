@@ -39,9 +39,9 @@ const VotingRounds = () => {
   // Redirect to live round
   const navigate = useNavigate()
   // TODO: add production voting round
-  const appId = window.location.hostname.includes('testnet') ? 499163907 : 1158913461
+  const appId = window.location.hostname.includes('testnet') ? 499163907 : 1272421166
   if (import.meta.env.VITE_ENVIRONMENT !== 'local') {
-    // navigate(`/vote/${appId}`)
+    navigate(`/vote/${appId}`)
   }
 
   useEffect(() => {
