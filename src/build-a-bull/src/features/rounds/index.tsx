@@ -10,8 +10,6 @@ import { useCreatorAddresses } from '@/features/wallet/state'
 import { VotingRoundSection } from './VotingRoundSection'
 import { VotingRoundStatus } from './VotingRoundTile'
 
-const NETWORK = import.meta.env.VITE_ALGOD_NETWORK
-
 export const VotingRoundTileLoading = () => (
   <>
     <Skeleton className="h-52" variant="rectangular" />
@@ -41,7 +39,7 @@ const VotingRounds = () => {
   // Redirect to live round
   const navigate = useNavigate()
   // TODO: add production voting round
-  const appId = NETWORK === 'testnet' ? 499163907 : 1158913461
+  const appId = window.location.hostname.includes('testnet') ? 499163907 : 1158913461
   if (import.meta.env.VITE_ENVIRONMENT !== 'local') {
     navigate(`/vote/${appId}`)
   }
