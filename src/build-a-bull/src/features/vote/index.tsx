@@ -29,6 +29,7 @@ import { VotingInstructions } from './VotingInstructions'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 import { generateOptionIDsToCountsMapping } from '@/utils/common'
+import YouTubeIcon from '@mui/icons-material/YouTube'
 
 // Fisher-Yates shuffle
 Array.prototype.shuffle = function () {
@@ -326,7 +327,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
         {isLoadingVotingRoundData ? (
           <Skeleton className="h-12 w-1/2" variant="text" />
         ) : (
-          <Typography variant="h3">{votingRoundMetadata?.title}</Typography>
+          <div className="grid lg:grid-cols-4 grid-cols-3">
+            <Typography className="lg:col-span-3 col-span-2" variant="h3">{votingRoundMetadata?.title}</Typography>
+            <Button onClick={()=>window.open("https://www.youtube.com/live/HVpyIZVIV9s?feature=shared", '_blank', 'noopener, noreferrer')} className="col-span-1" startIcon={<YouTubeIcon />} variant="contained">
+              Watch Live
+            </Button>
+          </div>
         )}
         {votingRoundMetadata?.description && <Typography>{votingRoundMetadata.description}</Typography>}
         {votingRoundMetadata?.informationUrl && (
