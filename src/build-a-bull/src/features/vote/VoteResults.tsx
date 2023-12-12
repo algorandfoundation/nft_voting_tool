@@ -3,7 +3,7 @@ import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
 import { useMemo, useState } from 'react'
-import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { Question, VotingRoundMetadata } from '@/shared/IPFSGateway'
 import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 import { ProposalCard } from '@/shared/ProposalCard'
 import { VotingRoundResult } from '@/shared/types'
@@ -39,6 +39,16 @@ export const VoteResults = ({
         }, 0)
       : 0
   }
+
+  const countVotesTally = (question: Question) => {
+    return question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+  }
+
+  const passedToTopSort = (q1: Question, q2: Question) => {
+    if (!q1.metadata?.threshold || !q2.metadata?.threshold) return 0
+    return countVotesTally(q2) / q2.metadata.threshold - countVotesTally(q1) / q1.metadata.threshold
+  }
+
   const totalVotes = useMemo(() => getTotalVotes(), [votingRoundResults, votingRoundMetadata])
   const generateProposalsResultsCsv = async () => {
     if (votingRoundMetadata) {
@@ -105,27 +115,27 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadata?.questions.map((question) => (
-            <div key={question.id}>
-              {question.metadata && (
-                <ProposalCard
-                  title={question.prompt}
-                  description={question.description}
-                  category={question.metadata.category}
-                  focus_area={question.metadata.focus_area}
-                  link={question.metadata.link}
-                  threshold={question.metadata.threshold}
-                  ask={question.metadata.ask}
-                  skipTags={true}
-                  totalVotes={totalVotes}
-                  votesTally={
-                    question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
-                  }
-                  hasClosed={true}
-                />
-              )}
-            </div>
-          ))}
+          votingRoundMetadata?.questions
+            .sort((q1, q2) => passedToTopSort(q1, q2))
+            .map((question) => (
+              <div key={question.id}>
+                {question.metadata && (
+                  <ProposalCard
+                    title={question.prompt}
+                    description={question.description}
+                    category={question.metadata.category}
+                    focus_area={question.metadata.focus_area}
+                    link={question.metadata.link}
+                    threshold={question.metadata.threshold}
+                    ask={question.metadata.ask}
+                    skipTags={true}
+                    totalVotes={totalVotes}
+                    votesTally={countVotesTally(question)}
+                    hasClosed={true}
+                  />
+                )}
+              </div>
+            ))}
       </div>
       <div className="w-full text-right mt-4">
         <Button
