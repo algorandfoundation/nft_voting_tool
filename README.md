@@ -262,3 +262,15 @@ We recommend using the following IAM policy, which gives the least access possib
     ]
 }
 ```
+# Disaster Recovery
+
+During a deployment, there is a chance for a race condition between the CDK S3 deployer and CloudFront invalidation.
+It is intermittent and is being tracked in [an issue in the cdk library](https://github.com/aws/aws-cdk/issues/15891).
+If the deployment fails to update the Custom::CDKBucketDeployment, use the following process:
+
+1. Log into the effected AWS account and navigate to CloudFormation
+2. Select the failed deployment and use the `Stack options` drop down to select `Continue update rollback`
+   1. In the `Continue update rollback`, make sure to expand `Advanced` and select `skip` for the failing resource
+   2. Trigger the rollback
+3. Re-run the failed deployment from the CI/CD platform  (GithubActions). This may require a second deployment to ensure the cache is invalidated
+

@@ -2,14 +2,12 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import { saveAs } from 'file-saver'
 import Papa from 'papaparse'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { VotingRoundMetadata } from '@/shared/IPFSGateway'
+import { useMemo, useState } from 'react'
+import { Question, VotingRoundMetadata } from '@/shared/IPFSGateway'
 import { VotingRoundGlobalState } from '@/shared/VotingRoundContract'
 import { ProposalCard } from '@/shared/ProposalCard'
 import { VotingRoundResult } from '@/shared/types'
 import { generateOptionIDsToCountsMapping } from '@/utils/common'
-import { VoteDetails } from './VoteDetails'
 import VotingStats from './VotingStats'
 import { VotingTime } from './VotingTime'
 
@@ -33,7 +31,25 @@ export const VoteResults = ({
   const [error, setError] = useState<string | null>(null)
 
   const optionIDsToCounts = votingRoundResults !== undefined ? generateOptionIDsToCountsMapping(votingRoundResults) : {}
+  function getTotalVotes() {
+    return votingRoundResults && votingRoundMetadata
+      ? votingRoundResults.reduce((c, r) => {
+          const isYesOption = votingRoundMetadata.questions.map((q) => q.options[0]).some((el) => el.id === r.optionId)
+          return isYesOption ? c + r.count : c
+        }, 0)
+      : 0
+  }
 
+  const countVotesTally = (question: Question) => {
+    return question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+  }
+
+  const passedToTopSort = (q1: Question, q2: Question) => {
+    if (!q1.metadata?.threshold || !q2.metadata?.threshold) return 0
+    return countVotesTally(q2) / q2.metadata.threshold - countVotesTally(q1) / q1.metadata.threshold
+  }
+
+  const totalVotes = useMemo(() => getTotalVotes(), [votingRoundResults, votingRoundMetadata])
   const generateProposalsResultsCsv = async () => {
     if (votingRoundMetadata) {
       setIsDownloadingProposalsCsv(true)
@@ -67,23 +83,11 @@ export const VoteResults = ({
 
   return (
     <div>
-      <div className="mb-4">
-        <Link to="/" className="no-underline text-gray-600 hover:underline">
-          <Typography>&#60; Back to Voting sessions</Typography>
-        </Link>
-      </div>
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="col-span-1 xl:col-span-2">
           <Typography variant="h3">{votingRoundMetadata?.title} - Results</Typography>
         </div>
-        <div>
-          <VoteDetails
-            globalState={votingRoundGlobalState}
-            appId={votingRoundGlobalState.appId}
-            loading={isLoadingVotingRoundData}
-            roundMetadata={votingRoundMetadata}
-          />
-        </div>
+        <div></div>
         <div>
           <VotingStats
             isLoading={isLoadingVotingRoundData || isLoadingVotingRoundResults}
@@ -111,25 +115,27 @@ export const VoteResults = ({
             </>
           ))}
         {!isLoadingVotingRoundResults &&
-          votingRoundMetadata?.questions.map((question) => (
-            <div key={question.id}>
-              {question.metadata && (
-                <ProposalCard
-                  title={question.prompt}
-                  description={question.description}
-                  category={question.metadata.category}
-                  focus_area={question.metadata.focus_area}
-                  link={question.metadata.link}
-                  threshold={question.metadata.threshold}
-                  ask={question.metadata.ask}
-                  votesTally={
-                    question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
-                  }
-                  hasClosed={true}
-                />
-              )}
-            </div>
-          ))}
+          votingRoundMetadata?.questions
+            .sort((q1, q2) => passedToTopSort(q1, q2))
+            .map((question) => (
+              <div key={question.id}>
+                {question.metadata && (
+                  <ProposalCard
+                    title={question.prompt}
+                    description={question.description}
+                    category={question.metadata.category}
+                    focus_area={question.metadata.focus_area}
+                    link={question.metadata.link}
+                    threshold={question.metadata.threshold}
+                    ask={question.metadata.ask}
+                    skipTags={true}
+                    totalVotes={totalVotes}
+                    votesTally={countVotesTally(question)}
+                    hasClosed={true}
+                  />
+                )}
+              </div>
+            ))}
       </div>
       <div className="w-full text-right mt-4">
         <Button
