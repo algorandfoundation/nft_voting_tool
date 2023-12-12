@@ -5,11 +5,11 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ClearIcon from '@mui/icons-material/Clear'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import { Alert, Box, Button, Checkbox, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, IconButton, Link, Skeleton, Typography } from '@mui/material'
 import clsx from 'clsx'
 import { useEffect, useMemo, useState } from 'react'
-import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
-import { Question, VoteGatingSnapshot, VotingRoundMetadata, fetchVotingRoundMetadata, fetchVotingSnapshot } from '@/shared/IPFSGateway'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Question, VotingRoundMetadata, fetchVotingRoundMetadata } from '@/shared/IPFSGateway'
 import {
   TallyCounts,
   VotingRoundGlobalState,
@@ -61,14 +61,12 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const [error, setError] = useState<string | null>(null)
 
-  const [voteWeight, setVoteWeight] = useState<number>(0)
-  const [voteAllocationsPercentage, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
-  const [voteAllocations, setVoteAllocations] = useState<VoteAllocation>({})
+  const [voteWeight] = useState<number>(0)
+  const [_, setVoteAllocationsPercentage] = useState<VoteAllocation>({})
+  const [__, setVoteAllocations] = useState<VoteAllocation>({})
 
   const { loading: submittingVote, execute: submitVote, error: errorSubmittingVote } = api.useSubmitVote()
   const { loading: closingVotingRound, execute: closeVotingRound, error: closingVotingRoundError } = api.useCloseVotingRound()
-
-  const totalAllocatedPercentage = Object.values(voteAllocationsPercentage).reduce((a, b) => a + b, 0)
 
   const hasVoteStarted = !votingRoundGlobalState ? false : getHasVoteStarted(votingRoundGlobalState)
   const hasVoteEnded = !votingRoundGlobalState ? false : getHasVoteEnded(votingRoundGlobalState)
@@ -318,11 +316,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   return (
     <div>
-      <div className="mb-4">
-        <RouterLink to="/" className="no-underline text-gray-600 hover:underline">
-          <Typography>&#60; Back to events</Typography>
-        </RouterLink>
-      </div>
       <div>
         {error && (
           <Alert className="max-w-xl mt-4 text-white bg-red font-semibold" icon={false}>
@@ -360,17 +353,6 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                 <Typography variant="h4">Projects</Typography>
               )}
             </div>
-            <div>
-              {canVote && !hasVoted && (
-                <>
-                  <Typography variant="h4">Your allocations</Typography>
-                  <Typography>
-                    {totalAllocatedPercentage}% total · {100 - totalAllocatedPercentage}% remaining to allocate
-                  </Typography>
-                </>
-              )}
-            </div>
-
             {isLoadingVotingRoundData && (
               <div className="col-span-3">
                 <Skeleton className="h-40 mb-4" variant="rectangular" />
@@ -514,9 +496,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                     <HandThumbUpIcon className={clsx('align-bottom h-6 w-6 mr-3', !canSubmitVote ? '' : 'text-green')} />
                   </div>
                   <div>
-                    <Typography>
-                      {!hasVoted ? 'Once your allocations total to 100%, you’ll be able to cast your votes!' : "You've already voted!"}
-                    </Typography>
+                    <Typography>{!hasVoted ? 'Submit your vote!' : "You've already voted!"}</Typography>
                   </div>
                 </div>
                 <Button onClick={handleSubmitVote} color="primary" variant="contained" className="text-right" disabled={!canSubmitVote}>

@@ -7,7 +7,7 @@ import algorandFoundationLogo from '../assets/algorand-foundation-logo.svg'
 import { useConnectedWallet, useCreatorAddresses, useSetShowConnectWalletModal } from '../features/wallet/state'
 import { getWalletLabel } from '../shared/wallet'
 import { MenuIcon, XIcon } from './icons'
-import { forwardRef } from "react";
+import { forwardRef } from 'react'
 
 interface Link {
   name: string
@@ -19,11 +19,7 @@ interface Link {
   onClick?: () => void
 }
 
-const createNavigation = () =>
-  [
-    { name: 'Home', href: '/', protect: false },
-    { name: 'Create', href: '/create', protect: true },
-  ] as Link[]
+const createNavigation = () => [{ name: 'Create', href: '/create', protect: true }] as Link[]
 
 function NavLink(props: { currentClasses: string; defaultClasses: string; link: Link; displayName?: string }) {
   const classes = 'no-underline text-black'

@@ -1,5 +1,5 @@
 import { MouseEvent, useMemo, useState } from 'react'
-import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
+import { IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material'
 import FilterAltIcon from '@mui/icons-material/FilterAlt'
 import { Question } from '@/shared/IPFSGateway'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
@@ -37,15 +37,6 @@ export function FilterMenu({
     return questions.reduce((prev, curr) => {
       if (typeof curr?.metadata?.focus_area === 'string' && !prev.includes(curr.metadata.focus_area)) {
         prev.push(curr.metadata.focus_area)
-      }
-      return prev
-    }, [] as string[])
-  }, [questions])
-
-  const categories = useMemo<string[]>(() => {
-    return questions.reduce((prev, curr) => {
-      if (typeof curr?.metadata?.category === 'string' && !prev.includes(curr.metadata.category)) {
-        prev.push(curr.metadata.category)
       }
       return prev
     }, [] as string[])
@@ -100,17 +91,6 @@ export function FilterMenu({
             {fa}
           </MenuItem>
         ))}
-        <Divider />
-        <MenuItem disabled sx={{ opacity: '1 !important' }}>
-          Category
-        </MenuItem>
-        {categories.map((fa) => (
-          <MenuItem onClick={() => onChange('category', fa)}>
-            <ListItemIcon>{isSelected('category', fa) ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}</ListItemIcon>
-            {fa}
-          </MenuItem>
-        ))}
-        <Divider />
         <MenuItem onClick={onClear}>Clear</MenuItem>
       </Menu>
     </div>

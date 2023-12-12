@@ -39,7 +39,8 @@ export const VoteResults = ({
   isLoadingVotingRoundResults,
   snapshot,
 }: VoteResultsProps) => {
-  const [isDownloadingCsv, setIsDownloadingCsv] = useState(false)
+  const [isDownloadingAddressesCsv, setIsDownloadingAddressesCsv] = useState(false)
+  const [isDownloadingProposalsCsv, setIsDownloadingProposalsCsv] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const isReserveListEnabled = reserveListSupportedVersions.includes(votingRoundMetadata?.version || '1.0.0')
@@ -106,7 +107,7 @@ export const VoteResults = ({
 
   const generateAddressesThatVotedCsv = async () => {
     if (votingRoundMetadata) {
-      setIsDownloadingCsv(true)
+      setIsDownloadingAddressesCsv(true)
       setError(null)
       try {
         const addresses = await fetchAddressesThatVoted(votingRoundGlobalState.appId)
@@ -127,7 +128,49 @@ export const VoteResults = ({
           setError('Unexpected error')
         }
       }
-      setIsDownloadingCsv(false)
+      setIsDownloadingAddressesCsv(false)
+    }
+  }
+
+  const generateProposalsResultsCsv = async () => {
+    if (votingRoundMetadataClone) {
+      setIsDownloadingProposalsCsv(true)
+      setError(null)
+      try {
+        const csvData = Papa.unparse(
+          votingRoundMetadataClone.questions.map((question) => {
+            const threshold = question.metadata?.threshold
+            const votesTally =
+              question.options.length > 0 && optionIDsToCounts[question.options[0].id] ? optionIDsToCounts[question.options[0].id] : 0
+            const percentage = threshold && threshold > 0 ? Math.min(100, (votesTally / threshold) * 100) : 100
+            const hasPassed = percentage >= 100
+            return {
+              question: question.prompt,
+              description: question.description,
+              category: question.metadata?.category,
+              focus_area: question.metadata?.focus_area,
+              link: question.metadata?.link,
+              threshold: question.metadata?.threshold,
+              ask: question.metadata?.ask,
+              votes: votesTally,
+              is_reserve_list: isReserveListEnabled && reserveList.length > 0 && reserveList.some((q) => q.id === question.id),
+              passed: hasPassed || (isReserveListEnabled && reserveList.length > 0 && passedReserveList.has(question.id)),
+            }
+          }),
+        )
+
+        const blob = new Blob([csvData], { type: 'text/csv' })
+        saveAs(blob, `proposals-${votingRoundMetadataClone.title}.csv`)
+      } catch (e) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          // eslint-disable-next-line no-console
+          console.error(e)
+          setError('Unexpected error')
+        }
+      }
+      setIsDownloadingProposalsCsv(false)
     }
   }
 
@@ -260,10 +303,21 @@ export const VoteResults = ({
           variant="contained"
           color="primary"
           onClick={generateAddressesThatVotedCsv}
-          disabled={isLoadingVotingRoundData || isDownloadingCsv}
+          disabled={isLoadingVotingRoundData || isDownloadingAddressesCsv}
           endIcon={<FileDownloadIcon />}
         >
           Download addresses that voted
+        </Button>
+      </div>
+      <div className="w-full text-right mt-4">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={generateProposalsResultsCsv}
+          disabled={isLoadingVotingRoundData || isDownloadingProposalsCsv}
+          endIcon={<FileDownloadIcon />}
+        >
+          Download proposals results CSV
         </Button>
       </div>
       {error && (

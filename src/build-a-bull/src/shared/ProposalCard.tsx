@@ -16,6 +16,7 @@ export type ProposalCardProps = {
   totalVotes?: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
+  skipTags?: boolean
 }
 
 export const ProposalCard = ({
@@ -30,6 +31,7 @@ export const ProposalCard = ({
   totalVotes = 0,
   hasClosed = false,
   forcePass = false,
+  skipTags = false,
 }: ProposalCardProps) => {
   // Handle collapse state
   const [isOverflow, setIsOverflow] = useState(false)
@@ -51,8 +53,8 @@ export const ProposalCard = ({
     <Paper elevation={0} className="p-5">
       <div className="flex justify-between">
         <div>
-          {hasPassed && <PassedChip />}
-          {hasClosed && !hasPassed && <DidNotPassChip />}
+          {hasPassed && !skipTags && <PassedChip />}
+          {hasClosed && !hasPassed && !skipTags && <DidNotPassChip />}
         </div>
         <div className="text-right">
           <span className="hidden md:inline-block">
