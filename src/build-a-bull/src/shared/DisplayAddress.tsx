@@ -29,7 +29,7 @@ export const DisplayAddress = ({ address }: AccountProps) => {
         </Link>
       ) : (
         address && (
-          <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/address/${address}`} target="_blank" className="font-normal">
+          <Link href={`${import.meta.env.VITE_ALGO_EXPLORER_URL}/account/${address}`} target="_blank" className="font-normal">
             {getWalletLabel(address)}
           </Link>
         )
