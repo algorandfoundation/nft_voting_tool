@@ -10,7 +10,6 @@ import {
   ProvidersArray,
   useInitializeProviders,
 } from '@makerx/use-wallet'
-import MyAlgoConnect from '@randlabs/myalgo-connect'
 import { PeraWalletConnect } from '@perawallet/connect'
 import { WalletConnectModalSign } from '@walletconnect/modal-sign-html'
 import type _algosdk from 'algosdk'
@@ -56,7 +55,6 @@ export function useAlgoWallet(context: { autoConnect: boolean; network: string; 
         },
       },
     },
-    { id: PROVIDER_ID.MYALGO, clientStatic: MyAlgoConnect },
     { id: PROVIDER_ID.EXODUS },
   ] as ProvidersArray
 
