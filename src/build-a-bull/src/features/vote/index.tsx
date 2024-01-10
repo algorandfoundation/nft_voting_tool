@@ -328,8 +328,15 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
           <Skeleton className="h-12 w-1/2" variant="text" />
         ) : (
           <div className="grid lg:grid-cols-4 grid-cols-3">
-            <Typography className="lg:col-span-3 col-span-2" variant="h3">{votingRoundMetadata?.title}</Typography>
-            <Button onClick={()=>window.open("https://www.youtube.com/live/HVpyIZVIV9s?feature=shared", '_blank', 'noopener, noreferrer')} className="col-span-1" startIcon={<YouTubeIcon />} variant="contained">
+            <Typography className="lg:col-span-3 col-span-2" variant="h3">
+              {votingRoundMetadata?.title}
+            </Typography>
+            <Button
+              onClick={() => window.open('https://www.youtube.com/live/HVpyIZVIV9s?feature=shared', '_blank', 'noopener, noreferrer')}
+              className="col-span-1"
+              startIcon={<YouTubeIcon />}
+              variant="contained"
+            >
               Watch Live
             </Button>
           </div>

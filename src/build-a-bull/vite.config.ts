@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
-import * as path from "path";
+import * as path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,7 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       buffer: 'buffer/',
-      "@":  path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 })
