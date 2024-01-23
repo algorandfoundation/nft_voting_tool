@@ -332,7 +332,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               {votingRoundMetadata?.title}
             </Typography>
             <Button
-              onClick={() => window.open('https://www.youtube.com/live/HVpyIZVIV9s?feature=shared', '_blank', 'noopener, noreferrer')}
+              onClick={() => window.open('https://www.youtube.com/watch?v=TLihJ2DhnMU', '_blank', 'noopener, noreferrer')}
               className="col-span-1"
               startIcon={<YouTubeIcon />}
               variant="contained"
