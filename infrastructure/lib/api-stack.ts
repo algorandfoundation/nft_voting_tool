@@ -52,7 +52,7 @@ export class ApiStack extends cdk.Stack {
       props.timeout = Duration.seconds(60)
     }
     if (!props.memorySize) {
-      props.memorySize = 256
+      props.memorySize = 512
     }
 
     /*****************/
