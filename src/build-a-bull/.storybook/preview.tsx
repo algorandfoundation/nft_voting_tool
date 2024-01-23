@@ -4,12 +4,11 @@ import { withThemeFromJSXProvider } from '@storybook/addon-themes'
 import { lightTheme, darkTheme } from '../src/themes'
 import type { Preview } from '@storybook/react'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { WalletProvider} from '@makerx/use-wallet'
+import { WalletProvider } from '@makerx/use-wallet'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { useAlgoWallet } from '../src/utils/useAlgoWalletProvider'
 import { RecoilRoot } from 'recoil'
 import { ComponentType } from 'react'
-
 
 const preview: Preview = {
   parameters: {
@@ -21,7 +20,7 @@ const preview: Preview = {
         date: /Date$/,
       },
     },
-  }
+  },
 }
 
 // TODO: Create Providers.tsx
@@ -54,6 +53,6 @@ export const decorators = [
     defaultTheme: 'light',
     Provider: ThemeProvider,
     GlobalStyles: CssBaseline,
-  })
+  }),
 ]
 export default preview
