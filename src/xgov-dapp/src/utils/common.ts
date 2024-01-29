@@ -31,7 +31,7 @@ export const passedPercentage = (q: Question, votesTally: number) => {
 
 export const isReserveList = (question: Question, votesTally: number) => {
   const percentage = passedPercentage(question, votesTally)
-  return percentage < 100 && percentage >= 60 // TODO: make this configurable
+  return percentage < 100 && percentage >= 100 // TODO: make this configurable, currently deactivated
 }
 
 export const generateOptionIDsToCountsMapping = (votingRoundResults: VotingRoundResult[]) => {
