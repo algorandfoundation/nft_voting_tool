@@ -1,6 +1,7 @@
 import { Readable } from 'stream'
 import { Controller, Get, Path, Post, Route, Security, UploadedFile } from 'tsoa'
 import { inject, injectable } from 'tsyringe'
+import { fileTypeFromBuffer } from 'file-type'
 import { IIpfsService } from '../services/ipfsService.js'
 import { NotFoundException, ServiceException } from '../models/errors/httpResponseException.js'
 
@@ -18,7 +19,8 @@ export class IpfsController extends Controller {
   public async get(@Path() cid: string): Promise<Readable | NotFoundException> {
     try {
       const buffer = await this.ipfsService.getBuffer(cid)
-      this.setHeader('Content-Type', 'application/json')
+      const fileType = await fileTypeFromBuffer(buffer)
+      this.setHeader('Content-Type', fileType?.mime || 'application/json')
       this.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
       return Readable.from(buffer)
     } catch (_) {
