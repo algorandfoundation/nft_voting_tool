@@ -1,11 +1,9 @@
 import { S3 } from '@aws-sdk/client-s3'
-import { SecretsManager } from '@aws-sdk/client-secrets-manager'
 import { IocContainer } from '@tsoa/runtime'
 import fs from 'fs'
 import path from 'path'
 import { container, Lifecycle } from 'tsyringe'
 import { Web3Storage } from 'web3.storage'
-import { AwsSecretsService } from './services/awsSecretsService'
 import { CacheOnlyIPFSService } from './services/cacheOnlyIpfsService'
 import { CloudFlareIPFSService } from './services/cloudflareIpfsService'
 import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService'
@@ -85,22 +83,6 @@ if (env === 'development') {
     'IIpfsService',
     {
       useClass: Web3StorageWithCacheIpfsService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-  container.register<SecretsManager>('SecretsManager', {
-    useFactory: (_) => {
-      return new SecretsManager({
-        region: process.env.AWS_REGION,
-      })
-    },
-  })
-  container.register<AwsSecretsService>(
-    'AwsSecretsService',
-    {
-      useClass: AwsSecretsService,
     },
     {
       lifecycle: Lifecycle.Singleton,
