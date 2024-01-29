@@ -1,8 +1,8 @@
 import { Readable } from 'stream'
 import { Controller, Get, Path, Post, Route, Security, UploadedFile } from 'tsoa'
 import { inject, injectable } from 'tsyringe'
-import { IIpfsService } from '../services/ipfsService'
-import { NotFoundException, ServiceException } from '../models/errors/httpResponseException'
+import { IIpfsService } from '../services/ipfsService.js'
+import { NotFoundException, ServiceException } from '../models/errors/httpResponseException.js'
 
 @injectable()
 @Route('ipfs')

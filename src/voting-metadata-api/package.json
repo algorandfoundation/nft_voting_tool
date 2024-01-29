@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "API to cache and store IPFS Files on S3 as well as assist in local development",
   "author": "Algorand Foundation",
-  "type": "commonjs",
+  "type": "module",
   "main": "src/lambda-handler.js",
   "scripts": {
     "audit": "check-audit",
     "audit:resolve": "resolve-audit",
     "build": "rimraf build && tsoa spec-and-routes && tsc && copyfiles package.json package-lock.json build && cd build && npm ci --omit=dev",
     "clean": "rimraf node_modules && rimraf build",
-    "dev": "npm run routes && ts-node-dev --transpile-only --watch .env -r dotenv/config src/server.ts",
+    "dev": "npm run routes && tsx watch -r dotenv/config src/server.ts",
     "format": "prettier --write .",
     "lint": "eslint --ext .ts,.tsx \"src/\"",
     "lint:fix": "eslint --ext .ts,.tsx \"src/\" --fix",
@@ -50,7 +50,7 @@
     "npm-audit-resolver": "^3.0.0-9",
     "prettier": "^2.8.4",
     "rimraf": "^4.4.0",
-    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.7.0",
     "typescript": "^4.9.5"
   },
   "overrides": {

@@ -5,8 +5,8 @@ import { PinataStorageWithCache } from '@makerx/node-ipfs'
 import { S3ObjectCache, FileSystemObjectCache } from '@makerx/node-cache'
 import { S3 } from '@aws-sdk/client-s3'
 
-import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_TOKEN } from './env'
-import { IIpfsService, IpfsService } from './services/ipfsService'
+import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_TOKEN } from './env.js'
+import { IIpfsService, IpfsService } from './services/ipfsService.js'
 assertValidEnv()
 
 // Use filesystem in development, S3 in production

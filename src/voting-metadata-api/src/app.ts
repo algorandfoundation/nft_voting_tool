@@ -3,8 +3,8 @@ import express, { Application, Request as ExRequest, Response as ExResponse, Nex
 import helmet from 'helmet'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
-import { RegisterRoutes } from '../routes/routes'
-import { HTTPResponseException } from './models/errors/httpResponseException'
+import { RegisterRoutes } from '../routes/routes.js'
+import { HTTPResponseException } from './models/errors/httpResponseException.js'
 
 export default function CreateApp(): Application {
   const app: Application = express()
