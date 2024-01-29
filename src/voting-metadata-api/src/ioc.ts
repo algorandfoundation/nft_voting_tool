@@ -3,20 +3,20 @@ import { join } from 'node:path'
 import { container, Lifecycle } from 'tsyringe'
 import { PinataStorageWithCache } from '@makerx/node-ipfs'
 import { S3ObjectCache, FileSystemObjectCache } from '@makerx/node-cache'
-import { IIpfsService, IpfsService } from './services/ipfsService'
 import { S3 } from '@aws-sdk/client-s3'
 
-const env = process.env.NODE_ENV || 'development'
-const isDevelop = env === 'development'
+import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_TOKEN } from './env'
+import { IIpfsService, IpfsService } from './services/ipfsService'
+assertValidEnv()
 
 // Use filesystem in development, S3 in production
-const cache = isDevelop
+const cache = isDevelopment
   ? new FileSystemObjectCache(join(__dirname, '..', '.cache'), true)
   : new S3ObjectCache(
       new S3({
-        region: process.env.AWS_REGION || 'us-west-1',
+        region: AWS_REGION,
       }),
-      process.env.CACHE_BUCKET_NAME || 'nft-voting-tool-api-developer-cache',
+      CACHE_BUCKET_NAME,
     )
 
 // Inject the IPFS Service
@@ -33,10 +33,8 @@ container.register<IIpfsService>(
 // Inject MakerX IPFS
 container.register<PinataStorageWithCache>('PinataStorageWithCache', {
   useFactory(_) {
-    if (typeof process.env.IPFS_API_TOKEN === 'undefined') {
-      throw new Error('Must have a valid IPFS_API_TOKEN')
-    }
-    return new PinataStorageWithCache(process.env.IPFS_API_TOKEN, cache)
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return new PinataStorageWithCache(IPFS_API_TOKEN!, cache)
   },
 })
 
