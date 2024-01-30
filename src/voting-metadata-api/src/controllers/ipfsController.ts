@@ -33,8 +33,8 @@ export class IpfsController extends Controller {
   public async post(@UploadedFile() file: Express.Multer.File): Promise<{ cid: string } | ServiceException | Error> {
     try {
       return this.ipfsService.putFile(file)
-    } catch (e) {
-      return new ServiceException((e as Error).message)
+    } catch (_) {
+      return new ServiceException('Something went wrong!')
     }
   }
 }
