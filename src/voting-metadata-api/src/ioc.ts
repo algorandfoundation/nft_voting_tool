@@ -9,15 +9,15 @@ import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_
 import { IIpfsService, IpfsService } from './services/ipfsService.js'
 assertValidEnv()
 
+const s3 = new S3({
+  region: AWS_REGION,
+})
+
+// Ensure AWS Configuration is valid
+if (!isDevelopment) await s3.config.credentials()
+
 // Use filesystem in development, S3 in production
-const cache = isDevelopment
-  ? new FileSystemObjectCache(join(__dirname, '..', '.cache'), true)
-  : new S3ObjectCache(
-      new S3({
-        region: AWS_REGION,
-      }),
-      CACHE_BUCKET_NAME,
-    )
+const cache = isDevelopment ? new FileSystemObjectCache(join(__dirname, '..', '.cache'), true) : new S3ObjectCache(s3, CACHE_BUCKET_NAME)
 
 // Inject the IPFS Service
 container.register<IIpfsService>(

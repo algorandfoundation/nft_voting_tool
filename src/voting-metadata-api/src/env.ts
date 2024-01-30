@@ -16,10 +16,6 @@ export function assertValidEnv() {
     throw new Error('Must have valid IPFS_API_TOKEN!')
   }
   if (!isDevelopment) {
-    if (typeof process.env.AWS_ACCESS_KEY_ID === 'undefined' || typeof process.env.AWS_ACCESS_KEY_SECRET === 'undefined') {
-      throw new Error('Must have valid AWS_ACCESS_KEY_ID and AWS_ACCESS_KEY_SECRET')
-    }
-
     if (typeof process.env.AWS_REGION === 'undefined') {
       console.warn(`AWS_REGION is not set, using default region ${DEFAULT_REGION}`)
     }
