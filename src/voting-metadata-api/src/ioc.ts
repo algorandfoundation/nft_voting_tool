@@ -1,5 +1,6 @@
 import { IocContainer } from '@tsoa/runtime'
 import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { container, Lifecycle } from 'tsyringe'
 import { PinataStorageWithCache } from '@makerx/node-ipfs'
 import { S3ObjectCache, FileSystemObjectCache } from '@makerx/node-cache'
@@ -9,6 +10,7 @@ import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_
 import { IIpfsService, IpfsService } from './services/ipfsService.js'
 assertValidEnv()
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const s3 = new S3({
   region: AWS_REGION,
 })
