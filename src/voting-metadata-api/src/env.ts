@@ -20,8 +20,8 @@ export function assertValidEnv() {
       console.warn(`AWS_REGION is not set, using default region ${DEFAULT_REGION}`)
     }
 
-    if (typeof process.env.DEFAULT_CACHE_BUCKET === 'undefined') {
-      console.warn(`DEFAULT_CACHE_BUCKET is not set, using default bucket ${DEFAULT_CACHE_BUCKET}`)
+    if (typeof process.env.CACHE_BUCKET_NAME === 'undefined') {
+      console.warn(`CACHE_BUCKET_NAME is not set, using default bucket ${DEFAULT_CACHE_BUCKET}`)
     }
   }
 }
