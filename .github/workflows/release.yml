@@ -125,7 +125,7 @@ jobs:
       - build-api
     steps:
       - name: Deploy
-        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
+        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@abd45a2905e45902f3014b9b4a69f669cdf427ae
         env:
           NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: testnet
@@ -183,7 +183,7 @@ jobs:
       - build-api
     steps:
       - name: Deploy
-        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
+        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@abd45a2905e45902f3014b9b4a69f669cdf427ae
         env:
           NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: prod
