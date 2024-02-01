@@ -103,9 +103,3 @@ jobs:
       - name: Copy .env
         if: ${{ inputs.run-dispatch }}
         run: cp ${{inputs.working.directory}}.env.testnet.template ${{inputs.working.directory}}.env
-      - name: Dispatch
-        if:  ${{ inputs.run-dispatch }}
-        uses: chromaui/action@v1
-        with:
-          workingDir: ${{ inputs.working-directory }}
-          projectToken: ${{ secrets.chromatic-token }}
