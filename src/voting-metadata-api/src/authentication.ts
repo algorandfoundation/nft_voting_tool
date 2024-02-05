@@ -1,7 +1,7 @@
 import { addMinutes, isWithinInterval } from 'date-fns'
 import * as express from 'express'
-import { ForbiddenException } from './models/errors/httpResponseException'
-import { verifyAlgorandTransaction } from './services/algorandSignatureService'
+import { ForbiddenException } from './models/errors/httpResponseException.js'
+import { verifyAlgorandTransaction } from './services/algorandSignatureService.js'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export function expressAuthentication(request: express.Request, securityName: string, scopes?: string[]): Promise<any> {

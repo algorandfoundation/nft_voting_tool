@@ -15,6 +15,7 @@
     }
   },
   "routes": {
+    "esm": true,
     "routesDir": "routes",
     "iocModule": "src/ioc",
     "middleware": "express",

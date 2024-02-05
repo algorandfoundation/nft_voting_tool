@@ -21,3 +21,9 @@ export class ForbiddenException extends HTTPResponseException {
     super(403, message)
   }
 }
+
+export class ServiceException extends HTTPResponseException {
+  constructor(message: string) {
+    super(500, message)
+  }
+}

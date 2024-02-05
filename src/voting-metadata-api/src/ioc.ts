@@ -1,112 +1,44 @@
-import { S3 } from '@aws-sdk/client-s3'
-import { SecretsManager } from '@aws-sdk/client-secrets-manager'
 import { IocContainer } from '@tsoa/runtime'
-import fs from 'fs'
-import path from 'path'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { container, Lifecycle } from 'tsyringe'
-import { Web3Storage } from 'web3.storage'
-import { AwsSecretsService } from './services/awsSecretsService'
-import { CacheOnlyIPFSService } from './services/cacheOnlyIpfsService'
-import { CloudFlareIPFSService } from './services/cloudflareIpfsService'
-import { FileSystemObjectCacheService } from './services/fileSystemObjectCacheService'
-import { IIpfsService } from './services/ipfsService'
-import { IObjectCacheService } from './services/objectCacheService'
-import { S3ObjectCacheService } from './services/s3ObjectCacheService'
-import { Web3StorageWithCacheIpfsService } from './services/web3StorageIpfsService'
+import { PinataStorageWithCache } from '@makerx/node-ipfs'
+import { S3ObjectCache, FileSystemObjectCache } from '@makerx/node-cache'
+import { S3 } from '@aws-sdk/client-s3'
 
-const env = process.env.NODE_ENV || 'development'
+import { isDevelopment, assertValidEnv, AWS_REGION, CACHE_BUCKET_NAME, IPFS_API_TOKEN } from './env.js'
+import { IIpfsService, IpfsService } from './services/ipfsService.js'
+assertValidEnv()
 
-container.register<CloudFlareIPFSService>('CloudFlareIPFSService', {
-  useClass: CloudFlareIPFSService,
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const s3 = new S3({
+  region: AWS_REGION,
 })
 
-container.register<number | undefined>('CacheMissDuration', {
-  // Don't cache misses
-  useValue: 0,
-})
+// Ensure AWS Configuration is valid
+if (!isDevelopment) await s3.config.credentials()
 
-if (env === 'development') {
-  const cacheDir = path.join(__dirname, '..', '.cache')
-  container.register<string>('CacheDirectory', {
-    useValue: cacheDir,
-  })
-  if (!fs.existsSync(cacheDir)) {
-    console.log(`${cacheDir} not found, creating it...`)
-    fs.mkdirSync(cacheDir)
-  }
-  container.register<IObjectCacheService>(
-    'IObjectCacheService',
-    {
-      useClass: FileSystemObjectCacheService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-  container.register<IIpfsService>(
-    'IIpfsService',
-    {
-      useClass: CacheOnlyIPFSService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-} else {
-  container.register<S3>('S3Client', {
-    useFactory: (_) => {
-      return new S3({
-        region: process.env.AWS_REGION,
-      })
-    },
-  })
-  container.register<string>('S3Bucket', {
+// Use filesystem in development, S3 in production
+const cache = isDevelopment ? new FileSystemObjectCache(join(__dirname, '..', '.cache'), true) : new S3ObjectCache(s3, CACHE_BUCKET_NAME)
+
+// Inject the IPFS Service
+container.register<IIpfsService>(
+  'IIpfsService',
+  {
+    useClass: IpfsService,
+  },
+  {
+    lifecycle: Lifecycle.Singleton,
+  },
+)
+
+// Inject MakerX IPFS
+container.register<PinataStorageWithCache>('PinataStorageWithCache', {
+  useFactory(_) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    useValue: process.env.CACHE_BUCKET_NAME!,
-  })
-  container.register<IObjectCacheService>(
-    'IObjectCacheService',
-    {
-      useClass: S3ObjectCacheService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-  container.register<Web3Storage>('Web3StorageClient', {
-    useFactory: (_) => {
-      return new Web3Storage({
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        token: process.env.WEB3_STORAGE_API_TOKEN!,
-      })
-    },
-  })
-  container.register<IIpfsService>(
-    'IIpfsService',
-    {
-      useClass: Web3StorageWithCacheIpfsService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-  container.register<SecretsManager>('SecretsManager', {
-    useFactory: (_) => {
-      return new SecretsManager({
-        region: process.env.AWS_REGION,
-      })
-    },
-  })
-  container.register<AwsSecretsService>(
-    'AwsSecretsService',
-    {
-      useClass: AwsSecretsService,
-    },
-    {
-      lifecycle: Lifecycle.Singleton,
-    },
-  )
-}
+    return new PinataStorageWithCache(IPFS_API_TOKEN!, cache)
+  },
+})
 
 export const iocContainer: IocContainer = {
   get: <T>(controller: { prototype: T }): T => {
