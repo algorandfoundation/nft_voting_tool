@@ -71,7 +71,7 @@ jobs:
       # run LocalNet
       - name: Run LocalNet
         run: |
-          pipx install algokit
+          pipx install algokit==1.11.2
           algokit localnet start
           cp ./smart_contracts/.env.template ./smart_contracts/.env
         working-directory: ${{ inputs.working-directory }}
