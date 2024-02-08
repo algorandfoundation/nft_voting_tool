@@ -26,8 +26,10 @@ export const VotingInstructions = ({ voteWeight }: { voteWeight: number }) => {
             proposals.
           </strong>
         </Typography>
+        <Typography className="mb-3"></Typography>
         <Typography>
-          <strong>Once you cast your votes, you cannot change them.</strong>
+          <strong>Once you cast your votes, you cannot change them.</strong> Proposals that have <strong>PASSED</strong> cannot receive
+          further votes. {/*Please choose a different proposal to allocate your votes to.*/}
         </Typography>
       </div>
     </Box>
