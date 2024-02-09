@@ -125,7 +125,7 @@ jobs:
       - build-api
     steps:
       - name: Deploy
-        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
+        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@abd45a2905e45902f3014b9b4a69f669cdf427ae
         env:
           NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: testnet
@@ -136,7 +136,7 @@ jobs:
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
+          IPFS_API_TOKEN: ${{ secrets.IPFS_API_TOKEN }}
           NODE_ENV: production
           API_ALLOWED_ADDRESSES: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
           API_BINARY_CONTENT_TYPES: 'image/*'
@@ -183,7 +183,7 @@ jobs:
       - build-api
     steps:
       - name: Deploy
-        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@main
+        uses: makerxstudio/shared-config/.github/actions/node-deploy-cdk@abd45a2905e45902f3014b9b4a69f669cdf427ae
         env:
           NO_BUILD: true
           DEPLOYMENT_ENVIRONMENT: prod
@@ -194,7 +194,7 @@ jobs:
           WEBSITE_BUILD_PATH_XGOV: ${{ github.workspace }}/xgov-dapp/dist
           WEBSITE_BUILD_PATH_BAB: ${{ github.workspace }}/build-a-bull/dist
           API_BUILD_PATH: ${{ github.workspace }}/api/build
-          WEB3_STORAGE_API_TOKEN: ${{ secrets.WEB3_STORAGE_API_TOKEN }}
+          IPFS_API_TOKEN: ${{ secrets.IPFS_API_TOKEN }}
           NODE_ENV: production
           API_ALLOWED_ADDRESSES: ${{ vars.CREATOR_ALLOW_LIST_ADDRESSES }}
           API_BINARY_CONTENT_TYPES: 'image/*'

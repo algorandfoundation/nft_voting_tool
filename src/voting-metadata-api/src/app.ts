@@ -3,16 +3,13 @@ import express, { Application, Request as ExRequest, Response as ExResponse, Nex
 import helmet from 'helmet'
 import 'reflect-metadata'
 import { ValidateError } from 'tsoa'
-import { RegisterRoutes } from '../routes/routes'
-import { container } from './ioc'
-import { HTTPResponseException } from './models/errors/httpResponseException'
-import { AwsSecretsService } from './services/awsSecretsService'
+import { RegisterRoutes } from '../routes/routes.js'
+import { HTTPResponseException } from './models/errors/httpResponseException.js'
 
 export default function CreateApp(): Application {
   const app: Application = express()
   const env = process.env.NODE_ENV || 'development'
   if (env !== 'development') {
-    container.resolve<AwsSecretsService>('AwsSecretsService').resolveSecrets()
     app.use(
       helmet({
         contentSecurityPolicy: false,

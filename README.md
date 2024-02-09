@@ -114,7 +114,7 @@ To use it you need to configure the following with a `DEV_` prefix for TestNet a
     * `AWS_ACCESS_KEY_ID`: The access key of a "deployment user" in AWS with requisite access (see below)
     * `AWS_ACCESS_KEY_SECRET`: The secret of the deployment user
     * `CDK_DEFAULT_ACCOUNT`: The ID of the AWS account being deployed to
-    * `WEB3_STORAGE_API_TOKEN`: An API token from a <https://web3.storage/> account
+    * `IPFS_API_TOKEN`: An API token from a <https://www.pinata.cloud/> account
     * `ALGOD_NODE_CONFIG_TOKEN`: (Optional) Token for the algod API if needed
 * Variables
     * `ALGOD_NETWORK`: The Algorand network name, either `testnet` or `mainnet`

@@ -1,4 +1,4 @@
-import CreateApp from './app'
+import CreateApp from './app.js'
 
 const port = process.env.PORT || 3000
 

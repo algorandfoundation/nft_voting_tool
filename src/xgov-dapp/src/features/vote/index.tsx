@@ -5,9 +5,23 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ClearIcon from '@mui/icons-material/Clear'
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn'
-import { Alert, Box, Button, IconButton, InputAdornment, Link, Skeleton, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  InputAdornment,
+  Link,
+  Skeleton,
+  TextField,
+  Typography,
+} from '@mui/material'
 import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom'
 import {
   Question,
@@ -51,6 +65,7 @@ Array.prototype.shuffle = function () {
 
 function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' | 'none' }) {
   const { voteId: voteIdParam } = useParams()
+  const [dialogOpen, setDialogOpen] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const voteId = Number(voteIdParam!)
   const { activeAddress, signer } = useWallet()
@@ -253,10 +268,30 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   const handleSubmitVote = async () => {
     if (!canSubmitVote) return
+    // Get fresh counts before submitting
+    const _tallyCounts = await fetchTallyCounts(voteId, votingRoundMetadata)
+    const isOverAllocated = votingRoundMetadata?.questions
+      .map((q) => {
+        const _tallyCount = _tallyCounts.find((item) => item.optionId === q.options[0].id) || { count: -Infinity }
+
+        const count = _tallyCount.count
+        const threshold = q.metadata?.threshold || Infinity
+        const allocation = voteAllocations[q.id]
+        const isPassed = count >= threshold
+
+        return allocation > 0 && isPassed
+      })
+      .some((i) => i)
+
+    // Exit with a dialog and refetch
+    if (isOverAllocated) {
+      setDialogOpen(true)
+      refetchVoteResults(voteId, votingRoundMetadata)
+      return
+    }
 
     const sumOfVotes = Object.values(voteAllocations).reduce((a, b) => a + b, 0)
     const difference = voteWeight - sumOfVotes
-
     const newVoteAllocations = { ...voteAllocations }
 
     if (difference !== 0) {
@@ -368,6 +403,10 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
     }
   }, [votingRoundMetadata])
 
+  function getVotesTally(question: Question) {
+    return optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
+  }
+
   if (hasClosed && votingRoundGlobalState) {
     return (
       <VoteResults
@@ -383,6 +422,24 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
 
   return (
     <div>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <DialogTitle>
+          <Typography variant="h5">Allocation Error</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography>You are trying to vote for a proposal that has already passed. Please reallocate your votes.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="contained" onClick={() => setDialogOpen(false)}>
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
       <div className="mb-4">
         <RouterLink to="/" className="no-underline text-gray-600 hover:underline">
           <Typography>&#60; Back to Voting sessions</Typography>
@@ -478,9 +535,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                         link={question.metadata.link}
                         threshold={question.metadata.threshold}
                         ask={question.metadata.ask}
-                        votesTally={
-                          optionIdsToCount && optionIdsToCount[question.options[0].id] ? optionIdsToCount[question.options[0].id] : 0
-                        }
+                        votesTally={getVotesTally(question)}
                       />
                     )}
                   </div>
@@ -490,7 +545,11 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                         <TextField
                           type="number"
                           className="w-32 bg-white m-4 rounded-xl"
-                          disabled={totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]}
+                          disabled={
+                            (totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]) ||
+                            getVotesTally(question) >=
+                              (typeof question.metadata?.threshold !== 'undefined' ? question.metadata.threshold : 0)
+                          }
                           InputProps={{
                             inputProps: {
                               max: 100 - totalAllocatedPercentage + voteAllocationsPercentage[question.id],
