@@ -528,7 +528,7 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                   <div className="col-span-2">
                     {question.metadata && (
                       <ProposalCard
-                        id={`proposal-${question.id}`}
+                        anchor={`https://xgov.algorand.foundation/vote/${voteId}#proposal-${question.id}`}
                         title={question.prompt}
                         description={question.description}
                         category={question.metadata.category}

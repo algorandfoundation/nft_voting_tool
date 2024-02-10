@@ -16,11 +16,11 @@ export type ProposalCardProps = {
   votesTally: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
-  id?: string | any
+  anchor?: string | any
 }
 
 export const ProposalCard = ({
-id,
+  anchor,
   link,
   title,
   description,
@@ -100,7 +100,7 @@ id,
             {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
             {category && <CategoryChip category={category} />}
           </span>
-          {id && ( <CopyToClipBoard className="text-grey-light align-text-top ml-2 inline-block" valueToCopy={id} /> )}
+          {anchor && ( <CopyToClipBoard className="text-grey-light align-text-top ml-2 inline-block" valueToCopy={anchor} /> )}
           <Link className="text-grey-light align-text-top ml-2 inline-block" href={link} target="_blank">
             <LaunchIcon />
           </Link>
