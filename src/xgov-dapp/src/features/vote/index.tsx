@@ -524,10 +524,11 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
               .sort(sortQuestions)
               .sort(pinPassedQuestions)
               .map((question) => (
-                <div key={question.id} id={question.id} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
+                <div key={question.id} id={`proposal-${question.id}`} className="col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white rounded-lg">
                   <div className="col-span-2">
                     {question.metadata && (
                       <ProposalCard
+                        id={`proposal-${question.id}`}
                         title={question.prompt}
                         description={question.description}
                         category={question.metadata.category}
