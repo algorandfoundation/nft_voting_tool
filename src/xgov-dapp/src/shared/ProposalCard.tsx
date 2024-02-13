@@ -46,7 +46,7 @@ export const ProposalCard = ({
     setExpanded(!expanded)
   }
 
-  if (category === 'Abstain') {
+  if (category === 'Abstain' || category === 'Mock') {
     return (
       <Paper elevation={0} className="p-5">
         <div className="flex justify-between">
