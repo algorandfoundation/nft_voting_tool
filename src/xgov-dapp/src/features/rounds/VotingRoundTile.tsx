@@ -239,7 +239,7 @@ export const VotingRoundTile = ({ globalState, votingRoundStatus }: VotingRoundT
     )
   }
 
-  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadata, passedReserveList)
+  const { totalAsked, totalAwarded } = calculateTotalAskedAndAwarded(votingRoundResults, votingRoundMetadataClone, passedReserveList)
 
   return (
     <Box className="bg-white rounded-lg p-5">
