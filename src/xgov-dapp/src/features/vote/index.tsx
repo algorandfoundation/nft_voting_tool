@@ -547,8 +547,10 @@ function Vote({ sort: sortProp = 'none' }: { sort?: 'ascending' | 'descending' |
                           className="w-32 bg-white m-4 rounded-xl"
                           disabled={
                             (totalAllocatedPercentage === 100 && !voteAllocationsPercentage[question.id]) ||
-                            getVotesTally(question) >=
-                              (typeof question.metadata?.threshold !== 'undefined' ? question.metadata.threshold : 0)
+                            (typeof question.metadata?.category !== 'undefined' &&
+                              !['Abstain', 'Mock'].includes(question.metadata?.category) &&
+                              getVotesTally(question) >=
+                                (typeof question.metadata?.threshold !== 'undefined' ? question.metadata.threshold : 0))
                           }
                           InputProps={{
                             inputProps: {
