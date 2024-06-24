@@ -14,9 +14,8 @@ function NavLink(props: { link: Link }) {
 }
 
 const links: Link[] = [
-  { name: 'Algorand Community', href: 'https://community.algorand.org/' },
+  { name: 'Algorand Community', href: 'https://forum.algorand.org/' },
   { name: 'Developer Resources', href: 'https://developer.algorand.org/' },
-  { name: 'FAQs', href: 'https://algorand.foundation/faq' },
   {
     name: 'Disclaimers',
     href: 'https://algorand.foundation/terms-and-conditions-and-important-disclaimers-of-algo-token-incentives',
@@ -25,7 +24,6 @@ const links: Link[] = [
     name: 'Privacy Policies',
     href: 'https://algorandfoundationv2.cdn.prismic.io/algorandfoundationv2/120c23ac-cc63-4c42-a10e-a53169fa4134_AF_Privacy_Policy.pdf',
   },
-  { name: 'Contact Us', href: 'https://algorand.foundation/contact' },
   { name: 'Algorand Inc.', href: 'https://www.algorand.com/' },
 ]
 export default function SiteFooter() {
