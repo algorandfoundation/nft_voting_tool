@@ -20,14 +20,14 @@ jobs:
     with:
       working-directory: ./src/dapp
       run-build: true
-      audit-script: npm run audit --audit-level=high
+      audit-script: npm run audit --audit-level=critical
   build-xgov-dapp:
     name: xGov Dapp
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/xgov-dapp
       pre-run-script: cd ../dapp && npm ci
-      audit-script: npm run audit --audit-level=high
+      audit-script: npm run audit --audit-level=critical
       run-dispatch: true
     secrets:
       chromatic-token: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
@@ -37,7 +37,7 @@ jobs:
     uses: ./.github/workflows/node-ci.yml
     with:
       working-directory: ./src/build-a-bull
-      audit-script: npm run audit --audit-level=high
+      audit-script: npm run audit --audit-level=critical
     secrets:
       npm-auth-token: ${{ secrets.GITHUB_TOKEN }}
   build-api:
@@ -47,7 +47,7 @@ jobs:
       node-version: 18.x
       working-directory: ./src/voting-metadata-api
       run-build: true
-      audit-script: npm run audit --audit-level=high
+      audit-script: npm run audit --audit-level=critical
   build-algorand:
     name: Algorand build
     uses: ./.github/workflows/smart-contract-ci.yml
@@ -59,4 +59,4 @@ jobs:
     with:
       working-directory: ./infrastructure
       run-build: true
-      audit-script: npm run audit --audit-level=high
+      audit-script: npm run audit --audit-level=critical

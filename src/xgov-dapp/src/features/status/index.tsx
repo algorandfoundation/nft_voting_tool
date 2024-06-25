@@ -145,13 +145,7 @@ function Status() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Box className="bg-white flex rounded-xl px-4 py-2 items-center">
-            <MuiLink className="no-underline hover:underline" href="https://algorand.foundation/xgov" target="_blank">
-              xGov Program Info
-              <LaunchIcon className="ml-2 text-grey-light align-bottom" />
-            </MuiLink>
-          </Box>
-          <Box className="bg-white flex rounded-xl px-4 py-2 items-center">
-            <MuiLink className="no-underline hover:underline" href="https://www.algorand.foundation/xgov-guide" target="_blank">
+            <MuiLink className="no-underline hover:underline" href="https://forum.algorand.org/t/xgov-guide-post-alpha-pilot/12153" target="_blank">
               xGov Guide
               <LaunchIcon className="ml-2 text-grey-light align-bottom" />
             </MuiLink>
