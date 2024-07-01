@@ -3,6 +3,7 @@ import LaunchIcon from '@mui/icons-material/Launch'
 import { Chip, Collapse, LinearProgress, Link, Paper, Typography } from '@mui/material'
 import { AbstainChip, CategoryChip, DidNotPassChip, MockProposalChip, PassedChip, VotesNeededToPassChip } from './Chips'
 import { useOverflow } from './hooks/useOverflow'
+import CopyToClipBoard from '../features/wallet/copyToClipBoard'
 
 export type ProposalCardProps = {
   link: string | undefined
@@ -15,9 +16,11 @@ export type ProposalCardProps = {
   votesTally: number | undefined
   hasClosed?: boolean
   forcePass?: boolean
+  anchor?: string | any
 }
 
 export const ProposalCard = ({
+  anchor,
   link,
   title,
   description,
@@ -97,6 +100,7 @@ export const ProposalCard = ({
             {focus_area && <Chip className="rounded-lg mr-2" label={focus_area} />}
             {category && <CategoryChip category={category} />}
           </span>
+          {anchor && ( <CopyToClipBoard className="text-grey-light align-text-top ml-2 inline-block" valueToCopy={anchor} /> )}
           <Link className="text-grey-light align-text-top ml-2 inline-block" href={link} target="_blank">
             <LaunchIcon />
           </Link>
