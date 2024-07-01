@@ -7,7 +7,7 @@ interface TermPoolsTableProps {
   govenorData: GovenorTermPoolData[]
   isLoading: boolean
 }
-
+type FixedDeposits = GovenorTermPoolData & { fixDeposits?: number; fixEarnings?: number }
 function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTableProps) {
   return (
     <>
@@ -37,7 +37,19 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
           {!isLoading &&
             termPools?.length &&
             termPools.map((termPool) => {
-              const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
+              const termPoolGovenorData: FixedDeposits = govenorData
+                .filter((item) => item.pool === termPool.id)
+                .reduce((result: FixedDeposits, poolData, currentIndex) => {
+                  if (currentIndex === 0) {
+                    result = poolData
+                    result.fixDeposits = parseInt(poolData.original_reward)
+                    result.fixEarnings = parseInt(poolData.current_reward) - parseInt(poolData.original_reward)
+                  } else {
+                    result?.fixDeposits && (result.fixDeposits += parseInt(poolData.original_reward))
+                    result?.fixEarnings && (result.fixEarnings += parseInt(poolData.current_reward) - parseInt(poolData.original_reward))
+                  }
+                  return result
+                }, {} as FixedDeposits)
               return (
                 <div key={termPool.id} className="table-row invisible lg:visible">
                   <div className="table-cell bg-white  pb-2 rounded-l-lg ">
@@ -48,7 +60,7 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                   </div>
                   <div className="table-cell bg-white ">
                     <div className="pl-2 py-4">
-                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} µA
+                      {termPoolGovenorData ? parseInt(termPoolGovenorData?.fixDeposits?.toString() || '0').toLocaleString() : 0} µA
                     </div>
                   </div>
                   <div className="table-cell bg-white ">
@@ -59,10 +71,8 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
                   </div>
                   <div className="table-cell bg-white rounded-r-lg">
                     <div className="pl-2 py-4">
-                      {termPoolGovenorData && termPoolGovenorData?.current_reward
-                        ? `${Math.floor(
-                            Number(termPoolGovenorData?.current_reward) - parseInt(termPoolGovenorData?.original_reward),
-                          ).toLocaleString()} µA`
+                      {termPoolGovenorData && termPoolGovenorData?.fixEarnings
+                        ? `${Math.floor(termPoolGovenorData?.fixEarnings).toLocaleString()} µA`
                         : '-'}
                     </div>
                   </div>
