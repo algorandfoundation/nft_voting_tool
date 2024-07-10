@@ -1,4 +1,4 @@
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import { Box, Button, Skeleton, Typography } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

@@ -1,4 +1,4 @@
-import { WalletProvider, custom } from '@makerx/use-wallet'
+import { WalletProvider, custom } from '@txnlab/use-wallet'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { PropsWithChildren } from 'react'

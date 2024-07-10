@@ -3,7 +3,7 @@ import { QueryObserverResult, RefetchOptions, RefetchQueryFilters, UseQueryResul
 import type { TallyCounts, VotingRoundGlobalState } from '../../../dapp/src/shared/VotingRoundContract'
 import type { VoteGatingSnapshot, VotingRoundMetadata } from '../../../dapp/src/shared/IPFSGateway'
 import api from '../shared/api'
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import { getHasVoteEnded, getHasVoteStarted } from '../shared/vote'
 import useGlobalStateQuery from './use-global-state-query'
 import useMetadataQuery from './use-metadata-query'

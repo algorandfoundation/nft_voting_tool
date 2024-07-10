@@ -1,4 +1,4 @@
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import LaunchIcon from '@mui/icons-material/Launch'
 import { Alert, Box, Button, Skeleton, Typography, Link as MuiLink } from '@mui/material'
 import sortBy from 'lodash.sortby'
