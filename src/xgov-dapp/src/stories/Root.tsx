@@ -1,7 +1,7 @@
 import SiteHeader from '../components/siteHeader'
 import ConnectWallet from '../features/wallet/ConnectWallet'
 import ManualWallet from '../features/wallet/ManualWallet'
-import { custom } from '@makerx/use-wallet'
+import { custom } from '@txnlab/use-wallet'
 import SiteFooter from '../components/siteFooter'
 import ScrollToTop from '../shared/router/ScrollToTop'
 import { PropsWithChildren } from 'react'

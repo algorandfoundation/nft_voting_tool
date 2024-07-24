@@ -26,7 +26,7 @@
     "@headlessui/react": "^1.7.13",
     "@heroicons/react": "^2.0.16",
     "@makerx/forms-mui": "^1.1.0",
-    "@makerx/use-wallet": "^3.0.0",
+    "@txnlab/use-wallet": "^2.8.2",
     "@mui/icons-material": "^5.11.11",
     "@mui/material": "^5.11.13",
     "@mui/x-date-pickers": "^6.0.2",

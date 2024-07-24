@@ -1,5 +1,5 @@
 import { ValidatedForm, zfd } from '@makerx/forms-mui'
-import { custom } from '@makerx/use-wallet'
+import { custom } from '@txnlab/use-wallet'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
 import { useRef } from 'react'
 import { UseFormReturn } from 'react-hook-form'

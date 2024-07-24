@@ -1,5 +1,5 @@
 import { CheckCircleIcon } from '@heroicons/react/24/outline'
-import { PROVIDER_ID, useWallet } from '@makerx/use-wallet'
+import { PROVIDER_ID, useWallet } from '@txnlab/use-wallet'
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import api from '../../shared/api'

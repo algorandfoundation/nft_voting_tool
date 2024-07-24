@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer'
-import { CustomProvider, Metadata, PROVIDER_ID } from '@makerx/use-wallet'
+import { CustomProvider, Metadata, PROVIDER_ID } from '@txnlab/use-wallet'
 import type _algosdk from 'algosdk'
 import { atom, DefaultValue, selector, SetterOrUpdater, useRecoilValue, useSetRecoilState } from 'recoil'
 
