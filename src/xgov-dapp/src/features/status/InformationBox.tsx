@@ -8,33 +8,18 @@ function InformationBox() {
           <strong>Voting Sessions</strong>
         </Typography>
         <Typography>
-          In this version of the xGov Voting Tool, <strong>you can vote one time only</strong>. Be sure to check your vote allocation before
-          submitting your vote.
+          During the Alpha phase governors were required to vote to maintain eligibility. If you missed a vote your eligibility was revoked.
+          For each Voting Session, the Voting Status confirms eligibility, where: You voted = Eligible You didn't vote = Not eligible At the
+          end of the Term Pool, the Algos forfeited by the ineligible xGovs are distributed amongst all eligible xGovs.
         </Typography>
-        <Typography className="mt-4 mb-3">
-          <strong>Maintaining your xGov eligilbility</strong>
+
+        <Typography className="my-3">
+          <strong>Term Pools</strong>
         </Typography>
-        <Typography>
-          <strong>Your xGov duty is to vote in all voting sessions during the 12 months of the Term Pool duration.</strong> That maintains
-          your eligibility to receive the Algo deposit (your original governance rewards) back at the end of the term pool.{' '}
-        </Typography>
-        <Typography>
-          <br />
-          <strong>You will become ineligible if fail to vote on a session.</strong> If you are stacking voting power by participating in
-          more than one Term Pool simultaneously, and miss a voting session, the total of Algos across all pools will be forfeited.
-        </Typography>
-        <Typography>
-          <br />
-          At the end of the Term Pool, the Algos forfeited by the ineligible xGovs will be distributed amongst all eligible xGovs.
-        </Typography>
-        <Typography className="mt-4 mb-4">
-          <strong>Your xGov Current Balance</strong>
-        </Typography>
-        <Typography>
-          Your xGov Current Balance is equal to the sum of the Governance Rewards of the periods you opted in to xGov plus your Term Pool
-          forfeited Algo share. It is displayed in µA (or microAlgo) because smart contracts cannot handle decimal numbers. You will receive
-          your Deposit, plus the forfeited Algo share, after 12 months from the commitment.
-        </Typography>
+        Term pools (TP) funds are held by the Algorand Foundation for 12 months from inception. Once a Term Pool matures the funds are
+        transferred to the original wallet used in governance or, if indicated at the time of commitment, to the governor's controller
+        address. The Duration column displays the creation and maturation dates for each term pool. Once a term pool matures, funds are
+        distributed within 14 days.
       </div>
     </Box>
   )
