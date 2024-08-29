@@ -15,13 +15,13 @@ function InformationBox() {
         <Typography>You voted = Eligible</Typography>
         <Typography>You didn't vote = Not eligible</Typography>
         <Typography className="my-3">
-          At the end of the Term Pool, the Algos forfeited by the ineligible xGovs are distributed amongst all eligible xGovs.
+          At the end of the Term Pool, the Algo forfeited by the ineligible xGovs are distributed amongst all eligible xGovs.
         </Typography>
         <Typography className="my-3">
           <strong>Term Pools</strong>
         </Typography>
         <Typography>
-          Term pools (TP) funds are held by the Algorand Foundation for 12 months from inception. Once a Term Pool matures the funds are
+          Term pool (TP) funds are held by the Algorand Foundation for 12 months from inception. Once a Term Pool matures the funds are
           transferred to the original wallet used in governance or, if indicated at the time of commitment, to the governor's controller
           address.
         </Typography>
