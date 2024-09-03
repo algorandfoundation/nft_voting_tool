@@ -1,4 +1,4 @@
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import { Alert, Button, Skeleton, Typography } from '@mui/material'
 import clsx from 'clsx'
 import dayjs from 'dayjs'

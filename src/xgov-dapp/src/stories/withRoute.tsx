@@ -1,6 +1,6 @@
 import { ComponentType, useEffect } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import Root from './Root'
 
 export type WithRouterOptions = {

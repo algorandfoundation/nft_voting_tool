@@ -7,7 +7,11 @@ interface TermPoolsTableProps {
   govenorData: GovenorTermPoolData[]
   isLoading: boolean
 }
-
+// Indexes of the TermPoll which have been distributed
+const DISTRIBUTED_TERM_POOLS = [0]
+function indexColor(idx: number): string {
+  return DISTRIBUTED_TERM_POOLS.includes(idx) ? 'bg-green-light' : 'bg-white'
+}
 function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTableProps) {
   return (
     <>
@@ -36,28 +40,28 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
 
           {!isLoading &&
             termPools?.length &&
-            termPools.map((termPool) => {
+            termPools.map((termPool, idx) => {
               const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
               return (
                 <div key={termPool.id} className="table-row invisible lg:visible">
-                  <div className="table-cell bg-white  pb-2 rounded-l-lg ">
+                  <div className={`table-cell pb-2 rounded-l-lg ${indexColor(idx)}`}>
                     <div className="py-4 pl-4">{termPool.name}</div>
                   </div>
-                  <div className="table-cell bg-white">
+                  <div className={`table-cell ${indexColor(idx)}`}>
                     <div className="pl-2 py-4">{parseInt(termPool.total_pool).toLocaleString()} µA</div>
                   </div>
-                  <div className="table-cell bg-white ">
+                  <div className={`table-cell ${indexColor(idx)}`}>
                     <div className="pl-2 py-4">
                       {termPoolGovenorData ? parseInt(termPoolGovenorData?.original_reward).toLocaleString() : 0} µA
                     </div>
                   </div>
-                  <div className="table-cell bg-white ">
+                  <div className={`table-cell ${indexColor(idx)}`}>
                     <div className="pl-2 py-4">
                       {dayjs(parseInt(termPool.start_date) * 1000).format('DD-MM-YYYY')} -{' '}
                       {dayjs(parseInt(termPool.end_date) * 1000).format('DD-MM-YYYY')}
                     </div>
                   </div>
-                  <div className="table-cell bg-white rounded-r-lg">
+                  <div className={`table-cell rounded-r-lg ${indexColor(idx)}`}>
                     <div className="pl-2 py-4">
                       {termPoolGovenorData && termPoolGovenorData?.current_reward
                         ? `${Math.floor(
@@ -75,10 +79,10 @@ function TermPoolsTable({ termPools, govenorData, isLoading }: TermPoolsTablePro
       <div className="lg:hidden">
         {!isLoading &&
           termPools?.length &&
-          termPools.map((termPool) => {
+          termPools.map((termPool, idx) => {
             const termPoolGovenorData = govenorData.find((item) => item.pool === termPool.id)
             return (
-              <div key={termPool.id} className="grid grid-cols-3 mb-4 bg-white rounded-lg p-4 gap-2">
+              <div key={termPool.id} className={`grid grid-cols-3 mb-4 rounded-lg p-4 gap-2 ${indexColor(idx)}`}>
                 <div>
                   <strong>Name</strong>
                 </div>

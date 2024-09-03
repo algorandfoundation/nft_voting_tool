@@ -3,7 +3,7 @@ import { Alert, Box, Button, Link as MuiLink, Skeleton, Typography } from '@mui/
 import { Link } from 'react-router-dom'
 import { VotingRoundGlobalState } from '../../../../dapp/src/shared/VotingRoundContract'
 
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import { useEffect, useState } from 'react'
 import { fetchVotingRoundGlobalStatesByCreators } from '../../../../dapp/src/shared/VotingRoundContract'
 import { GovenorTermPoolData, TermPool, fetchGovenorData, fetchTermPools } from '../../shared/xGovApi'
@@ -151,45 +151,6 @@ function Status() {
             </MuiLink>
           </Box>
         </div>
-        <EligibilityStatus isEligible={isEligible} isLoading={isLoadingXgovData} />
-        {isLoadingXgovData ? (
-          <Skeleton className="h-40 w-full" variant="rectangular" />
-        ) : (
-          <Box className="bg-white flex rounded-xl px-4 py-6">
-            <div className="w-full">
-              <Typography className="mb-3">
-                <strong>Your xGov Current Balance</strong>
-              </Typography>
-              <Typography variant="h3">
-                {govenorData.reduce((sum, item) => sum + parseInt(item.current_reward), 0).toLocaleString()} µA
-              </Typography>
-            </div>
-          </Box>
-        )}
-        {isLoadingXgovData ? (
-          <Skeleton className="h-40 w-full" variant="rectangular" />
-        ) : (
-          <Box className="bg-white flex rounded-xl px-4 py-6">
-            <div className="w-full">
-              <Typography className="mb-3">
-                <strong>Potential earnings from xGov participation</strong>
-              </Typography>
-              <Typography variant="h3">
-                {govenorData
-                  .reduce(
-                    (prev, current) =>
-                      prev +
-                      (current?.current_reward
-                        ? Math.floor(Number(current?.current_reward) - parseInt(current?.original_reward)) / 1_000_000
-                        : 0),
-                    0,
-                  )
-                  .toLocaleString()}{' '}
-                ALGO
-              </Typography>
-            </div>
-          </Box>
-        )}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div className="col-span-1 lg:col-span-2">

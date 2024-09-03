@@ -1,4 +1,4 @@
-import { useWallet } from '@makerx/use-wallet'
+import { useWallet } from '@txnlab/use-wallet'
 import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { UseXGovQueryOptions } from './index'
 import { fetchVoterVotes } from '../../../dapp/src/shared/VotingRoundContract'
