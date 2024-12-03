@@ -8,7 +8,7 @@ interface TermPoolsTableProps {
   isLoading: boolean
 }
 // Indexes of the TermPoll which have been distributed
-const DISTRIBUTED_TERM_POOLS = [0]
+const DISTRIBUTED_TERM_POOLS = [0, 1, 2, 3]
 function indexColor(idx: number): string {
   return DISTRIBUTED_TERM_POOLS.includes(idx) ? 'bg-green-light' : 'bg-white'
 }
