@@ -25,18 +25,6 @@ function InformationBox() {
         <Typography className="my-3">
           At the end of the Term Pool, the Algo forfeited by the ineligible xGovs are distributed amongst all eligible xGovs.
         </Typography>
-        <Typography className="my-3">
-          <strong>Term Pools</strong>
-        </Typography>
-        <Typography>
-          Term pool (TP) funds are held by the Algorand Foundation for 12 months from inception. Once a Term Pool matures the funds are
-          transferred to the original wallet used in governance or, if indicated at the time of commitment, to the governor's controller
-          address.
-        </Typography>
-        <Typography className="my-3">
-          The Duration column displays the creation and maturation dates for each term pool. Once a term pool matures, funds are distributed
-          within 14 days.
-        </Typography>
       </div>
     </Box>
   )
