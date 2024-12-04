@@ -8,7 +8,7 @@ function InformationBox() {
           <strong>*** IMPORTANT UPDATE ***</strong>
         </Typography>
         <Typography className="my-3">
-          GP12 Voting Measure 1 established a new xGov enrolment methodology for use when we relaunch the xGov platform later this year.
+          GP12 Voting Measure 1 established a new xGov enrollment methodology for use when we relaunch the xGov platform later this year.
           Consequently, there was no need to keep Algo locked in Term Pools 2, 3 and 4. All funds were distributed to eligible xGovs on 9
           October 2024, and Term Pools 2, 3, and 4 are now closed.
         </Typography>
