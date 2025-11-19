@@ -9,6 +9,7 @@ import ConnectWallet from './features/wallet/ConnectWallet'
 import ManualWallet from './features/wallet/ManualWallet'
 import ScrollToTop from './shared/router/ScrollToTop'
 import { useAlgoWallet } from './utils/useAlgoWalletProvider'
+import NewXGovSiteBanner from './components/NewXGovSiteBanner'
 
 type LayoutProps = PropsWithChildren<unknown>
 
@@ -29,6 +30,7 @@ export default function Root() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <WalletProvider value={walletProviders.walletProviders}>
         <SiteHeader />
+        <NewXGovSiteBanner />
         <SiteContent>
           <div className="min-h-screen py-8 px-8">
             <Outlet />
